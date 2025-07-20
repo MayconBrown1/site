@@ -163,8 +163,7 @@
 </section>
  
 <!-- ANUNCIO -->
- 
- <style> 
+<style> 
   #popup-anuncio {
     position: fixed;
     top: 50%;
@@ -173,30 +172,34 @@
     z-index: 9999;
     display: none;
     animation: fadeIn 0.5s ease;
-    width: 400px; /* AUMENTADO para PC */
-    max-width: 100%; /* Evita passar da tela */
+    width: 400px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow: auto;
+    background: transparent;
   }
 
   #popup-anuncio img {
     width: 100%;
     height: auto;
-    cursor: pointer;
     display: block;
   }
 
   #fechar-anuncio {
     position: absolute;
-    top: -10px;
-    right: -10px;
+    top: 5px;
+    right: 5px;
     background: red;
     color: white;
     border: none;
     font-size: 18px;
     border-radius: 50%;
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     cursor: pointer;
     z-index: 10000;
+    line-height: 28px;
+    text-align: center;
   }
 
   @keyframes fadeIn {
@@ -204,19 +207,23 @@
     to { opacity: 1; transform: translate(-50%, -50%); }
   }
 
-  /* Responsivo para celulares */
-  @media (max-width: 400px) {
+  /* Responsivo para dispositivos menores que 600px */
+  @media (max-width: 600px) {
     #popup-anuncio {
-      width: 90vw; /* Ajusta para ocupar quase toda a largura no celular */
+      width: 90vw;
+      max-height: 85vh;
     }
 
     #fechar-anuncio {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       font-size: 16px;
+      line-height: 24px;
     }
   }
-</style> 
+</style>
+
+
 
 
 <div id="popup-anuncio">
