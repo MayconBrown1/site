@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Controle Financeiro</title>
+  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+  <!-- Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="../../index.html">
+        <img src="../../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+      </a>
+      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <nav class="hidden md:flex space-x-4">
+        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
+        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
+        <a class="text-indigo-600 font-semibold">/ Controle Financeiro</a>
+        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+        <a href="../../contato.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+      <nav class="flex flex-col space-y-2">
+        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
+        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
+        <a class="text-indigo-600 font-semibold">/ Controle Financeiro</a>
+        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+        <a href="../../contato.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-center text-black mb-6">Controle Financeiro</h1>
+
+    <!-- Filtros e Resumo -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div>
+        <label class="block mb-1 font-semibold">Filtrar por Mês</label>
+        <select id="filtroMes" onchange="filtrarPorMes()" class="w-full p-2 rounded border">
+          <!-- Opções geradas via JS -->
+        </select>
+      </div>
+
+      <div class="md:col-span-2 bg-white p-4 rounded shadow">
+        <h2 class="text-xl font-semibold mb-2">Resumo</h2>
+        <p>Entradas: <strong>R$ <span id="totalEntradas">0.00</span></strong></p>
+        <p>Saídas: <strong>R$ <span id="totalSaidas">0.00</span></strong></p>
+        <p>Saldo: <strong class="text-green-600">R$ <span id="saldo">0.00</span></strong></p>
+        <div class="mt-2 flex gap-2">
+          <button onclick="baixarBackup()" class="bg-blue-500 text-white px-4 py-2 rounded">Backup</button>
+          <label class="cursor-pointer bg-yellow-500 text-white px-4 py-2 rounded">
+            Restaurar
+            <input type="file" id="inputBackup" accept=".json" class="hidden">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário Nova Transação -->
+    <div class="bg-white p-6 rounded shadow mb-6">
+      <h2 class="text-lg font-semibold mb-4">Nova Transação</h2>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input id="descricao" placeholder="Descrição" class="p-2 border rounded">
+        <input id="valor" type="number" placeholder="Valor" class="p-2 border rounded">
+        <select id="tipo" class="p-2 border rounded">
+          <option value="entrada">Entrada</option>
+          <option value="saida">Saída</option>
+        </select>
+        <select id="categoria" class="p-2 border rounded">
+          <optgroup label="Entradas">
+            <option>Salário</option>
+            <option>Bicos/Freelancer</option>
+            <option>Presente</option>
+            <option>Venda</option>
+            <option>Serviço</option>
+            <option>Outros</option>
+          </optgroup>
+          <optgroup label="Saídas">
+            <option>Investimento</option>
+            <option>Alimentação</option>
+            <option>Transporte</option>
+            <option>Saúde</option>
+            <option>Lazer</option>
+            <option>Compras</option>
+            <option>Moradia</option>
+            <option>Assinaturas</option>
+            <option>Outros</option>
+          </optgroup>
+        </select>
+      </div>
+      <button onclick="adicionarTransacao()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Salvar Transação</button>
+    </div>
+
+    <!-- Lista e Gráfico -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Transações</h2>
+        <div class="mb-2">
+          <label><input type="checkbox" id="mostrarEntradas" checked onchange="renderizarLista()"> Mostrar Entradas</label>
+          <label class="ml-4"><input type="checkbox" id="mostrarSaidas" checked onchange="renderizarLista()"> Mostrar Saídas</label>
+        </div>
+        <div id="listaTransacoes" class="space-y-2 text-sm"></div>
+      </div>
+
+      <div class="bg-white p-4 rounded shadow">
+        <h2 class="text-lg font-semibold mb-2">Gráfico</h2>
+        <canvas id="grafico"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="text-center py-4 text-sm text-gray-500 mt-16">
+    <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    let transacoes = JSON.parse(localStorage.getItem("transacoes")) || [];
+    let mesSelecionado = new Date().toISOString().slice(0, 7);
+    let editandoIndex = null; // índice da transação que está sendo editada
+
+    function obterMes(isoDate) {
+      return isoDate.slice(0, 7);
+    }
+
+    function filtrarTransacoesPorMes(mes) {
+      return transacoes.filter((t) => obterMes(t.data) === mes);
+    }
+
+    function atualizarResumo() {
+      const transacoesFiltradas = filtrarTransacoesPorMes(mesSelecionado);
+      let entradas = transacoesFiltradas
+        .filter((t) => t.tipo === "entrada")
+        .reduce((acc, t) => acc + t.valor, 0);
+      let saidas = transacoesFiltradas
+        .filter((t) => t.tipo === "saida")
+        .reduce((acc, t) => acc + t.valor, 0);
+      let saldo = entradas - saidas;
+      document.getElementById("totalEntradas").innerText = entradas.toFixed(2);
+      document.getElementById("totalSaidas").innerText = saidas.toFixed(2);
+      document.getElementById("saldo").innerText = saldo.toFixed(2);
+    }
+
+    function popularFiltroMeses() {
+  const select = document.getElementById("filtroMes");
+  const mesesUnicos = [...new Set(transacoes.map(t => obterMes(t.data)))];
+  select.innerHTML = "";
+  mesesUnicos.forEach(mes => {
+    const option = document.createElement("option");
+    option.value = mes;
+    option.textContent = mes;
+    select.appendChild(option);
+  });
+  mesSelecionado = select.value || new Date().toISOString().slice(0, 7);
+  atualizarResumo();
+  renderizarLista();
+}
+
+
+    function renderizarLista() {
+      const mostrarEntradas =
+        document.getElementById("mostrarEntradas")?.checked ?? true;
+      const mostrarSaidas =
+        document.getElementById("mostrarSaidas")?.checked ?? true;
+      const lista = document.getElementById("listaTransacoes");
+      lista.innerHTML = "";
+      const transacoesFiltradas = filtrarTransacoesPorMes(mesSelecionado);
+
+      transacoesFiltradas.forEach((t, i) => {
+        if (
+          (t.tipo === "entrada" && !mostrarEntradas) ||
+          (t.tipo === "saida" && !mostrarSaidas)
+        )
+          return;
+
+        const div = document.createElement("div");
+        div.className = "transacao-item";
+
+        if (editandoIndex === i) {
+          // modo edição
+          div.innerHTML = `
+            <div class="transacao-info">
+              <input type="text" id="editDescricao" value="${t.descricao}" />
+              <input type="number" id="editValor" value="${t.valor.toFixed(2)}" />
+              <select id="editCategoria">
+                <optgroup label="Entradas">
+                  <option ${t.categoria === "Salário" ? "selected" : ""}>Salário</option>
+                  <option ${t.categoria === "Bicos/Freelancer" ? "selected" : ""}>Bicos/Freelancer</option>
+                  <option ${t.categoria === "Presente" ? "selected" : ""}>Presente</option>
+                  <option ${t.categoria === "Investimentos" ? "selected" : ""}>Investimentos</option>
+                  <option ${t.categoria === "Vendas" ? "selected" : ""}>Vendas</option>
+                  <option ${t.categoria === "Outros" ? "selected" : ""}>Outros</option>
+                </optgroup>
+                <optgroup label="Saídas">
+                  <option ${t.categoria === "Alimentação" ? "selected" : ""}>Alimentação</option>
+                  <option ${t.categoria === "Transporte" ? "selected" : ""}>Transporte</option>
+                  <option ${t.categoria === "Saúde" ? "selected" : ""}>Saúde</option>
+                  <option ${t.categoria === "Lazer" ? "selected" : ""}>Lazer</option>
+                  <option ${t.categoria === "Compras" ? "selected" : ""}>Compras</option>
+                  <option ${t.categoria === "Moradia" ? "selected" : ""}>Moradia</option>
+                  <option ${t.categoria === "Assinaturas" ? "selected" : ""}>Assinaturas</option>
+                  <option ${t.categoria === "Outros" ? "selected" : ""}>Outros</option>
+                </optgroup>
+              </select>
+              <select id="editTipo">
+                <option value="entrada" ${t.tipo === "entrada" ? "selected" : ""}>Entrada</option>
+                <option value="saida" ${t.tipo === "saida" ? "selected" : ""}>Saída</option>
+              </select>
+            </div>
+            <div class="flex gap-2">
+  <button 
+    class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 btn-salvar" 
+    onclick="salvarEdicao(${i})"
+  >
+    Salvar
+  </button>
+  <button 
+    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 btn-cancelar" 
+    onclick="cancelarEdicao()"
+  >
+    Cancelar
+  </button>
+</div>
+
+          `;
+        } else {
+          div.innerHTML = `
+            <div class="transacao-info">
+              <strong>${t.descricao}</strong>
+              <span>R$ ${t.valor.toFixed(2)}</span>
+              <span>${t.categoria}</span>
+              <span>${t.tipo}</span>
+            </div>
+            <div class="flex gap-2">
+  <button 
+    class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600" 
+    onclick="editarTransacao(${i})"
+  >
+    Editar
+  </button>
+  <button 
+    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" 
+    onclick="excluirTransacao(${i})"
+  >
+    Apagar
+  </button>
+</div>
+
+          `;
+        }
+        lista.appendChild(div);
+      });
+    }
+
+    document.getElementById('inputBackup').addEventListener('change', function (event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        transacoes = data;
+        localStorage.setItem("transacoes", JSON.stringify(transacoes));
+        atualizarResumo();
+        renderizarLista();
+        popularFiltroMeses();
+        alert("Backup restaurado com sucesso!");
+      } else {
+        alert("O arquivo selecionado não é válido.");
+      }
+    } catch (error) {
+      alert("Erro ao ler o arquivo: " + error.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+
+    function adicionarTransacao() {
+      const descricao = document.getElementById("descricao").value.trim();
+      const valor = parseFloat(document.getElementById("valor").value);
+      const categoria = document.getElementById("categoria").value;
+      const tipo = document.getElementById("tipo").value;
+      if (!descricao || !valor || isNaN(valor)) return alert("Preencha todos os campos corretamente!");
+      const nova = {
+        descricao,
+        valor,
+        categoria,
+        tipo,
+        data: new Date().toISOString(),
+      };
+      transacoes.push(nova);
+      salvarTransacoes();
+      document.getElementById("descricao").value = "";
+      document.getElementById("valor").value = "";
+      document.getElementById("categoria").selectedIndex = 0;
+      document.getElementById("tipo").value = "entrada";
+      renderizarLista();
+      atualizarResumo();
+      atualizarGrafico();
+    }
+
+    function salvarTransacoes() {
+      localStorage.setItem("transacoes", JSON.stringify(transacoes));
+    }
+
+    function editarTransacao(index) {
+      editandoIndex = index;
+      renderizarLista();
+    }
+
+    function cancelarEdicao() {
+      editandoIndex = null;
+      renderizarLista();
+    }
+
+    function salvarEdicao(index) {
+      const descricao = document.getElementById("editDescricao").value.trim();
+      const valor = parseFloat(document.getElementById("editValor").value);
+      const categoria = document.getElementById("editCategoria").value;
+      const tipo = document.getElementById("editTipo").value;
+      if (!descricao || !valor || isNaN(valor)) return alert("Preencha todos os campos corretamente!");
+      transacoes[index].descricao = descricao;
+      transacoes[index].valor = valor;
+      transacoes[index].categoria = categoria;
+      transacoes[index].tipo = tipo;
+      // Atualizar data para data atual para manter coerência ou manter antiga?
+      // Vamos manter antiga para histórico:
+      // transacoes[index].data = new Date().toISOString();
+      salvarTransacoes();
+      editandoIndex = null;
+      renderizarLista();
+      atualizarResumo();
+      atualizarGrafico();
+    }
+
+    function excluirTransacao(index) {
+      if (confirm("Tem certeza que deseja apagar esta transação?")) {
+        transacoes.splice(index, 1);
+        salvarTransacoes();
+        renderizarLista();
+        atualizarResumo();
+        atualizarGrafico();
+      }
+    }
+
+    function carregarFiltroMes() {
+      const filtro = document.getElementById("filtroMes");
+      const meses = [...new Set(transacoes.map((t) => obterMes(t.data)))];
+      meses.sort((a, b) => b.localeCompare(a)); // ordem decrescente
+      filtro.innerHTML = "";
+      meses.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        filtro.appendChild(opt);
+      });
+      if (meses.includes(mesSelecionado)) {
+        filtro.value = mesSelecionado;
+      } else if (meses.length > 0) {
+        mesSelecionado = meses[0];
+        filtro.value = mesSelecionado;
+      }
+    }
+
+    function filtrarPorMes() {
+      mesSelecionado = document.getElementById("filtroMes").value;
+      renderizarLista();
+      atualizarResumo();
+      atualizarGrafico();
+    }
+
+    // Gráfico
+    let graficoInstance;
+    function atualizarGrafico() {
+      const ctx = document.getElementById("grafico").getContext("2d");
+      const transacoesMes = filtrarTransacoesPorMes(mesSelecionado);
+      const categorias = [...new Set(transacoesMes.map((t) => t.categoria))];
+      const valoresPorCategoria = categorias.map((cat) =>
+        transacoesMes
+          .filter((t) => t.categoria === cat)
+          .reduce((acc, t) => acc + (t.tipo === "saida" ? -t.valor : t.valor), 0)
+      );
+
+      if (graficoInstance) graficoInstance.destroy();
+
+      graficoInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: categorias,
+          datasets: [
+            {
+              label: "Valor por Categoria",
+              data: valoresPorCategoria,
+              backgroundColor: valoresPorCategoria.map((v) =>
+                v >= 0 ? "rgba(54, 162, 235, 0.7)" : "rgba(255, 99, 132, 0.7)"
+              ),
+              borderColor: valoresPorCategoria.map((v) =>
+                v >= 0 ? "rgba(54, 162, 235, 1)" : "rgba(255, 99, 132, 1)"
+              ),
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true },
+          },
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: "black" } },
+          },
+        },
+      });
+    }
+
+    function baixarBackup() {
+      const dataStr = JSON.stringify(transacoes, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup_transacoes.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function inicializar() {
+      carregarFiltroMes();
+      renderizarLista();
+      atualizarResumo();
+      atualizarGrafico();
+    }
+
+    inicializar();
+
+  let deferredPrompt;
+  const btnInstalar = document.getElementById('btnInstalarApp');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Previne que o navegador mostre o prompt automaticamente
+    e.preventDefault();
+    // Guarda o evento para disparar depois
+    deferredPrompt = e;
+    // Mostra o botão para o usuário
+    btnInstalar.style.display = 'block';
+  });
+
+  btnInstalar.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    // Mostra o prompt de instalação
+    deferredPrompt.prompt();
+    // Espera a resposta do usuário
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('Usuário aceitou instalar o app');
+    } else {
+      console.log('Usuário rejeitou a instalação');
+    }
+    // Esconde o botão após o uso
+    btnInstalar.style.display = 'none';
+    deferredPrompt = null;
+  });
+
+  // Opcional: escuta se o app já foi instalado para esconder o botão
+  window.addEventListener('appinstalled', () => {
+    console.log('App instalado com sucesso!');
+    btnInstalar.style.display = 'none';
+  });
+
+  let registros = JSON.parse(localStorage.getItem("registros")) || [];
+
+    function atualizarTabela() {
+      const tabela = document.querySelector("#tabela tbody");
+      tabela.innerHTML = "";
+      let saldo = 0;
+
+      registros.forEach((registro, index) => {
+        if (registro.tipo === "entrada") {
+          saldo += parseFloat(registro.valor);
+        } else {
+          saldo -= parseFloat(registro.valor);
+        }
+
+        tabela.innerHTML += `
+          <tr>
+            <td>${registro.descricao}</td>
+            <td>R$ ${parseFloat(registro.valor).toFixed(2)}</td>
+            <td>${registro.tipo}</td>
+            <td>
+              <button class="edit-btn" onclick="editarRegistro(${index})">Editar</button>
+              <button class="delete-btn" onclick="excluirRegistro(${index})">Excluir</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById("saldo").innerText = `Saldo: R$ ${saldo.toFixed(2)}`;
+      localStorage.setItem("registros", JSON.stringify(registros));
+    }
+
+    function adicionarRegistro() {
+      const descricao = document.getElementById("descricao").value;
+      const valor = parseFloat(document.getElementById("valor").value);
+      const tipo = document.getElementById("tipo").value;
+
+      if (!descricao || isNaN(valor)) {
+        alert("Preencha todos os campos corretamente.");
+        return;
+      }
+
+      registros.push({ descricao, valor, tipo });
+      atualizarTabela();
+
+      document.getElementById("descricao").value = "";
+      document.getElementById("valor").value = "";
+    }
+
+    function editarRegistro(index) {
+      const novoDescricao = prompt("Nova descrição:", registros[index].descricao);
+      const novoValor = parseFloat(prompt("Novo valor:", registros[index].valor));
+      const novoTipo = prompt("Novo tipo (entrada/saida):", registros[index].tipo);
+
+      if (novoDescricao && !isNaN(novoValor) && (novoTipo === "entrada" || novoTipo === "saida")) {
+        registros[index] = { descricao: novoDescricao, valor: novoValor, tipo: novoTipo };
+        atualizarTabela();
+      } else {
+        alert("Dados inválidos.");
+      }
+    }
+
+    function excluirRegistro(index) {
+      if (confirm("Deseja realmente excluir este registro?")) {
+        registros.splice(index, 1);
+        atualizarTabela();
+      }
+    }
+
+    function fazerBackup() {
+      const blob = new Blob([JSON.stringify(registros)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup_financeiro.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function restaurarBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const dados = JSON.parse(e.target.result);
+          if (Array.isArray(dados)) {
+            registros = dados;
+            atualizarTabela();
+            alert("Backup restaurado com sucesso!");
+          } else {
+            alert("Arquivo de backup inválido.");
+          }
+        } catch (error) {
+          alert("Erro ao ler o arquivo: " + error.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    atualizarTabela();
+
+  </script>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+  </script>
+</body>
+
+</html>

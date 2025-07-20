@@ -1,0 +1,16 @@
+{
+    "name": "Maycon Brown - Suporte Informática",
+    "short_name": "Maycon Brown",
+    "description": "Soluções Digitais para o Seu Dia a Dia",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#FFFFFF",
+    "icons": [
+      {
+        "src": "img/icone.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }

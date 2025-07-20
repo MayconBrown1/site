@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maycon Brown Admin</title>
+  <link rel="shortcut icon" href="/img/icone1.png" type="image/x-icon">
+  <link rel="manifest" href="manifest.json" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    function copiarTexto(link) {
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Link copiado: ' + link);
+      });
+    }
+  </script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="/admin/index.html">
+        <img src="/img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+      </a>
+      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <nav class="hidden md:flex space-x-4">
+        <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
+        <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+      <nav class="flex flex-col space-y-2">
+        <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
+        <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-black bg-cover bg-center text-white py-20 text-center">
+    <div class="container mx-auto px-4">
+      <h2 class="text-4xl font-bold mb-4">ADMIN</h2>
+    </div>
+  </section>
+
+  <!-- Botões de cópia -->
+  <section class="container mx-auto px-4 py-12 text-center">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-center">
+      <button onclick="copiarTexto('https://mayconbrown-bda8c.web.app/7z')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        7z
+      </button>
+      <button onclick="copiarTexto('https://mayconbrown-bda8c.web.app/anydesk')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        Anydesk
+      </button>
+      <button onclick="copiarTexto('https://mayconbrown-bda8c.web.app/corel-erro')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        Corel Erro
+      </button>
+      <button onclick="copiarTexto('https://mayconbrown-bda8c.web.app/driver-booster')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        Driver Booster
+      </button>
+    </div>
+  </section>
+
+    <div class="container mx-auto px-4">
+      <h3 class="text-4xl font-bold mb-4">MATRIZ DE BORDADO</h2>
+    </div>
+
+  <section class="container mx-auto px-4 py-12 text-center">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 justify-center">
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1qRIIasEUzbBZxx2mN5dNxY6U7C09bp4P&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0001 lacoste
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1-qLBNVF9JjVMIRqIXWA_nQ8X7EViqljc&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0002 Bandeira do Brasil
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=14l6MyHBmm5udjF9O022myweTeGaj0WbB&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0003 Carrefour
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=11FfBAfO-c0mxcMA-mVBDhQg7iYUDlvQB&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0004 coca cola
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=19A-wc_aQCkSww4CGH6mJc3TILaD1NFOR&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0005 Eletrotecnica
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=13hkwQEcy5wl1X8Xu8oO_gZxI80__4ZY8&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0006 farmacia
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1QGWbYon3DlR408wocHXEFyc5oyBhiHNm&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0007 Flamengo
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=11zXgtigp7zhw2jHgx76gL4wstSSj3h69&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0008 Goku rosto
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=13NdHrrqx4S4m15Lfai-ilvshqmMEaUxw&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0009 gucci
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1S9ZthKkMrH8qT66_v4EFfS0zepjQ230a&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0010 Corinthians
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1Ncl8LY7KCUFKqjddaX8bxzQlxr4GLJo_&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0011 logo rebelde
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=16NLVXqARWwiwDJnHdnWfrMoLx-z0UbWp&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0012 Monster energy 30cm
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1-C3X2ga7NVlLzFnJV71MpEuS3QLnsGhG&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0013 nome rebelde
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1MR1auGNLX3EH3Pa5OohoKYMzOxuBp5Ff&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0014 Palmeiras
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=11p5HZzdGy4wgVFUO1lZWlSfMQD0DNvjG&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0015 QuikSilver
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=120csb2sxe8ezhvcybfvs4p7kjZ65Jojl&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0016 Shell plc
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1G8psYV0Jsyxfu-C3-CiHC_Xz2Xi6IMQh&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0017 Stitch
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=18QzEww374GanlRpxk7U5pvLJe1Ay2TUo&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0018 Cambaí
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=18e7Ys7s3pMOPEANNcRV0kFP0Jz3OfYYu&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0019 São Paulo Fc
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=12E2hHGlbekiZCCyN6QIRpDafSvAtjG-W&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0020 Bandeira São Paulo
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1tVaSy3xDZtPrhNOFZ__zi6DrSipj6oHU&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0021 Transporte Escolar
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1VCjPMMj9YFFROnwziPfBP7eW31UsA42b&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0022 Catedral de Maringá
+      </button>
+      <button onclick="copiarTexto('https://drive.google.com/open?id=1ZYf4AcXlYQY_JA6w3_gL0CoE9gRd8pfx&usp=drive_fs')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow">
+        0023 Alfabeto Borboleta e Rosa
+      </button>
+      
+    </div>
+  </section>
+
+
+  <!-- Botão flutuante de Sair -->
+  <button id="logout" class="fixed top-14 right-14 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg z-50">
+    Sair
+  </button>
+
+  <!-- Firebase Auth: Proteção e Logout -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+      authDomain: "mayconbrown-bda8c.firebaseapp.com",
+      projectId: "mayconbrown-bda8c",
+      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
+      messagingSenderId: "226624962636",
+      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+      measurementId: "G-Y1BTTK576V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Verifica se o usuário está logado
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "/admin/login.html"; // redireciona se não estiver logado
+      }
+    });
+
+    // Função de logout
+    document.getElementById("logout").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "/admin/login.html";
+      });
+    });
+  </script>
+
+  <!-- Rodapé -->
+  <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+    <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+  </footer>
+</body>
+</html>

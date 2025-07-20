@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Matrizes de Bordado Admin</title>
+    <link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Script simples para alternar menu mobile
+        function toggleMenu() {
+          const menu = document.getElementById('mobile-menu');
+          if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+          } else {
+            menu.classList.add('hidden');
+          }
+        }
+      </script>
+    </head>
+    <body class="bg-gray-50 text-gray-800">
+      <!-- Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="../../admin/index.html">
+        <img src="../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+      </a>
+      
+      <!-- Botão para mobile -->
+      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          ></path>
+        </svg>
+      </button>
+      
+      <!-- Menu normal -->
+          <nav class="hidden md:flex space-x-4">
+            <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
+            <a href="../matrizes-admin.html" class="text-indigo-600 font-semibold">Matrizes</a>
+            <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
+            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+  
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+          <nav class="flex flex-col space-y-2">
+            <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
+            <a href="../matrizes-admin.html" class="text-indigo-600 font-semibold">Matrizes</a>
+          <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
+            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+      </header>
+
+    <!-- Conteúdo -->
+    <main class="py-16">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-6 text-center">Matrizes de Bordado Admin</h2>
+        <p class="text-black mb-12 text-center">
+          Pacotes de matrizes compatíveis com as principais máquinas de bordado, em vários formatos.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">🎨 Matriz Personalizada - Admin</h3>
+            <p class="text-gray-400 mb-4">
+              Criação sob medida conforme sua necessidade, para projetos exclusivos.
+            </p>
+            <p class="font-bold text-indigo-600 mb-4">Sob orçamento</p>
+            <a href="painel-mensagens.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Solicitar</a>
+          </div>
+          
+          <div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">💼 Profissões - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes voltadas para representar diferentes áreas de trabalho, ideais para personalização de uniformes e brindes profissionais.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/profissoes-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🏅 Esportes - Admin</h3>
+  <p class="text-gray-400 mb-4">Modelos inspirados em diversas modalidades esportivas, perfeitos para camisetas, toalhas e artigos de times ou atletas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/esportes-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🍼 Infantil - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes delicadas e divertidas para crianças e bebês, ideais para enxovais, roupinhas e lembrancinhas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/infantil-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">✝️ Religiosos - Admin</h3>
+  <p class="text-gray-400 mb-4">Desenhos com símbolos de fé e espiritualidade, para personalizações com significado religioso e devocional.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/religiosos-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">❤️ Amor e Datas Especiais - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes temáticas para momentos especiais como Dia das Mães, casamentos e outras datas comemorativas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/datas-especiais-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">✍️ Frases e Palavras - Admin</h3>
+  <p class="text-gray-400 mb-4">Frases inspiradoras, engraçadas ou emocionantes para dar um toque personalizado em qualquer peça bordada.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/frases-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🐶 Animais - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes com animais domésticos, selvagens ou de fazenda, ótimas para artigos infantis, decoração ou peças temáticas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/animais-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🧑‍🍳 Culinária - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes voltadas para o mundo da cozinha, ideais para aventais, panos de prato, toucas de chef e lembrancinhas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/culinaria-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🌺 Flores e Natureza - Admin</h3>
+  <p class="text-gray-400 mb-4">Matrizes florais e naturais que trazem beleza e leveza para qualquer tipo de bordado decorativo.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/natureza-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">👕 Moda e Estilo - Admin</h3>
+  <p class="text-gray-400 mb-4">Desenhos modernos, clássicos e cheios de estilo para quem gosta de exclusividade e identidade visual nas roupas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/moda-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">®️ Marcas</h3>
+  <p class="text-gray-400 mb-4">Matrizes inspiradas em marcas famosas que todo mundo reconhece. Ideal para quem quer destacar estilo, exclusividade e personalidade nas roupas.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/marcas-admin.html" class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-2">🎉 Temas Diversos - Admin</h3>
+  <p class="text-gray-400 mb-4">Categoria para matrizes variadas, como emojis, cultura nordestina, bandeiras e muito mais para todos os gostos.</p>
+  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
+  <a href="matriz/diversos-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
+</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Botão flutuante de Sair -->
+  <button id="logout" class="fixed top-14 right-14 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg z-50">
+    Sair
+  </button>
+
+  <!-- Firebase Auth: Proteção e Logout -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+      authDomain: "mayconbrown-bda8c.firebaseapp.com",
+      projectId: "mayconbrown-bda8c",
+      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
+      messagingSenderId: "226624962636",
+      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+      measurementId: "G-Y1BTTK576V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Verifica se o usuário está logado
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "/admin/login.html"; // redireciona se não estiver logado
+      }
+    });
+
+    // Função de logout
+    document.getElementById("logout").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "/admin/login.html";
+      });
+    });
+  </script>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+    </footer>
+  </body>
+</html>

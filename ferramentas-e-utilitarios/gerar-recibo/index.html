@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de Recibo | Maycon Brown</title>
+  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+  </script>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+  <!-- Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="../../index.html">
+        <img src="../../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+      </a>
+      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      <nav class="hidden md:flex space-x-4">
+        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
+        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
+        <a class="text-indigo-600 font-semibold">/ Gerador de Recibo</a>
+        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+        <a href="../../contato.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+      <nav class="flex flex-col space-y-2">
+        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
+        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
+        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
+        <a class="text-indigo-600 font-semibold">/ Gerador de Recibo</a>
+        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+        <a href="../../contato.html" class="hover:text-indigo-600">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="py-12">
+    <div class="max-w-4xl mx-auto bg-black p-6 shadow-lg rounded-xl">
+      <h2 class="text-2xl font-bold mb-4 text-center text-white">Gerador de Recibo</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="block font-medium text-white">Empresa</label>
+          <input type="text" id="empresa" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">CNPJ</label>
+          <input type="text" id="cnpj" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">Vendedor</label>
+          <input type="text" id="vendedor" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">Logo da Empresa</label>
+          <input type="file" id="logo" class="w-full border rounded p-2 text-white" accept="image/*">
+        </div>
+        <div>
+          <label class="block font-medium text-white">Cliente</label>
+          <input type="text" id="cliente" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">CPF ou CNPJ do Cliente</label>
+          <input type="text" id="cpfcnpj" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">Data</label>
+          <input type="date" id="data" class="w-full border rounded p-2">
+        </div>
+        <div>
+          <label class="block font-medium text-white">Desconto</label>
+          <div class="flex gap-2">
+            <select id="tipoDesconto" class="border rounded p-2">
+              <option value="reais">R$</option>
+              <option value="porcentagem">%</option>
+            </select>
+            <input type="number" id="desconto" value="0" class="flex-1 border rounded p-2">
+          </div>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-semibold mt-6 mb-2 text-white">Produtos / Serviços</h3>
+      <div id="itens" class="space-y-2">
+        <div class="grid grid-cols-3 gap-2">
+          <input type="text" class="descricao border rounded p-2" placeholder="Descrição">
+          <input type="number" class="quantidade border rounded p-2" placeholder="Qtd" value="1">
+          <input type="number" class="valor border rounded p-2" placeholder="Valor Unit. (R$)">
+        </div>
+      </div>
+      <button onclick="addItem()" class="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Adicionar Item</button>
+      <button onclick="gerarRecibo()" class="ml-2 mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Gerar Recibo</button>
+
+      <div class="mt-8 border-t pt-6">
+        <div class="bg-white p-4 rounded shadow-md" id="recibo">
+          <img id="logo-img" style="display:none; width: 120px;" class="mb-4" alt="Logo">
+          <h3 class="text-center text-xl font-bold">RECIBO</h3>
+          <p><strong>Empresa:</strong> <span id="r-empresa"></span> | <strong>CNPJ:</strong> <span id="r-cnpj"></span></p>
+          <p><strong>Vendedor:</strong> <span id="r-vendedor"></span></p>
+          <p><strong>Cliente:</strong> <span id="r-cliente"></span> | <strong>CPF/CNPJ:</strong> <span id="r-cpfcnpj"></span></p>
+          <p><strong>Data:</strong> <span id="r-data"></span></p>
+          <table class="w-full border mt-4 text-sm">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border px-2 py-1">Descrição</th>
+                <th class="border px-2 py-1">Qtd</th>
+                <th class="border px-2 py-1">Valor Unit.</th>
+                <th class="border px-2 py-1">Total</th>
+              </tr>
+            </thead>
+            <tbody id="r-itens"></tbody>
+          </table>
+          <p class="mt-2"><strong>Desconto:</strong> <span id="r-desconto"></span></p>
+          <h3 class="text-lg font-bold">Total Final: R$ <span id="r-totalfinal"></span></h3>
+          <div class="text-right mt-6"><hr class="w-48 border-t border-gray-400"></div>
+        </div>
+        <button onclick="baixarPDF()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Baixar PDF</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+    <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    function addItem() {
+      const div = document.createElement('div');
+      div.className = 'grid grid-cols-3 gap-2';
+      div.innerHTML = `
+        <input type="text" class="descricao border rounded p-2" placeholder="Descrição">
+        <input type="number" class="quantidade border rounded p-2" placeholder="Qtd" value="1">
+        <input type="number" class="valor border rounded p-2" placeholder="Valor Unit. (R$)">
+      `;
+      document.getElementById('itens').appendChild(div);
+    }
+
+    function gerarRecibo() {
+      const logoInput = document.getElementById('logo');
+      const logoImg = document.getElementById('logo-img');
+      if (logoInput.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          logoImg.src = e.target.result;
+          logoImg.style.display = 'block';
+        };
+        reader.readAsDataURL(logoInput.files[0]);
+      } else {
+        logoImg.style.display = 'none';
+      }
+
+      document.getElementById('r-empresa').textContent = document.getElementById('empresa').value;
+      document.getElementById('r-cnpj').textContent = document.getElementById('cnpj').value;
+      document.getElementById('r-vendedor').textContent = document.getElementById('vendedor').value;
+      document.getElementById('r-cliente').textContent = document.getElementById('cliente').value;
+      document.getElementById('r-cpfcnpj').textContent = document.getElementById('cpfcnpj').value;
+      document.getElementById('r-data').textContent = new Date(document.getElementById('data').value).toLocaleDateString('pt-BR');
+
+      const tipoDesconto = document.getElementById('tipoDesconto').value;
+      const desconto = parseFloat(document.getElementById('desconto').value || 0);
+
+      const tbody = document.getElementById('r-itens');
+      tbody.innerHTML = '';
+      let total = 0;
+
+      document.querySelectorAll('.descricao').forEach((descEl, i) => {
+        const d = descEl.value;
+        const q = parseInt(document.querySelectorAll('.quantidade')[i].value) || 0;
+        const v = parseFloat(document.querySelectorAll('.valor')[i].value) || 0;
+        const s = q * v;
+        total += s;
+        tbody.innerHTML += `<tr><td class='border px-2 py-1'>${d}</td><td class='border px-2 py-1'>${q}</td><td class='border px-2 py-1'>R$ ${v.toFixed(2)}</td><td class='border px-2 py-1'>R$ ${s.toFixed(2)}</td></tr>`;
+      });
+
+      let valorDesconto = tipoDesconto === 'porcentagem' ? (total * (desconto / 100)) : desconto;
+      document.getElementById('r-desconto').textContent = tipoDesconto === 'porcentagem'
+        ? `${desconto.toFixed(2)}% (R$ ${valorDesconto.toFixed(2)})`
+        : `R$ ${valorDesconto.toFixed(2)}`;
+
+      const totalFinal = total - valorDesconto;
+      document.getElementById('r-totalfinal').textContent = totalFinal.toFixed(2);
+    }
+
+    async function baixarPDF() {
+      const recibo = document.getElementById('recibo');
+      const canvas = await html2canvas(recibo, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth() - 20;
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 10, 10, pdfWidth, pdfHeight);
+      pdf.save('recibo.pdf');
+    }
+  </script>
+</body>
+
+</html>

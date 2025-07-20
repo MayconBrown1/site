@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Escritório e Produtividade Admin</title>
+  <link rel="shortcut icon" href="../img/icone.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
+
+
+  
+    const firebaseConfig = {
+        apiKey: "AIzaSyCfhOEOqQVbXgNYwORLwSyNH7w6cKlaVg0",
+    authDomain: "ferramentas-e-utilitarios.firebaseapp.com",
+    projectId: "ferramentas-e-utilitarios",
+    storageBucket: "ferramentas-e-utilitarios.firebasestorage.app",
+    messagingSenderId: "528869929361",
+    appId: "1:528869929361:web:b30fd114667a606c65aa30"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+  
+    let editarId = null; // Guarda ID do produto que está sendo editado
+  
+    async function adicionarProduto() {
+  const nome = document.getElementById("nome").value;
+  const descricao = document.getElementById("descricao").value;
+  const valor = document.getElementById("valor").value;
+  const link = document.getElementById("link").value;
+  const imagemURL = document.getElementById("imagem").value;
+  const imagemArquivo = document.getElementById("imagemArquivo").files[0];
+
+  if (!nome || !descricao || !valor || !link || (!imagemURL && !imagemArquivo)) {
+    return alert("Preencha todos os campos! Você precisa informar uma imagem.");
+  }
+
+  let imagemFinal = imagemURL;
+
+  // Se não tiver URL e tiver arquivo, sobe para o Firebase Storage
+  if (!imagemURL && imagemArquivo) {
+    const storageRef = ref(storage, `imagens/${Date.now()}_${imagemArquivo.name}`);
+    const snapshot = await uploadBytes(storageRef, imagemArquivo);
+    imagemFinal = await getDownloadURL(snapshot.ref);
+  }
+
+  const dados = {
+    nome,
+    descricao,
+    valor,
+    link,
+    imagem: imagemFinal,
+    promocao: false
+  };
+
+  if (editarId) {
+    const produtoRef = doc(db, "escritorio", editarId);
+    await updateDoc(produtoRef, dados);
+    editarId = null;
+    document.getElementById("btn-submit").textContent = "Adicionar Produto";
+  } else {
+    await addDoc(collection(db, "escritorio"), dados);
+  }
+
+  document.getElementById("form-produto").reset();
+  carregarescritorio();
+}
+
+  
+    async function carregarescritorio() {
+  const lista = document.getElementById("lista-escritorio");
+  lista.innerHTML = "";
+  const querySnapshot = await getDocs(collection(db, "escritorio"));
+  querySnapshot.forEach(docSnap => {
+    const produto = docSnap.data();
+    const id = docSnap.id;
+
+    lista.innerHTML += `
+      <div id="produto-${id}" class="bg-black shadow-lg rounded-xl p-6 relative">
+        <div id="selo-promo-${id}" class="${produto.promocao ? '' : 'hidden'} animar-promocao absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded font-bold z-10">
+        PROMOÇÃO
+      </div>
+        <img src="${produto.imagem}" alt="${produto.nome}" class="rounded-lg mb-4 w-full h-auto object-contain" />
+        <h3 class="text-white font-semibold mb-2">${produto.nome}</h3>
+        <p class="text-gray-400 mb-4 whitespace-pre-line max-h-32 overflow-y-auto">${produto.descricao}</p>
+        <p class="font-bold text-green-600 mb-4">R$ ${produto.valor}</p>
+        
+        <button onclick="editarProduto('${id}')" class="absolute top-4 right-4 bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500">Editar</button>
+
+        <div class="flex gap-2 mt-2">
+          <button onclick="marcarPromocao('${id}')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Promoção</button>
+          <button onclick="removerPromocao('${id}')" class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">Sem promoção</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+async function marcarPromocao(id) {
+  const selo = document.getElementById(`selo-promo-${id}`);
+  if (selo) {
+    selo.classList.remove("hidden");
+  }
+
+  const produtoRef = doc(db, "escritorio", id);
+  await updateDoc(produtoRef, {
+    promocao: true
+  });
+}
+
+async function removerPromocao(id) {
+  const selo = document.getElementById(`selo-promo-${id}`);
+  if (selo) {
+    selo.classList.add("hidden");
+  }
+
+  const produtoRef = doc(db, "escritorio", id);
+  await updateDoc(produtoRef, {
+    promocao: false
+  });
+}
+
+window.marcarPromocao = marcarPromocao;
+window.removerPromocao = removerPromocao;
+
+    async function editarProduto(id) {
+      const produtoRef = doc(db, "escritorio", id);
+      const escritorionap = await getDocs(collection(db, "escritorio"));
+      // Buscando produto por id
+      const docSnap = await (await import("https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js")).getDoc(produtoRef);
+  
+      if (docSnap.exists()) {
+        const produto = docSnap.data();
+        document.getElementById("nome").value = produto.nome;
+        document.getElementById("descricao").value = produto.descricao;
+        document.getElementById("valor").value = produto.valor;
+        document.getElementById("link").value = produto.link;
+        document.getElementById("imagem").value = produto.imagem;
+  
+        editarId = id;
+        document.getElementById("btn-submit").textContent = "Salvar Alterações";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        alert("Produto não encontrado!");
+      }
+    }
+  
+    window.adicionarProduto = adicionarProduto;
+    window.carregarescritorio = carregarescritorio;
+    window.editarProduto = editarProduto;
+  
+    window.onload = carregarescritorio;
+  </script>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById("mobile-menu");
+    menu.classList.toggle("hidden");
+  }
+</script>
+
+  
+  <style>
+    @keyframes piscarPromo {
+      0%, 100% { background-color: #dc2626; } /* vermelho */
+      50% { background-color: #f97316; }      /* laranja */
+    }
+  
+    .animar-promocao {
+      animation: piscarPromo 1s infinite;
+    }
+  </style>
+  
+  
+</head>
+<body class="bg-gray-50 text-gray-800">
+  
+  <!-- Navbar -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+      <a href="../../admin/index.html">
+        <img src="../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+      </a>
+      
+      <!-- Botão para mobile -->
+      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          ></path>
+        </svg>
+      </button>
+      
+      <!-- Menu normal -->
+          <nav class="hidden md:flex space-x-4">
+            <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares-admin.html" class="text-indigo-600 font-semibold">Softwares</a>
+            <a href="../matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
+            <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
+            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+  
+        <!-- Menu mobile -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+          <nav class="flex flex-col space-y-2">
+            <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares-admin.html" class="text-indigo-600 font-semibold">Softwares</a>
+            <a href="../matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
+          <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
+            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+      </header>
+
+  <!-- Conteúdo -->
+  <main class="py-16">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <h2 class="text-3xl font-bold mb-6 text-center">🧾 Escritório e Produtividade</h2>
+
+      <form id="form-produto" class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input id="nome" type="text" placeholder="Nome do Produto" class="p-2 rounded border border-gray-300" />
+<textarea id="descricao" placeholder="Descrição do Produto" class="p-2 rounded border border-gray-300 resize-none" rows="3"></textarea>
+<input id="valor" type="text" placeholder="Valor do Produto" class="p-2 rounded border border-gray-300" />
+<input type="text" id="link" placeholder="Link personalizado para o botão" class="border p-2 rounded w-full mb-4" />
+
+<input type="text" id="imagem" placeholder="URL da Imagem (opcional)" class="p-2 rounded border border-gray-300" />
+<input type="file" id="imagemArquivo" class="p-2 rounded border border-gray-300" />
+
+<button type="button" onclick="adicionarProduto()" id="btn-submit" class="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 col-span-1 md:col-span-3">
+  Adicionar Produto
+</button>
+       
+      </form>
+
+      <div id="lista-escritorio" class="grid md:grid-cols-2 gap-8"></div>
+    </div>
+  </main>
+</body>
+</html>

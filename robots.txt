@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mayconbrown.com.br/sitemap.xml

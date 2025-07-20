@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encurtador de Link - Bitly</title>
+    <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('https://mayconbrown.com.br/img/svg/fundo-site.svg');
+            background-size: cover; /* Faz a imagem cobrir toda a tela */
+            background-position: center; /* Centraliza a imagem de fundo */
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        .logo {
+            width: 400px;
+        }
+        .container {
+            
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            text-align: center;
+            border-radius: 8px;
+            margin-top: 100px; /* Adapta o espaçamento para não cobrir a logo */
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #444;
+            color: #fff;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .copy-button {
+            background-color: #17a2b8;
+            margin-top: 10px;
+        }
+        .copy-button:hover {
+            background-color: #138496;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-container">
+        <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo" class="logo">
+    </div>
+
+    <div class="container">
+        <h2>Encurtador de Link</h2>
+        <input type="text" id="linkInput" placeholder="Cole seu link aqui">
+        <button onclick="shortenLink()">Encurtar Link</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function shortenLink() {
+            const longUrl = document.getElementById("linkInput").value;
+            if (longUrl === "") {
+                alert("Por favor, insira um link.");
+                return;
+            }
+
+            const token = "a27d07bc94c5a1c34556053d627c90fa5008d2f2";  // Coloque seu token aqui
+            const apiUrl = `https://api-ssl.bitly.com/v4/shorten`;
+
+            const data = {
+                "long_url": longUrl
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const shortUrl = data.link;
+                document.getElementById("result").innerHTML = `
+                    <p><strong>Link Encurtado:</strong> <a href="${shortUrl}" target="_blank" style="color: #28a745;">${shortUrl}</a></p>
+                    <button class="copy-button" onclick="copyLink('${shortUrl}')">Copiar Link</button>
+                `;
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Ocorreu um erro ao encurtar o link.');
+            });
+        }
+
+        function copyLink(link) {
+            navigator.clipboard.writeText(link).then(() => {
+                alert("Link copiado com sucesso!");
+            }).catch(err => {
+                console.error("Erro ao copiar o link: ", err);
+            });
+        }
+    </script>
+
+</body>
+</html>

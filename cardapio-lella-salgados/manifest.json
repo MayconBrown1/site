@@ -1,0 +1,21 @@
+{
+  "name": "Lella Salgados",
+  "short_name": "Lella",
+  "start_url": "https://mayconbrown.com.br/cardapio-lella-salgados/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#d9230f",
+  "description": "Cardápio online da Lella Salgados com pedidos via WhatsApp.",
+  "icons": [
+    {
+      "src": "../img/lella-salgados-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/lella-salgados-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

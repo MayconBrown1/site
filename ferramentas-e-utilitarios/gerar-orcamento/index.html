@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Orçamento Profissional</title>
+  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+    }
+    header {
+      background-color: #1e1e1e;
+      padding: 10px;
+      text-align: center;
+    }
+    header img {
+      width: 400px;
+      margin: 10px auto;
+      display: block;
+    }
+    main {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #00c853;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 20px;
+      width: 100%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #servicos-container {
+      margin-top: 15px;
+      background-color: #222;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="http://mayconbrown.com.br/">
+      <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo Maycon Brown">
+    </a>
+  </header>
+  <main>
+    <h2>Gerador de Orçamento Profissional</h2><label>📷 Logo da empresa:</label>
+<input type="file" id="logoUpload" accept="image/png, image/jpeg" />
+
+<label>🏢 Nome da empresa:</label>
+<input type="text" id="empresa" />
+
+<label>🔢 CNPJ:</label>
+<input type="text" id="cnpj" />
+
+<label>📍 Endereço:</label>
+<input type="text" id="endereco" />
+
+<label>📞 WhatsApp da empresa:</label>
+<input type="text" id="whatsEmpresa" />
+
+<label>📧 E-mail comercial:</label>
+<input type="email" id="emailEmpresa" />
+
+<hr/>
+
+<label>👤 Nome do cliente:</label>
+<input type="text" id="cliente" />
+
+<label>📱 WhatsApp do cliente:</label>
+<input type="text" id="whatsCliente" />
+
+<label>📧 E-mail do cliente:</label>
+<input type="email" id="emailCliente" />
+
+<div id="servicos-container">
+  <label>🛠️ Serviço:</label>
+  <input type="text" class="servico" placeholder="Ex: Formatação de computador" />
+  <label>💰 Valor:</label>
+  <input type="number" class="valor" placeholder="Ex: 100" />
+</div>
+
+<button onclick="adicionarServico()">➕ Adicionar outro serviço</button>
+
+<label>🗒️ Observações (prazo, condições, etc):</label>
+<textarea id="observacoes" rows="4"></textarea>
+
+<button onclick="gerarPDF()">📄 Gerar Orçamento em PDF</button>
+
+  </main>  <script>
+    function adicionarServico() {
+      const container = document.getElementById("servicos-container");
+
+      const label1 = document.createElement("label");
+      label1.textContent = "🛠️ Serviço:";
+      const servico = document.createElement("input");
+      servico.type = "text";
+      servico.className = "servico";
+      servico.placeholder = "Ex: Instalação de sistema";
+
+      const label2 = document.createElement("label");
+      label2.textContent = "💰 Valor:";
+      const valor = document.createElement("input");
+      valor.type = "number";
+      valor.className = "valor";
+      valor.placeholder = "Ex: 50";
+
+      container.appendChild(label1);
+      container.appendChild(servico);
+      container.appendChild(label2);
+      container.appendChild(valor);
+    }
+
+    async function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const empresa = document.getElementById("empresa").value;
+      const cnpj = document.getElementById("cnpj").value;
+      const endereco = document.getElementById("endereco").value;
+      const whatsEmpresa = document.getElementById("whatsEmpresa").value;
+      const emailEmpresa = document.getElementById("emailEmpresa").value;
+      const cliente = document.getElementById("cliente").value;
+      const whatsCliente = document.getElementById("whatsCliente").value;
+      const emailCliente = document.getElementById("emailCliente").value;
+      const observacoes = document.getElementById("observacoes").value;
+
+      let y = 20;
+
+      const logoFile = document.getElementById("logoUpload").files[0];
+      if (logoFile) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+          const base64 = reader.result;
+          doc.addImage(base64, 'PNG', 140, 10, 50, 20);
+          gerarConteudoPDF();
+        };
+        reader.readAsDataURL(logoFile);
+      } else {
+        gerarConteudoPDF();
+      }
+
+      function gerarConteudoPDF() {
+        y += 10;
+        doc.setFontSize(12);
+        doc.text(`Empresa: ${empresa}`, 15, y);
+        doc.text(`CNPJ: ${cnpj}`, 15, y + 8);
+        doc.text(`Endereço: ${endereco}`, 15, y + 16);
+        doc.text(`WhatsApp: ${whatsEmpresa}`, 15, y + 24);
+        doc.text(`E-mail: ${emailEmpresa}`, 15, y + 32);
+
+        y += 50;
+        doc.setFontSize(13);
+        doc.text("Dados do Cliente:", 15, y);
+        doc.setFontSize(12);
+        doc.text(`Nome: ${cliente}`, 15, y + 8);
+        doc.text(`WhatsApp: ${whatsCliente}`, 15, y + 16);
+        doc.text(`E-mail: ${emailCliente}`, 15, y + 24);
+
+        y += 35;
+        doc.setFontSize(13);
+        doc.text("Serviços:", 15, y);
+        let total = 0;
+
+        const servicos = document.querySelectorAll(".servico");
+        const valores = document.querySelectorAll(".valor");
+
+        servicos.forEach((el, i) => {
+          const nome = el.value;
+          const valor = parseFloat(valores[i].value);
+          if (nome && !isNaN(valor)) {
+            y += 8;
+            doc.setFontSize(12);
+            doc.text(`- ${nome}: R$ ${valor.toFixed(2)}`, 20, y);
+            total += valor;
+          }
+        });
+
+        y += 12;
+        doc.setFontSize(13);
+        doc.text(`Total: R$ ${total.toFixed(2)}`, 15, y);
+
+        y += 15;
+        doc.setFontSize(12);
+        doc.text("Observações:", 15, y);
+        y += 8;
+        doc.setFontSize(11);
+        const linhas = doc.splitTextToSize(observacoes, 180);
+        doc.text(linhas, 15, y);
+
+        doc.save(`Orcamento_${cliente.replace(/\s/g, "_")}.pdf`);
+      }
+    }
+  </script></body>
+</html>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lella Salgados</title>
+<link rel="manifest" href="manifest.json">
+  <link rel="shortcut icon" href="..\img\lella-salgados-icone.png" type="image/x-icon">
+
+<!-- Firebase SDK Modular -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+  authDomain: "mayconbrown-bda8c.firebaseapp.com",
+  projectId: "mayconbrown-bda8c",
+  storageBucket: "mayconbrown-bda8c.appspot.com",
+  messagingSenderId: "226624962636",
+  appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+  measurementId: "G-Y1BTTK576V"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const lojaLatitude = -5.938720410918939;
+const lojaLongitude = -35.2843825297951;
+const taxaPorKm = 1.40 * 2;
+let carrinho = {};
+let taxaEntrega = 0;
+let catalogoProdutos = []; // armazenaremos { id, nome, preco }
+
+import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+async function carregarCatalogoFirebase() {
+  const q = query(collection(db, 'lellasalgados'), orderBy('ordem', 'asc'));
+  const snapshot = await getDocs(q);
+  catalogoProdutos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  criarCatalogo();
+}
+
+
+function criarCatalogo() {
+  const div = document.getElementById('catalogo');
+  div.innerHTML = '';
+  carrinho = {}; // reset carrinho ao recarregar catálogo
+
+  catalogoProdutos.forEach(produto => {
+    carrinho[produto.id] = 0; // usa id no carrinho
+
+    const el = document.createElement('div');
+    el.className = 'salgado';
+
+    el.innerHTML = `
+      <span>${produto.nome} - R$${produto.preco.toFixed(2)}</span>
+      <div class="botoes-qtd">
+        <button onclick="mudarQuantidade('${produto.id}', -1)">–</button>
+        <span id="quant_${produto.id}">0</span>
+        <button onclick="mudarQuantidade('${produto.id}', 1)">+</button>
+      </div>
+    `;
+    div.appendChild(el);
+  });
+}
+
+window.mudarQuantidade = function(id, qtd) {
+  if (!(id in carrinho)) return;
+  carrinho[id] = Math.max(0, carrinho[id] + qtd);
+  document.getElementById(`quant_${id}`).textContent = carrinho[id];
+  atualizarCarrinho();
+};
+
+function atualizarCarrinho() {
+  let total = 0;
+  let quantidade = 0;
+
+  for (let id in carrinho) {
+    const produto = catalogoProdutos.find(p => p.id === id);
+    if (produto) {
+      quantidade += carrinho[id];
+      total += carrinho[id] * produto.preco;
+    }
+  }
+
+  document.getElementById('quantidadeTotal').textContent = quantidade;
+  document.getElementById('subtotal').textContent = total.toFixed(2);
+  atualizarTotal();
+  atualizarBotaoFinalizar(quantidade, taxaEntrega);
+}
+
+function atualizarBotaoFinalizar(quantidade, taxa) {
+  const botaoFinalizar = document.getElementById('finalizar');
+  // Só libera se tiver pelo menos 1 produto E taxa de entrega maior que zero
+  if (quantidade > 0 && taxa > 0) {
+    botaoFinalizar.disabled = false;
+  } else {
+    botaoFinalizar.disabled = true;
+  }
+}
+
+
+function atualizarTotal() {
+  let subtotal = parseFloat(document.getElementById('subtotal').textContent) || 0;
+  let total = subtotal + taxaEntrega;
+  document.getElementById('totalGeral').textContent = total.toFixed(2);
+}
+
+window.usarLocalizacao = function() {
+  if (!navigator.geolocation) {
+    alert("Geolocalização não suportada.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const latCliente = pos.coords.latitude;
+    const lonCliente = pos.coords.longitude;
+    const distancia = calcularDistancia(latCliente, lonCliente, lojaLatitude, lojaLongitude);
+
+    if (distancia > 2) {
+      alert("Desculpe, não entregamos fora do raio de 2Km.");
+      document.getElementById('taxaEntrega').textContent = '---';
+      taxaEntrega = 0;
+      atualizarBotaoFinalizar(getQuantidadeCarrinho(), taxaEntrega);
+      return;
+    }
+
+    taxaEntrega = distancia * taxaPorKm;
+    if (taxaEntrega < 3) taxaEntrega = 3.00;
+
+    document.getElementById('taxaEntrega').textContent = taxaEntrega.toFixed(2);
+    atualizarTotal();
+    atualizarBotaoFinalizar(getQuantidadeCarrinho(), taxaEntrega);
+  }, err => {
+    alert("Não foi possível obter localização: " + err.message);
+  });
+};
+
+function getQuantidadeCarrinho() {
+  let quantidade = 0;
+  for (let id in carrinho) {
+    quantidade += carrinho[id];
+  }
+  return quantidade;
+}
+
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
+}
+
+function calcularDistancia(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+window.verificarPagamento = function() {
+  const forma = document.getElementById('pagamento').value;
+  document.getElementById('campoTroco').style.display = forma === 'especie' ? 'block' : 'none';
+  document.getElementById('trocoLinha').style.display = 'none';
+};
+
+window.calcularTroco = function() {
+  const entregue = parseFloat(document.getElementById('valorEntregue').value);
+  const total = parseFloat(document.getElementById('subtotal').textContent) + taxaEntrega;
+  if (entregue >= total) {
+    document.getElementById('troco').textContent = (entregue - total).toFixed(2);
+    document.getElementById('trocoLinha').style.display = 'block';
+  }
+  atualizarTotal();
+};
+
+window.finalizarPedido = function() {
+  const nome = document.getElementById('nome').value.trim();
+  const whats = document.getElementById('whatsapp').value.trim();
+  const endereco = document.getElementById('endereco').value.trim();
+  const pagamento = document.getElementById('pagamento').value;
+  const quantidade = document.getElementById('quantidadeTotal').textContent;
+  const subtotal = document.getElementById('subtotal').textContent;
+  const taxa = document.getElementById('taxaEntrega').textContent;
+  const total = document.getElementById('totalGeral').textContent;
+  const trocoValor = document.getElementById('troco').textContent;
+  const valorEntregue = document.getElementById('valorEntregue').value;
+
+  if (!nome || !whats || !endereco || quantidade === "0") {
+    alert("Preencha todos os campos e escolha pelo menos 1 salgado.");
+    return;
+  }
+
+  const dadosPedido = {
+    nome, whats, endereco, pagamento,
+    quantidade, subtotal, taxa, total,
+    trocoValor, valorEntregue
+  };
+
+  if (pagamento === 'pix') {
+    document.getElementById('pixModal').style.display = 'flex';
+    window.dadosPix = dadosPedido;
+  } else {
+    enviarPedidoWhatsApp(dadosPedido);
+  }
+};
+
+function enviarPedidoWhatsApp(dados) {
+  let itens = '';
+  for (let id in carrinho) {
+    if (carrinho[id] > 0) {
+      const produto = catalogoProdutos.find(p => p.id === id);
+      if (produto) {
+        itens += `${carrinho[id]}x ${produto.nome} - R$${produto.preco.toFixed(2)}%0A`;
+      }
+    }
+  }
+
+  let mensagem = `Olá! Quero fazer um pedido de salgados:%0A%0A` +
+    `Nome: ${dados.nome}%0AWhatsApp: ${dados.whats}%0AEndereço: ${dados.endereco}%0A%0A` +
+    `Pedido:%0A${itens}%0A` +
+    `Quantidade: ${dados.quantidade} Produtos%0ASubtotal: R$ ${dados.subtotal}%0ATaxa de entrega: R$ ${dados.taxa}%0A`;
+
+  if (dados.pagamento === 'especie') mensagem += `Troco para: R$ ${dados.valorEntregue}%0A`;
+  mensagem += `Total: R$ ${dados.total}%0AForma de pagamento: ${dados.pagamento}`;
+  if (dados.pagamento === 'especie') mensagem += `%0ATroco: R$ ${dados.trocoValor}`;
+
+  window.open(`https://wa.me/5584986977302?text=${mensagem}`, '_blank');
+};
+
+window.copiarPix = function() {
+  navigator.clipboard.writeText('84986977302');
+  alert("Chave PIX copiada!");
+};
+
+window.enviarComprovante = function() {
+  if (taxaEntrega <= 0) {
+    alert("Por favor, clique em 'Usar minha localização' antes de enviar o comprovante.");
+    return;
+  }
+
+  document.getElementById('pixModal').style.display = 'none';
+  if (window.dadosPix) {
+    enviarPedidoWhatsApp(window.dadosPix);
+    window.dadosPix = null; // limpa os dados após enviar
+  } else {
+    alert("Erro: os dados do pedido não foram encontrados.");
+  }
+
+
+  function enviarPedidoWhatsApp(dados) {
+    let itens = '';
+    for (let id in carrinho) {
+      if (carrinho[id] > 0) {
+        const produto = catalogoProdutos.find(p => p.id === id);
+        if (produto) {
+          itens += `${carrinho[id]}x ${produto.nome} - R$${produto.preco.toFixed(2)}%0A`;
+        }
+      }
+    }
+
+    let mensagem = `Olá! Quero fazer um pedido de salgados:%0A%0A` +
+      `Nome: ${dados.nome}%0AWhatsApp: ${dados.whats}%0AEndereço: ${dados.endereco}%0A%0A` +
+      `Pedido:%0A${itens}%0A` +
+      `Quantidade: ${dados.quantidade} Produtos%0ASubtotal: R$ ${dados.subtotal}%0ATaxa de entrega: R$ ${dados.taxa}%0A`;
+
+    if (dados.pagamento === 'especie') mensagem += `Troco para: R$ ${dados.valorEntregue}%0A`;
+    mensagem += `Total: R$ ${dados.total}%0AForma de pagamento: ${dados.pagamento}`;
+    if (dados.pagamento === 'especie') mensagem += `%0ATroco: R$ ${dados.trocoValor}`;
+
+    window.open(`https://wa.me/5584986977302?text=${mensagem}`, '_blank');
+  }
+  
+};
+
+window.fecharPixModal = function() {
+  document.getElementById('pixModal').style.display = 'none';
+}
+
+
+window.addEventListener('DOMContentLoaded', carregarCatalogoFirebase);
+
+</script>
+
+</script>
+<button id="installButton" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #d9230f;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: none;
+">
+  Instalar App
+</button>
+<script>
+  let deferredPrompt;
+  const installButton = document.getElementById('installButton');
+
+  // Escuta o evento "beforeinstallprompt"
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Mostra o botão
+    installButton.style.display = 'block';
+
+    // Clica no botão
+    installButton.addEventListener('click', () => {
+      installButton.style.display = 'none'; // Esconde o botão após o clique
+      deferredPrompt.prompt();
+
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuário aceitou instalar o app');
+        } else {
+          console.log('Usuário recusou a instalação');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+
+  // Verifica se o app já está instalado
+  window.addEventListener('appinstalled', () => {
+    console.log('App instalado');
+    installButton.style.display = 'none';
+  });
+</script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #fff8f2;
+    margin: 0;
+    padding: 0 10px 20px;
+    color: #333;
+  }
+  header {
+    background-color: #ffe600;
+    padding: 1rem;
+    text-align: center;
+  }
+  header img {
+    max-height: 60px;
+  }
+  .container {
+    max-width: 800px;
+    margin: auto;
+  }
+  #catalogo {
+    margin-top: 1rem;
+  }
+  .salgado {
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .salgado span {
+    flex: 1 1 60%;
+    font-size: 1.1rem;
+  }
+  .botoes-qtd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .botoes-qtd button {
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background-color: #d9230f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    user-select: none;
+  }
+  .botoes-qtd span {
+    min-width: 30px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  .formulario {
+    background: #ffe6dc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .formulario label {
+    display: block;
+    margin: 10px 0 4px;
+    font-weight: bold;
+  }
+  .formulario input, .formulario select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  .formulario button {
+    margin-top: 15px;
+    background-color: #d9230f;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .formulario button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+  .resumo p {
+    margin: 5px 0;
+    font-size: 1.1rem;
+  }
+  #pixModal {
+  display: none; /* Escondido por padrão */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex; /* Aqui defina display flex só uma vez */
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+  #pixModal .conteudo {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+  #pixModal button {
+    margin: 10px 5px 0;
+    background: #d9230f;
+    border: none;
+    padding: 10px 15px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  /* Responsividade */
+  @media (max-width: 480px) {
+    .salgado span {
+      flex: 1 1 100%;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+    .botoes-qtd button {
+      padding: 8px 14px;
+      font-size: 1.5rem;
+    }
+    .botoes-qtd span {
+      min-width: 35px;
+      font-size: 1.3rem;
+    }
+    .formulario input, .formulario select {
+      max-width: 100%;
+      font-size: 1.1rem;
+    }
+    .formulario button {
+      font-size: 1.2rem;
+      padding: 12px;
+    }
+  }
+  #pixModal .conteudo {
+  position: relative; /* para posicionar o botão fechar relativo ao modal */
+}
+
+#pixModal .fechar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #d9230f;
+  line-height: 1;
+  padding: 0;
+  user-select: none;
+}
+#pixModal .fechar:hover {
+  color: #a60000;
+}
+
+  
+</style>
+
+<body>
+<header>
+  <img src="../img/lella-salgados01.webp" alt="Lella Salgados" />
+</header>
+<div class="container">
+  <div id="catalogo"></div>
+
+  <div class="formulario">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" placeholder="Seu nome" />
+
+    <label for="whatsapp">WhatsApp:</label>
+    <input type="tel" id="whatsapp" placeholder="(99) 99999-9999" />
+
+    <label for="endereco">Endereço:</label>
+    <input type="text" id="endereco" placeholder="Seu endereço" />
+
+    <button type="button" onclick="usarLocalizacao()">Usar minha localização</button>
+
+    <label for="pagamento">Forma de Pagamento:</label>
+    <select id="pagamento" onchange="verificarPagamento()">
+      <option value="cartao">Cartão</option>
+      <option value="pix">PIX</option>
+      <option value="especie">Espécie</option>
+    </select>
+
+    <div id="campoTroco" style="display:none;">
+      <label for="valorEntregue">Valor entregue:</label>
+      <input type="number" id="valorEntregue" oninput="calcularTroco()" min="0" step="0.01" />
+    </div>
+
+    <div class="resumo">
+      <p>Total de Salgados: <span id="quantidadeTotal">0</span></p>
+      <p>Subtotal: R$<span id="subtotal">0.00</span></p>
+      <p>Taxa de Entrega: R$<span id="taxaEntrega">0.00</span></p>
+      <p id="trocoLinha" style="display:none;">Troco: R$<span id="troco">0.00</span></p>
+      <p><strong>Total: R$<span id="totalGeral">0.00</span></strong></p>
+    </div>
+
+    <button id="finalizar" disabled onclick="finalizarPedido()">Finalizar Pedido</button>
+  </div>
+</div>
+
+<div id="pixModal" class="pix-modal" style="display:none;">
+  <div class="conteudo">
+    <button class="fechar" onclick="fecharPixModal()" aria-label="Fechar modal">×</button>
+    <h2>Pagamento via PIX</h2>
+    <p><strong>Chave:</strong> 84986977302</p>
+    <p><strong>Nome:</strong> Rafaela Inacio da Silva</p>
+    <p><strong>Banco:</strong> Nubank</p>
+    <button onclick="copiarPix()">Copiar Chave PIX</button>
+    <button onclick="enviarComprovante()">Enviar pedido e comprovante</button>
+  </div>
+</div>
+
+</body>
+</html>

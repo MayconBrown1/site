@@ -1,0 +1,16 @@
+{
+    "name": "Brown Finanças",
+    "short_name": "Brown Finanças",
+    "description": "Tenha o controle das suas finanças na palma da mão.",
+    "start_url": "https://mayconbrown.com.br/ferramentas/brown-financas",
+    "display": "standalone",
+    "background_color": "#121212",
+    "theme_color": "#121212",
+    "icons": [
+      {
+        "src": "https://mayconbrown.com.br/img/brown-financas.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      }
+    ]
+  }

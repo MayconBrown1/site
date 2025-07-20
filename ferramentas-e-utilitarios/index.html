@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ferramentas e Utilitários GRÁTIS</title>
+    <link rel="shortcut icon" href="../img/icone.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Script simples para alternar menu mobile
+        function toggleMenu() {
+          const menu = document.getElementById('mobile-menu');
+          if (menu.classList.contains('hidden')) {
+            menu.classList.remove('hidden');
+          } else {
+            menu.classList.add('hidden');
+          }
+        }
+      </script>
+    </head>
+    <body class="bg-gray-50 text-gray-800">
+      <!-- Navbar -->
+      <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+          <a href="/index.html">
+            <img src="/img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+          </a>
+          <button class="md:hidden" onclick="toggleMenu()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <nav class="hidden md:flex space-x-4">
+            <a href="../index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+            <a class="text-indigo-600 font-semibold">/ Ferramentas e Utilitários</a>
+            <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+            <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+            <a href="../contato.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+          <nav class="flex flex-col space-y-2">
+            <a href="../index.html" class="hover:text-indigo-600">Início</a>
+            <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+            <a class="text-indigo-600 font-semibold">/ Ferramentas e Utilitários</a>
+            <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+            <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+            <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+            <a href="../contato.html" class="hover:text-indigo-600">Contato</a>
+          </nav>
+        </div>
+      </header>
+
+    <!-- Conteúdo -->
+    <main class="py-16">
+      <div class="container mx-auto px-4 max-w-4xl">
+        <h2 class="text-3xl font-bold mb-6 text-center">Ferramentas e Utilitários GRÁTIS</h2>
+        <p class="text-black mb-12 text-center">
+          Tudo o que você precisa para facilitar seu dia a dia digital em um só lugar.
+        </p>
+
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">💼 Controle Financeiro</h3>
+            <p class="text-gray-400 mb-4">Organize suas entradas e saídas e saiba onde seu dinheiro está indo.</p>
+            <a href="/ferramentas-e-utilitarios/brown-financas"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">📋 Controle de Clientes</h3>
+            <p class="text-gray-400 mb-4">Gerencie seus clientes, histórico de compras e informações de contato.</p>
+            <a href="/ferramentas-e-utilitarios/controle-clientes"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">📱 Gerador de Link WhatsApp</h3>
+            <p class="text-gray-400 mb-4">Crie um link direto para o seu WhatsApp com mensagem personalizada.</p>
+            <a href="/ferramentas-e-utilitarios/link-whatsapp"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">🔗 Gerador de Link em QR Code</h3>
+            <p class="text-gray-400 mb-4">Transforme qualquer link em um QR Code com sua logo em segundos.</p>
+            <a href="/ferramentas-e-utilitarios/gerar-qrcode"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">📄 Gerador de Currículo</h3>
+            <p class="text-gray-400 mb-4">Monte um currículo profissional de forma rápida e prática.</p>
+            <a href="/ferramentas-e-utilitarios/gerar-curriculo"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">📃 Gerador de Contrato de Aluguel</h3>
+            <p class="text-gray-400 mb-4">Gere contratos prontos para imprimir e assinar, sem complicação.</p>
+            <a href="/ferramentas-e-utilitarios/gerar-contrato"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">🔐 Gerador de Senhas</h3>
+            <p class="text-gray-400 mb-4">Crie senhas fortes e seguras para proteger suas contas.</p>
+            <a href="/ferramentas-e-utilitarios/gerador-senhas"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">💳 Criar Cartão de Visita</h3>
+            <p class="text-gray-400 mb-4">Crie seu próprio cartão de visita personalizado direto pela nossa página, fácil e rápido!</p>
+            <a href="/ferramentas-e-utilitarios/editor-cartao-visita"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">🧾 Gerador de Orçamento</h3>
+            <p class="text-gray-400 mb-4">Monte orçamentos profissionais e envie direto para seus clientes.</p>
+            <a href="/ferramentas-e-utilitarios/gerar-orcamento"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+
+          <div class="bg-black shadow-lg rounded-xl p-6">
+            <h3 class="text-white font-semibold mb-2">💰 Gerador de Recibo</h3>
+            <p class="text-gray-400 mb-4">Monte orçamentos profissionais e envie direto para seus clientes.</p>
+            <a href="/ferramentas-e-utilitarios/gerar-recibo"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Acessar</a>
+          </div>
+        </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+    </footer>
+  </body>
+</html>

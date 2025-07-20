@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gerador de Contrato de Aluguel Simples</title>
+  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      background-color: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    header img {
+      width: 400px;
+      display: block;
+      margin: 0 auto 20px auto;
+    }
+    form {
+      max-width: 700px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #0b5ed7;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="https://mayconbrown.com.br/" target="_blank">
+    <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo Maycon Brown">
+  </a>
+</header>
+
+<form id="contratoForm">
+  <h2>Gerador de Contrato de Aluguel</h2>
+
+  <label>Nome do Locador</label>
+  <input type="text" name="locador" required>
+
+  <label>RG do Locador</label>
+  <input type="text" name="rg_locador" required>
+
+  <label>CPF do Locador</label>
+  <input type="text" name="cpf_locador" required>
+
+  <label>Endereço do Locador</label>
+  <textarea name="endereco_locador" required></textarea>
+
+  <label>Nome do Locatário</label>
+  <input type="text" name="locatario" required>
+
+  <label>RG do Locatário</label>
+  <input type="text" name="rg_locatario" required>
+
+  <label>CPF do Locatário</label>
+  <input type="text" name="cpf_locatario" required>
+
+  <label>Endereço do Locatário</label>
+  <textarea name="endereco_locatario" required></textarea>
+
+  <label>Endereço do Imóvel</label>
+  <textarea name="endereco_imovel" required></textarea>
+
+  <label>Valor do Aluguel (R$)</label>
+  <input type="text" name="valor_aluguel" required>
+
+  <label>Forma de Pagamento</label>
+  <input type="text" name="forma_pagamento" required>
+
+  <label>Data de Vencimento</label>
+  <input type="text" name="vencimento" required>
+
+  <label>Duração do Contrato (meses)</label>
+  <input type="number" name="duracao" required>
+
+  <button type="button" onclick="gerarPDF()">Gerar Contrato em PDF</button>
+</form>
+
+<script>
+  async function gerarPDF() {
+    const form = document.forms['contratoForm'];
+    const {
+      locador, rg_locador, cpf_locador, endereco_locador,
+      locatario, rg_locatario, cpf_locatario, endereco_locatario,
+      endereco_imovel, valor_aluguel, forma_pagamento, vencimento, duracao
+    } = Object.fromEntries(new FormData(form).entries());
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let texto = `
+CONTRATO DE LOCAÇÃO DE IMÓVEL RESIDENCIAL
+
+LOCADOR: ${locador}, RG: ${rg_locador}, CPF: ${cpf_locador}, Endereço: ${endereco_locador}
+
+LOCATÁRIO: ${locatario}, RG: ${rg_locatario}, CPF: ${cpf_locatario}, Endereço: ${endereco_locatario}
+
+Objeto do Contrato: Locação do imóvel situado em ${endereco_imovel}
+
+Valor do Aluguel: R$ ${valor_aluguel} mensais
+Forma de Pagamento: ${forma_pagamento}
+Data de Vencimento: Todo dia ${vencimento} de cada mês
+Duração: ${duracao} meses a contar da data da assinatura
+
+CLÁUSULAS GERAIS:
+1. O imóvel deve ser devolvido nas mesmas condições em que foi entregue.
+2. Despesas com água, luz, IPTU e demais taxas são de responsabilidade do locatário.
+3. Em caso de rescisão antecipada, deve-se comunicar com 30 dias de antecedência.
+4. O não pagamento implica em multa de 10% sobre o valor do aluguel, juros e atualização monetária.
+
+Assinaturas:
+
+___________________________     ___________________________
+Locador                               Locatário
+
+Data: ____ / ____ / ______
+    `;
+
+    doc.setFont("times", "normal");
+    doc.setFontSize(12);
+    doc.text(texto, 10, 10, { maxWidth: 190 });
+
+    doc.save("Contrato-Aluguel.pdf");
+  }
+</script>
+
+</body>
+</html>

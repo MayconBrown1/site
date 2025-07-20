@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Painel Admin - Lella Salgados</title>
+  <link rel="manifest" href="manifest-admin.json">
+  <link rel="shortcut icon" href="..\img\lella-salgados-icone.png" type="image/x-icon">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1rem;
+      background-color: #fdf6f0;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      color: #d9230f;
+      text-align: center;
+    }
+    input, button, select {
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+    input, select {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #d9230f;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .info {
+      flex: 2 1 50%;
+    }
+    .acoes {
+      flex: 1 1 40%;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .acoes button {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.9rem;
+      flex: 1 1 auto;
+    }
+    .editar-inputs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .editar-inputs input, .editar-inputs select {
+      flex: 1 1 45%;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Painel Administrativo</h1>
+  <input type="text" id="nomeProduto" placeholder="Nome do produto" />
+  <input type="number" id="precoProduto" placeholder="Preço do produto" step="0.01" />
+  <input type="number" id="ordemProduto" placeholder="Ordem do produto (numérico)" min="0" />
+  <button id="btnAdicionar">Adicionar Produto</button>
+
+  <h2>Produtos Cadastrados</h2>
+  <ul id="listaProdutos"></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      updateDoc,
+      query,
+      orderBy,
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+      authDomain: "mayconbrown-bda8c.firebaseapp.com",
+      projectId: "mayconbrown-bda8c",
+      storageBucket: "mayconbrown-bda8c.appspot.com",
+      messagingSenderId: "226624962636",
+      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+      measurementId: "G-Y1BTTK576V",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const produtosRef = collection(db, "lellasalgados");
+
+    const lista = document.getElementById("listaProdutos");
+    const btnAdicionar = document.getElementById("btnAdicionar");
+
+    async function listarProdutos() {
+      lista.innerHTML = "";
+      // Query ordenando por campo "ordem", se não existir, coloca no fim (10000)
+      const q = query(produtosRef, orderBy("ordem", "asc"));
+      const querySnapshot = await getDocs(q);
+
+      // Se algum produto não tiver ordem, vamos atualizar depois
+      const semOrdem = [];
+
+      querySnapshot.forEach((docSnap) => {
+        const produto = docSnap.data();
+        if (produto.ordem === undefined) semOrdem.push(docSnap.id);
+      });
+
+      // Atualiza produtos sem ordem com ordem 10000 para ficarem no final
+      for (const id of semOrdem) {
+        await updateDoc(doc(db, "lellasalgados", id), { ordem: 10000 });
+      }
+
+      // Refazer consulta para garantir ordem correta
+      const finalSnapshot = await getDocs(query(produtosRef, orderBy("ordem", "asc")));
+
+      finalSnapshot.forEach((docSnap) => {
+        const produto = docSnap.data();
+        criarItemProduto(docSnap.id, produto);
+      });
+    }
+
+    function criarItemProduto(id, produto) {
+      const li = document.createElement("li");
+      li.dataset.id = id;
+
+      const infoDiv = document.createElement("div");
+      infoDiv.className = "info";
+      infoDiv.textContent = `${produto.nome} - R$ ${produto.preco.toFixed(2)} - Ordem: ${produto.ordem}`;
+
+      const acoesDiv = document.createElement("div");
+      acoesDiv.className = "acoes";
+
+      const btnEditar = document.createElement("button");
+      btnEditar.textContent = "Editar";
+      btnEditar.onclick = () => abrirEdicao(id, produto, li);
+
+      const btnExcluir = document.createElement("button");
+      btnExcluir.textContent = "Excluir";
+      btnExcluir.onclick = async () => {
+        if (confirm("Tem certeza que deseja excluir este produto?")) {
+          await deleteDoc(doc(db, "lellasalgados", id));
+          listarProdutos();
+        }
+      };
+
+      acoesDiv.appendChild(btnEditar);
+      acoesDiv.appendChild(btnExcluir);
+
+      li.appendChild(infoDiv);
+      li.appendChild(acoesDiv);
+      lista.appendChild(li);
+    }
+
+    function abrirEdicao(id, produto, li) {
+      li.innerHTML = ""; // Limpa conteúdo para editar
+
+      const inputsDiv = document.createElement("div");
+      inputsDiv.className = "editar-inputs";
+
+      const inputNome = document.createElement("input");
+      inputNome.type = "text";
+      inputNome.value = produto.nome;
+      inputNome.placeholder = "Nome do produto";
+
+      const inputPreco = document.createElement("input");
+      inputPreco.type = "number";
+      inputPreco.step = "0.01";
+      inputPreco.min = "0";
+      inputPreco.value = produto.preco;
+      inputPreco.placeholder = "Preço do produto";
+
+      const inputOrdem = document.createElement("input");
+      inputOrdem.type = "number";
+      inputOrdem.min = "0";
+      inputOrdem.value = produto.ordem ?? 10000;
+      inputOrdem.placeholder = "Ordem do produto";
+
+      const btnSalvar = document.createElement("button");
+      btnSalvar.textContent = "Salvar";
+      btnSalvar.onclick = async () => {
+        const novoNome = inputNome.value.trim();
+        const novoPreco = parseFloat(inputPreco.value);
+        const novaOrdem = parseInt(inputOrdem.value);
+
+        if (!novoNome || isNaN(novoPreco) || isNaN(novaOrdem)) {
+          alert("Preencha nome, preço e ordem corretamente.");
+          return;
+        }
+
+        try {
+          await updateDoc(doc(db, "lellasalgados", id), {
+            nome: novoNome,
+            preco: novoPreco,
+            ordem: novaOrdem,
+          });
+          listarProdutos();
+        } catch (error) {
+          alert("Erro ao salvar produto: " + error.message);
+        }
+      };
+
+      const btnCancelar = document.createElement("button");
+      btnCancelar.textContent = "Cancelar";
+      btnCancelar.onclick = () => {
+        listarProdutos();
+      };
+
+      inputsDiv.appendChild(inputNome);
+      inputsDiv.appendChild(inputPreco);
+      inputsDiv.appendChild(inputOrdem);
+      inputsDiv.appendChild(btnSalvar);
+      inputsDiv.appendChild(btnCancelar);
+
+      li.appendChild(inputsDiv);
+    }
+
+    btnAdicionar.addEventListener("click", async () => {
+      const nome = document.getElementById("nomeProduto").value.trim();
+      const preco = parseFloat(document.getElementById("precoProduto").value);
+      const ordem = parseInt(document.getElementById("ordemProduto").value);
+
+      if (!nome || isNaN(preco) || isNaN(ordem)) {
+        alert("Por favor, preencha nome, preço e ordem corretamente.");
+        return;
+      }
+
+      try {
+        await addDoc(produtosRef, { nome, preco, ordem });
+        document.getElementById("nomeProduto").value = "";
+        document.getElementById("precoProduto").value = "";
+        document.getElementById("ordemProduto").value = "";
+        listarProdutos();
+        alert("Produto adicionado com sucesso!");
+      } catch (error) {
+        alert("Erro ao adicionar produto: " + error.message);
+      }
+    });
+
+    listarProdutos();
+  </script>
+
+  </script>
+<button id="installButton" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #d9230f;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: none;
+">
+  Instalar App
+</button>
+<script>
+  let deferredPrompt;
+  const installButton = document.getElementById('installButton');
+
+  // Escuta o evento "beforeinstallprompt"
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Mostra o botão
+    installButton.style.display = 'block';
+
+    // Clica no botão
+    installButton.addEventListener('click', () => {
+      installButton.style.display = 'none'; // Esconde o botão após o clique
+      deferredPrompt.prompt();
+
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuário aceitou instalar o app');
+        } else {
+          console.log('Usuário recusou a instalação');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+
+  // Verifica se o app já está instalado
+  window.addEventListener('appinstalled', () => {
+    console.log('App instalado');
+    installButton.style.display = 'none';
+  });
+</script>
+</body>
+</html>

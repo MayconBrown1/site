@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brown Draw</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background-color: #111827;
+      overflow: hidden;
+    }
+    canvas {
+      touch-action: none;
+    }
+    #sizeInfo {
+      font-size: 14px;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- TOPO -->
+  <div class="absolute top-0 left-0 right-0 z-10 flex justify-between items-center bg-gray-800 p-2">
+    <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo Brown" class="w-[150px]">
+    <div class="flex flex-wrap gap-2 items-center">
+      <button onclick="addRect()" title="Retângulo" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">▭</button>
+      <button onclick="addCircle()" title="Círculo" class="bg-green-600 hover:bg-green-700 px-3 py-1 rounded">◯</button>
+      <button onclick="addLine()" title="Linha" class="bg-yellow-600 hover:bg-yellow-700 px-3 py-1 rounded">╍</button>
+      <button onclick="addText()" title="Texto" class="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded">A</button>
+      <button onclick="startDrawing()" title="Caneta" class="bg-pink-600 hover:bg-pink-700 px-3 py-1 rounded">✎</button>
+      <button onclick="uploadImage()" title="Imagem de Fundo" class="bg-orange-600 hover:bg-orange-700 px-3 py-1 rounded">🖼️</button>
+      <button onclick="deleteSelected()" title="Deletar" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded">🗑️</button>
+      <button onclick="exportSVG()" title="Exportar SVG" class="bg-teal-600 hover:bg-teal-700 px-3 py-1 rounded">⬇️ SVG</button>
+      <button onclick="exportPDF()" title="Exportar PDF" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded">⬇️ PDF</button>
+      <button onclick="salvarCDR()" title="Salvar no CorelDRAW" class="bg-cyan-700 hover:bg-cyan-800 px-3 py-1 rounded">🖨️ CDR (via SVG)</button>
+      <input type="color" id="colorPicker" title="Selecionar Cor" class="w-8 h-8 p-0 border-0 bg-transparent cursor-pointer" />
+    </div>
+    <div id="sizeInfo">Tamanho: -- mm x -- mm</div>
+  </div>
+
+  <!-- CANVAS -->
+  <canvas id="canvas"></canvas>
+  <input type="file" id="imgUpload" accept="image/*" style="display: none;" />
+
+  <!-- SCRIPT PRINCIPAL -->
+  <script>
+    const MM_TO_PX = 3.78;
+
+    const canvas = new fabric.Canvas('canvas', {
+      backgroundColor: '#ffffff',
+      selection: true
+    });
+
+    function resizeCanvas() {
+      canvas.setWidth(window.innerWidth);
+      canvas.setHeight(window.innerHeight);
+      canvas.renderAll();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // ATUALIZA INFORMAÇÃO DE TAMANHO
+    function updateSizeInfo() {
+      const obj = canvas.getActiveObject();
+      if (!obj) return document.getElementById("sizeInfo").innerText = "Tamanho: -- mm x -- mm";
+
+      const widthMM = (obj.width * obj.scaleX / MM_TO_PX).toFixed(1);
+      const heightMM = (obj.height * obj.scaleY / MM_TO_PX).toFixed(1);
+      document.getElementById("sizeInfo").innerText = `Tamanho: ${widthMM} mm x ${heightMM} mm`;
+    }
+
+    canvas.on('object:modified', updateSizeInfo);
+    canvas.on('object:added', updateSizeInfo);
+    canvas.on('selection:updated', updateSizeInfo);
+    canvas.on('selection:created', updateSizeInfo);
+    canvas.on('selection:cleared', updateSizeInfo);
+    canvas.on('mouse:down', updateSizeInfo);
+
+    function addRect() {
+      const rect = new fabric.Rect({ left: 100, top: 100, fill: 'red', width: 100, height: 100 });
+      canvas.add(rect).setActiveObject(rect);
+    }
+
+    function addCircle() {
+      const circle = new fabric.Circle({ left: 150, top: 150, fill: 'blue', radius: 50 });
+      canvas.add(circle).setActiveObject(circle);
+    }
+
+    function addLine() {
+      const line = new fabric.Line([50, 50, 200, 50], { stroke: 'black', strokeWidth: 3 });
+      canvas.add(line).setActiveObject(line);
+    }
+
+    function addText() {
+      const text = new fabric.IText('Texto aqui', { left: 200, top: 200, fill: 'black', fontSize: 24 });
+      canvas.add(text).setActiveObject(text);
+    }
+
+    function deleteSelected() {
+      const active = canvas.getActiveObject();
+      if (active) canvas.remove(active);
+    }
+
+    function exportSVG() {
+      const svg = canvas.toSVG();
+      const blob = new Blob([svg], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'brown-draw.svg';
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportPDF() {
+      canvas.discardActiveObject();
+      canvas.renderAll();
+      const dataURL = canvas.toDataURL({ format: 'png' });
+      const docDefinition = {
+        pageSize: 'A4',
+        content: [
+          {
+            image: dataURL,
+            width: 500
+          }
+        ]
+      };
+      pdfMake.createPdf(docDefinition).download("brown-draw.pdf");
+    }
+
+    function salvarCDR() {
+      alert("1️⃣ Clique em '⬇️ SVG'\n2️⃣ Abra no CorelDRAW\n3️⃣ Vá em 'Arquivo > Salvar como' e escolha .CDR\n\n🎯 Pronto! Arte pronta no Corel.");
+    }
+
+    // FERRAMENTA CANETA
+    let isDrawing = false;
+    function startDrawing() {
+      isDrawing = !isDrawing;
+      canvas.isDrawingMode = isDrawing;
+    }
+
+    // SELECIONAR COR
+    document.getElementById("colorPicker").addEventListener("input", function () {
+      const color = this.value;
+      const obj = canvas.getActiveObject();
+      if (obj) {
+        if (obj.type === "line") obj.set({ stroke: color });
+        else obj.set({ fill: color });
+        canvas.renderAll();
+      }
+    });
+
+    // UPLOAD DE IMAGEM
+    function uploadImage() {
+      document.getElementById('imgUpload').click();
+    }
+
+    document.getElementById('imgUpload').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (f) {
+        fabric.Image.fromURL(f.target.result, function (img) {
+          img.set({ left: 50, top: 50, selectable: true });
+          canvas.add(img).sendToBack();
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // VOLTAR COM ESC
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") window.history.back();
+    });
+  </script>
+</body>
+</html>

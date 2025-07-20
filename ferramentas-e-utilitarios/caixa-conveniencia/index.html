@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sistema de Caixa</title>
+  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <script src="https://unpkg.com/@zxing/browser@latest"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #000;
+      color: #fff;
+    }
+    h1, h2, h3 {
+      text-align: center;
+      color: #fff;
+    }
+    #scanner, #cadastro, #vendas {
+      margin-top: 2rem;
+    }
+    input, button, select {
+      padding: 8px;
+      margin: 4px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    button {
+      background: #333;
+      color: #fff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    img {
+      max-width: 100px;
+      border-radius: 4px;
+    }
+    .produto {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+      justify-content: space-between;
+    }
+    .produto-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    .produto-detalhes {
+      flex-grow: 1;
+    }
+    .logo {
+      display: block;
+      margin: 0 auto 1rem auto;
+      max-width: 400px;
+    }
+    #menu {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+      z-index: 999;
+    }
+    /* Modal simples para editar produto */
+    #modalEditar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #modalEditar.flex {
+      display: flex;
+    }
+    #modalEditar .modal-content {
+      background: #222;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      color: #fff;
+    }
+    #modalEditar label {
+      display: block;
+      margin-top: 10px;
+    }
+    #modalEditar input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      border-radius: 4px;
+      border: none;
+      font-size: 1rem;
+      color: #000;
+    }
+    #modalEditar button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    .btn-adicionar {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      border: none;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      margin-right: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .btn-adicionar:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" class="logo" alt="Logo" />
+
+  <div id="menu">
+    <button onclick="alternarCadastro()">✏️ Cadastrar Produtos</button>
+    <button onclick="alternarProdutosCadastrados()">📋 Produtos Cadastrados</button>
+  </div>
+
+  <h1>Sistema de Caixa</h1>
+
+  <section id="cadastro" style="display:none">
+    <h2>Cadastro de Produtos</h2>
+    <input id="codigo" placeholder="Código de Barras" />
+    <input id="nome" placeholder="Nome do Produto" />
+    <input id="preco" type="number" step="0.01" placeholder="Preço (R$)" />
+    <input id="imagem" type="text" placeholder="URL da Imagem" />
+    <button onclick="cadastrarProduto()">Cadastrar</button>
+    <button onclick="fazerBackup()">📦 Fazer Backup</button>
+    <button onclick="document.getElementById('inputBackup').click()">🔁 Restaurar Backup</button>
+    <input type="file" id="inputBackup" accept=".json" style="display: none" onchange="restaurarBackup(event)" />
+  </section>
+
+  <section id="vendas">
+    <h2>Venda Atual</h2>
+    <div id="listaProdutos"></div>
+    <h3>Total: R$ <span id="total">0.00</span></h3>
+    <select id="pagamento">
+      <option value="Dinheiro">Dinheiro</option>
+      <option value="Cartão">Cartão</option>
+      <option value="Pix">Pix</option>
+    </select>
+    <button onclick="finalizarVenda()">Finalizar</button>
+  </section>
+
+  <input
+    type="text"
+    id="pesquisaProdutos"
+    placeholder="Pesquisar produtos..."
+    oninput="filtrarProdutos()"
+    style="display:none;"
+  />
+
+  <div id="produtosCadastrados" style="display:none">
+    <h2>Produtos Cadastrados</h2>
+    <div id="listaCadastro"></div>
+  </div>
+
+  <!-- Modal para editar produto -->
+  <div id="modalEditar" class="hidden">
+    <div class="modal-content">
+      <h3>Editar Produto</h3>
+      <label>Código (não pode ser alterado):</label>
+      <input type="text" id="editarCodigo" disabled />
+      <label>Nome:</label>
+      <input type="text" id="editarNome" />
+      <label>Preço (R$):</label>
+      <input type="number" step="0.01" id="editarPreco" />
+      <label>URL da Imagem:</label>
+      <input type="text" id="editarImagem" />
+      <button onclick="salvarEdicao()">Salvar</button>
+      <button onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    let produtos = JSON.parse(localStorage.getItem('produtos') || '{}');
+    let vendaAtual = [];
+    let produtosVisiveis = false;
+    let cadastroVisivel = false;
+
+    // Para o modal de edição
+    let codigoEditando = null;
+
+    // Cadastrar novo produto
+    function cadastrarProduto() {
+      const codigo = document.getElementById('codigo').value.trim();
+      const nome = document.getElementById('nome').value.trim();
+      const preco = parseFloat(document.getElementById('preco').value);
+      const imagem = document.getElementById('imagem').value.trim();
+
+      if (!codigo || !nome || isNaN(preco)) {
+        alert('Preencha os campos corretamente');
+        return;
+      }
+
+      produtos[codigo] = { nome, preco, imagem };
+      salvarProdutos();
+      alert('Produto cadastrado!');
+
+      limparCamposCadastro();
+
+      if (produtosVisiveis) mostrarProdutosCadastrados();
+    }
+
+    function filtrarProdutos() {
+      const filtro = document.getElementById('pesquisaProdutos').value.toLowerCase();
+      const lista = document.getElementById('listaCadastro');
+      lista.innerHTML = '';
+
+      for (const codigo in produtos) {
+        const prod = produtos[codigo];
+        if (
+          prod.nome.toLowerCase().includes(filtro) ||
+          codigo.toLowerCase().includes(filtro)
+        ) {
+          lista.innerHTML += `
+            <div class="produto">
+              <div class="produto-info">
+                <img src="${prod.imagem}" alt="img" />
+                <div class="produto-detalhes">
+                  <b>${prod.nome}</b><br>
+                  Código: ${codigo}<br>
+                  Preço: R$ ${prod.preco.toFixed(2)}
+                </div>
+              </div>
+              <button onclick="adicionarProduto('${codigo}')" title="Adicionar à venda" class="btn-adicionar">+</button>
+              <button onclick="abrirModalEditar('${codigo}')">Editar</button>
+              <button onclick="excluirProduto('${codigo}')">Excluir</button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function mostrarProdutosCadastrados() {
+      document.getElementById('pesquisaProdutos').style.display = 'block';
+      filtrarProdutos();
+    }
+
+    // Salva no localStorage
+    function salvarProdutos() {
+      localStorage.setItem('produtos', JSON.stringify(produtos));
+    }
+
+    function limparCamposCadastro() {
+      document.getElementById('codigo').value = '';
+      document.getElementById('nome').value = '';
+      document.getElementById('preco').value = '';
+      document.getElementById('imagem').value = '';
+    }
+
+    // Adicionar produto na venda
+    function adicionarProduto(codigo) {
+      const produto = produtos[codigo];
+      if (!produto) return alert('Produto não encontrado');
+
+      // Verifica se já está na venda atual
+      const idx = vendaAtual.findIndex(item => item.codigo === codigo);
+      if (idx >= 0) {
+        vendaAtual[idx].quantidade++;
+      } else {
+        vendaAtual.push({ codigo, quantidade: 1 });
+      }
+      mostrarVendaAtual();
+    }
+
+    function mostrarVendaAtual() {
+      const lista = document.getElementById('listaProdutos');
+      lista.innerHTML = '';
+      let total = 0;
+
+      vendaAtual.forEach(item => {
+        const prod = produtos[item.codigo];
+        const subtotal = prod.preco * item.quantidade;
+        total += subtotal;
+
+        lista.innerHTML += `
+          <div class="produto">
+            <div class="produto-info">
+              <img src="${prod.imagem}" alt="img" />
+              <div class="produto-detalhes">
+                <b>${prod.nome}</b><br>
+                Quantidade: ${item.quantidade} | Preço unitário: R$ ${prod.preco.toFixed(2)}<br>
+                Subtotal: R$ ${subtotal.toFixed(2)}
+              </div>
+            </div>
+            <button onclick="removerProdutoVenda('${item.codigo}')">-</button>
+          </div>
+        `;
+      });
+
+      document.getElementById('total').textContent = total.toFixed(2);
+    }
+
+    // Remover produto da venda (reduzir quantidade)
+    function removerProdutoVenda(codigo) {
+      const idx = vendaAtual.findIndex(item => item.codigo === codigo);
+      if (idx < 0) return;
+      if (vendaAtual[idx].quantidade > 1) {
+        vendaAtual[idx].quantidade--;
+      } else {
+        vendaAtual.splice(idx, 1);
+      }
+      mostrarVendaAtual();
+    }
+
+    // Finalizar venda
+    function finalizarVenda() {
+      if (vendaAtual.length === 0) return alert('Nenhum produto na venda');
+
+      const pagamento = document.getElementById('pagamento').value;
+      const total = vendaAtual.reduce((acc, item) => {
+        return acc + produtos[item.codigo].preco * item.quantidade;
+      }, 0);
+
+      alert(`Venda finalizada!\nPagamento: ${pagamento}\nTotal: R$ ${total.toFixed(2)}`);
+
+      vendaAtual = [];
+      mostrarVendaAtual();
+    }
+
+    // Alternar visibilidade do cadastro
+    function alternarCadastro() {
+      cadastroVisivel = !cadastroVisivel;
+      document.getElementById('cadastro').style.display = cadastroVisivel ? 'block' : 'none';
+      if (cadastroVisivel) {
+        produtosVisiveis = false;
+        document.getElementById('produtosCadastrados').style.display = 'none';
+        document.getElementById('pesquisaProdutos').style.display = 'none';
+      }
+    }
+
+    // Alternar visibilidade dos produtos cadastrados
+    function alternarProdutosCadastrados() {
+      produtosVisiveis = !produtosVisiveis;
+      document.getElementById('produtosCadastrados').style.display = produtosVisiveis ? 'block' : 'none';
+      if (produtosVisiveis) {
+        cadastroVisivel = false;
+        document.getElementById('cadastro').style.display = 'none';
+        document.getElementById('pesquisaProdutos').style.display = 'block';
+        filtrarProdutos();
+      } else {
+        document.getElementById('pesquisaProdutos').style.display = 'none';
+      }
+    }
+
+    // Modal para editar produto
+    function abrirModalEditar(codigo) {
+      const prod = produtos[codigo];
+      if (!prod) return alert('Produto não encontrado para edição');
+
+      codigoEditando = codigo;
+      document.getElementById('editarCodigo').value = codigo;
+      document.getElementById('editarNome').value = prod.nome;
+      document.getElementById('editarPreco').value = prod.preco;
+      document.getElementById('editarImagem').value = prod.imagem;
+
+      document.getElementById('modalEditar').classList.add('flex');
+      document.getElementById('modalEditar').classList.remove('hidden');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalEditar').classList.remove('flex');
+      document.getElementById('modalEditar').classList.add('hidden');
+      codigoEditando = null;
+    }
+
+    function salvarEdicao() {
+      if (!codigoEditando) return;
+
+      const nome = document.getElementById('editarNome').value.trim();
+      const preco = parseFloat(document.getElementById('editarPreco').value);
+      const imagem = document.getElementById('editarImagem').value.trim();
+
+      if (!nome || isNaN(preco)) {
+        alert('Preencha os campos corretamente');
+        return;
+      }
+
+      produtos[codigoEditando] = { nome, preco, imagem };
+      salvarProdutos();
+      alert('Produto atualizado!');
+
+      fecharModal();
+
+      if (produtosVisiveis) filtrarProdutos();
+      mostrarVendaAtual();
+    }
+
+    // Excluir produto
+    function excluirProduto(codigo) {
+      if (!confirm('Tem certeza que deseja excluir este produto?')) return;
+      delete produtos[codigo];
+      salvarProdutos();
+
+      if (produtosVisiveis) filtrarProdutos();
+
+      // Remove também da venda atual, se existir
+      vendaAtual = vendaAtual.filter(item => item.codigo !== codigo);
+      mostrarVendaAtual();
+    }
+
+    // Backup do banco de dados
+    function fazerBackup() {
+      const dataStr = JSON.stringify(produtos, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup_produtos_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // Restaurar backup
+    function restaurarBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const dados = JSON.parse(e.target.result);
+          if (typeof dados === 'object' && dados !== null) {
+            produtos = dados;
+            salvarProdutos();
+            alert('Backup restaurado com sucesso!');
+            if (produtosVisiveis) filtrarProdutos();
+            mostrarVendaAtual();
+          } else {
+            alert('Arquivo inválido');
+          }
+        } catch {
+          alert('Erro ao ler o arquivo');
+        }
+      };
+      reader.readAsText(file);
+
+      // Limpa o input para permitir restaurar o mesmo arquivo novamente se quiser
+      event.target.value = '';
+    }
+
+    // Inicialização da tela
+    mostrarVendaAtual();
+
+  </script>
+</body>
+</html>
