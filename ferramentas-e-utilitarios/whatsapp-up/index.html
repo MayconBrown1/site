@@ -35,7 +35,20 @@
         alert("Por favor, digite um número válido.");
         return;
       }
-      const url = `https://wa.me/55${numero}`;
+
+      const mensagem = `Olá, tudo bem?
+Me chamo Maycon e trabalho ajudando pessoas com:
+\u2705 Formatação de computadores Remotamente
+\u2705 Instalação de softwares vitalícios (Corel, Photoshop, Office etc.)
+\u2705 Vetorização de logos
+\u2705 Criação de páginas de vendas personalizadas
+
+\ud83d\udc40 Dá uma olhadinha no meu site e veja tudo o que posso fazer por você:
+\ud83d\udc49 https://mayconbrown.com.br/
+
+Se quiser tirar dúvidas ou fazer um orçamento, é só me chamar!`;
+
+      const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
       window.open(url, '_blank');
     }
   </script>
