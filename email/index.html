@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Email - Brown Solução Digital</title>
+  <link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    .container {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    .copy-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2563eb;
+    }
+    pre {
+      white-space: pre-wrap;
+      font-family: inherit;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="copy-buttons">
+    <button onclick="copiarAssunto()">Copiar Assunto</button>
+    <button onclick="copiarMensagem()">Copiar Mensagem</button>
+  </div>
+
+  <h3>Assunto do Email:</h3>
+  <pre id="assunto">Instale Corel, Photoshop, Office vitalício – veja como! 👇</pre>
+
+  <h3>Mensagem:</h3>
+  <pre id="mensagem">Olá, tudo bem?
+Me chamo Maycon e trabalho ajudando pessoas com:
+✅ Formatação de computadores <strong>Remotamente</strong>
+✅ Instalação de softwares vitalícios (Corel, Photoshop, Office etc.)
+✅ Vetorização de logos
+✅ Criação de páginas de vendas personalizadas
+
+👀 Dá uma olhadinha no meu site e veja tudo o que posso fazer por você:
+👉 https://mayconbrown.com.br/
+
+Se quiser tirar dúvidas ou fazer um orçamento, é só me chamar!</pre>
+</div>
+
+<script>
+  function copiarMensagem() {
+    const mensagem = document.getElementById("mensagem").innerText;
+    navigator.clipboard.writeText(mensagem).then(() => {
+      alert("Mensagem copiada com sucesso!");
+    });
+  }
+
+  function copiarAssunto() {
+    const assunto = document.getElementById("assunto").innerText;
+    navigator.clipboard.writeText(assunto).then(() => {
+      alert("Assunto copiado com sucesso!");
+    });
+  }
+</script>
+
+</body>
+</html>
