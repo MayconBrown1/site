@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsenal Digital - Mais de 600 Livros para Empreendedores</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            margin-bottom: 40px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #1e3c72;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease-out 0.6s both;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 215, 0, 0.6);
+            background: linear-gradient(45deg, #FFA500, #FFD700);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1e3c72;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 60px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Carousel Section */
+        .carousel-section {
+            margin-bottom: 80px;
+        }
+
+        .carousel-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .carousel-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 2px;
+        }
+
+        .swiper {
+            width: 100%;
+            padding: 20px 0 40px 0;
+        }
+
+        .swiper-slide {
+            width: auto;
+            height: auto;
+        }
+
+        .book-item {
+            width: 180px;
+            margin: 0 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .book-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        .book-cover:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            transform: scale(1.05);
+        }
+
+        .book-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 15px;
+            color: #333;
+            line-height: 1.3;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        /* Benefits Section */
+        .benefits {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .benefit-item {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .benefit-icon {
+            font-size: 3rem;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .benefit-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .benefit-description {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: #f8f9fa;
+        }
+
+        .testimonial-item {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            margin: 0 15px;
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            font-style: italic;
+            margin-bottom: 25px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-role {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .stars {
+            color: #FFD700;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Offer Section */
+        .offer {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .offer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .price-container {
+            margin: 40px 0;
+        }
+
+        .old-price {
+            font-size: 2rem;
+            text-decoration: line-through;
+            color: #ff6b6b;
+            opacity: 0.8;
+        }
+
+        .new-price {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #FFD700;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .discount-badge {
+            display: inline-block;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 80px;
+            backdrop-filter: blur(10px);
+        }
+
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .countdown-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Guarantee */
+        .guarantee {
+            background: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .guarantee-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .payment-icon {
+            font-size: 2rem;
+            color: #666;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .payment-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 20px;
+            }
+
+            .section {
+                padding: 60px 0;
+            }
+
+            .book-item {
+                width: 140px;
+            }
+
+            .book-cover {
+                height: 180px;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .countdown {
+                gap: 15px;
+            }
+
+            .countdown-item {
+                min-width: 70px;
+                padding: 15px;
+            }
+
+            .new-price {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .book-item {
+                width: 120px;
+                margin: 0 5px;
+            }
+
+            .book-cover {
+                height: 160px;
+            }
+
+            .payment-methods {
+                gap: 15px;
+            }
+        }
+
+        /* Fixed CTA Button */
+        .fixed-cta {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        @media (max-width: 768px) {
+            .fixed-cta {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .fixed-cta .cta-button {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>O Maior Arsenal de Livros para Empreendedores da Internet</h1>
+            <p>Mais de 600 títulos para transformar sua carreira, negócios e vida pessoal</p>
+            <a href="#oferta" class="cta-button">Quero Meu Arsenal Agora!</a>
+        </div>
+    </section>
+
+    <!-- Books Carousels Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Explore Nosso Arsenal Completo</h2>
+            <p class="section-subtitle">Mais de 600 livros organizados por categoria para acelerar seu crescimento profissional e pessoal</p>
+
+            <!-- Negócios e Empreendedorismo -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">📈 Negócios e Empreendedorismo</h3>
+                <div class="swiper business-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Negócios -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71V4lNR2gKL.jpg" alt="Título do Livro 1" class="book-cover" loading="lazy">
+                                <div class="book-title">Pai Rico, Pai Pobre – Robert T. Kiyosaki</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81r5VTxaBiL.jpg" alt="Título do Livro 2" class="book-cover" loading="lazy">
+                                <div class="book-title">Do Mil ao Milhão – Thiago Nigro</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81kwaPCHP1L._UF1000,1000_QL80_.jpg" alt="Título do Livro 3" class="book-cover" loading="lazy">
+                                <div class="book-title">O Manual do Empreendedor – Steve Blank</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71aww8qcDSL._UF1000,1000_QL80_.jpg" alt="Título do Livro 4" class="book-cover" loading="lazy">
+                                <div class="book-title">Sonho Grande – Cristiane Correa</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/815iPX0SgkL.jpg" alt="Título do Livro 5" class="book-cover" loading="lazy">
+                                <div class="book-title">O Poder do Hábito – Charles Duhigg</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/61EAeWnj-WS.jpg" alt="Título do Livro 6" class="book-cover" loading="lazy">
+                                <div class="book-title">Empresas Feitas para Vencer – Jim Collins</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marketing Digital -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">🚀 Marketing Digital</h3>
+                <div class="swiper marketing-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Marketing -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71DccJGxsKL._UF1000,1000_QL80_.jpg" alt="Marketing Digital Avançado" class="book-cover" loading="lazy">
+                                <div class="book-title">Marketing 4.0 – Philip Kotler</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71mWm5Oq7cL.jpg" alt="SEO e Tráfego Orgânico" class="book-cover" loading="lazy">
+                                <div class="book-title">As Armas da Persuasão – Robert Cialdini</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://0.academia-photos.com/attachment_thumbnails/61281460/mini_magick20191120-30958-1fd181s.png?1574282231" alt="Redes Sociais para Negócios" class="book-cover" loading="lazy">
+                                <div class="book-title">A Bíblia do Marketing Digital – Cláudio Torres</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81WG+yB+7uL._UF1000,1000_QL80_.jpg" alt="Email Marketing Eficaz" class="book-cover" loading="lazy">
+                                <div class="book-title">Transformando palavras em dinheiro - Ícaro de Carvalho</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91iak0CH77L._UF894,1000_QL80_.jpg" alt="Copywriting Persuasivo" class="book-cover" loading="lazy">
+                                <div class="book-title">Livro de Ouro dos Gatilhos Mentais</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71Vu5zSsfML._UF1000,1000_QL80_.jpg" alt="Funis de Vendas" class="book-cover" loading="lazy">
+                                <div class="book-title">FÁBRICA DE MILIONÁRIOS - Marcelo Veiga</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vendas e Persuasão -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">💰 Vendas e Persuasão</h3>
+                <div class="swiper sales-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Vendas -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://archive.org/services/img/comofazeramigoseinfluenciarpessoasdalecarnegie_201907/full/pct:200/0/default.jpg" alt="Técnicas de Vendas" class="book-cover" loading="lazy">
+                                <div class="book-title">Como Fazer Amigos e Influenciar Pessoas – Dale Carnegie</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/61ZxdpZEAOL.jpg" alt="Psicologia da Persuasão" class="book-cover" loading="lazy">
+                                <div class="book-title">Spin Selling – Neil Rackham</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91DIf5cYCeL._UF1000,1000_QL80_.jpg" alt="Negociação Avançada" class="book-cover" loading="lazy">
+                                <div class="book-title">A Arte da Negociação – Chris Voss</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81r9h14myiS._UF1000,1000_QL80_.jpg" alt="Vendas Consultivas" class="book-cover" loading="lazy">
+                                <div class="book-title">O Jeito Disney de Encantar os Clientes – Disney Institute</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81kaUSnbhpL._UF1000,1000_QL80_.jpg" alt="Fechamento de Vendas" class="book-cover" loading="lazy">
+                                <div class="book-title">Gatilhos mentais - Gustavo Ferreira</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/818fCoDA3kL.jpg" alt="CRM e Relacionamento" class="book-cover" loading="lazy">
+                                <div class="book-title">Bora Vender - Alfredo Soares</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desenvolvimento Pessoal -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">🌟 Desenvolvimento Pessoal</h3>
+                <div class="swiper personal-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Desenvolvimento Pessoal -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81D1T67ZflL._UF894,1000_QL80_.jpg" alt="Produtividade Máxima" class="book-cover" loading="lazy">
+                                <div class="book-title">Mindset: A Nova Psicologia do Sucesso – Carol Dweck</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81m-aKfHLlL.jpg" alt="Mindset de Crescimento" class="book-cover" loading="lazy">
+                                <div class="book-title">Fator de Enriquecimento – Paulo Vieira</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71HuZRl-XeL.jpg" alt="Inteligência Emocional" class="book-cover" loading="lazy">
+                                <div class="book-title">Essencialismo – Greg McKeown</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91NY3dGiqUL._UF1000,1000_QL80_.jpg" alt="Hábitos de Sucesso" class="book-cover" loading="lazy">
+                                <div class="book-title">A Coragem de Ser Imperfeito – Brené Brown</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/819ERrDHRcL.jpg" alt="Comunicação Eficaz" class="book-cover" loading="lazy">
+                                <div class="book-title">Mais Esperto que o Diabo – Napoleon Hill</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81KyX8ZOzCL._UF1000,1000_QL80_.jpg" alt="Gestão do Tempo" class="book-cover" loading="lazy">
+                                <div class="book-title">Seja Rico - Bruno Gimenes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Finanças e Investimentos -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">💎 Finanças e Investimentos</h3>
+                <div class="swiper finance-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Finanças -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81CvdyEn5rL._UF1000,1000_QL80_.jpg" alt="Educação Financeira" class="book-cover" loading="lazy">
+                                <div class="book-title">O Investidor Inteligente – Benjamin Graham</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91vhdgjte3L.jpg" alt="Investimentos Inteligentes" class="book-cover" loading="lazy">
+                                <div class="book-title">O Homem Mais Rico da Babilônia – George S. Clason</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81WzW3xJb5L.jpg" alt="Planejamento Financeiro" class="book-cover" loading="lazy">
+                                <div class="book-title">Os Segredos da Mente Milionária – T. Harv Eker</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81Htd43L3KL.jpg" alt="Renda Passiva" class="book-cover" loading="lazy">
+                                <div class="book-title">Investimentos Inteligentes – Gustavo Cerbasi</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91W8Z0d9nwL._UF894,1000_QL80_.jpg" alt="Mercado de Ações" class="book-cover" loading="lazy">
+                                <div class="book-title">O mensageiro milionário - Brendon Burchard</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/51v+Nb8qEIL._UF894,1000_QL80_.jpg" alt="Criptomoedas" class="book-cover" loading="lazy">
+                                <div class="book-title">Como Organizar sua Vida Financeira</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liderança e Gestão -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">👑 Liderança e Gestão</h3>
+                <div class="swiper leadership-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Liderança -->
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://img.travessa.com.br/livro/GR/42/42c4c138-3548-4ec8-908d-a88178a9a82a.jpg" alt="Liderança Eficaz" class="book-cover" loading="lazy">
+                                <div class="book-title">Steve jobs - O estilo de liderança para uma nova geração</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81ydaXHpiBL._UF1000,1000_QL80_.jpg" alt="Gestão de Equipes" class="book-cover" loading="lazy">
+                                <div class="book-title">Como chegar ao SIM – William Ury</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/61fpzhhIAiL._UF1000,1000_QL80_.jpg" alt="Coaching e Mentoria" class="book-cover" loading="lazy">
+                                <div class="book-title">Josh Kaufman - Manual do CEO</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71M6czhxmTL.jpg" alt="Tomada de Decisões" class="book-cover" loading="lazy">
+                                <div class="book-title">Simon Sinek - Comece pelo porquê</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/811jUvTg4FL.jpg" alt="Cultura Organizacional" class="book-cover" loading="lazy">
+                                <div class="book-title">Os 7 hábitos das pessoas altamente eficazes - stephen r. covey</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/91kurpsVErL.jpg" alt="Gestão de Conflitos" class="book-cover" loading="lazy">
+                                <div class="book-title">A Lei do Triunfo – Napoleon Hill</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outros -->
+            <div class="carousel-section">
+                <h3 class="carousel-title">✅ Outros</h3>
+                <div class="swiper leadership-swiper">
+                    <div class="swiper-wrapper">
+                        <!-- Substitua abaixo pelas capas dos seus livros de Liderança -->
+                         <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/61cW6iwnZBL.jpg" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Os Códigos do Milhão - Pablo Marçal</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71GERMF6n6L._UF894,1000_QL80_.jpg" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Pega a visão - Rick Chesther</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/71kjsxqzWSL._UF1000,1000_QL80_.jpg" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Vai Lá e Faz - Tiago Mattos</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://m.media-amazon.com/images/I/81geW1a0N-L._UF894,1000_QL80_.jpg" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Antiotario - Rafael Aires</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://imgv2-2-f.scribdassets.com/img/document/661275410/original/a0fae9364c/1?v=1" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Como Viralizar no Tik Tok</div>
+                            </div>
+                        </div>
+                        <div class="swiper-slide">
+                            <div class="book-item">
+                                <img src="https://livrariascuritiba.vteximg.com.br/arquivos/ids/2134027-1000-1000/lv397497_1.jpg?v=638223749332430000" alt="Empreendedorismo" class="book-cover" loading="lazy">
+                                <div class="book-title">Poder E Manipulação - Jacob Petry</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="section benefits">
+        <div class="container">
+            <h2 class="section-title">Por Que Escolher Nosso Arsenal Digital?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="benefit-title">600+ Livros Premium</h3>
+                    <p class="benefit-description">A maior coleção de livros digitais para empreendedores, cuidadosamente selecionados por especialistas.</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h3 class="benefit-title">Acesso Imediato</h3>
+                    <p class="benefit-description">Download instantâneo após a compra. Comece a ler em segundos, em qualquer dispositivo.</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="benefit-title">Multiplataforma</h3>
+                    <p class="benefit-description">Leia no seu celular, tablet, computador ou e-reader. Compatível com todos os dispositivos.</p>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <i class="fas fa-infinity"></i>
+                    </div>
+                    <h3 class="benefit-title">Acesso Vitalício</h3>
+                    <p class="benefit-description">Pague uma vez e tenha acesso para sempre. Sem mensalidades ou taxas adicionais.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section testimonials">
+        <div class="container">
+            <h2 class="section-title">O Que Nossos Clientes Dizem</h2>
+            <div class="swiper testimonials-swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="testimonial-item">
+                            <div class="stars">★★★★★</div>
+                            <p class="testimonial-text">"Incrível! Mais de 600 livros por menos de R$ 40. Já li 15 livros e cada um me trouxe insights valiosos para meu negócio. Investimento que se paga sozinho!"</p>
+                            <div class="testimonial-author">Carlos Silva</div>
+                            <div class="testimonial-role">Empreendedor Digital</div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="testimonial-item">
+                            <div class="stars">★★★★★</div>
+                            <p class="testimonial-text">"Como consultora, preciso estar sempre atualizada. Este arsenal me deu acesso a conhecimentos que custaria milhares de reais em cursos. Recomendo 100%!"</p>
+                            <div class="testimonial-author">Ana Rodrigues</div>
+                            <div class="testimonial-role">Consultora de Marketing</div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="testimonial-item">
+                            <div class="stars">★★★★★</div>
+                            <p class="testimonial-text">"A qualidade dos livros é excepcional. Organizados por categoria, fácil de encontrar o que preciso. Minha produtividade aumentou 300% após aplicar as técnicas."</p>
+                            <div class="testimonial-author">Roberto Santos</div>
+                            <div class="testimonial-role">CEO de Startup</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Offer Section -->
+    <section class="section offer" id="oferta">
+        <div class="container">
+            <div class="offer-content">
+                <h2 class="section-title">Oferta Especial - Por Tempo Limitado!</h2>
+                
+                <div class="discount-badge">98% DE DESCONTO</div>
+                
+                <div class="price-container">
+                    <div class="old-price">De R$ 2.897,90</div>
+                    <div class="new-price">Por apenas R$ 49,90</div>
+                </div>
+
+                <div class="countdown">
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="hours">23</div>
+                        <div class="countdown-label">Horas</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="minutes">59</div>
+                        <div class="countdown-label">Minutos</div>
+                    </div>
+                    <div class="countdown-item">
+                        <div class="countdown-number" id="seconds">59</div>
+                        <div class="countdown-label">Segundos</div>
+                    </div>
+                </div>
+
+                <a href="https://mayconbrown.com.br/" class="cta-button" style="font-size: 1.5rem; padding: 25px 50px; margin: 30px 0;">
+                    🔥 GARANTIR MEU ARSENAL AGORA! 🔥
+                </a>
+
+                <p style="margin-top: 20px; font-size: 1.1rem; opacity: 0.9;">
+                    ⚡ Acesso imediato após o pagamento<br>
+                    📱 Compatível com todos os dispositivos<br>
+                    ♾️ Acesso vitalício garantido
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guarantee Section -->
+    <section class="guarantee">
+        <div class="container">
+            <div class="guarantee-badge">
+                <i class="fas fa-shield-alt"></i> GARANTIA DE 7 DIAS
+            </div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 20px; color: #1e3c72;">100% Satisfação Garantida</h3>
+            <p style="font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto 40px auto;">
+                Se por qualquer motivo você não ficar completamente satisfeito com o Arsenal Digital, 
+                devolvemos 100% do seu dinheiro em até 7 dias. Sem perguntas, sem complicações.
+            </p>
+            
+            <div class="payment-methods">
+                <div class="payment-icon"><i class="fab fa-cc-visa"></i></div>
+                <div class="payment-icon"><i class="fab fa-cc-mastercard"></i></div>
+                <div class="payment-icon"><i class="fab fa-pix"></i></div>
+            </div>
+            
+            <p style="margin-top: 30px; color: #666;">
+                <i class="fas fa-lock" style="color: #28a745; margin-right: 8px;"></i>
+                Pagamento 100% seguro e criptografado
+            </p>
+        </div>
+    </section>
+
+    <!-- Fixed CTA Button -->
+    <div class="fixed-cta">
+        <a href="https://mayconbrown.com.br/" class="cta-button">
+            Comprar Agora!
+        </a>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // Initialize Swiper carousels
+        document.addEventListener('DOMContentLoaded', function() {
+            // Business Swiper
+            new Swiper('.business-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Marketing Swiper
+            new Swiper('.marketing-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 3500,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Sales Swiper
+            new Swiper('.sales-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Personal Development Swiper
+            new Swiper('.personal-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 4500,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Finance Swiper
+            new Swiper('.finance-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Leadership Swiper
+            new Swiper('.leadership-swiper', {
+                slidesPerView: 'auto',
+                spaceBetween: 20,
+                loop: true,
+                autoplay: {
+                    delay: 5500,
+                    disableOnInteraction: false,
+                },
+                breakpoints: {
+                    320: { slidesPerView: 2, spaceBetween: 10 },
+                    480: { slidesPerView: 3, spaceBetween: 15 },
+                    768: { slidesPerView: 4, spaceBetween: 20 },
+                    1024: { slidesPerView: 6, spaceBetween: 20 }
+                }
+            });
+
+            // Testimonials Swiper
+            new Swiper('.testimonials-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true,
+                autoplay: {
+                    delay: 6000,
+                    disableOnInteraction: false,
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                breakpoints: {
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 }
+                }
+            });
+        });
+
+        // Countdown Timer
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            const distance = tomorrow.getTime() - now;
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+        }
+
+        // Update countdown every second
+        setInterval(updateCountdown, 1000);
+        updateCountdown(); // Initial call
+
+        // Smooth scroll for CTA buttons
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.carousel-section, .benefit-item, .testimonial-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96ba68c7012c280c',t:'MTc1NDYwNzgyNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
