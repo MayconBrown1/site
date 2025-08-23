@@ -408,15 +408,12 @@
         <div class="container">
             <div class="hero-content">
                 <div class="video-container">
-                    <video class="promo-video" autoplay muted loop playsinline poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQ1MCIgdmlld0JveD0iMCAwIDgwMCA0NTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDUwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8Y2lyY2xlIGN4PSI0MDAiIGN5PSIyMjUiIHI9IjUwIiBmaWxsPSIjRkZENzAwIi8+Cjxwb2x5Z29uIHBvaW50cz0iMzgwLDIwNSA0MjAsMjI1IDM4MCwyNDUiIGZpbGw9IiMwMDAiLz4KPHR5cGUgZm9udC1mYW1pbHk9IlBvcHBpbnMiIGZvbnQtc2l6ZT0iMjQiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiNGRkQ3MDAiPgo8dGV4dCB4PSI0MDAiIHk9IjMwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UEFDSyBNSUxJT05BUklPPC90ZXh0Pgo8dGV4dCB4PSI0MDAiIHk9IjMzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIxNiI+VHJhbnNmb3JtZSBzdWEgdmlkYSBhZ29yYSE8L3RleHQ+CjwvdHlwZT4KPGR1ZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgo8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMEEwQTBBO3N0b3Atb3BhY2l0eToxIiAvPgo8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMxQTFBMUE7c3RvcC1vcGFjaXR5OjEiIC8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+">
-    <source src="../../video/pack-milionario.mp4" type="video/mp4">
-    <p style="color: #ffd700; text-align: center; padding: 40px;">
-        Seu navegador não suporta vídeos HTML5. 
-        <a href="../../video/pack-milionario.mp4" style="color: #ffd700;">Clique aqui para baixar o vídeo</a>
-    </p>
-</video>
-
-                </div>
+    <video id="promoVideo" class="promo-video" autoplay muted loop playsinline>
+        <source src="../../video/pack-milionario.mp4" type="video/mp4">
+        Seu navegador não suporta vídeos HTML5.
+    </video>
+    <button id="soundToggle" class="sound-btn">🔇 Som</button>
+</div>
                 <div class="hero-image">💰</div>
                 <a href="#" class="cta-button">QUERO MEU PACK AGORA 🔥</a>
                 <div class="limited-offer">Oferta por tempo limitado ⏳</div>
@@ -637,5 +634,49 @@
         `;
         document.head.appendChild(style);
     </script>
+
+    <style>
+.video-container {
+    position: relative;
+    display: inline-block;
+}
+.promo-video {
+    width: 100%;
+    border-radius: 12px;
+}
+.sound-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(0,0,0,0.6);
+    color: #ffd700;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+.sound-btn:hover {
+    background: rgba(255,215,0,0.8);
+    color: #000;
+}
+</style>
+
+<script>
+const video = document.getElementById("promoVideo");
+const btn = document.getElementById("soundToggle");
+
+btn.addEventListener("click", () => {
+    if (video.muted) {
+        video.muted = false;
+        btn.textContent = "🔊 Som ligado";
+    } else {
+        video.muted = true;
+        btn.textContent = "🔇 Som desligado";
+    }
+});
+</script>
+
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'973c72bac7411dd3',t:'MTc1NTk3MTM4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
