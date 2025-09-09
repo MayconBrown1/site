@@ -174,22 +174,45 @@
     </section>
 
     <!-- Destaques -->
-    <section class="py-16">
-      <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-        <div class="bg-black shadow p-6 rounded-xl">
-          <h3 class="text-white font-semibold mb-2">Softwares com Licença Vitalícia</h3>
-          <p class="text-gray-400">Receba por download imediato com suporte incluso.</p>
-        </div>
-        <div class="bg-black shadow p-6 rounded-xl">
-          <h3 class="text-white font-semibold mb-2">Matrizes Profissionais</h3>
-          <p class="text-gray-400">Formatos PES, JEF, DST e muito mais.</p>
-        </div>
-        <div class="bg-black shadow p-6 rounded-xl">
-          <h3 class="text-white font-semibold mb-2">Formatação 100% Remota</h3>
-          <p class="text-gray-400">Agende e formate seu PC sem sair de casa.</p>
-        </div>
-      </div>
-    </section>
+<section class="py-16">
+  <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+    <a href="softwares.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Softwares com Licença Vitalícia</h3>
+      <p class="text-gray-400">Receba por download imediato com suporte incluso.</p>
+    </a>
+
+    <a href="matrizes.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Matrizes Profissionais</h3>
+      <p class="text-gray-400">Formatos PES, JEF, DST e muito mais.</p>
+    </a>
+
+    <a href="formatacao.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Formatação 100% Remota</h3>
+      <p class="text-gray-400">Agende e formate seu PC sem sair de casa.</p>
+    </a>
+  </div>
+</section>
+
+<style>
+.card-gradient {
+  background-color: #1a1a1a; /* fundo escuro */
+  border: 4px solid;
+  border-image-slice: 1;
+  border-width: 4px;
+  border-image-source: linear-gradient(to bottom, #1eff0060, transparent 30%, transparent 70%, #00ff0062); /* degrade laranja em cima e embaixo */
+  padding: 1.5rem;
+  border-radius: 1rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: block; /* garante que o <a> preencha todo o card */
+  text-decoration: none; /* remove sublinhado do link */
+}
+
+.card-gradient:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(21, 255, 0, 0.63);
+}
+</style>
+
 
     <!-- Feedback de Clientes -->
     <section class="py-12 bg-black bg-opacity-20">
