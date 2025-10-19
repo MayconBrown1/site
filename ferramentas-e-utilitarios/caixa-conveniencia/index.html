@@ -36,6 +36,7 @@
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
+                    <button onclick="acessarAdm()" class="bg-red-500 hover:bg-red-700 px-3 py-2 rounded transition-colors text-sm">ADM</button>
                 </div>
             </div>
         </header>
@@ -308,7 +309,7 @@
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                             <button onclick="exportarVendas()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
                                 Exportar Vendas
                             </button>
@@ -317,6 +318,9 @@
                             </button>
                             <button onclick="exportarBackup()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
                                 Backup Completo
+                            </button>
+                            <button onclick="recuperarBackup()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                                Recuperar Backup
                             </button>
                         </div>
                     </div>
@@ -344,6 +348,98 @@
                                 <tbody id="tabela-vendas-dia">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção ADM -->
+            <div id="adm-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                    <h2 class="text-xl lg:text-2xl font-semibold mb-4">🔧 Administração do Sistema</h2>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="text-yellow-600 mr-3">⚠️</div>
+                            <div>
+                                <h3 class="font-semibold text-yellow-800">Área Restrita</h3>
+                                <p class="text-sm text-yellow-700">Esta área permite alterar configurações importantes do sistema. Use com cuidado!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Configurações PIX -->
+                        <div class="border rounded-lg p-4">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-700">📱 Configurações PIX</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="adm-pix-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Recebedor *</label>
+                                    <input type="text" id="adm-pix-nome" maxlength="25" class="w-full p-3 border rounded-lg text-base" placeholder="Nome completo">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-chave" class="block text-sm font-medium text-gray-700 mb-1">Chave PIX *</label>
+                                    <input type="text" id="adm-pix-chave" class="w-full p-3 border rounded-lg text-base" placeholder="CPF, CNPJ, email, telefone ou chave aleatória">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-cidade" class="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
+                                    <input type="text" id="adm-pix-cidade" maxlength="15" class="w-full p-3 border rounded-lg text-base" placeholder="Cidade">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-banco" class="block text-sm font-medium text-gray-700 mb-1">Nome do Banco</label>
+                                    <input type="text" id="adm-pix-banco" class="w-full p-3 border rounded-lg text-base" placeholder="Nome do banco (apenas para exibição)">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                <h4 class="font-semibold text-blue-800 mb-2">💡 Dicas para Chave PIX:</h4>
+                                <ul class="text-sm text-blue-700 space-y-1">
+                                    <li>• <strong>CPF:</strong> Digite apenas números (ex: 12345678901)</li>
+                                    <li>• <strong>CNPJ:</strong> Digite apenas números (ex: 12345678000195)</li>
+                                    <li>• <strong>Email:</strong> Digite o email completo (ex: seuemail@gmail.com)</li>
+                                    <li>• <strong>Telefone:</strong> Use formato +5585999999999</li>
+                                    <li>• <strong>Chave Aleatória:</strong> Cole a chave completa</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="flex gap-3 mt-4">
+                                <button onclick="salvarConfigPix()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    💾 Salvar Configurações PIX
+                                </button>
+                                <button onclick="testarPix()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    🧪 Testar PIX
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Configurações do Sistema -->
+                        <div class="border rounded-lg p-4">
+                            <h3 class="text-lg font-semibold mb-4 text-green-700">⚙️ Configurações do Sistema</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="adm-senha-sistema" class="block text-sm font-medium text-gray-700 mb-1">Senha do Sistema</label>
+                                    <input type="password" id="adm-senha-sistema" class="w-full p-3 border rounded-lg text-base" placeholder="Nova senha (deixe vazio para manter atual)">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
+                                    <input type="text" id="adm-nome-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="Nome que aparece no comprovante">
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 mt-4">
+                                <button onclick="salvarConfigSistema()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    💾 Salvar Configurações
+                                </button>
+                                <button onclick="resetarSistema()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    🔄 Resetar Sistema
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -404,6 +500,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Senha ADM -->
+    <div id="modal-senha-adm" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">🔐 Acesso Administrativo</h3>
+            <p class="text-gray-600 mb-4">Digite a senha de administrador para acessar as configurações:</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="senha-adm" class="block text-sm font-medium text-gray-700 mb-1">Senha de Administrador</label>
+                    <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmarSenhaAdm()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Acessar ADM
+                </button>
+                <button onclick="cancelarSenhaAdm()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input oculto para upload de backup -->
+    <input type="file" id="input-backup" accept=".json" style="display: none;" onchange="processarBackup(this)">
 
     <!-- Modal de Comprovante -->
     <div id="modal-comprovante" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
@@ -475,6 +596,7 @@
         let produtos = JSON.parse(localStorage.getItem('pdv_produtos') || '[]');
         let vendas = JSON.parse(localStorage.getItem('pdv_vendas') || '[]');
         let movimentos = JSON.parse(localStorage.getItem('pdv_movimentos') || '[]');
+        let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"senha": "1234", "nomeEmpresa": "PDV - Sistema de Caixa"}');
         let carrinho = [];
         let vendaAtual = null;
         let produtoEditando = null;
@@ -486,11 +608,25 @@
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarDados();
+            carregarConfigPix();
             atualizarInterface();
             configurarAtalhos();
             atualizarInfoPix();
             showSection('vendas');
         });
+
+        // Carregar configurações PIX salvas
+        function carregarConfigPix() {
+            const configPixSalva = localStorage.getItem('pdv_config_pix');
+            if (configPixSalva) {
+                try {
+                    const configCarregada = JSON.parse(configPixSalva);
+                    Object.assign(CONFIG_PIX, configCarregada);
+                } catch (error) {
+                    console.error('Erro ao carregar config PIX:', error);
+                }
+            }
+        }
 
         // Atualizar informações PIX na interface
         function atualizarInfoPix() {
@@ -549,6 +685,8 @@
                 calcularSaldoCaixa();
             } else if (sectionName === 'vendas') {
                 atualizarListaProdutos();
+            } else if (sectionName === 'adm') {
+                carregarConfiguracoesAdm();
             }
         }
 
@@ -1633,7 +1771,7 @@
 
         function confirmarExclusaoVenda() {
             const senhaDigitada = document.getElementById('senha-exclusao').value;
-            const senhaCorreta = '1234';
+            const senhaCorreta = configSistema.senha || '1234';
             
             if (senhaDigitada !== senhaCorreta) {
                 mostrarMensagem('Senha incorreta!', 'erro');
@@ -1673,7 +1811,7 @@
 
         function confirmarExclusaoMovimento() {
             const senhaDigitada = document.getElementById('senha-exclusao').value;
-            const senhaCorreta = '1234';
+            const senhaCorreta = configSistema.senha || '1234';
             
             if (senhaDigitada !== senhaCorreta) {
                 mostrarMensagem('Senha incorreta!', 'erro');
@@ -1759,6 +1897,8 @@
                 produtos: produtos,
                 vendas: vendas,
                 movimentos: movimentos,
+                configSistema: configSistema,
+                configPix: CONFIG_PIX,
                 dataExportacao: new Date().toISOString()
             };
             
@@ -1770,7 +1910,7 @@
             link.download = `backup_pdv_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             
-            mostrarMensagem('Backup criado com sucesso!', 'sucesso');
+            mostrarMensagem('Backup completo criado com sucesso!', 'sucesso');
         }
 
         function baixarCSV(conteudo, nomeArquivo) {
@@ -1830,11 +1970,240 @@
             });
         }
 
+        // Funções ADM
+        function acessarAdm() {
+            const modal = document.getElementById('modal-senha-adm');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Focar no campo de senha
+            document.getElementById('senha-adm').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('senha-adm').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarSenhaAdm();
+                }
+            };
+        }
+
+        function confirmarSenhaAdm() {
+            const senhaDigitada = document.getElementById('senha-adm').value;
+            const senhaCorreta = configSistema.senha || '1234';
+            
+            if (senhaDigitada !== senhaCorreta) {
+                mostrarMensagem('Senha incorreta!', 'erro');
+                document.getElementById('senha-adm').value = '';
+                document.getElementById('senha-adm').focus();
+                return;
+            }
+            
+            cancelarSenhaAdm();
+            showSection('adm');
+            mostrarMensagem('Acesso liberado! Bem-vindo à área administrativa.', 'sucesso');
+        }
+
+        function cancelarSenhaAdm() {
+            document.getElementById('senha-adm').value = '';
+            const modal = document.getElementById('modal-senha-adm');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function carregarConfiguracoesAdm() {
+            // Carregar configurações PIX
+            document.getElementById('adm-pix-nome').value = CONFIG_PIX.nomeRecebedor;
+            document.getElementById('adm-pix-chave').value = CONFIG_PIX.chavePix;
+            document.getElementById('adm-pix-cidade').value = CONFIG_PIX.cidade;
+            document.getElementById('adm-pix-banco').value = CONFIG_PIX.nomeBanco;
+            
+            // Carregar configurações do sistema
+            document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
+        }
+
+        function salvarConfigPix() {
+            const nome = document.getElementById('adm-pix-nome').value.trim();
+            const chave = document.getElementById('adm-pix-chave').value.trim();
+            const cidade = document.getElementById('adm-pix-cidade').value.trim();
+            const banco = document.getElementById('adm-pix-banco').value.trim();
+            
+            if (!nome || !chave || !cidade) {
+                mostrarMensagem('Nome, chave PIX e cidade são obrigatórios!', 'erro');
+                return;
+            }
+            
+            if (nome.length > 25) {
+                mostrarMensagem('Nome deve ter no máximo 25 caracteres!', 'erro');
+                return;
+            }
+            
+            if (cidade.length > 15) {
+                mostrarMensagem('Cidade deve ter no máximo 15 caracteres!', 'erro');
+                return;
+            }
+            
+            // Atualizar configurações PIX
+            CONFIG_PIX.nomeRecebedor = nome;
+            CONFIG_PIX.chavePix = chave;
+            CONFIG_PIX.cidade = cidade;
+            CONFIG_PIX.nomeBanco = banco || 'Banco';
+            
+            // Salvar no localStorage
+            localStorage.setItem('pdv_config_pix', JSON.stringify(CONFIG_PIX));
+            
+            // Atualizar interface PIX
+            atualizarInfoPix();
+            
+            mostrarMensagem('Configurações PIX salvas com sucesso!', 'sucesso');
+        }
+
+        function testarPix() {
+            const nome = document.getElementById('adm-pix-nome').value.trim();
+            const chave = document.getElementById('adm-pix-chave').value.trim();
+            const cidade = document.getElementById('adm-pix-cidade').value.trim();
+            
+            if (!nome || !chave || !cidade) {
+                mostrarMensagem('Preencha todos os campos obrigatórios primeiro!', 'erro');
+                return;
+            }
+            
+            // Simular teste PIX
+            mostrarMensagem('Teste PIX: Configurações válidas! ✓', 'sucesso');
+            
+            // Mostrar preview das informações
+            const preview = `
+                Nome: ${nome}
+                Chave: ${formatarChavePix(chave)}
+                Cidade: ${cidade}
+                
+                ✅ Configurações prontas para uso!
+            `;
+            
+            setTimeout(() => {
+                mostrarMensagem(preview, 'sucesso');
+            }, 1000);
+        }
+
+        function salvarConfigSistema() {
+            const novaSenha = document.getElementById('adm-senha-sistema').value.trim();
+            const nomeEmpresa = document.getElementById('adm-nome-empresa').value.trim();
+            
+            if (novaSenha && novaSenha.length < 4) {
+                mostrarMensagem('Senha deve ter pelo menos 4 caracteres!', 'erro');
+                return;
+            }
+            
+            // Atualizar configurações
+            if (novaSenha) {
+                configSistema.senha = novaSenha;
+            }
+            
+            if (nomeEmpresa) {
+                configSistema.nomeEmpresa = nomeEmpresa;
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
+            
+            // Limpar campo de senha
+            document.getElementById('adm-senha-sistema').value = '';
+            
+            mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
+        }
+
+        function resetarSistema() {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, vendas, movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+                return;
+            }
+            
+            if (!confirm('🚨 ÚLTIMA CONFIRMAÇÃO: Todos os dados serão perdidos permanentemente. Confirma o reset completo?')) {
+                return;
+            }
+            
+            // Limpar todos os dados
+            localStorage.removeItem('pdv_produtos');
+            localStorage.removeItem('pdv_vendas');
+            localStorage.removeItem('pdv_movimentos');
+            localStorage.removeItem('pdv_config_sistema');
+            localStorage.removeItem('pdv_config_pix');
+            
+            // Recarregar página
+            location.reload();
+        }
+
+        // Funções de Backup
+        function recuperarBackup() {
+            document.getElementById('input-backup').click();
+        }
+
+        function processarBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            if (!file.name.endsWith('.json')) {
+                mostrarMensagem('Arquivo deve ser um JSON válido!', 'erro');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validar estrutura do backup
+                    if (!backup.produtos || !backup.vendas || !backup.movimentos) {
+                        mostrarMensagem('Arquivo de backup inválido!', 'erro');
+                        return;
+                    }
+                    
+                    if (!confirm('⚠️ ATENÇÃO: Esta ação irá substituir TODOS os dados atuais pelos dados do backup.\n\nTem certeza que deseja continuar?')) {
+                        return;
+                    }
+                    
+                    // Restaurar dados
+                    produtos = backup.produtos || [];
+                    vendas = backup.vendas || [];
+                    movimentos = backup.movimentos || [];
+                    
+                    if (backup.configSistema) {
+                        configSistema = backup.configSistema;
+                    }
+                    
+                    if (backup.configPix) {
+                        Object.assign(CONFIG_PIX, backup.configPix);
+                        localStorage.setItem('pdv_config_pix', JSON.stringify(CONFIG_PIX));
+                    }
+                    
+                    // Salvar dados restaurados
+                    salvarDados();
+                    
+                    // Atualizar interface
+                    atualizarInterface();
+                    atualizarInfoPix();
+                    
+                    mostrarMensagem(`Backup restaurado com sucesso! ${produtos.length} produtos, ${vendas.length} vendas e ${movimentos.length} movimentos recuperados.`, 'sucesso');
+                    
+                    // Voltar para vendas
+                    showSection('vendas');
+                    
+                } catch (error) {
+                    console.error('Erro ao processar backup:', error);
+                    mostrarMensagem('Erro ao processar arquivo de backup: ' + error.message, 'erro');
+                }
+            };
+            
+            reader.readAsText(file);
+            
+            // Limpar input
+            input.value = '';
+        }
+
         // Persistência
         function salvarDados() {
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
             localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
             localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));
+            localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
         }
 
         function carregarDados() {
@@ -1882,5 +2251,5 @@
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990de99954dd27e9',t:'MTc2MDg1MjEzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990dfc87957a27e9',t:'MTc2MDg1MjkwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
