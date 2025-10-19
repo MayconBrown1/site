@@ -383,6 +383,28 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Senha -->
+    <div id="modal-senha" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">🔒 Confirmação Necessária</h3>
+            <p class="text-gray-600 mb-4">Digite a senha para excluir esta venda:</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="senha-exclusao" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <input type="password" id="senha-exclusao" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmarExclusaoVenda()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Confirmar Exclusão
+                </button>
+                <button onclick="cancelarExclusaoVenda()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Comprovante -->
     <div id="modal-comprovante" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
@@ -458,6 +480,8 @@
         let produtoEditando = null;
         let movimentoEditando = null;
         let vendaParaComprovante = null;
+        let vendaParaExcluir = null;
+        let movimentoParaExcluir = null;
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
@@ -1383,21 +1407,30 @@
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
             
-            // Não permitir excluir movimentos de vendas
+            // Usar o mesmo sistema de senha das vendas
+            movimentoParaExcluir = movimento;
+            
+            const modal = document.getElementById('modal-senha');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Alterar o texto do modal para movimento
+            modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
             if (movimento.vendaId) {
-                mostrarMensagem('Não é possível excluir movimentos gerados por vendas!', 'erro');
-                return;
+                modal.querySelector('p').textContent = 'Digite a senha para excluir este movimento de venda:';
+            } else {
+                modal.querySelector('p').textContent = 'Digite a senha para excluir este movimento:';
             }
             
-            confirmarAcao('Tem certeza que deseja excluir este movimento?').then(confirmado => {
-                if (confirmado) {
-                    movimentos = movimentos.filter(m => m.id !== movimentoId);
-                    salvarDados();
-                    atualizarHistoricoMovimentos();
-                    calcularSaldoCaixa();
-                    mostrarMensagem('Movimento excluído com sucesso!', 'sucesso');
+            // Focar no campo de senha
+            document.getElementById('senha-exclusao').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('senha-exclusao').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarExclusaoMovimento();
                 }
-            });
+            };
         }
 
         // Movimentação de caixa
@@ -1524,8 +1557,12 @@
                     <td class="px-4 py-2">${venda.pagamento.tipo}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="mostrarComprovanteVenda('${venda.id}')" 
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm transition-colors">
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
                             Ver Comprovante
+                        </button>
+                        <button onclick="excluirVenda('${venda.id}')" 
+                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm transition-colors">
+                            Excluir
                         </button>
                     </td>
                 `;
@@ -1546,10 +1583,16 @@
                             <div class="font-bold text-green-600 text-lg">R$ ${venda.total.toFixed(2)}</div>
                         </div>
                     </div>
-                    <button onclick="mostrarComprovanteVenda('${venda.id}')" 
-                            class="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors mt-2">
-                        Ver Comprovante
-                    </button>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="mostrarComprovanteVenda('${venda.id}')" 
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Ver Comprovante
+                        </button>
+                        <button onclick="excluirVenda('${venda.id}')" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Excluir
+                        </button>
+                    </div>
                 `;
                 cardsContainer.appendChild(card);
             });
@@ -1564,6 +1607,126 @@
             if (venda) {
                 mostrarComprovante(venda);
             }
+        }
+
+        // Funções para excluir vendas com senha
+        function excluirVenda(vendaId) {
+            const venda = vendas.find(v => v.id === vendaId);
+            if (!venda) return;
+            
+            vendaParaExcluir = venda;
+            
+            const modal = document.getElementById('modal-senha');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Focar no campo de senha
+            document.getElementById('senha-exclusao').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('senha-exclusao').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarExclusaoVenda();
+                }
+            };
+        }
+
+        function confirmarExclusaoVenda() {
+            const senhaDigitada = document.getElementById('senha-exclusao').value;
+            const senhaCorreta = '1234';
+            
+            if (senhaDigitada !== senhaCorreta) {
+                mostrarMensagem('Senha incorreta!', 'erro');
+                document.getElementById('senha-exclusao').value = '';
+                document.getElementById('senha-exclusao').focus();
+                return;
+            }
+            
+            // Verificar se é venda ou movimento
+            if (vendaParaExcluir) {
+                // Restaurar estoque dos produtos
+                vendaParaExcluir.itens.forEach(item => {
+                    const produto = produtos.find(p => p.id === item.produtoId);
+                    if (produto) {
+                        produto.estoque += item.quantidade;
+                    }
+                });
+                
+                // Remover movimento de caixa relacionado
+                movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
+                
+                // Remover venda
+                vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
+                
+                salvarDados();
+                cancelarExclusaoVenda();
+                atualizarTabelaVendasDia();
+                atualizarRelatorios();
+                calcularSaldoCaixa();
+                atualizarTabelaProdutos();
+                
+                mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
+            } else if (movimentoParaExcluir) {
+                confirmarExclusaoMovimento();
+            }
+        }
+
+        function confirmarExclusaoMovimento() {
+            const senhaDigitada = document.getElementById('senha-exclusao').value;
+            const senhaCorreta = '1234';
+            
+            if (senhaDigitada !== senhaCorreta) {
+                mostrarMensagem('Senha incorreta!', 'erro');
+                document.getElementById('senha-exclusao').value = '';
+                document.getElementById('senha-exclusao').focus();
+                return;
+            }
+            
+            if (!movimentoParaExcluir) return;
+            
+            // Se for movimento de venda, também restaurar o estoque
+            if (movimentoParaExcluir.vendaId) {
+                const venda = vendas.find(v => v.id === movimentoParaExcluir.vendaId);
+                if (venda) {
+                    // Restaurar estoque dos produtos
+                    venda.itens.forEach(item => {
+                        const produto = produtos.find(p => p.id === item.produtoId);
+                        if (produto) {
+                            produto.estoque += item.quantidade;
+                        }
+                    });
+                    
+                    // Remover a venda também
+                    vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
+                    
+                    mostrarMensagem('Movimento e venda excluídos com sucesso! Estoque restaurado.', 'sucesso');
+                } else {
+                    mostrarMensagem('Movimento excluído com sucesso!', 'sucesso');
+                }
+            } else {
+                mostrarMensagem('Movimento excluído com sucesso!', 'sucesso');
+            }
+            
+            // Remover movimento
+            movimentos = movimentos.filter(m => m.id !== movimentoParaExcluir.id);
+            
+            salvarDados();
+            cancelarExclusaoVenda(); // Usar a mesma função para fechar o modal
+            atualizarHistoricoMovimentos();
+            calcularSaldoCaixa();
+            atualizarTabelaVendasDia();
+            atualizarRelatorios();
+            atualizarTabelaProdutos();
+        }
+
+        function cancelarExclusaoVenda() {
+            vendaParaExcluir = null;
+            movimentoParaExcluir = null;
+            document.getElementById('senha-exclusao').value = '';
+            
+            const modal = document.getElementById('modal-senha');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         // Exportações
@@ -1719,5 +1882,5 @@
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990dced3877327e9',t:'MTc2MDg1MTAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990de99954dd27e9',t:'MTc2MDg1MjEzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
