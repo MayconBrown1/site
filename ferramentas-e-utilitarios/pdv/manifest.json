@@ -1,6 +1,6 @@
 {
-  "name": "PDV - Sistema de Caixa",
-  "short_name": "PDV",
+  "name": "PDV",
+  "short_name": "PDV - Sistema de Caixa",
   "description": "Soluções Digitais para o Seu Dia a Dia",
   "start_url": "/ferramentas-e-utilitarios/pdv",
   "display": "standalone",
