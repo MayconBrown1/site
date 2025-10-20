@@ -2005,12 +2005,6 @@ function showInstallButton() {
             }
         }
 
-        function cancelarEdicaoMovimento() {
-            movimentoEditando = null;
-            const modal = document.getElementById('modal-editar-movimento');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
 
         function excluirMovimento(movimentoId) {
             const movimento = movimentos.find(m => m.id === movimentoId);
