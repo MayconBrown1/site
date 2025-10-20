@@ -8,24 +8,9 @@
   "theme_color": "#FFFFFF",
   "icons": [
     {
-      "src": "https://mayconbrown.com.br/img/pdv1.png",
+      "src": "/img/pdv1.png",
       "sizes": "192x192",
       "type": "image/png"
-    },
-    {
-      "src": "https://mayconbrown.com.br/img/pdv1.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "https://mayconbrown.com.br/img/pdv1.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
-    },
-    {
-      "src": "https://mayconbrown.com.br/img/pdv1.ico",
-      "sizes": "192x192",
-      "type": "image/x-icon"
     }
   ]
 }
