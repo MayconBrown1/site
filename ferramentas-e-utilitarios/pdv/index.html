@@ -325,9 +325,12 @@
                             <button onclick="exportarProdutos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
                                 Exportar Produtos
                             </button>
-                            <button onclick="exportarBackup()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
-                                Backup Completo
-                            </button>
+                            <button 
+    onclick="exportarBackup()" 
+    class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+    Backup Completo
+</button>
+
                             <button onclick="recuperarBackup()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
                                 Recuperar Backup
                             </button>
@@ -2381,26 +2384,43 @@ function showInstallButton() {
             mostrarMensagem('Produtos exportados com sucesso!', 'sucesso');
         }
 
-        function exportarBackup() {
-            const backup = {
-                produtos: produtos,
-                vendas: vendas,
-                movimentos: movimentos,
-                configSistema: configSistema,
-                configPix: CONFIG_PIX,
-                dataExportacao: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(backup, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `backup_pdv_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            mostrarMensagem('Backup completo criado com sucesso!', 'sucesso');
-        }
+        async function exportarBackup() {
+    const backup = {
+        produtos: produtos,
+        vendas: vendas,
+        movimentos: movimentos,
+        configSistema: configSistema,
+        configPix: CONFIG_PIX,
+        dataExportacao: new Date().toISOString()
+    };
+
+    try {
+        // Pergunta onde salvar
+        const handle = await window.showSaveFilePicker({
+            suggestedName: `backup_pdv_${new Date().toISOString().split('T')[0]}.json`,
+            types: [
+                {
+                    description: 'Arquivos JSON',
+                    accept: { 'application/json': ['.json'] },
+                },
+            ],
+        });
+
+        const writable = await handle.createWritable();
+
+        // Escreve o conteúdo do backup
+        await writable.write(JSON.stringify(backup, null, 2));
+
+        // Finaliza gravação
+        await writable.close();
+
+        mostrarMensagem('Backup completo criado com sucesso!', 'sucesso');
+    } catch (err) {
+        console.error(err);
+        mostrarMensagem('Backup cancelado ou ocorreu um erro.', 'erro');
+    }
+}
+
 
         function baixarCSV(conteudo, nomeArquivo) {
             const dataBlob = new Blob([conteudo], {type: 'text/csv;charset=utf-8;'});
