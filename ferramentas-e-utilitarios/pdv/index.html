@@ -1,0 +1,2708 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV - Sistema de Frente de Caixa</title>
+    <link rel="shortcut icon" href="/img/icone.png" type="image/x-icon">
+    <link rel="manifest" href="manifest.json" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; }
+        }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-full">
+    <div class="min-h-full flex flex-col">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-3 md:p-4 shadow-lg">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <h1 class="text-lg md:text-2xl font-bold">PDV - Sistema de Caixa</h1>
+                <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                    <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
+                    <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
+                    <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
+                    <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
+                    <button onclick="acessarAdm()" class="bg-red-500 hover:bg-red-700 px-3 py-2 rounded transition-colors text-sm">ADM</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4">
+            <!-- Seção Vendas -->
+            <div id="vendas-section" class="section">
+                <div class="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 h-full">
+                    <!-- Busca e Produtos -->
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
+                        <h2 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">Adicionar Produto</h2>
+                        <div class="mb-3 lg:mb-4">
+                            <label for="busca-produto" class="block text-sm font-medium text-gray-700 mb-2">Buscar Produto</label>
+                            <input type="text" id="busca-produto" placeholder="Nome ou código..." 
+                                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                                   onkeyup="buscarProduto(this.value)" onkeydown="handleProductSearch(event)">
+                        </div>
+                        <div id="produtos-lista" class="space-y-2 max-h-48 lg:max-h-96 overflow-y-auto"></div>
+                    </div>
+
+                    <!-- Carrinho -->
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-2">
+                        <h2 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">Carrinho</h2>
+                        <div id="carrinho-items" class="space-y-2 lg:space-y-3 max-h-48 lg:max-h-80 overflow-y-auto mb-3 lg:mb-4"></div>
+                        <div class="border-t pt-3 lg:pt-4">
+                            <div class="flex justify-between items-center mb-2 text-sm lg:text-base">
+                                <span class="font-medium">Subtotal:</span>
+                                <span id="subtotal" class="text-base lg:text-lg">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between items-center mb-2 text-sm lg:text-base">
+                                <label for="desconto" class="font-medium">Desconto (%):</label>
+                                <input type="number" id="desconto" min="0" max="100" step="0.01" value="0" 
+                                       class="w-16 lg:w-20 p-1 border rounded text-right text-base" onchange="calcularTotal()">
+                            </div>
+                            <div class="flex justify-between items-center text-lg lg:text-xl font-bold text-green-600">
+                                <span>Total:</span>
+                                <span id="total-venda">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagamento -->
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-3">
+                        <h2 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">Pagamento</h2>
+                        <div class="grid grid-cols-1 gap-2 lg:space-y-3 mb-3 lg:mb-4">
+                            <button onclick="selecionarPagamento('dinheiro')" 
+                                    class="w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm lg:text-base">
+                                💵 Dinheiro
+                            </button>
+                            <button onclick="selecionarPagamento('pix')" 
+                                    class="w-full p-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors text-sm lg:text-base">
+                                📱 PIX
+                            </button>
+                            <button onclick="selecionarPagamento('cartao')" 
+                                    class="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm lg:text-base">
+                                💳 Cartão
+                            </button>
+                        </div>
+                        
+                        <div id="pagamento-detalhes" class="hidden">
+                            <div id="dinheiro-form" class="hidden space-y-3">
+                                <div>
+                                    <label for="valor-recebido" class="block text-sm font-medium text-gray-700 mb-1">Valor Recebido</label>
+                                    <input type="number" id="valor-recebido" step="0.01" min="0" 
+                                           class="w-full p-3 border rounded-lg text-base" onchange="calcularTroco()">
+                                </div>
+                                <div class="text-base lg:text-lg font-semibold">
+                                    Troco: <span id="troco" class="text-green-600">R$ 0,00</span>
+                                </div>
+                            </div>
+                            
+                            <div id="pix-form" class="hidden space-y-3">
+                                <div class="text-center">
+                                    <div class="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300 mb-3">
+                                        <div id="qr-code-container" class="flex justify-center mb-3">
+                                            <div class="text-gray-500">QR Code será gerado após confirmar o valor</div>
+                                        </div>
+                                        <div class="text-sm text-gray-600">
+                                            <p><strong>Recebedor:</strong> <span id="pix-nome-display"></span></p>
+                                            <p><strong>Chave:</strong> <span id="pix-chave-display"></span></p>
+                                            <p><strong>Banco:</strong> <span id="pix-banco-display"></span></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Status do PIX -->
+                                    <div id="pix-status" class="hidden mb-3 p-3 rounded-lg">
+                                        <div id="pix-status-content"></div>
+                                    </div>
+                                    
+                                    <button onclick="gerarQRCodePix()" id="btn-gerar-qr" class="w-full bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg transition-colors mb-3">
+                                        Gerar QR Code PIX
+                                    </button>
+                                </div>
+                                <div>
+                                    <label for="pix-id" class="block text-sm font-medium text-gray-700 mb-1">ID da Transação (opcional)</label>
+                                    <input type="text" id="pix-id" class="w-full p-3 border rounded-lg text-base" placeholder="ID do PIX">
+                                </div>
+                            </div>
+                            
+                            <div id="cartao-form" class="hidden space-y-3">
+                                <div>
+                                    <label for="tipo-cartao" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                    <select id="tipo-cartao" class="w-full p-3 border rounded-lg text-base">
+                                        <option value="credito">Crédito</option>
+                                        <option value="debito">Débito</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="parcelas" class="block text-sm font-medium text-gray-700 mb-1">Parcelas</label>
+                                    <select id="parcelas" class="w-full p-3 border rounded-lg text-base">
+                                        <option value="1">1x</option>
+                                        <option value="2">2x</option>
+                                        <option value="3">3x</option>
+                                        <option value="6">6x</option>
+                                        <option value="12">12x</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button onclick="finalizarVenda()" 
+                                    class="w-full mt-4 p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-base">
+                                Finalizar Venda
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Produtos -->
+            <div id="produtos-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-6">
+                        <h2 class="text-xl lg:text-2xl font-semibold">Gerenciar Produtos</h2>
+                        <button onclick="mostrarFormProduto()" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                            Novo Produto
+                        </button>
+                    </div>
+                    
+                    <div id="form-produto" class="hidden mb-4 lg:mb-6 p-4 bg-gray-50 rounded-lg">
+                        <h3 class="text-base lg:text-lg font-semibold mb-4">Cadastrar/Editar Produto</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                            <div>
+                                <label for="produto-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                                <input type="text" id="produto-nome" required class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label for="produto-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
+                                <input type="text" id="produto-codigo" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label for="produto-preco" class="block text-sm font-medium text-gray-700 mb-1">Preço de Venda *</label>
+                                <input type="number" id="produto-preco" step="0.01" min="0" required class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label for="produto-custo" class="block text-sm font-medium text-gray-700 mb-1">Custo</label>
+                                <input type="number" id="produto-custo" step="0.01" min="0" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label for="produto-unidade" class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+                                <select id="produto-unidade" class="w-full p-3 border rounded-lg text-base">
+                                    <option value="un">Unidade</option>
+                                    <option value="kg">Quilograma</option>
+                                    <option value="g">Grama</option>
+                                    <option value="l">Litro</option>
+                                    <option value="ml">Mililitro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="produto-estoque" class="block text-sm font-medium text-gray-700 mb-1">Estoque Inicial</label>
+                                <input type="number" id="produto-estoque" step="0.01" min="0" value="0" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div class="sm:col-span-2 lg:col-span-1">
+                                <label for="produto-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                <input type="text" id="produto-categoria" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 mt-4">
+                            <button onclick="salvarProduto()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                Salvar
+                            </button>
+                            <button onclick="cancelarEdicaoProduto()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabela responsiva para mobile -->
+                    <div class="block lg:hidden">
+                        <div id="produtos-cards" class="space-y-3"></div>
+                    </div>
+                    
+                    <!-- Tabela normal para desktop -->
+                    <div class="hidden lg:block overflow-x-auto">
+                        <table class="w-full table-auto">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-2 text-left">Nome</th>
+                                    <th class="px-4 py-2 text-left">Código</th>
+                                    <th class="px-4 py-2 text-right">Preço</th>
+                                    <th class="px-4 py-2 text-right">Estoque</th>
+                                    <th class="px-4 py-2 text-left">Categoria</th>
+                                    <th class="px-4 py-2 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-produtos">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Caixa -->
+            <div id="caixa-section" class="section hidden">
+                <div class="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
+                        <h2 class="text-lg lg:text-xl font-semibold mb-4">Movimentação de Caixa</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="movimento-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                <select id="movimento-tipo" class="w-full p-3 border rounded-lg text-base">
+                                    <option value="entrada">Entrada</option>
+                                    <option value="saida">Saída</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="movimento-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                                <input type="number" id="movimento-valor" step="0.01" min="0" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div>
+                                <label for="movimento-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                                <input type="text" id="movimento-descricao" class="w-full p-3 border rounded-lg text-base" placeholder="Descrição do movimento">
+                            </div>
+                            <button onclick="registrarMovimento()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors text-base">
+                                Registrar Movimento
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                            <h3 class="font-semibold mb-2 text-base lg:text-lg">Saldo do Caixa</h3>
+                            <div class="text-xl lg:text-2xl font-bold text-green-600" id="saldo-caixa">R$ 0,00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-2">
+                        <h2 class="text-lg lg:text-xl font-semibold mb-4">Histórico de Movimentos</h2>
+                        <div class="max-h-64 lg:max-h-96 overflow-y-auto">
+                            <div id="historico-movimentos" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Relatórios -->
+            <div id="relatorios-section" class="section hidden">
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <h2 class="text-xl lg:text-2xl font-semibold mb-4">Relatórios e Dashboard</h2>
+                        
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4 lg:mb-6">
+                            <div class="bg-blue-50 p-3 lg:p-4 rounded-lg">
+                                <h3 class="font-semibold text-blue-800 text-sm lg:text-base">Vendas Hoje</h3>
+                                <div class="text-xl lg:text-2xl font-bold text-blue-600" id="vendas-hoje">0</div>
+                            </div>
+                            <div class="bg-green-50 p-3 lg:p-4 rounded-lg">
+                                <h3 class="font-semibold text-green-800 text-sm lg:text-base">Faturamento Hoje</h3>
+                                <div class="text-lg lg:text-2xl font-bold text-green-600" id="faturamento-hoje">R$ 0,00</div>
+                            </div>
+                            <div class="bg-purple-50 p-3 lg:p-4 rounded-lg">
+                                <h3 class="font-semibold text-purple-800 text-sm lg:text-base">Produtos</h3>
+                                <div class="text-xl lg:text-2xl font-bold text-purple-600" id="total-produtos">0</div>
+                            </div>
+                            <div class="bg-red-50 p-3 lg:p-4 rounded-lg">
+                                <h3 class="font-semibold text-red-800 text-sm lg:text-base">Estoque Baixo</h3>
+                                <div class="text-xl lg:text-2xl font-bold text-red-600" id="estoque-baixo">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                            <button onclick="exportarVendas()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                                Exportar Vendas
+                            </button>
+                            <button onclick="exportarProdutos()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                                Exportar Produtos
+                            </button>
+                            <button onclick="exportarBackup()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                                Backup Completo
+                            </button>
+                            <button onclick="recuperarBackup()" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
+                                Recuperar Backup
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <h3 class="text-lg lg:text-xl font-semibold mb-4">Vendas do Dia</h3>
+                        
+                        <!-- Cards para mobile -->
+                        <div class="block lg:hidden">
+                            <div id="vendas-cards" class="space-y-3"></div>
+                        </div>
+                        
+                        <!-- Tabela para desktop -->
+                        <div class="hidden lg:block overflow-x-auto">
+                            <table class="w-full table-auto">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left">Hora</th>
+                                        <th class="px-4 py-2 text-left">Itens</th>
+                                        <th class="px-4 py-2 text-right">Total</th>
+                                        <th class="px-4 py-2 text-left">Pagamento</th>
+                                        <th class="px-4 py-2 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-vendas-dia">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção ADM -->
+            <div id="adm-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                    <h2 class="text-xl lg:text-2xl font-semibold mb-4">🔧 Administração do Sistema</h2>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="text-yellow-600 mr-3">⚠️</div>
+                            <div>
+                                <h3 class="font-semibold text-yellow-800">Área Restrita</h3>
+                                <p class="text-sm text-yellow-700">Esta área permite alterar configurações importantes do sistema. Use com cuidado!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Configurações PIX -->
+                        <div class="border rounded-lg p-4">
+                            <h3 class="text-lg font-semibold mb-4 text-purple-700">📱 Configurações PIX</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="adm-pix-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Recebedor *</label>
+                                    <input type="text" id="adm-pix-nome" maxlength="25" class="w-full p-3 border rounded-lg text-base" placeholder="Nome completo">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-chave" class="block text-sm font-medium text-gray-700 mb-1">Chave PIX *</label>
+                                    <input type="text" id="adm-pix-chave" class="w-full p-3 border rounded-lg text-base" placeholder="CPF, CNPJ, email, telefone ou chave aleatória">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-cidade" class="block text-sm font-medium text-gray-700 mb-1">Cidade *</label>
+                                    <input type="text" id="adm-pix-cidade" maxlength="15" class="w-full p-3 border rounded-lg text-base" placeholder="Cidade">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-pix-banco" class="block text-sm font-medium text-gray-700 mb-1">Nome do Banco</label>
+                                    <input type="text" id="adm-pix-banco" class="w-full p-3 border rounded-lg text-base" placeholder="Nome do banco (apenas para exibição)">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                                <h4 class="font-semibold text-blue-800 mb-2">💡 Dicas para Chave PIX:</h4>
+                                <ul class="text-sm text-blue-700 space-y-1">
+                                    <li>• <strong>CPF:</strong> Digite apenas números (ex: 12345678901)</li>
+                                    <li>• <strong>CNPJ:</strong> Digite apenas números (ex: 12345678000195)</li>
+                                    <li>• <strong>Email:</strong> Digite o email completo (ex: seuemail@gmail.com)</li>
+                                    <li>• <strong>Telefone:</strong> Use formato +5585999999999</li>
+                                    <li>• <strong>Chave Aleatória:</strong> Cole a chave completa</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="flex gap-3 mt-4">
+                                <button onclick="salvarConfigPix()" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    💾 Salvar Configurações PIX
+                                </button>
+                                <button onclick="testarPix()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    🧪 Testar PIX
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Configurações do Sistema -->
+                        <div class="border rounded-lg p-4">
+                            <h3 class="text-lg font-semibold mb-4 text-green-700">⚙️ Configurações do Sistema</h3>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="adm-senha-sistema" class="block text-sm font-medium text-gray-700 mb-1">Senha do Sistema</label>
+                                    <input type="password" id="adm-senha-sistema" class="w-full p-3 border rounded-lg text-base" placeholder="Nova senha (deixe vazio para manter atual)">
+                                </div>
+                                
+                                <div>
+                                    <label for="adm-nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
+                                    <input type="text" id="adm-nome-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="Nome que aparece no comprovante">
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-3 mt-4">
+                                <button onclick="salvarConfigSistema()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    💾 Salvar Configurações
+                                </button>
+                                <button onclick="resetarSistema()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
+                                    🔄 Resetar Sistema
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Editar Movimento -->
+    <div id="modal-editar-movimento" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">Editar Movimento</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="edit-movimento-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="edit-movimento-tipo" class="w-full p-3 border rounded-lg text-base">
+                        <option value="entrada">Entrada</option>
+                        <option value="saida">Saída</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="edit-movimento-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                    <input type="number" id="edit-movimento-valor" step="0.01" min="0" class="w-full p-3 border rounded-lg text-base">
+                </div>
+                <div>
+                    <label for="edit-movimento-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <input type="text" id="edit-movimento-descricao" class="w-full p-3 border rounded-lg text-base">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="salvarEdicaoMovimento()" class="flex-1 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Salvar
+                </button>
+                <button onclick="cancelarEdicaoMovimento()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Senha -->
+    <div id="modal-senha" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">🔒 Confirmação Necessária</h3>
+            <p class="text-gray-600 mb-4">Digite a senha para excluir esta venda:</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="senha-exclusao" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <input type="password" id="senha-exclusao" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                </div>
+                <div class="text-center mt-2">
+    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
+       target="_blank"
+       class="text-blue-600 hover:text-blue-800 text-sm underline">
+        Esqueci a senha
+    </a>
+</div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmarExclusaoVenda()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Confirmar Exclusão
+                </button>
+                <button onclick="cancelarExclusaoVenda()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Senha ADM -->
+    <div id="modal-senha-adm" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">🔐 Acesso Administrativo</h3>
+            <p class="text-gray-600 mb-4">Digite a senha de administrador para acessar as configurações:</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="senha-adm" class="block text-sm font-medium text-gray-700 mb-1">Senha de Administrador</label>
+                    <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                </div>
+                <div class="text-center mt-2">
+    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
+       target="_blank"
+       class="text-blue-600 hover:text-blue-800 text-sm underline">
+        Esqueci a senha
+    </a>
+</div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmarSenhaAdm()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Acessar ADM
+                </button>
+                <button onclick="cancelarSenhaAdm()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input oculto para upload de backup -->
+    <input type="file" id="input-backup" accept=".json" style="display: none;" onchange="processarBackup(this)">
+
+    <!-- Modal de Pesagem -->
+    <div id="modal-pesagem" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">⚖️ Pesagem do Produto</h3>
+            
+            <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                <div class="font-semibold text-blue-800" id="pesagem-produto-nome"></div>
+                <div class="text-sm text-blue-600">Preço por kg: <span id="pesagem-preco-kg"></span></div>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="peso-gramas" class="block text-sm font-medium text-gray-700 mb-1">Peso em gramas *</label>
+                    <input type="number" id="peso-gramas" min="1" step="1" class="w-full p-3 border rounded-lg text-base" 
+                           placeholder="Ex: 500" onkeyup="calcularPrecoPesagem()" oninput="calcularPrecoPesagem()">
+                    <div class="text-xs text-gray-500 mt-1">Digite o peso em gramas (ex: 500g = 0,5kg)</div>
+                </div>
+                
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">Peso:</span>
+                        <span id="peso-display" class="text-blue-600">0g (0,000kg)</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="font-medium">Valor total:</span>
+                        <span id="valor-total-pesagem" class="text-green-600 font-bold text-lg">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="confirmarPesagem()" class="flex-1 bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg transition-colors text-base">
+                    ✓ Adicionar ao Carrinho
+                </button>
+                <button onclick="cancelarPesagem()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Comprovante -->
+    <div id="modal-comprovante" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
+            <div class="print-area">
+                <div class="text-center mb-4">
+                    <h2 class="text-lg lg:text-xl font-bold">COMPROVANTE DE VENDA</h2>
+                    <div class="text-sm text-gray-600" id="comprovante-data"></div>
+                </div>
+                <div id="comprovante-itens" class="mb-4 text-sm lg:text-base"></div>
+                <div class="border-t pt-2">
+                    <div id="comprovante-total" class="mb-3"></div>
+                    <div class="flex justify-between font-bold text-base lg:text-lg border-t pt-2">
+                        <span>TOTAL A PAGAR:</span>
+                        <span id="comprovante-total-final" class="text-green-600"></span>
+                    </div>
+                    <div class="text-sm mt-3 pt-2 border-t" id="comprovante-pagamento"></div>
+                </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 mt-6 no-print">
+                <button onclick="imprimirOuPDF()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors text-base">
+                    📄 Imprimir/PDF
+                </button>
+                <button onclick="fecharComprovante()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 🔧 CONFIGURAÇÃO PIX - ALTERE AQUI! 🔧
+        // ========================================
+        /*
+         * INSTRUÇÕES PARA PERSONALIZAR O PIX:
+         * 
+         * 1. CHAVE PIX: Altere o valor de 'chavePix' abaixo
+         *    - Para CPF: use apenas números (ex: '12345678901')
+         *    - Para CNPJ: use apenas números (ex: '12345678000195')
+         *    - Para Email: use o email completo (ex: 'seuemail@gmail.com')
+         *    - Para Telefone: use +5585999999999 (com código do país)
+         *    - Para Chave Aleatória: cole a chave completa
+         * 
+         * 2. NOME DO RECEBEDOR: Altere 'nomeRecebedor'
+         *    - Use o nome completo como aparece no banco
+         *    - Máximo 25 caracteres
+         * 
+         * 3. CIDADE: Altere 'cidade'
+         *    - Nome da cidade onde está registrado
+         *    - Máximo 15 caracteres
+         * 
+         * 4. CNPJ/CPF: Altere 'chavePix' (mesmo valor da chave se for CPF/CNPJ)
+         * 
+         * 5. BANCO: Altere 'nomeBanco' (apenas para exibição)
+         */
+        
+        const CONFIG_PIX = {
+            chavePix: '00000000000',           // ⬅️ ALTERE AQUI: Sua chave PIX
+            nomeRecebedor: 'Seu Nome Aqui',  // ⬅️ ALTERE AQUI: Seu nome completo
+            cidade: 'Sua Cidade Aqui',                 // ⬅️ ALTERE AQUI: Sua cidade
+            nomeBanco: 'Nome do Banco'              // ⬅️ ALTERE AQUI: Nome do seu banco
+        };
+        
+        // ========================================
+        // FIM DA CONFIGURAÇÃO PIX
+        // ========================================
+
+        // Estado da aplicação
+        let produtos = JSON.parse(localStorage.getItem('pdv_produtos') || '[]');
+        let vendas = JSON.parse(localStorage.getItem('pdv_vendas') || '[]');
+        let movimentos = JSON.parse(localStorage.getItem('pdv_movimentos') || '[]');
+        let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"senha": "1234", "nomeEmpresa": "PDV - Sistema de Caixa"}');
+        let carrinho = [];
+        let vendaAtual = null;
+        let produtoEditando = null;
+        let movimentoEditando = null;
+        let vendaParaComprovante = null;
+        let vendaParaExcluir = null;
+        let movimentoParaExcluir = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDados();
+            carregarConfigPix();
+            atualizarInterface();
+            configurarAtalhos();
+            atualizarInfoPix();
+            showSection('vendas');
+        });
+
+        // Carregar configurações PIX salvas
+        function carregarConfigPix() {
+            const configPixSalva = localStorage.getItem('pdv_config_pix');
+            if (configPixSalva) {
+                try {
+                    const configCarregada = JSON.parse(configPixSalva);
+                    Object.assign(CONFIG_PIX, configCarregada);
+                } catch (error) {
+                    console.error('Erro ao carregar config PIX:', error);
+                }
+            }
+        }
+
+        // Atualizar informações PIX na interface
+        function atualizarInfoPix() {
+            document.getElementById('pix-nome-display').textContent = CONFIG_PIX.nomeRecebedor;
+            document.getElementById('pix-chave-display').textContent = formatarChavePix(CONFIG_PIX.chavePix);
+            document.getElementById('pix-banco-display').textContent = CONFIG_PIX.nomeBanco;
+        }
+
+        // Formatar chave PIX para exibição
+        function formatarChavePix(chave) {
+            // Se for CPF (11 dígitos)
+            if (/^\d{11}$/.test(chave)) {
+                return chave.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            }
+            // Se for CNPJ (14 dígitos)
+            if (/^\d{14}$/.test(chave)) {
+                return chave.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+            }
+            // Se for telefone
+            if (chave.startsWith('+55')) {
+                return chave.replace(/(\+55)(\d{2})(\d{5})(\d{4})/, '$1 ($2) $3-$4');
+            }
+            // Outros casos (email, chave aleatória)
+            return chave;
+        }
+
+        // Configurar atalhos de teclado
+        function configurarAtalhos() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F2') {
+                    e.preventDefault();
+                    showSection('produtos');
+                    mostrarFormProduto();
+                } else if (e.key === 'F4') {
+                    e.preventDefault();
+                    if (carrinho.length > 0 && vendaAtual) {
+                        finalizarVenda();
+                    }
+                }
+            });
+        }
+
+        // Navegação entre seções
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionName + '-section').classList.remove('hidden');
+            
+            if (sectionName === 'relatorios') {
+                atualizarRelatorios();
+            } else if (sectionName === 'produtos') {
+                atualizarTabelaProdutos();
+            } else if (sectionName === 'caixa') {
+                atualizarHistoricoMovimentos();
+                calcularSaldoCaixa();
+            } else if (sectionName === 'vendas') {
+                atualizarListaProdutos();
+            } else if (sectionName === 'adm') {
+                carregarConfiguracoesAdm();
+            }
+        }
+
+        // Gerenciamento de produtos
+        function mostrarFormProduto() {
+            document.getElementById('form-produto').classList.remove('hidden');
+            document.getElementById('produto-nome').focus();
+        }
+
+        function cancelarEdicaoProduto() {
+            document.getElementById('form-produto').classList.add('hidden');
+            limparFormProduto();
+            produtoEditando = null;
+        }
+
+        function limparFormProduto() {
+            document.getElementById('produto-nome').value = '';
+            document.getElementById('produto-codigo').value = '';
+            document.getElementById('produto-preco').value = '';
+            document.getElementById('produto-custo').value = '';
+            document.getElementById('produto-unidade').value = 'un';
+            document.getElementById('produto-estoque').value = '0';
+            document.getElementById('produto-categoria').value = '';
+        }
+
+        function salvarProduto() {
+            const nome = document.getElementById('produto-nome').value.trim();
+            const preco = parseFloat(document.getElementById('produto-preco').value);
+            
+            if (!nome || !preco || preco <= 0) {
+                mostrarMensagem('Nome e preço são obrigatórios e o preço deve ser maior que zero!', 'erro');
+                return;
+            }
+
+            const produto = {
+                id: produtoEditando ? produtoEditando.id : 'p_' + Date.now(),
+                nome: nome,
+                codigo: document.getElementById('produto-codigo').value.trim(),
+                preco: preco,
+                custo: parseFloat(document.getElementById('produto-custo').value) || 0,
+                unidade: document.getElementById('produto-unidade').value,
+                estoque: parseFloat(document.getElementById('produto-estoque').value) || 0,
+                categoria: document.getElementById('produto-categoria').value.trim()
+            };
+
+            if (produtoEditando) {
+                const index = produtos.findIndex(p => p.id === produtoEditando.id);
+                produtos[index] = produto;
+            } else {
+                produtos.push(produto);
+            }
+
+            salvarDados();
+            atualizarTabelaProdutos();
+            atualizarListaProdutos();
+            cancelarEdicaoProduto();
+            mostrarMensagem('Produto salvo com sucesso!', 'sucesso');
+        }
+
+        // Variáveis para controle de ações protegidas
+        let acaoPendente = null;
+        let produtoParaAcao = null;
+
+        function editarProduto(id) {
+            produtoParaAcao = id;
+            acaoPendente = 'editar_produto';
+            solicitarSenhaAcao('Digite a senha para editar este produto:');
+        }
+
+        function removerProduto(id) {
+            produtoParaAcao = id;
+            acaoPendente = 'remover_produto';
+            solicitarSenhaAcao('Digite a senha para remover este produto:');
+        }
+
+        function executarEdicaoProduto(id) {
+            const produto = produtos.find(p => p.id === id);
+            if (!produto) return;
+
+            produtoEditando = produto;
+            document.getElementById('produto-nome').value = produto.nome;
+            document.getElementById('produto-codigo').value = produto.codigo || '';
+            document.getElementById('produto-preco').value = produto.preco;
+            document.getElementById('produto-custo').value = produto.custo || '';
+            document.getElementById('produto-unidade').value = produto.unidade;
+            document.getElementById('produto-estoque').value = produto.estoque;
+            document.getElementById('produto-categoria').value = produto.categoria || '';
+            
+            mostrarFormProduto();
+        }
+
+        function executarRemocaoProduto(id) {
+            produtos = produtos.filter(p => p.id !== id);
+            salvarDados();
+            atualizarTabelaProdutos();
+            atualizarListaProdutos();
+            mostrarMensagem('Produto removido com sucesso!', 'sucesso');
+        }
+
+        function atualizarTabelaProdutos() {
+            // Atualizar tabela desktop
+            const tbody = document.getElementById('tabela-produtos');
+            tbody.innerHTML = '';
+
+            // Atualizar cards mobile
+            const cardsContainer = document.getElementById('produtos-cards');
+            cardsContainer.innerHTML = '';
+
+            produtos.forEach(produto => {
+                const estoqueClass = produto.estoque <= 5 ? 'text-red-600 font-semibold' : '';
+                
+                // Tabela desktop
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-2">${produto.nome}</td>
+                    <td class="px-4 py-2">${produto.codigo || '-'}</td>
+                    <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right ${estoqueClass}">${produto.estoque} ${produto.unidade}</td>
+                    <td class="px-4 py-2">${produto.categoria || '-'}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button onclick="editarProduto('${produto.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
+                            Editar
+                        </button>
+                        <button onclick="removerProduto('${produto.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm transition-colors">
+                            Remover
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // Card mobile
+                const card = document.createElement('div');
+                card.className = 'border rounded-lg p-3 bg-gray-50';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-base">${produto.nome}</h4>
+                            <p class="text-sm text-gray-600">${produto.codigo || 'Sem código'}</p>
+                            <p class="text-sm text-gray-600">${produto.categoria || 'Sem categoria'}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>
+                            <div class="text-sm ${estoqueClass}">Estoque: ${produto.estoque} ${produto.unidade}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button onclick="editarProduto('${produto.id}')" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Editar
+                        </button>
+                        <button onclick="removerProduto('${produto.id}')" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Remover
+                        </button>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // Busca e seleção de produtos
+        function buscarProduto(termo) {
+            const lista = document.getElementById('produtos-lista');
+            lista.innerHTML = '';
+
+            if (!termo.trim()) {
+                atualizarListaProdutos();
+                return;
+            }
+
+            const produtosFiltrados = produtos.filter(p => 
+                p.nome.toLowerCase().includes(termo.toLowerCase()) ||
+                (p.codigo && p.codigo.includes(termo))
+            );
+
+            produtosFiltrados.forEach(produto => {
+                const div = document.createElement('div');
+                div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors';
+                div.onclick = () => adicionarAoCarrinho(produto.id);
+                
+                const estoqueClass = produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600';
+                
+                div.innerHTML = `
+                    <div class="font-medium">${produto.nome}</div>
+                    <div class="text-sm text-gray-600">R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span></div>
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        function atualizarListaProdutos() {
+            const lista = document.getElementById('produtos-lista');
+            lista.innerHTML = '';
+
+            produtos.slice(0, 10).forEach(produto => {
+                const div = document.createElement('div');
+                div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors';
+                div.onclick = () => adicionarAoCarrinho(produto.id);
+                
+                const estoqueClass = produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600';
+                
+                div.innerHTML = `
+                    <div class="font-medium">${produto.nome}</div>
+                    <div class="text-sm text-gray-600">R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span></div>
+                `;
+                lista.appendChild(div);
+            });
+        }
+
+        function handleProductSearch(event) {
+            if (event.key === 'Enter') {
+                const lista = document.getElementById('produtos-lista');
+                const primeiroProduto = lista.querySelector('div');
+                if (primeiroProduto) {
+                    primeiroProduto.click();
+                    document.getElementById('busca-produto').value = '';
+                }
+            }
+        }
+
+        // Sistema de pesagem para produtos por kg
+        let produtoParaPesagem = null;
+
+        function mostrarModalPesagem(produto) {
+            produtoParaPesagem = produto;
+            
+            document.getElementById('pesagem-produto-nome').textContent = produto.nome;
+            document.getElementById('pesagem-preco-kg').textContent = `R$ ${produto.preco.toFixed(2)}`;
+            document.getElementById('peso-gramas').value = '';
+            document.getElementById('peso-display').textContent = '0g (0,000kg)';
+            document.getElementById('valor-total-pesagem').textContent = 'R$ 0,00';
+            
+            const modal = document.getElementById('modal-pesagem');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Focar no campo de peso
+            document.getElementById('peso-gramas').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('peso-gramas').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarPesagem();
+                }
+            };
+        }
+
+        function calcularPrecoPesagem() {
+            if (!produtoParaPesagem) return;
+            
+            const pesoGramas = parseFloat(document.getElementById('peso-gramas').value) || 0;
+            const pesoKg = pesoGramas / 1000;
+            const valorTotal = pesoKg * produtoParaPesagem.preco;
+            
+            document.getElementById('peso-display').textContent = `${pesoGramas}g (${pesoKg.toFixed(3)}kg)`;
+            document.getElementById('valor-total-pesagem').textContent = `R$ ${valorTotal.toFixed(2)}`;
+        }
+
+        function confirmarPesagem() {
+            if (!produtoParaPesagem) return;
+            
+            const pesoGramas = parseFloat(document.getElementById('peso-gramas').value);
+            
+            if (!pesoGramas || pesoGramas <= 0) {
+                mostrarMensagem('Digite um peso válido em gramas!', 'erro');
+                document.getElementById('peso-gramas').focus();
+                return;
+            }
+            
+            const pesoKg = pesoGramas / 1000;
+            const precoUnitario = produtoParaPesagem.preco; // Preço por kg
+            
+            // Verificar se há estoque suficiente
+            if (pesoKg > produtoParaPesagem.estoque) {
+                mostrarMensagem(`Estoque insuficiente! Disponível: ${produtoParaPesagem.estoque}kg`, 'erro');
+                return;
+            }
+            
+            // Verificar se já existe item do mesmo produto no carrinho
+            const itemExistente = carrinho.find(item => item.produtoId === produtoParaPesagem.id);
+            
+            if (itemExistente) {
+                // Somar o peso ao item existente
+                const novaQuantidade = itemExistente.quantidade + pesoKg;
+                
+                if (novaQuantidade > produtoParaPesagem.estoque) {
+                    mostrarMensagem('Quantidade total excede o estoque disponível!', 'erro');
+                    return;
+                }
+                
+                itemExistente.quantidade = novaQuantidade;
+            } else {
+                // Criar novo item no carrinho
+                carrinho.push({
+                    produtoId: produtoParaPesagem.id,
+                    nome: produtoParaPesagem.nome,
+                    preco: precoUnitario,
+                    quantidade: pesoKg,
+                    unidade: produtoParaPesagem.unidade,
+                    pesoGramas: pesoGramas // Guardar peso original em gramas para exibição
+                });
+            }
+            
+            cancelarPesagem();
+            atualizarCarrinho();
+            mostrarMensagem(`${pesoGramas}g de ${produtoParaPesagem.nome} adicionado ao carrinho!`, 'sucesso');
+            document.getElementById('busca-produto').focus();
+        }
+
+        function cancelarPesagem() {
+            produtoParaPesagem = null;
+            const modal = document.getElementById('modal-pesagem');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function editarPesagem(produtoId) {
+            const produto = produtos.find(p => p.id === produtoId);
+            const itemCarrinho = carrinho.find(item => item.produtoId === produtoId);
+            
+            if (!produto || !itemCarrinho) return;
+            
+            // Remover item atual do carrinho temporariamente
+            removerDoCarrinho(produtoId);
+            
+            // Mostrar modal com peso atual
+            mostrarModalPesagem(produto);
+            
+            // Preencher com peso atual
+            const pesoAtualGramas = Math.round(itemCarrinho.quantidade * 1000);
+            document.getElementById('peso-gramas').value = pesoAtualGramas;
+            calcularPrecoPesagem();
+        }
+
+        // Gerenciamento do carrinho
+        function adicionarAoCarrinho(produtoId) {
+            const produto = produtos.find(p => p.id === produtoId);
+            if (!produto) return;
+
+            if (produto.estoque <= 0) {
+                mostrarMensagem('Produto sem estoque!', 'erro');
+                return;
+            }
+
+            // Se for produto por kg, mostrar modal para inserir peso
+            if (produto.unidade === 'kg') {
+                mostrarModalPesagem(produto);
+                return;
+            }
+
+            const itemExistente = carrinho.find(item => item.produtoId === produtoId);
+            
+            if (itemExistente) {
+                if (itemExistente.quantidade >= produto.estoque) {
+                    mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
+                    return;
+                }
+                itemExistente.quantidade += 1;
+            } else {
+                carrinho.push({
+                    produtoId: produtoId,
+                    nome: produto.nome,
+                    preco: produto.preco,
+                    quantidade: 1,
+                    unidade: produto.unidade
+                });
+            }
+
+            atualizarCarrinho();
+            document.getElementById('busca-produto').value = '';
+            document.getElementById('busca-produto').focus();
+        }
+
+        function alterarQuantidade(produtoId, novaQuantidade) {
+            const produto = produtos.find(p => p.id === produtoId);
+            const item = carrinho.find(item => item.produtoId === produtoId);
+            
+            if (!produto || !item) return;
+
+            if (novaQuantidade <= 0) {
+                removerDoCarrinho(produtoId);
+                return;
+            }
+
+            if (novaQuantidade > produto.estoque) {
+                mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
+                return;
+            }
+
+            item.quantidade = novaQuantidade;
+            atualizarCarrinho();
+        }
+
+        function removerDoCarrinho(produtoId) {
+            carrinho = carrinho.filter(item => item.produtoId !== produtoId);
+            atualizarCarrinho();
+        }
+
+        function atualizarCarrinho() {
+            const container = document.getElementById('carrinho-items');
+            container.innerHTML = '';
+
+            if (carrinho.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center py-4">Carrinho vazio</div>';
+                calcularTotal();
+                return;
+            }
+
+            carrinho.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'border rounded-lg p-3';
+                
+                const subtotal = item.preco * item.quantidade;
+                
+                // Formatação especial para produtos por kg
+                let quantidadeDisplay = item.quantidade;
+                let unidadeDisplay = item.unidade;
+                
+                if (item.unidade === 'kg') {
+                    const gramas = Math.round(item.quantidade * 1000);
+                    quantidadeDisplay = `${gramas}g (${item.quantidade.toFixed(3)}kg)`;
+                    unidadeDisplay = '';
+                } else {
+                    quantidadeDisplay = `${item.quantidade} ${item.unidade}`;
+                    unidadeDisplay = '';
+                }
+                
+                div.innerHTML = `
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <div class="font-medium text-sm lg:text-base">${item.nome}</div>
+                            <div class="text-xs lg:text-sm text-gray-600">R$ ${item.preco.toFixed(2)} x ${quantidadeDisplay}</div>
+                        </div>
+                        <div class="flex items-center justify-between lg:justify-end gap-2">
+                            <div class="flex items-center space-x-2">
+                                ${item.unidade === 'kg' ? 
+                                    `<button onclick="editarPesagem('${item.produtoId}')" 
+                                            class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">⚖️ Editar</button>` :
+                                    `<button onclick="alterarQuantidade('${item.produtoId}', ${item.quantidade - 1})" 
+                                            class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 lg:w-6 lg:h-6 rounded text-sm transition-colors">-</button>
+                                    <input type="number" value="${item.quantidade}" min="1" step="0.01" 
+                                           class="w-16 lg:w-14 p-1 border rounded text-center text-sm"
+                                           onchange="alterarQuantidade('${item.produtoId}', parseFloat(this.value))">
+                                    <button onclick="alterarQuantidade('${item.produtoId}', ${item.quantidade + 1})" 
+                                            class="bg-green-500 hover:bg-green-600 text-white w-8 h-8 lg:w-6 lg:h-6 rounded text-sm transition-colors">+</button>`
+                                }
+                                <button onclick="removerDoCarrinho('${item.produtoId}')" 
+                                        class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 lg:px-2 rounded text-sm transition-colors">×</button>
+                            </div>
+                            <div class="font-semibold text-base lg:text-sm lg:ml-3">R$ ${subtotal.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            calcularTotal();
+        }
+
+        function calcularTotal() {
+            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            const valorDesconto = subtotal * (desconto / 100);
+            const total = subtotal - valorDesconto;
+
+            document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+            document.getElementById('total-venda').textContent = `R$ ${total.toFixed(2)}`;
+
+            if (vendaAtual) {
+                calcularTroco();
+            }
+        }
+
+        // Pagamento
+        function selecionarPagamento(tipo) {
+            vendaAtual = { tipo: tipo };
+            
+            document.getElementById('pagamento-detalhes').classList.remove('hidden');
+            document.querySelectorAll('#pagamento-detalhes > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            
+            document.getElementById(tipo + '-form').classList.remove('hidden');
+            
+            if (tipo === 'dinheiro') {
+                document.getElementById('valor-recebido').focus();
+            } else if (tipo === 'pix') {
+                // Limpar QR Code anterior
+                document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
+            }
+        }
+
+        function gerarQRCodePix() {
+            if (carrinho.length === 0) {
+                mostrarMensagem('Adicione produtos ao carrinho primeiro!', 'erro');
+                return;
+            }
+
+            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            const valorDesconto = subtotal * (desconto / 100);
+            const total = subtotal - valorDesconto;
+
+            // Dados PIX - usando configuração personalizada
+            const dadosPix = {
+                chavePix: CONFIG_PIX.chavePix,
+                nomeRecebedor: CONFIG_PIX.nomeRecebedor,
+                cidade: CONFIG_PIX.cidade,
+                valor: total.toFixed(2),
+                identificador: 'PDV' + Date.now().toString().slice(-8)
+            };
+
+            // Gerar payload PIX (EMV)
+            const payloadPix = gerarPayloadPix(dadosPix);
+            
+            // Gerar QR Code
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            
+            try {
+                // Criar QR Code usando qrcode-generator
+                const qr = qrcode(0, 'M');
+                qr.addData(payloadPix);
+                qr.make();
+                
+                // Criar elemento canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const moduleCount = qr.getModuleCount();
+                const cellSize = 4;
+                const margin = 4;
+                
+                canvas.width = canvas.height = moduleCount * cellSize + margin * 2;
+                
+                // Desenhar fundo branco
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Desenhar módulos pretos
+                ctx.fillStyle = '#000000';
+                for (let row = 0; row < moduleCount; row++) {
+                    for (let col = 0; col < moduleCount; col++) {
+                        if (qr.isDark(row, col)) {
+                            ctx.fillRect(
+                                col * cellSize + margin,
+                                row * cellSize + margin,
+                                cellSize,
+                                cellSize
+                            );
+                        }
+                    }
+                }
+                
+                // Redimensionar para 200x200
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = finalCanvas.height = 200;
+                const finalCtx = finalCanvas.getContext('2d');
+                finalCtx.imageSmoothingEnabled = false;
+                finalCtx.drawImage(canvas, 0, 0, 200, 200);
+                
+                container.appendChild(finalCanvas);
+                
+                // Adicionar informações do PIX
+                const info = document.createElement('div');
+                info.className = 'mt-2 text-xs text-gray-600';
+                info.innerHTML = `
+                    <p><strong>Valor:</strong> R$ ${total.toFixed(2)}</p>
+                    <p><strong>ID:</strong> ${dadosPix.identificador}</p>
+                    <p class="mt-2 text-green-600">✓ QR Code gerado com sucesso!</p>
+                `;
+                container.appendChild(info);
+                
+                // Mostrar status de aguardando pagamento
+                mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'Escaneie o QR Code com seu app do banco');
+                
+                // Iniciar verificação de pagamento
+                iniciarVerificacaoPagamentoPix(dadosPix.identificador);
+                
+            } catch (error) {
+                container.innerHTML = '<div class="text-red-500">Erro ao gerar QR Code: ' + error.message + '</div>';
+                console.error('Erro QR Code:', error);
+            }
+        }
+
+        function mostrarStatusPix(tipo, titulo, descricao) {
+            const statusDiv = document.getElementById('pix-status');
+            const contentDiv = document.getElementById('pix-status-content');
+            
+            let bgColor, textColor, icon;
+            
+            switch(tipo) {
+                case 'aguardando':
+                    bgColor = 'bg-yellow-50 border-yellow-200';
+                    textColor = 'text-yellow-800';
+                    icon = '⏳';
+                    break;
+                case 'confirmado':
+                    bgColor = 'bg-green-50 border-green-200';
+                    textColor = 'text-green-800';
+                    icon = '✅';
+                    break;
+                case 'erro':
+                    bgColor = 'bg-red-50 border-red-200';
+                    textColor = 'text-red-800';
+                    icon = '❌';
+                    break;
+                default:
+                    bgColor = 'bg-gray-50 border-gray-200';
+                    textColor = 'text-gray-800';
+                    icon = 'ℹ️';
+            }
+            
+            statusDiv.className = `mb-3 p-3 rounded-lg border-2 ${bgColor}`;
+            contentDiv.innerHTML = `
+                <div class="flex items-center justify-center ${textColor}">
+                    <span class="text-2xl mr-2">${icon}</span>
+                    <div class="text-center">
+                        <div class="font-semibold">${titulo}</div>
+                        <div class="text-sm mt-1">${descricao}</div>
+                    </div>
+                </div>
+            `;
+            
+            statusDiv.classList.remove('hidden');
+        }
+
+        function iniciarVerificacaoPagamentoPix(identificador) {
+            // IMPORTANTE: Esta é uma simulação para demonstração
+            // Em um sistema real, você precisaria:
+            // 1. Integrar com a API do seu banco ou provedor PIX
+            // 2. Fazer polling para verificar o status do pagamento
+            // 3. Ou usar webhooks para receber notificações em tempo real
+            
+            mostrarMensagem('QR Code PIX gerado! Aguardando pagamento...', 'sucesso');
+        }
+
+
+
+        function gerarPayloadPix(dados) {
+            // Função para formatar campo EMV
+            function formatarCampo(id, valor) {
+                const tamanho = valor.length.toString().padStart(2, '0');
+                return id + tamanho + valor;
+            }
+
+            // Construir payload PIX conforme padrão EMV
+            let payload = '';
+            
+            // Payload Format Indicator
+            payload += formatarCampo('00', '01');
+            
+            // Point of Initiation Method
+            payload += formatarCampo('01', '12');
+            
+            // Merchant Account Information
+            let merchantInfo = '';
+            merchantInfo += formatarCampo('00', 'BR.GOV.BCB.PIX');
+            merchantInfo += formatarCampo('01', dados.chavePix);
+            payload += formatarCampo('26', merchantInfo);
+            
+            // Merchant Category Code
+            payload += formatarCampo('52', '0000');
+            
+            // Transaction Currency
+            payload += formatarCampo('53', '986'); // BRL
+            
+            // Transaction Amount
+            payload += formatarCampo('54', dados.valor);
+            
+            // Country Code
+            payload += formatarCampo('58', 'BR');
+            
+            // Merchant Name
+            payload += formatarCampo('59', dados.nomeRecebedor);
+            
+            // Merchant City
+            payload += formatarCampo('60', dados.cidade);
+            
+            // Additional Data Field Template
+            let additionalData = '';
+            additionalData += formatarCampo('05', dados.identificador);
+            payload += formatarCampo('62', additionalData);
+            
+            // CRC16 (será calculado)
+            payload += '6304';
+            
+            // Calcular CRC16
+            const crc = calcularCRC16(payload);
+            payload += crc;
+            
+            return payload;
+        }
+
+        function calcularCRC16(payload) {
+            // Implementação simplificada do CRC16-CCITT
+            let crc = 0xFFFF;
+            
+            for (let i = 0; i < payload.length; i++) {
+                crc ^= payload.charCodeAt(i) << 8;
+                
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x8000) {
+                        crc = (crc << 1) ^ 0x1021;
+                    } else {
+                        crc = crc << 1;
+                    }
+                }
+            }
+            
+            crc = crc & 0xFFFF;
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+
+        function calcularTroco() {
+            const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            const valorDesconto = total * (desconto / 100);
+            const totalFinal = total - valorDesconto;
+            
+            const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
+            const troco = valorRecebido - totalFinal;
+            
+            document.getElementById('troco').textContent = `R$ ${troco.toFixed(2)}`;
+            document.getElementById('troco').className = troco >= 0 ? 'text-green-600' : 'text-red-600';
+        }
+
+        function finalizarVenda() {
+            if (carrinho.length === 0) {
+                mostrarMensagem('Carrinho vazio!', 'erro');
+                return;
+            }
+
+            if (!vendaAtual) {
+                mostrarMensagem('Selecione uma forma de pagamento!', 'erro');
+                return;
+            }
+
+            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            const valorDesconto = subtotal * (desconto / 100);
+            const total = subtotal - valorDesconto;
+
+            // Validações específicas por tipo de pagamento
+            if (vendaAtual.tipo === 'dinheiro') {
+                const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
+                if (valorRecebido < total) {
+                    mostrarMensagem('Valor recebido é insuficiente!', 'erro');
+                    return;
+                }
+                vendaAtual.valorRecebido = valorRecebido;
+                vendaAtual.troco = valorRecebido - total;
+            } else if (vendaAtual.tipo === 'pix') {
+                vendaAtual.pixId = document.getElementById('pix-id').value;
+            } else if (vendaAtual.tipo === 'cartao') {
+                vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
+                vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
+            }
+
+            // Verificar estoque antes de finalizar
+            for (let item of carrinho) {
+                const produto = produtos.find(p => p.id === item.produtoId);
+                if (produto.estoque < item.quantidade) {
+                    mostrarMensagem(`Estoque insuficiente para ${produto.nome}!`, 'erro');
+                    return;
+                }
+            }
+
+            // Criar venda
+            const venda = {
+                id: 'v_' + Date.now(),
+                data: new Date().toISOString(),
+                itens: [...carrinho],
+                subtotal: subtotal,
+                desconto: desconto,
+                valorDesconto: valorDesconto,
+                total: total,
+                pagamento: vendaAtual
+            };
+
+            // Atualizar estoque
+            carrinho.forEach(item => {
+                const produto = produtos.find(p => p.id === item.produtoId);
+                produto.estoque -= item.quantidade;
+            });
+
+            // Salvar venda
+            vendas.push(venda);
+            
+            // Registrar movimento de caixa
+            const movimento = {
+                id: 'm_' + Date.now(),
+                data: new Date().toISOString(),
+                tipo: 'entrada',
+                valor: total,
+                descricao: `Venda #${venda.id} - ${vendaAtual.tipo}`,
+                vendaId: venda.id
+            };
+            movimentos.push(movimento);
+
+            salvarDados();
+            mostrarComprovante(venda);
+            limparVenda();
+            mostrarMensagem('Venda finalizada com sucesso!', 'sucesso');
+        }
+
+        function limparVenda() {
+            carrinho = [];
+            vendaAtual = null;
+            document.getElementById('desconto').value = '0';
+            document.getElementById('valor-recebido').value = '';
+            document.getElementById('pix-id').value = '';
+            document.getElementById('tipo-cartao').value = 'credito';
+            document.getElementById('parcelas').value = '1';
+            document.getElementById('pagamento-detalhes').classList.add('hidden');
+            
+            // Resetar status PIX
+            document.getElementById('pix-status').classList.add('hidden');
+            document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
+            
+            // Resetar botão finalizar
+            const btnFinalizar = document.querySelector('button[onclick="finalizarVenda()"]');
+            if (btnFinalizar) {
+                btnFinalizar.textContent = 'Finalizar Venda';
+                btnFinalizar.className = 'w-full mt-4 p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition-colors text-base';
+            }
+            
+            atualizarCarrinho();
+            atualizarListaProdutos();
+            document.getElementById('busca-produto').focus();
+        }
+
+        function mostrarComprovante(venda) {
+            vendaParaComprovante = venda;
+            const modal = document.getElementById('modal-comprovante');
+            const data = new Date(venda.data);
+            
+            // Atualizar data e código da venda
+            document.getElementById('comprovante-data').innerHTML = `
+                <div><strong>Venda:</strong> ${venda.id}</div>
+                <div><strong>Data:</strong> ${data.toLocaleDateString('pt-BR')} - <strong>Hora:</strong> ${data.toLocaleTimeString('pt-BR')}</div>
+                <div><strong>Estabelecimento:</strong> ${configSistema.nomeEmpresa || 'PDV - Sistema de Caixa'}</div>
+            `;
+            
+            // Criar HTML dos itens com mais detalhes
+            const itensHtml = venda.itens.map(item => {
+                let quantidadeTexto;
+                if (item.unidade === 'kg') {
+                    const gramas = Math.round(item.quantidade * 1000);
+                    quantidadeTexto = `${gramas}g (${item.quantidade.toFixed(3)}kg)`;
+                } else {
+                    quantidadeTexto = `${item.quantidade} ${item.unidade}`;
+                }
+                
+                return `
+                    <div class="border-b pb-2 mb-2">
+                        <div class="flex justify-between font-medium">
+                            <span>${item.nome}</span>
+                            <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${quantidadeTexto} x R$ ${item.preco.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('comprovante-itens').innerHTML = itensHtml;
+            
+            // Mostrar subtotal, desconto e total
+            let totaisHtml = `
+                <div class="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>R$ ${venda.subtotal.toFixed(2)}</span>
+                </div>
+            `;
+            
+            if (venda.desconto > 0) {
+                totaisHtml += `
+                    <div class="flex justify-between text-sm text-red-600">
+                        <span>Desconto (${venda.desconto}%):</span>
+                        <span>-R$ ${venda.valorDesconto.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('comprovante-total').innerHTML = totaisHtml;
+            document.getElementById('comprovante-total-final').textContent = `R$ ${venda.total.toFixed(2)}`;
+            
+            // Informações de pagamento detalhadas
+            let pagamentoTexto = `<strong>Forma de Pagamento:</strong> ${venda.pagamento.tipo.toUpperCase()}`;
+            
+            if (venda.pagamento.tipo === 'dinheiro') {
+                if (venda.pagamento.valorRecebido) {
+                    pagamentoTexto += `<br><strong>Valor Recebido:</strong> R$ ${venda.pagamento.valorRecebido.toFixed(2)}`;
+                }
+                if (venda.pagamento.troco > 0) {
+                    pagamentoTexto += `<br><strong>Troco:</strong> R$ ${venda.pagamento.troco.toFixed(2)}`;
+                }
+            } else if (venda.pagamento.tipo === 'cartao') {
+                const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CRÉDITO';
+                const parcelas = venda.pagamento.parcelas || 1;
+                pagamentoTexto += ` ${tipoCartao}`;
+                pagamentoTexto += `<br><strong>Parcelas:</strong> ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`;
+            } else if (venda.pagamento.tipo === 'pix') {
+                if (venda.pagamento.pixId) {
+                    pagamentoTexto += `<br><strong>ID Transação:</strong> ${venda.pagamento.pixId}`;
+                }
+            }
+            
+            document.getElementById('comprovante-pagamento').innerHTML = pagamentoTexto;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharComprovante() {
+            const modal = document.getElementById('modal-comprovante');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            vendaParaComprovante = null;
+        }
+
+        function imprimirOuPDF() {
+            // Verificar se há impressora disponível
+            if (window.navigator.userAgent.includes('Chrome') || window.navigator.userAgent.includes('Firefox')) {
+                // Mostrar opções
+                const opcoes = document.createElement('div');
+                opcoes.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                
+                opcoes.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                        <h3 class="text-lg font-semibold mb-4">Como deseja o comprovante?</h3>
+                        <div class="space-y-3">
+                            <button onclick="window.print(); fecharOpcoes()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors">
+                                🖨️ Imprimir (se tiver impressora)
+                            </button>
+                            <button onclick="gerarPDFComprovante(); fecharOpcoes()" class="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg transition-colors">
+                                📄 Baixar PDF
+                            </button>
+                            <button onclick="fecharOpcoes()" class="w-full bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(opcoes);
+                
+                window.fecharOpcoes = () => {
+                    opcoes.remove();
+                };
+            } else {
+                // Fallback para outros navegadores
+                gerarPDFComprovante();
+            }
+        }
+
+        function gerarPDFComprovante() {
+    if (!vendaParaComprovante) {
+        mostrarMensagem('Erro ao gerar PDF!', 'erro');
+        return;
+    }
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const venda = vendaParaComprovante;
+        const data = new Date(venda.data);
+        const largura = 80;
+        const margemEsquerda = 5;
+        const margemDireita = 75;
+
+        // ===============================
+        // 1️⃣  PRIMEIRA PASSAGEM: medir altura
+        // ===============================
+        let yPos = 8;
+        const calcAltura = () => {
+            yPos += 8 + 8 + 5 + 4 + 4 + 8; // cabeçalho
+            yPos += 6 + 5 + 5; // separadores e cabeçalhos
+
+            // itens
+            venda.itens.forEach(() => { yPos += 10; });
+
+            yPos += 6 + 5; // subtotal
+            if (venda.desconto > 0) yPos += 5;
+            yPos += 8 + 6 + 5; // total + separador + pagamento título
+
+            // formas de pagamento
+            if (venda.pagamento.tipo === 'dinheiro') yPos += 12;
+            else if (venda.pagamento.tipo === 'cartao') yPos += 10;
+            else if (venda.pagamento.tipo === 'pix') yPos += 10;
+
+            yPos += 6 + 6 + 8 + 4 + 4; // final
+
+            return yPos + 10; // margem extra
+        };
+
+        const alturaNecessaria = calcAltura();
+
+        // ===============================
+        // 2️⃣  SEGUNDA PASSAGEM: gerar PDF com altura real
+        // ===============================
+        const doc = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: [largura, alturaNecessaria]
+        });
+
+        doc.setFont('helvetica');
+        let y = 8;
+
+        // Nome do estabelecimento
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        const nomeEmpresa = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
+        doc.text(nomeEmpresa, largura / 2, y, { align: 'center' });
+        y += 8;
+
+        // Título
+        doc.setFontSize(12);
+        doc.text('COMPROVANTE DE VENDA', largura / 2, y, { align: 'center' });
+        y += 8;
+
+        // Código e data
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Venda: ${venda.id}`, largura / 2, y, { align: 'center' });
+        y += 5;
+        doc.text(`Data: ${data.toLocaleDateString('pt-BR')}`, largura / 2, y, { align: 'center' });
+        y += 4;
+        doc.text(`Hora: ${data.toLocaleTimeString('pt-BR')}`, largura / 2, y, { align: 'center' });
+        y += 8;
+
+        // Separadores
+        doc.text('================================', largura / 2, y, { align: 'center' });
+        y += 6;
+
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ITEM', margemEsquerda, y);
+        doc.text('QTD', 35, y);
+        doc.text('VALOR', margemDireita, y, { align: 'right' });
+        y += 5;
+
+        doc.text('--------------------------------', largura / 2, y, { align: 'center' });
+        y += 5;
+
+        // Itens
+        doc.setFont('helvetica', 'normal');
+        venda.itens.forEach(item => {
+            const nomeItem = item.nome.length > 22 ? item.nome.substring(0, 22) + '...' : item.nome;
+            doc.text(nomeItem, margemEsquerda, y);
+            y += 4;
+
+            let quantidadeTexto;
+            if (item.unidade === 'kg') {
+                const gramas = Math.round(item.quantidade * 1000);
+                quantidadeTexto = `${gramas}g`;
+            } else {
+                quantidadeTexto = `${item.quantidade} ${item.unidade}`;
+            }
+
+            const precoUnitario = `R$ ${item.preco.toFixed(2)}`;
+            const totalItem = (item.preco * item.quantidade).toFixed(2);
+
+            doc.text(`${quantidadeTexto} x ${precoUnitario}`, margemEsquerda, y);
+            doc.text(`R$ ${totalItem}`, margemDireita, y, { align: 'right' });
+            y += 6;
+        });
+
+        doc.text('================================', largura / 2, y, { align: 'center' });
+        y += 6;
+
+        // Totais
+        doc.setFontSize(8);
+        doc.text(`Subtotal:`, margemEsquerda, y);
+        doc.text(`R$ ${venda.subtotal.toFixed(2)}`, margemDireita, y, { align: 'right' });
+        y += 5;
+
+        if (venda.desconto > 0) {
+            doc.text(`Desconto (${venda.desconto}%):`, margemEsquerda, y);
+            doc.text(`-R$ ${venda.valorDesconto.toFixed(2)}`, margemDireita, y, { align: 'right' });
+            y += 5;
+        }
+
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`TOTAL A PAGAR:`, margemEsquerda, y);
+        doc.text(`R$ ${venda.total.toFixed(2)}`, margemDireita, y, { align: 'right' });
+        y += 8;
+
+        doc.setFontSize(7);
+        doc.text('================================', largura / 2, y, { align: 'center' });
+        y += 6;
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('FORMA DE PAGAMENTO:', margemEsquerda, y);
+        y += 5;
+
+        doc.setFont('helvetica', 'normal');
+        const forma = venda.pagamento.tipo.toUpperCase();
+
+        if (forma === 'DINHEIRO') {
+            doc.text(forma, margemEsquerda, y); y += 4;
+            if (venda.pagamento.valorRecebido)
+                doc.text(`Valor Recebido: R$ ${venda.pagamento.valorRecebido.toFixed(2)}`, margemEsquerda, y), y += 4;
+            if (venda.pagamento.troco > 0)
+                doc.text(`Troco: R$ ${venda.pagamento.troco.toFixed(2)}`, margemEsquerda, y), y += 4;
+        } else if (forma === 'CARTAO') {
+            const tipo = venda.pagamento.tipoCartao?.toUpperCase() || 'CREDITO';
+            const parcelas = venda.pagamento.parcelas || 1;
+            doc.text(`${forma} ${tipo}`, margemEsquerda, y); y += 4;
+            doc.text(`Parcelas: ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`, margemEsquerda, y); y += 4;
+        } else if (forma === 'PIX') {
+            doc.text(forma, margemEsquerda, y); y += 4;
+            if (venda.pagamento.pixId)
+                doc.text(`ID Transacao: ${venda.pagamento.pixId}`, margemEsquerda, y), y += 4;
+        }
+
+        y += 6;
+        doc.text('================================', largura / 2, y, { align: 'center' });
+        y += 6;
+
+        doc.setFontSize(9);
+        doc.text('CUPOM NAO FISCAL', largura / 2, y, { align: 'center' });
+        y += 8;
+
+        doc.setFontSize(6);
+        doc.text('Obrigado pela preferencia!', largura / 2, y, { align: 'center' });
+        y += 4;
+        doc.text('mayconbrown.com.br', largura / 2, y, { align: 'center' });
+
+        // ===============================
+        // 3️⃣  Salvar PDF com altura real exata
+        // ===============================
+        const dataFormatada = data.toISOString().split('T')[0];
+        const horaFormatada = data.toTimeString().split(' ')[0].replace(/:/g, '');
+        const nomeArquivo = `cupom_${venda.id}_${dataFormatada}_${horaFormatada}.pdf`;
+        doc.save(nomeArquivo);
+
+        mostrarMensagem('Cupom térmico gerado com sucesso!', 'sucesso');
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        mostrarMensagem('Erro ao gerar PDF: ' + error.message, 'erro');
+    }
+}
+
+
+        // Funções para editar e excluir movimentos
+        function editarMovimento(movimentoId) {
+            const movimento = movimentos.find(m => m.id === movimentoId);
+            if (!movimento) return;
+            
+            // Não permitir editar movimentos de vendas
+            if (movimento.vendaId) {
+                mostrarMensagem('Não é possível editar movimentos gerados por vendas!', 'erro');
+                return;
+            }
+            
+            movimentoEditando = movimento;
+            
+            document.getElementById('edit-movimento-tipo').value = movimento.tipo;
+            document.getElementById('edit-movimento-valor').value = movimento.valor;
+            document.getElementById('edit-movimento-descricao').value = movimento.descricao;
+            
+            const modal = document.getElementById('modal-editar-movimento');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function salvarEdicaoMovimento() {
+            if (!movimentoEditando) return;
+            
+            const tipo = document.getElementById('edit-movimento-tipo').value;
+            const valor = parseFloat(document.getElementById('edit-movimento-valor').value);
+            const descricao = document.getElementById('edit-movimento-descricao').value.trim();
+            
+            if (!valor || valor <= 0) {
+                mostrarMensagem('Valor deve ser maior que zero!', 'erro');
+                return;
+            }
+            
+            if (!descricao) {
+                mostrarMensagem('Descrição é obrigatória!', 'erro');
+                return;
+            }
+            
+            // Atualizar movimento
+            const index = movimentos.findIndex(m => m.id === movimentoEditando.id);
+            if (index !== -1) {
+                movimentos[index].tipo = tipo;
+                movimentos[index].valor = valor;
+                movimentos[index].descricao = descricao;
+                
+                salvarDados();
+                atualizarHistoricoMovimentos();
+                calcularSaldoCaixa();
+                cancelarEdicaoMovimento();
+                mostrarMensagem('Movimento atualizado com sucesso!', 'sucesso');
+            }
+        }
+
+        function cancelarEdicaoMovimento() {
+            movimentoEditando = null;
+            const modal = document.getElementById('modal-editar-movimento');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function excluirMovimento(movimentoId) {
+            const movimento = movimentos.find(m => m.id === movimentoId);
+            if (!movimento) return;
+            
+            movimentoParaExcluir = movimento;
+            acaoPendente = 'excluir_movimento';
+            
+            if (movimento.vendaId) {
+                solicitarSenhaAcao('Digite a senha para excluir este movimento de venda:');
+            } else {
+                solicitarSenhaAcao('Digite a senha para excluir este movimento:');
+            }
+        }
+
+        // Movimentação de caixa
+        function registrarMovimento() {
+            acaoPendente = 'registrar_movimento';
+            solicitarSenhaAcao('Digite a senha para registrar este movimento:');
+        }
+
+        function executarRegistroMovimento() {
+            const tipo = document.getElementById('movimento-tipo').value;
+            const valor = parseFloat(document.getElementById('movimento-valor').value);
+            const descricao = document.getElementById('movimento-descricao').value.trim();
+
+            if (!valor || valor <= 0) {
+                mostrarMensagem('Valor deve ser maior que zero!', 'erro');
+                return;
+            }
+
+            if (!descricao) {
+                mostrarMensagem('Descrição é obrigatória!', 'erro');
+                return;
+            }
+
+            const movimento = {
+                id: 'm_' + Date.now(),
+                data: new Date().toISOString(),
+                tipo: tipo,
+                valor: valor,
+                descricao: descricao
+            };
+
+            movimentos.push(movimento);
+            salvarDados();
+            
+            document.getElementById('movimento-valor').value = '';
+            document.getElementById('movimento-descricao').value = '';
+            
+            atualizarHistoricoMovimentos();
+            calcularSaldoCaixa();
+            mostrarMensagem('Movimento registrado com sucesso!', 'sucesso');
+        }
+
+        function atualizarHistoricoMovimentos() {
+            const container = document.getElementById('historico-movimentos');
+            container.innerHTML = '';
+
+            const movimentosOrdenados = [...movimentos].sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            movimentosOrdenados.slice(0, 20).forEach(movimento => {
+                const div = document.createElement('div');
+                div.className = `p-3 border rounded-lg ${movimento.tipo === 'entrada' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`;
+                
+                const data = new Date(movimento.data);
+                const cor = movimento.tipo === 'entrada' ? 'text-green-600' : 'text-red-600';
+                const sinal = movimento.tipo === 'entrada' ? '+' : '-';
+                
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <div class="font-medium">${movimento.descricao}</div>
+                            <div class="text-sm text-gray-600">${data.toLocaleDateString('pt-BR')} ${data.toLocaleTimeString('pt-BR')}</div>
+                        </div>
+                        <div class="font-semibold ${cor}">${sinal}R$ ${movimento.valor.toFixed(2)}</div>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="editarMovimento('${movimento.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">
+                            ✏️ Editar
+                        </button>
+                        <button onclick="excluirMovimento('${movimento.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors">
+                            🗑️ Excluir
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calcularSaldoCaixa() {
+            const saldo = movimentos.reduce((total, movimento) => {
+                return movimento.tipo === 'entrada' ? total + movimento.valor : total - movimento.valor;
+            }, 0);
+            
+            document.getElementById('saldo-caixa').textContent = `R$ ${saldo.toFixed(2)}`;
+            document.getElementById('saldo-caixa').className = saldo >= 0 ? 'text-2xl font-bold text-green-600' : 'text-2xl font-bold text-red-600';
+        }
+
+        // Relatórios
+        function atualizarRelatorios() {
+            const hoje = new Date().toDateString();
+            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+            
+            document.getElementById('vendas-hoje').textContent = vendasHoje.length;
+            
+            const faturamentoHoje = vendasHoje.reduce((sum, v) => sum + v.total, 0);
+            document.getElementById('faturamento-hoje').textContent = `R$ ${faturamentoHoje.toFixed(2)}`;
+            
+            document.getElementById('total-produtos').textContent = produtos.length;
+            
+            const estoqueBaixo = produtos.filter(p => p.estoque <= 5).length;
+            document.getElementById('estoque-baixo').textContent = estoqueBaixo;
+            
+            atualizarTabelaVendasDia();
+        }
+
+        function atualizarTabelaVendasDia() {
+            // Atualizar tabela desktop
+            const tbody = document.getElementById('tabela-vendas-dia');
+            tbody.innerHTML = '';
+
+            // Atualizar cards mobile
+            const cardsContainer = document.getElementById('vendas-cards');
+            cardsContainer.innerHTML = '';
+
+            const hoje = new Date().toDateString();
+            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+
+            vendasHoje.reverse().forEach(venda => {
+                const data = new Date(venda.data);
+                const itensResumo = venda.itens.map(item => `${item.nome} (${item.quantidade})`).join(', ');
+                
+                // Tabela desktop
+                const tr = document.createElement('tr');
+                tr.className = 'border-b hover:bg-gray-50';
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-2">${data.toLocaleTimeString('pt-BR')}</td>
+                    <td class="px-4 py-2">${itensResumo}</td>
+                    <td class="px-4 py-2 text-right">R$ ${venda.total.toFixed(2)}</td>
+                    <td class="px-4 py-2">${venda.pagamento.tipo}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button onclick="mostrarComprovanteVenda('${venda.id}')" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
+                            Ver Comprovante
+                        </button>
+                        <button onclick="excluirVenda('${venda.id}')" 
+                                class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm transition-colors">
+                            Excluir
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // Card mobile
+                const card = document.createElement('div');
+                card.className = 'border rounded-lg p-3 bg-gray-50';
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex-1">
+                            <div class="font-semibold text-base">${data.toLocaleTimeString('pt-BR')}</div>
+                            <div class="text-sm text-gray-600 mt-1">${itensResumo}</div>
+                            <div class="text-sm text-gray-600 mt-1">Pagamento: ${venda.pagamento.tipo}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-600 text-lg">R$ ${venda.total.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="mostrarComprovanteVenda('${venda.id}')" 
+                                class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Ver Comprovante
+                        </button>
+                        <button onclick="excluirVenda('${venda.id}')" 
+                                class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm transition-colors">
+                            Excluir
+                        </button>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+            });
+
+            if (vendasHoje.length === 0) {
+                cardsContainer.innerHTML = '<div class="text-center text-gray-500 py-4">Nenhuma venda hoje</div>';
+            }
+        }
+
+        function mostrarComprovanteVenda(vendaId) {
+            const venda = vendas.find(v => v.id === vendaId);
+            if (venda) {
+                mostrarComprovante(venda);
+            }
+        }
+
+        // Funções para excluir vendas com senha
+        function excluirVenda(vendaId) {
+            const venda = vendas.find(v => v.id === vendaId);
+            if (!venda) return;
+            
+            vendaParaExcluir = venda;
+            acaoPendente = 'excluir_venda';
+            solicitarSenhaAcao('Digite a senha para excluir esta venda:');
+        }
+
+        // Sistema unificado de solicitação de senha
+        function solicitarSenhaAcao(mensagem) {
+            const modal = document.getElementById('modal-senha');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Alterar o texto do modal
+            modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
+            modal.querySelector('p').textContent = mensagem;
+            
+            // Focar no campo de senha
+            document.getElementById('senha-exclusao').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('senha-exclusao').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarSenhaAcao();
+                }
+            };
+        }
+
+        function confirmarSenhaAcao() {
+    const senhaDigitada = document.getElementById('senha-exclusao').value;
+    const senhaAdm = configSistema.senha || '1234';
+    const senhaTI = '@m30r19b24'; // senha fixa do TI (não pode ser alterada)
+    
+    // Verifica se a senha digitada corresponde a ADM ou TI
+    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+        mostrarMensagem('Senha incorreta!', 'erro');
+        document.getElementById('senha-exclusao').value = '';
+        document.getElementById('senha-exclusao').focus();
+        return;
+    }
+
+    // Executar ação pendente
+    switch (acaoPendente) {
+        case 'editar_produto':
+            executarEdicaoProduto(produtoParaAcao);
+            break;
+        case 'remover_produto':
+            executarRemocaoProduto(produtoParaAcao);
+            break;
+        case 'registrar_movimento':
+            executarRegistroMovimento();
+            break;
+        case 'excluir_venda':
+            executarExclusaoVenda();
+            break;
+        case 'excluir_movimento':
+            executarExclusaoMovimento();
+            break;
+    }
+
+    // Limpar variáveis
+    acaoPendente = null;
+    produtoParaAcao = null;
+
+    // Fechar modal
+    cancelarExclusaoVenda();
+}
+
+
+        function confirmarExclusaoVenda() {
+            confirmarSenhaAcao();
+        }
+
+        function executarExclusaoVenda() {
+            if (!vendaParaExcluir) return;
+            
+            // Restaurar estoque dos produtos
+            vendaParaExcluir.itens.forEach(item => {
+                const produto = produtos.find(p => p.id === item.produtoId);
+                if (produto) {
+                    produto.estoque += item.quantidade;
+                }
+            });
+            
+            // Remover movimento de caixa relacionado
+            movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
+            
+            // Remover venda
+            vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
+            
+            salvarDados();
+            atualizarTabelaVendasDia();
+            atualizarRelatorios();
+            calcularSaldoCaixa();
+            atualizarTabelaProdutos();
+            
+            mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
+            vendaParaExcluir = null;
+        }
+
+        function executarExclusaoMovimento() {
+            if (!movimentoParaExcluir) return;
+            
+            // Se for movimento de venda, também restaurar o estoque
+            if (movimentoParaExcluir.vendaId) {
+                const venda = vendas.find(v => v.id === movimentoParaExcluir.vendaId);
+                if (venda) {
+                    // Restaurar estoque dos produtos
+                    venda.itens.forEach(item => {
+                        const produto = produtos.find(p => p.id === item.produtoId);
+                        if (produto) {
+                            produto.estoque += item.quantidade;
+                        }
+                    });
+                    
+                    // Remover a venda também
+                    vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
+                    
+                    mostrarMensagem('Movimento e venda excluídos com sucesso! Estoque restaurado.', 'sucesso');
+                } else {
+                    mostrarMensagem('Movimento excluído com sucesso!', 'sucesso');
+                }
+            } else {
+                mostrarMensagem('Movimento excluído com sucesso!', 'sucesso');
+            }
+            
+            // Remover movimento
+            movimentos = movimentos.filter(m => m.id !== movimentoParaExcluir.id);
+            
+            salvarDados();
+            atualizarHistoricoMovimentos();
+            calcularSaldoCaixa();
+            atualizarTabelaVendasDia();
+            atualizarRelatorios();
+            atualizarTabelaProdutos();
+            
+            movimentoParaExcluir = null;
+        }
+
+        function cancelarExclusaoVenda() {
+            vendaParaExcluir = null;
+            movimentoParaExcluir = null;
+            document.getElementById('senha-exclusao').value = '';
+            
+            const modal = document.getElementById('modal-senha');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Exportações
+        function exportarVendas() {
+            const csv = ['Data,Hora,Total,Pagamento,Itens'];
+            
+            vendas.forEach(venda => {
+                const data = new Date(venda.data);
+                const itens = venda.itens.map(item => `${item.nome}(${item.quantidade})`).join(';');
+                csv.push(`${data.toLocaleDateString('pt-BR')},${data.toLocaleTimeString('pt-BR')},${venda.total.toFixed(2)},${venda.pagamento.tipo},"${itens}"`);
+            });
+            
+            baixarCSV(csv.join('\n'), 'vendas.csv');
+            mostrarMensagem('Vendas exportadas com sucesso!', 'sucesso');
+        }
+
+        function exportarProdutos() {
+            const csv = ['Nome,Codigo,Preco,Custo,Estoque,Unidade,Categoria'];
+            
+            produtos.forEach(produto => {
+                csv.push(`"${produto.nome}","${produto.codigo || ''}",${produto.preco.toFixed(2)},${produto.custo.toFixed(2)},${produto.estoque},"${produto.unidade}","${produto.categoria || ''}"`);
+            });
+            
+            baixarCSV(csv.join('\n'), 'produtos.csv');
+            mostrarMensagem('Produtos exportados com sucesso!', 'sucesso');
+        }
+
+        function exportarBackup() {
+            const backup = {
+                produtos: produtos,
+                vendas: vendas,
+                movimentos: movimentos,
+                configSistema: configSistema,
+                configPix: CONFIG_PIX,
+                dataExportacao: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(backup, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `backup_pdv_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            mostrarMensagem('Backup completo criado com sucesso!', 'sucesso');
+        }
+
+        function baixarCSV(conteudo, nomeArquivo) {
+            const dataBlob = new Blob([conteudo], {type: 'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = nomeArquivo;
+            link.click();
+        }
+
+        // Sistema de mensagens
+        function mostrarMensagem(texto, tipo) {
+            const container = document.createElement('div');
+            container.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                tipo === 'sucesso' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            container.textContent = texto;
+            
+            document.body.appendChild(container);
+            
+            setTimeout(() => {
+                container.remove();
+            }, 3000);
+        }
+
+        function confirmarAcao(mensagem) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                
+                modal.innerHTML = `
+                    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+                        <h3 class="text-lg font-semibold mb-4">Confirmação</h3>
+                        <p class="mb-6">${mensagem}</p>
+                        <div class="flex space-x-3">
+                            <button onclick="confirmarSim()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition-colors">
+                                Sim
+                            </button>
+                            <button onclick="confirmarNao()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-2 rounded-lg transition-colors">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                window.confirmarSim = () => {
+                    modal.remove();
+                    resolve(true);
+                };
+                
+                window.confirmarNao = () => {
+                    modal.remove();
+                    resolve(false);
+                };
+            });
+        }
+
+        // Funções ADM
+        function acessarAdm() {
+            const modal = document.getElementById('modal-senha-adm');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Focar no campo de senha
+            document.getElementById('senha-adm').focus();
+            
+            // Permitir confirmar com Enter
+            document.getElementById('senha-adm').onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    confirmarSenhaAdm();
+                }
+            };
+        }
+
+        function confirmarSenhaAdm() {
+    const senhaDigitada = document.getElementById('senha-adm').value;
+    const senhaAdm = configSistema.senha || '1234';
+    const senhaTI = '@m30r19b24'; // senha fixa do TI
+    
+    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+        mostrarMensagem('Senha incorreta!', 'erro');
+        document.getElementById('senha-adm').value = '';
+        document.getElementById('senha-adm').focus();
+        return;
+    }
+
+    cancelarSenhaAdm();
+    showSection('adm');
+    mostrarMensagem('Acesso liberado! Bem-vindo à área administrativa.', 'sucesso');
+}
+
+
+        function cancelarSenhaAdm() {
+            document.getElementById('senha-adm').value = '';
+            const modal = document.getElementById('modal-senha-adm');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function carregarConfiguracoesAdm() {
+            // Carregar configurações PIX
+            document.getElementById('adm-pix-nome').value = CONFIG_PIX.nomeRecebedor;
+            document.getElementById('adm-pix-chave').value = CONFIG_PIX.chavePix;
+            document.getElementById('adm-pix-cidade').value = CONFIG_PIX.cidade;
+            document.getElementById('adm-pix-banco').value = CONFIG_PIX.nomeBanco;
+            
+            // Carregar configurações do sistema
+            document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
+        }
+
+        function salvarConfigPix() {
+            const nome = document.getElementById('adm-pix-nome').value.trim();
+            const chave = document.getElementById('adm-pix-chave').value.trim();
+            const cidade = document.getElementById('adm-pix-cidade').value.trim();
+            const banco = document.getElementById('adm-pix-banco').value.trim();
+            
+            if (!nome || !chave || !cidade) {
+                mostrarMensagem('Nome, chave PIX e cidade são obrigatórios!', 'erro');
+                return;
+            }
+            
+            if (nome.length > 25) {
+                mostrarMensagem('Nome deve ter no máximo 25 caracteres!', 'erro');
+                return;
+            }
+            
+            if (cidade.length > 15) {
+                mostrarMensagem('Cidade deve ter no máximo 15 caracteres!', 'erro');
+                return;
+            }
+            
+            // Atualizar configurações PIX
+            CONFIG_PIX.nomeRecebedor = nome;
+            CONFIG_PIX.chavePix = chave;
+            CONFIG_PIX.cidade = cidade;
+            CONFIG_PIX.nomeBanco = banco || 'Banco';
+            
+            // Salvar no localStorage
+            localStorage.setItem('pdv_config_pix', JSON.stringify(CONFIG_PIX));
+            
+            // Atualizar interface PIX
+            atualizarInfoPix();
+            
+            mostrarMensagem('Configurações PIX salvas com sucesso!', 'sucesso');
+        }
+
+        function testarPix() {
+            const nome = document.getElementById('adm-pix-nome').value.trim();
+            const chave = document.getElementById('adm-pix-chave').value.trim();
+            const cidade = document.getElementById('adm-pix-cidade').value.trim();
+            
+            if (!nome || !chave || !cidade) {
+                mostrarMensagem('Preencha todos os campos obrigatórios primeiro!', 'erro');
+                return;
+            }
+            
+            // Simular teste PIX
+            mostrarMensagem('Teste PIX: Configurações válidas! ✓', 'sucesso');
+            
+            // Mostrar preview das informações
+            const preview = `
+                Nome: ${nome}
+                Chave: ${formatarChavePix(chave)}
+                Cidade: ${cidade}
+                
+                ✅ Configurações prontas para uso!
+            `;
+            
+            setTimeout(() => {
+                mostrarMensagem(preview, 'sucesso');
+            }, 1000);
+        }
+
+        function salvarConfigSistema() {
+            const novaSenha = document.getElementById('adm-senha-sistema').value.trim();
+            const nomeEmpresa = document.getElementById('adm-nome-empresa').value.trim();
+            
+            if (novaSenha && novaSenha.length < 4) {
+                mostrarMensagem('Senha deve ter pelo menos 4 caracteres!', 'erro');
+                return;
+            }
+            
+            // Atualizar configurações
+            if (novaSenha) {
+                configSistema.senha = novaSenha;
+            }
+            
+            if (nomeEmpresa) {
+                configSistema.nomeEmpresa = nomeEmpresa;
+            }
+            
+            // Salvar no localStorage
+            localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
+            
+            // Limpar campo de senha
+            document.getElementById('adm-senha-sistema').value = '';
+            
+            mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
+        }
+
+        function resetarSistema() {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, vendas, movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+                return;
+            }
+            
+            if (!confirm('🚨 ÚLTIMA CONFIRMAÇÃO: Todos os dados serão perdidos permanentemente. Confirma o reset completo?')) {
+                return;
+            }
+            
+            // Limpar todos os dados
+            localStorage.removeItem('pdv_produtos');
+            localStorage.removeItem('pdv_vendas');
+            localStorage.removeItem('pdv_movimentos');
+            localStorage.removeItem('pdv_config_sistema');
+            localStorage.removeItem('pdv_config_pix');
+            
+            // Recarregar página
+            location.reload();
+        }
+
+        // Funções de Backup
+        function recuperarBackup() {
+            document.getElementById('input-backup').click();
+        }
+
+        function processarBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            if (!file.name.endsWith('.json')) {
+                mostrarMensagem('Arquivo deve ser um JSON válido!', 'erro');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validar estrutura do backup
+                    if (!backup.produtos || !backup.vendas || !backup.movimentos) {
+                        mostrarMensagem('Arquivo de backup inválido!', 'erro');
+                        return;
+                    }
+                    
+                    if (!confirm('⚠️ ATENÇÃO: Esta ação irá substituir TODOS os dados atuais pelos dados do backup.\n\nTem certeza que deseja continuar?')) {
+                        return;
+                    }
+                    
+                    // Restaurar dados
+                    produtos = backup.produtos || [];
+                    vendas = backup.vendas || [];
+                    movimentos = backup.movimentos || [];
+                    
+                    if (backup.configSistema) {
+                        configSistema = backup.configSistema;
+                    }
+                    
+                    if (backup.configPix) {
+                        Object.assign(CONFIG_PIX, backup.configPix);
+                        localStorage.setItem('pdv_config_pix', JSON.stringify(CONFIG_PIX));
+                    }
+                    
+                    // Salvar dados restaurados
+                    salvarDados();
+                    
+                    // Atualizar interface
+                    atualizarInterface();
+                    atualizarInfoPix();
+                    
+                    mostrarMensagem(`Backup restaurado com sucesso! ${produtos.length} produtos, ${vendas.length} vendas e ${movimentos.length} movimentos recuperados.`, 'sucesso');
+                    
+                    // Voltar para vendas
+                    showSection('vendas');
+                    
+                } catch (error) {
+                    console.error('Erro ao processar backup:', error);
+                    mostrarMensagem('Erro ao processar arquivo de backup: ' + error.message, 'erro');
+                }
+            };
+            
+            reader.readAsText(file);
+            
+            // Limpar input
+            input.value = '';
+        }
+
+        // Persistência
+        function salvarDados() {
+            localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
+            localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
+            localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));
+            localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
+        }
+
+        function carregarDados() {
+            // Dados de exemplo se não houver dados salvos
+            if (produtos.length === 0) {
+                produtos = [
+                    {
+                        id: 'p_001',
+                        nome: 'Refrigerante 350ml',
+                        codigo: '7891000100103',
+                        preco: 5.50,
+                        custo: 3.00,
+                        unidade: 'un',
+                        estoque: 50,
+                        categoria: 'Bebidas'
+                    },
+                    {
+                        id: 'p_002',
+                        nome: 'Pão Francês',
+                        codigo: '7891000100110',
+                        preco: 0.75,
+                        custo: 0.45,
+                        unidade: 'un',
+                        estoque: 100,
+                        categoria: 'Padaria'
+                    },
+                    {
+                        id: 'p_003',
+                        nome: 'Leite Integral 1L',
+                        codigo: '7891000100127',
+                        preco: 4.50,
+                        custo: 3.20,
+                        unidade: 'un',
+                        estoque: 25,
+                        categoria: 'Laticínios'
+                    },
+                    {
+                        id: 'p_004',
+                        nome: 'Carne Bovina (Alcatra)',
+                        codigo: '7891000100134',
+                        preco: 35.90,
+                        custo: 28.00,
+                        unidade: 'kg',
+                        estoque: 15.5,
+                        categoria: 'Açougue'
+                    }
+                ];
+                salvarDados();
+            }
+        }
+
+        function atualizarInterface() {
+            atualizarListaProdutos();
+            atualizarCarrinho();
+            calcularSaldoCaixa();
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
