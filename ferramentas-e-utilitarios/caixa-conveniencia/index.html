@@ -583,11 +583,12 @@
                 </div>
                 <div id="comprovante-itens" class="mb-4 text-sm lg:text-base"></div>
                 <div class="border-t pt-2">
-                    <div class="flex justify-between font-bold text-base lg:text-lg">
-                        <span>TOTAL:</span>
-                        <span id="comprovante-total"></span>
+                    <div id="comprovante-total" class="mb-3"></div>
+                    <div class="flex justify-between font-bold text-base lg:text-lg border-t pt-2">
+                        <span>TOTAL A PAGAR:</span>
+                        <span id="comprovante-total-final" class="text-green-600"></span>
                     </div>
-                    <div class="text-sm text-gray-600 mt-2" id="comprovante-pagamento"></div>
+                    <div class="text-sm mt-3 pt-2 border-t" id="comprovante-pagamento"></div>
                 </div>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 mt-6 no-print">
@@ -1571,27 +1572,80 @@
             const modal = document.getElementById('modal-comprovante');
             const data = new Date(venda.data);
             
-            document.getElementById('comprovante-data').textContent = 
-                data.toLocaleDateString('pt-BR') + ' ' + data.toLocaleTimeString('pt-BR');
+            // Atualizar data e código da venda
+            document.getElementById('comprovante-data').innerHTML = `
+                <div><strong>Venda:</strong> ${venda.id}</div>
+                <div><strong>Data:</strong> ${data.toLocaleDateString('pt-BR')} - <strong>Hora:</strong> ${data.toLocaleTimeString('pt-BR')}</div>
+                <div><strong>Estabelecimento:</strong> ${configSistema.nomeEmpresa || 'PDV - Sistema de Caixa'}</div>
+            `;
             
-            const itensHtml = venda.itens.map(item => `
-                <div class="flex justify-between">
-                    <span>${item.nome} (${item.quantidade} ${item.unidade})</span>
-                    <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
-                </div>
-            `).join('');
+            // Criar HTML dos itens com mais detalhes
+            const itensHtml = venda.itens.map(item => {
+                let quantidadeTexto;
+                if (item.unidade === 'kg') {
+                    const gramas = Math.round(item.quantidade * 1000);
+                    quantidadeTexto = `${gramas}g (${item.quantidade.toFixed(3)}kg)`;
+                } else {
+                    quantidadeTexto = `${item.quantidade} ${item.unidade}`;
+                }
+                
+                return `
+                    <div class="border-b pb-2 mb-2">
+                        <div class="flex justify-between font-medium">
+                            <span>${item.nome}</span>
+                            <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${quantidadeTexto} x R$ ${item.preco.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
             
             document.getElementById('comprovante-itens').innerHTML = itensHtml;
-            document.getElementById('comprovante-total').textContent = `R$ ${venda.total.toFixed(2)}`;
             
-            let pagamentoTexto = venda.pagamento.tipo.toUpperCase();
-            if (venda.pagamento.tipo === 'dinheiro' && venda.pagamento.troco > 0) {
-                pagamentoTexto += ` - Troco: R$ ${venda.pagamento.troco.toFixed(2)}`;
-            } else if (venda.pagamento.tipo === 'cartao') {
-                pagamentoTexto += ` ${venda.pagamento.tipoCartao} ${venda.pagamento.parcelas}x`;
+            // Mostrar subtotal, desconto e total
+            let totaisHtml = `
+                <div class="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>R$ ${venda.subtotal.toFixed(2)}</span>
+                </div>
+            `;
+            
+            if (venda.desconto > 0) {
+                totaisHtml += `
+                    <div class="flex justify-between text-sm text-red-600">
+                        <span>Desconto (${venda.desconto}%):</span>
+                        <span>-R$ ${venda.valorDesconto.toFixed(2)}</span>
+                    </div>
+                `;
             }
             
-            document.getElementById('comprovante-pagamento').textContent = pagamentoTexto;
+            document.getElementById('comprovante-total').innerHTML = totaisHtml;
+            document.getElementById('comprovante-total-final').textContent = `R$ ${venda.total.toFixed(2)}`;
+            
+            // Informações de pagamento detalhadas
+            let pagamentoTexto = `<strong>Forma de Pagamento:</strong> ${venda.pagamento.tipo.toUpperCase()}`;
+            
+            if (venda.pagamento.tipo === 'dinheiro') {
+                if (venda.pagamento.valorRecebido) {
+                    pagamentoTexto += `<br><strong>Valor Recebido:</strong> R$ ${venda.pagamento.valorRecebido.toFixed(2)}`;
+                }
+                if (venda.pagamento.troco > 0) {
+                    pagamentoTexto += `<br><strong>Troco:</strong> R$ ${venda.pagamento.troco.toFixed(2)}`;
+                }
+            } else if (venda.pagamento.tipo === 'cartao') {
+                const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CRÉDITO';
+                const parcelas = venda.pagamento.parcelas || 1;
+                pagamentoTexto += ` ${tipoCartao}`;
+                pagamentoTexto += `<br><strong>Parcelas:</strong> ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`;
+            } else if (venda.pagamento.tipo === 'pix') {
+                if (venda.pagamento.pixId) {
+                    pagamentoTexto += `<br><strong>ID Transação:</strong> ${venda.pagamento.pixId}`;
+                }
+            }
+            
+            document.getElementById('comprovante-pagamento').innerHTML = pagamentoTexto;
             
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -1662,41 +1716,74 @@
                 
                 // Configurar fonte
                 doc.setFont('helvetica');
-                let yPos = 10;
+                let yPos = 8;
                 
-                // Título
+                // Nome do estabelecimento
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                const nomeEmpresa = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
+                doc.text(nomeEmpresa, largura/2, yPos, { align: 'center' });
+                yPos += 8;
+                
+                // Título do comprovante
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
                 doc.text('COMPROVANTE DE VENDA', largura/2, yPos, { align: 'center' });
                 yPos += 8;
                 
-                // Data e hora
+                // Código da venda
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
-                doc.text(`${data.toLocaleDateString('pt-BR')} ${data.toLocaleTimeString('pt-BR')}`, largura/2, yPos, { align: 'center' });
+                doc.text(`Venda: ${venda.id}`, largura/2, yPos, { align: 'center' });
                 yPos += 5;
-                doc.text(`ID: ${venda.id}`, largura/2, yPos, { align: 'center' });
+                
+                // Data e hora
+                doc.text(`Data: ${data.toLocaleDateString('pt-BR')}`, largura/2, yPos, { align: 'center' });
+                yPos += 4;
+                doc.text(`Hora: ${data.toLocaleTimeString('pt-BR')}`, largura/2, yPos, { align: 'center' });
                 yPos += 8;
                 
                 // Linha separadora
                 doc.text('================================', largura/2, yPos, { align: 'center' });
                 yPos += 6;
                 
-                // Itens
+                // Cabeçalho dos itens
                 doc.setFontSize(7);
+                doc.setFont('helvetica', 'bold');
+                doc.text('ITEM', margemEsquerda, yPos);
+                doc.text('QTD', 35, yPos);
+                doc.text('VALOR', margemDireita, yPos, { align: 'right' });
+                yPos += 5;
+                
+                doc.text('--------------------------------', largura/2, yPos, { align: 'center' });
+                yPos += 5;
+                
+                // Itens da venda
                 doc.setFont('helvetica', 'normal');
                 
                 venda.itens.forEach(item => {
                     // Nome do produto (quebrar linha se necessário)
-                    const nomeItem = item.nome.length > 20 ? item.nome.substring(0, 20) + '...' : item.nome;
+                    const nomeItem = item.nome.length > 22 ? item.nome.substring(0, 22) + '...' : item.nome;
                     doc.text(nomeItem, margemEsquerda, yPos);
                     yPos += 4;
                     
-                    // Quantidade, preço unitário e total
-                    const qtdTexto = `${item.quantidade} ${item.unidade} x R$ ${item.preco.toFixed(2)}`;
+                    // Formatação da quantidade baseada na unidade
+                    let quantidadeTexto;
+                    if (item.unidade === 'kg') {
+                        const gramas = Math.round(item.quantidade * 1000);
+                        quantidadeTexto = `${gramas}g`;
+                    } else {
+                        quantidadeTexto = `${item.quantidade} ${item.unidade}`;
+                    }
+                    
+                    // Preço unitário
+                    const precoUnitario = `R$ ${item.preco.toFixed(2)}`;
+                    
+                    // Total do item
                     const totalItem = (item.preco * item.quantidade).toFixed(2);
                     
-                    doc.text(qtdTexto, margemEsquerda, yPos);
+                    // Linha com quantidade e preço
+                    doc.text(`${quantidadeTexto} x ${precoUnitario}`, margemEsquerda, yPos);
                     doc.text(`R$ ${totalItem}`, margemDireita, yPos, { align: 'right' });
                     yPos += 6;
                 });
@@ -1709,10 +1796,12 @@
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
                 
+                // Subtotal
                 doc.text(`Subtotal:`, margemEsquerda, yPos);
                 doc.text(`R$ ${venda.subtotal.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
                 yPos += 5;
                 
+                // Desconto (se houver)
                 if (venda.desconto > 0) {
                     doc.text(`Desconto (${venda.desconto}%):`, margemEsquerda, yPos);
                     doc.text(`-R$ ${venda.valorDesconto.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
@@ -1722,7 +1811,7 @@
                 // Total final
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
-                doc.text(`TOTAL:`, margemEsquerda, yPos);
+                doc.text(`TOTAL A PAGAR:`, margemEsquerda, yPos);
                 doc.text(`R$ ${venda.total.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
                 yPos += 8;
                 
@@ -1733,20 +1822,41 @@
                 yPos += 6;
                 
                 // Forma de pagamento
-                doc.text(`Pagamento: ${venda.pagamento.tipo.toUpperCase()}`, margemEsquerda, yPos);
-                yPos += 4;
+                doc.setFont('helvetica', 'bold');
+                doc.text('FORMA DE PAGAMENTO:', margemEsquerda, yPos);
+                yPos += 5;
                 
-                if (venda.pagamento.tipo === 'dinheiro' && venda.pagamento.troco > 0) {
-                    doc.text(`Recebido: R$ ${venda.pagamento.valorRecebido.toFixed(2)}`, margemEsquerda, yPos);
+                doc.setFont('helvetica', 'normal');
+                let formaPagamento = venda.pagamento.tipo.toUpperCase();
+                
+                if (venda.pagamento.tipo === 'dinheiro') {
+                    doc.text(`${formaPagamento}`, margemEsquerda, yPos);
                     yPos += 4;
-                    doc.text(`Troco: R$ ${venda.pagamento.troco.toFixed(2)}`, margemEsquerda, yPos);
-                    yPos += 4;
+                    
+                    if (venda.pagamento.valorRecebido) {
+                        doc.text(`Valor Recebido: R$ ${venda.pagamento.valorRecebido.toFixed(2)}`, margemEsquerda, yPos);
+                        yPos += 4;
+                    }
+                    
+                    if (venda.pagamento.troco > 0) {
+                        doc.text(`Troco: R$ ${venda.pagamento.troco.toFixed(2)}`, margemEsquerda, yPos);
+                        yPos += 4;
+                    }
                 } else if (venda.pagamento.tipo === 'cartao') {
-                    doc.text(`${venda.pagamento.tipoCartao} ${venda.pagamento.parcelas}x`, margemEsquerda, yPos);
+                    const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CREDITO';
+                    const parcelas = venda.pagamento.parcelas || 1;
+                    doc.text(`${formaPagamento} ${tipoCartao}`, margemEsquerda, yPos);
                     yPos += 4;
-                } else if (venda.pagamento.tipo === 'pix' && venda.pagamento.pixId) {
-                    doc.text(`ID PIX: ${venda.pagamento.pixId}`, margemEsquerda, yPos);
+                    doc.text(`Parcelas: ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`, margemEsquerda, yPos);
                     yPos += 4;
+                } else if (venda.pagamento.tipo === 'pix') {
+                    doc.text(`${formaPagamento}`, margemEsquerda, yPos);
+                    yPos += 4;
+                    
+                    if (venda.pagamento.pixId) {
+                        doc.text(`ID Transacao: ${venda.pagamento.pixId}`, margemEsquerda, yPos);
+                        yPos += 4;
+                    }
                 }
                 
                 yPos += 6;
@@ -1756,24 +1866,26 @@
                 yPos += 6;
                 
                 // Cupom não fiscal
-                doc.setFontSize(8);
+                doc.setFontSize(9);
                 doc.setFont('helvetica', 'bold');
-                doc.text('CUPOM NÃO FISCAL', largura/2, yPos, { align: 'center' });
+                doc.text('CUPOM NAO FISCAL', largura/2, yPos, { align: 'center' });
                 yPos += 8;
                 
                 // Rodapé
                 doc.setFontSize(6);
                 doc.setFont('helvetica', 'normal');
-                doc.text('Obrigado pela preferência!', largura/2, yPos, { align: 'center' });
+                doc.text('Obrigado pela preferencia!', largura/2, yPos, { align: 'center' });
                 yPos += 4;
                 doc.text('mayconbrown.com.br', largura/2, yPos, { align: 'center' });
                 
                 // Ajustar altura do PDF baseado no conteúdo
-                const alturaFinal = Math.max(yPos + 10, 100);
+                const alturaFinal = Math.max(yPos + 10, 120);
                 doc.internal.pageSize.height = alturaFinal;
                 
                 // Salvar PDF
-                const nomeArquivo = `cupom_${venda.id}_${data.toISOString().split('T')[0]}.pdf`;
+                const dataFormatada = data.toISOString().split('T')[0];
+                const horaFormatada = data.toTimeString().split(' ')[0].replace(/:/g, '');
+                const nomeArquivo = `cupom_${venda.id}_${dataFormatada}_${horaFormatada}.pdf`;
                 doc.save(nomeArquivo);
                 
                 mostrarMensagem('Cupom térmico gerado com sucesso!', 'sucesso');
@@ -2583,5 +2695,5 @@
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9914825ae76027e9',t:'MTc2MDkyMTMwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
