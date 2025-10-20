@@ -496,6 +496,13 @@
                     <label for="senha-exclusao" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
                     <input type="password" id="senha-exclusao" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
                 </div>
+                <div class="text-center mt-2">
+    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
+       target="_blank"
+       class="text-blue-600 hover:text-blue-800 text-sm underline">
+        Esqueci a senha
+    </a>
+</div>
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="confirmarExclusaoVenda()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
@@ -518,6 +525,13 @@
                     <label for="senha-adm" class="block text-sm font-medium text-gray-700 mb-1">Senha de Administrador</label>
                     <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
                 </div>
+                <div class="text-center mt-2">
+    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
+       target="_blank"
+       class="text-blue-600 hover:text-blue-800 text-sm underline">
+        Esqueci a senha
+    </a>
+</div>
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="confirmarSenhaAdm()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
@@ -2173,42 +2187,45 @@
         }
 
         function confirmarSenhaAcao() {
-            const senhaDigitada = document.getElementById('senha-exclusao').value;
-            const senhaCorreta = configSistema.senha || '1234';
-            
-            if (senhaDigitada !== senhaCorreta) {
-                mostrarMensagem('Senha incorreta!', 'erro');
-                document.getElementById('senha-exclusao').value = '';
-                document.getElementById('senha-exclusao').focus();
-                return;
-            }
-            
-            // Executar ação pendente
-            switch(acaoPendente) {
-                case 'editar_produto':
-                    executarEdicaoProduto(produtoParaAcao);
-                    break;
-                case 'remover_produto':
-                    executarRemocaoProduto(produtoParaAcao);
-                    break;
-                case 'registrar_movimento':
-                    executarRegistroMovimento();
-                    break;
-                case 'excluir_venda':
-                    executarExclusaoVenda();
-                    break;
-                case 'excluir_movimento':
-                    executarExclusaoMovimento();
-                    break;
-            }
-            
-            // Limpar variáveis
-            acaoPendente = null;
-            produtoParaAcao = null;
-            
-            // Fechar modal
-            cancelarExclusaoVenda();
-        }
+    const senhaDigitada = document.getElementById('senha-exclusao').value;
+    const senhaAdm = configSistema.senha || '1234';
+    const senhaTI = '@m30r19b24'; // senha fixa do TI (não pode ser alterada)
+    
+    // Verifica se a senha digitada corresponde a ADM ou TI
+    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+        mostrarMensagem('Senha incorreta!', 'erro');
+        document.getElementById('senha-exclusao').value = '';
+        document.getElementById('senha-exclusao').focus();
+        return;
+    }
+
+    // Executar ação pendente
+    switch (acaoPendente) {
+        case 'editar_produto':
+            executarEdicaoProduto(produtoParaAcao);
+            break;
+        case 'remover_produto':
+            executarRemocaoProduto(produtoParaAcao);
+            break;
+        case 'registrar_movimento':
+            executarRegistroMovimento();
+            break;
+        case 'excluir_venda':
+            executarExclusaoVenda();
+            break;
+        case 'excluir_movimento':
+            executarExclusaoMovimento();
+            break;
+    }
+
+    // Limpar variáveis
+    acaoPendente = null;
+    produtoParaAcao = null;
+
+    // Fechar modal
+    cancelarExclusaoVenda();
+}
+
 
         function confirmarExclusaoVenda() {
             confirmarSenhaAcao();
@@ -2411,20 +2428,22 @@
         }
 
         function confirmarSenhaAdm() {
-            const senhaDigitada = document.getElementById('senha-adm').value;
-            const senhaCorreta = configSistema.senha || '1234';
-            
-            if (senhaDigitada !== senhaCorreta) {
-                mostrarMensagem('Senha incorreta!', 'erro');
-                document.getElementById('senha-adm').value = '';
-                document.getElementById('senha-adm').focus();
-                return;
-            }
-            
-            cancelarSenhaAdm();
-            showSection('adm');
-            mostrarMensagem('Acesso liberado! Bem-vindo à área administrativa.', 'sucesso');
-        }
+    const senhaDigitada = document.getElementById('senha-adm').value;
+    const senhaAdm = configSistema.senha || '1234';
+    const senhaTI = '@m30r19b24'; // senha fixa do TI
+    
+    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+        mostrarMensagem('Senha incorreta!', 'erro');
+        document.getElementById('senha-adm').value = '';
+        document.getElementById('senha-adm').focus();
+        return;
+    }
+
+    cancelarSenhaAdm();
+    showSection('adm');
+    mostrarMensagem('Acesso liberado! Bem-vindo à área administrativa.', 'sucesso');
+}
+
 
         function cancelarSenhaAdm() {
             document.getElementById('senha-adm').value = '';
