@@ -1,16 +1,16 @@
 {
-    "name": "PDV",
-    "short_name": "PDV - Sistema de Caixa",
-    "description": "Soluções Digitais para o Seu Dia a Dia",
-    "start_url": "/ferramentas-e-utilitarios/pdv",
-    "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#FFFFFF",
-    "icons": [
-      {
-        "src": "/img/pdv1-72.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      }
-    ]
-  }
+  "name": "PDV",
+  "short_name": "PDV - Sistema de Caixa",
+  "description": "Soluções Digitais para o Seu Dia a Dia",
+  "start_url": "/ferramentas-e-utilitarios/pdv",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "icons": [
+    {
+      "src": "/img/pdv1-152.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
