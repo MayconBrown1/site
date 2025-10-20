@@ -1701,71 +1701,72 @@
 
             try {
                 const { jsPDF } = window.jspdf;
-                // Formato para impressora térmica 80mm (aproximadamente 58mm de largura útil)
+                // Formato para impressora térmica 80mm com altura maior
                 const doc = new jsPDF({
                     orientation: 'portrait',
                     unit: 'mm',
-                    format: [80, 200] // Largura fixa 80mm, altura ajustável
+                    format: [80, 300] // Largura 80mm, altura inicial maior
                 });
                 
                 const venda = vendaParaComprovante;
                 const data = new Date(venda.data);
                 const largura = 80;
-                const margemEsquerda = 5;
-                const margemDireita = 75;
+                const margemEsquerda = 4;
+                const margemDireita = 76;
                 
                 // Configurar fonte
                 doc.setFont('helvetica');
-                let yPos = 8;
+                let yPos = 12; // Começar mais abaixo para evitar cortes
                 
                 // Nome do estabelecimento
-                doc.setFontSize(10);
+                doc.setFontSize(11);
                 doc.setFont('helvetica', 'bold');
                 const nomeEmpresa = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
                 doc.text(nomeEmpresa, largura/2, yPos, { align: 'center' });
-                yPos += 8;
+                yPos += 10;
                 
                 // Título do comprovante
-                doc.setFontSize(12);
+                doc.setFontSize(13);
                 doc.setFont('helvetica', 'bold');
                 doc.text('COMPROVANTE DE VENDA', largura/2, yPos, { align: 'center' });
-                yPos += 8;
+                yPos += 10;
                 
                 // Código da venda
-                doc.setFontSize(8);
+                doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 doc.text(`Venda: ${venda.id}`, largura/2, yPos, { align: 'center' });
-                yPos += 5;
+                yPos += 6;
                 
-                // Data e hora
+                // Data e hora separadas
                 doc.text(`Data: ${data.toLocaleDateString('pt-BR')}`, largura/2, yPos, { align: 'center' });
-                yPos += 4;
+                yPos += 5;
                 doc.text(`Hora: ${data.toLocaleTimeString('pt-BR')}`, largura/2, yPos, { align: 'center' });
-                yPos += 8;
+                yPos += 10;
                 
                 // Linha separadora
                 doc.text('================================', largura/2, yPos, { align: 'center' });
-                yPos += 6;
+                yPos += 8;
                 
                 // Cabeçalho dos itens
-                doc.setFontSize(7);
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'bold');
                 doc.text('ITEM', margemEsquerda, yPos);
                 doc.text('QTD', 35, yPos);
                 doc.text('VALOR', margemDireita, yPos, { align: 'right' });
-                yPos += 5;
+                yPos += 6;
                 
                 doc.text('--------------------------------', largura/2, yPos, { align: 'center' });
-                yPos += 5;
+                yPos += 6;
                 
                 // Itens da venda
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
                 
                 venda.itens.forEach(item => {
                     // Nome do produto (quebrar linha se necessário)
-                    const nomeItem = item.nome.length > 22 ? item.nome.substring(0, 22) + '...' : item.nome;
+                    const nomeItem = item.nome.length > 24 ? item.nome.substring(0, 24) + '...' : item.nome;
                     doc.text(nomeItem, margemEsquerda, yPos);
-                    yPos += 4;
+                    yPos += 5;
                     
                     // Formatação da quantidade baseada na unidade
                     let quantidadeTexto;
@@ -1785,101 +1786,104 @@
                     // Linha com quantidade e preço
                     doc.text(`${quantidadeTexto} x ${precoUnitario}`, margemEsquerda, yPos);
                     doc.text(`R$ ${totalItem}`, margemDireita, yPos, { align: 'right' });
-                    yPos += 6;
+                    yPos += 7;
                 });
                 
                 // Linha separadora
                 doc.text('================================', largura/2, yPos, { align: 'center' });
-                yPos += 6;
+                yPos += 8;
                 
                 // Totais
-                doc.setFontSize(8);
+                doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 
                 // Subtotal
                 doc.text(`Subtotal:`, margemEsquerda, yPos);
                 doc.text(`R$ ${venda.subtotal.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
-                yPos += 5;
+                yPos += 6;
                 
                 // Desconto (se houver)
                 if (venda.desconto > 0) {
                     doc.text(`Desconto (${venda.desconto}%):`, margemEsquerda, yPos);
                     doc.text(`-R$ ${venda.valorDesconto.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
-                    yPos += 5;
+                    yPos += 6;
                 }
                 
                 // Total final
-                doc.setFontSize(10);
+                doc.setFontSize(11);
                 doc.setFont('helvetica', 'bold');
                 doc.text(`TOTAL A PAGAR:`, margemEsquerda, yPos);
                 doc.text(`R$ ${venda.total.toFixed(2)}`, margemDireita, yPos, { align: 'right' });
-                yPos += 8;
+                yPos += 10;
                 
                 // Linha separadora
-                doc.setFontSize(7);
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
                 doc.text('================================', largura/2, yPos, { align: 'center' });
-                yPos += 6;
+                yPos += 8;
                 
                 // Forma de pagamento
+                doc.setFontSize(9);
                 doc.setFont('helvetica', 'bold');
                 doc.text('FORMA DE PAGAMENTO:', margemEsquerda, yPos);
-                yPos += 5;
+                yPos += 6;
                 
+                doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
                 let formaPagamento = venda.pagamento.tipo.toUpperCase();
                 
                 if (venda.pagamento.tipo === 'dinheiro') {
                     doc.text(`${formaPagamento}`, margemEsquerda, yPos);
-                    yPos += 4;
+                    yPos += 5;
                     
                     if (venda.pagamento.valorRecebido) {
                         doc.text(`Valor Recebido: R$ ${venda.pagamento.valorRecebido.toFixed(2)}`, margemEsquerda, yPos);
-                        yPos += 4;
+                        yPos += 5;
                     }
                     
                     if (venda.pagamento.troco > 0) {
                         doc.text(`Troco: R$ ${venda.pagamento.troco.toFixed(2)}`, margemEsquerda, yPos);
-                        yPos += 4;
+                        yPos += 5;
                     }
                 } else if (venda.pagamento.tipo === 'cartao') {
                     const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CREDITO';
                     const parcelas = venda.pagamento.parcelas || 1;
                     doc.text(`${formaPagamento} ${tipoCartao}`, margemEsquerda, yPos);
-                    yPos += 4;
+                    yPos += 5;
                     doc.text(`Parcelas: ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`, margemEsquerda, yPos);
-                    yPos += 4;
+                    yPos += 5;
                 } else if (venda.pagamento.tipo === 'pix') {
                     doc.text(`${formaPagamento}`, margemEsquerda, yPos);
-                    yPos += 4;
+                    yPos += 5;
                     
                     if (venda.pagamento.pixId) {
                         doc.text(`ID Transacao: ${venda.pagamento.pixId}`, margemEsquerda, yPos);
-                        yPos += 4;
+                        yPos += 5;
                     }
                 }
                 
-                yPos += 6;
+                yPos += 8;
                 
                 // Linha separadora
                 doc.text('================================', largura/2, yPos, { align: 'center' });
-                yPos += 6;
-                
-                // Cupom não fiscal
-                doc.setFontSize(9);
-                doc.setFont('helvetica', 'bold');
-                doc.text('CUPOM NAO FISCAL', largura/2, yPos, { align: 'center' });
                 yPos += 8;
                 
+                // Cupom não fiscal
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('CUPOM NAO FISCAL', largura/2, yPos, { align: 'center' });
+                yPos += 10;
+                
                 // Rodapé
-                doc.setFontSize(6);
+                doc.setFontSize(7);
                 doc.setFont('helvetica', 'normal');
                 doc.text('Obrigado pela preferencia!', largura/2, yPos, { align: 'center' });
-                yPos += 4;
+                yPos += 6;
                 doc.text('mayconbrown.com.br', largura/2, yPos, { align: 'center' });
+                yPos += 8;
                 
-                // Ajustar altura do PDF baseado no conteúdo
-                const alturaFinal = Math.max(yPos + 10, 120);
+                // Ajustar altura do PDF baseado no conteúdo com margem extra
+                const alturaFinal = Math.max(yPos + 15, 150);
                 doc.internal.pageSize.height = alturaFinal;
                 
                 // Salvar PDF
@@ -2695,5 +2699,5 @@
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991495f685e427e9',t:'MTc2MDkyMjEwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
