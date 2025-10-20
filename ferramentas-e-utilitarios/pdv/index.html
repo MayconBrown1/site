@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDV - Sistema de Frente de Caixa</title>
     <link rel="shortcut icon" href="/img/pdv1.ico" type="image/x-icon">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FFFFFF">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
@@ -618,6 +618,15 @@
             </div>
         </div>
     </div>
+
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker registrado'))
+    .catch(err => console.error('Erro ao registrar SW:', err));
+}
+</script>
+
 
     <script>
         // ========================================
