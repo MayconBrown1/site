@@ -2004,7 +2004,7 @@ function showInstallButton() {
                 mostrarMensagem('Movimento atualizado com sucesso!', 'sucesso');
             }
         }
-
+        
         function cancelarEdicaoMovimento() {
             movimentoEditando = null;
             const modal = document.getElementById('modal-editar-movimento');
@@ -2089,9 +2089,6 @@ function showInstallButton() {
                         <div class="font-semibold ${cor}">${sinal}R$ ${movimento.valor.toFixed(2)}</div>
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <button onclick="editarMovimento('${movimento.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">
-                            ✏️ Editar
-                        </button>
                         <button onclick="excluirMovimento('${movimento.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors">
                             🗑️ Excluir
                         </button>
