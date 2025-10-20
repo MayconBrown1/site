@@ -793,7 +793,23 @@
             mostrarMensagem('Produto salvo com sucesso!', 'sucesso');
         }
 
+        // Variáveis para controle de ações protegidas
+        let acaoPendente = null;
+        let produtoParaAcao = null;
+
         function editarProduto(id) {
+            produtoParaAcao = id;
+            acaoPendente = 'editar_produto';
+            solicitarSenhaAcao('Digite a senha para editar este produto:');
+        }
+
+        function removerProduto(id) {
+            produtoParaAcao = id;
+            acaoPendente = 'remover_produto';
+            solicitarSenhaAcao('Digite a senha para remover este produto:');
+        }
+
+        function executarEdicaoProduto(id) {
             const produto = produtos.find(p => p.id === id);
             if (!produto) return;
 
@@ -809,14 +825,12 @@
             mostrarFormProduto();
         }
 
-        function removerProduto(id) {
-            if (confirmarAcao('Tem certeza que deseja remover este produto?')) {
-                produtos = produtos.filter(p => p.id !== id);
-                salvarDados();
-                atualizarTabelaProdutos();
-                atualizarListaProdutos();
-                mostrarMensagem('Produto removido com sucesso!', 'sucesso');
-            }
+        function executarRemocaoProduto(id) {
+            produtos = produtos.filter(p => p.id !== id);
+            salvarDados();
+            atualizarTabelaProdutos();
+            atualizarListaProdutos();
+            mostrarMensagem('Produto removido com sucesso!', 'sucesso');
         }
 
         function atualizarTabelaProdutos() {
@@ -1800,34 +1814,23 @@
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
             
-            // Usar o mesmo sistema de senha das vendas
             movimentoParaExcluir = movimento;
+            acaoPendente = 'excluir_movimento';
             
-            const modal = document.getElementById('modal-senha');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            
-            // Alterar o texto do modal para movimento
-            modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
             if (movimento.vendaId) {
-                modal.querySelector('p').textContent = 'Digite a senha para excluir este movimento de venda:';
+                solicitarSenhaAcao('Digite a senha para excluir este movimento de venda:');
             } else {
-                modal.querySelector('p').textContent = 'Digite a senha para excluir este movimento:';
+                solicitarSenhaAcao('Digite a senha para excluir este movimento:');
             }
-            
-            // Focar no campo de senha
-            document.getElementById('senha-exclusao').focus();
-            
-            // Permitir confirmar com Enter
-            document.getElementById('senha-exclusao').onkeydown = function(e) {
-                if (e.key === 'Enter') {
-                    confirmarExclusaoMovimento();
-                }
-            };
         }
 
         // Movimentação de caixa
         function registrarMovimento() {
+            acaoPendente = 'registrar_movimento';
+            solicitarSenhaAcao('Digite a senha para registrar este movimento:');
+        }
+
+        function executarRegistroMovimento() {
             const tipo = document.getElementById('movimento-tipo').value;
             const valor = parseFloat(document.getElementById('movimento-valor').value);
             const descricao = document.getElementById('movimento-descricao').value.trim();
@@ -2008,10 +2011,19 @@
             if (!venda) return;
             
             vendaParaExcluir = venda;
-            
+            acaoPendente = 'excluir_venda';
+            solicitarSenhaAcao('Digite a senha para excluir esta venda:');
+        }
+
+        // Sistema unificado de solicitação de senha
+        function solicitarSenhaAcao(mensagem) {
             const modal = document.getElementById('modal-senha');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            
+            // Alterar o texto do modal
+            modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
+            modal.querySelector('p').textContent = mensagem;
             
             // Focar no campo de senha
             document.getElementById('senha-exclusao').focus();
@@ -2019,12 +2031,12 @@
             // Permitir confirmar com Enter
             document.getElementById('senha-exclusao').onkeydown = function(e) {
                 if (e.key === 'Enter') {
-                    confirmarExclusaoVenda();
+                    confirmarSenhaAcao();
                 }
             };
         }
 
-        function confirmarExclusaoVenda() {
+        function confirmarSenhaAcao() {
             const senhaDigitada = document.getElementById('senha-exclusao').value;
             const senhaCorreta = configSistema.senha || '1234';
             
@@ -2035,46 +2047,65 @@
                 return;
             }
             
-            // Verificar se é venda ou movimento
-            if (vendaParaExcluir) {
-                // Restaurar estoque dos produtos
-                vendaParaExcluir.itens.forEach(item => {
-                    const produto = produtos.find(p => p.id === item.produtoId);
-                    if (produto) {
-                        produto.estoque += item.quantidade;
-                    }
-                });
-                
-                // Remover movimento de caixa relacionado
-                movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
-                
-                // Remover venda
-                vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
-                
-                salvarDados();
-                cancelarExclusaoVenda();
-                atualizarTabelaVendasDia();
-                atualizarRelatorios();
-                calcularSaldoCaixa();
-                atualizarTabelaProdutos();
-                
-                mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
-            } else if (movimentoParaExcluir) {
-                confirmarExclusaoMovimento();
+            // Executar ação pendente
+            switch(acaoPendente) {
+                case 'editar_produto':
+                    executarEdicaoProduto(produtoParaAcao);
+                    break;
+                case 'remover_produto':
+                    executarRemocaoProduto(produtoParaAcao);
+                    break;
+                case 'registrar_movimento':
+                    executarRegistroMovimento();
+                    break;
+                case 'excluir_venda':
+                    executarExclusaoVenda();
+                    break;
+                case 'excluir_movimento':
+                    executarExclusaoMovimento();
+                    break;
             }
+            
+            // Limpar variáveis
+            acaoPendente = null;
+            produtoParaAcao = null;
+            
+            // Fechar modal
+            cancelarExclusaoVenda();
         }
 
-        function confirmarExclusaoMovimento() {
-            const senhaDigitada = document.getElementById('senha-exclusao').value;
-            const senhaCorreta = configSistema.senha || '1234';
+        function confirmarExclusaoVenda() {
+            confirmarSenhaAcao();
+        }
+
+        function executarExclusaoVenda() {
+            if (!vendaParaExcluir) return;
             
-            if (senhaDigitada !== senhaCorreta) {
-                mostrarMensagem('Senha incorreta!', 'erro');
-                document.getElementById('senha-exclusao').value = '';
-                document.getElementById('senha-exclusao').focus();
-                return;
-            }
+            // Restaurar estoque dos produtos
+            vendaParaExcluir.itens.forEach(item => {
+                const produto = produtos.find(p => p.id === item.produtoId);
+                if (produto) {
+                    produto.estoque += item.quantidade;
+                }
+            });
             
+            // Remover movimento de caixa relacionado
+            movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
+            
+            // Remover venda
+            vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
+            
+            salvarDados();
+            atualizarTabelaVendasDia();
+            atualizarRelatorios();
+            calcularSaldoCaixa();
+            atualizarTabelaProdutos();
+            
+            mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
+            vendaParaExcluir = null;
+        }
+
+        function executarExclusaoMovimento() {
             if (!movimentoParaExcluir) return;
             
             // Se for movimento de venda, também restaurar o estoque
@@ -2104,12 +2135,13 @@
             movimentos = movimentos.filter(m => m.id !== movimentoParaExcluir.id);
             
             salvarDados();
-            cancelarExclusaoVenda(); // Usar a mesma função para fechar o modal
             atualizarHistoricoMovimentos();
             calcularSaldoCaixa();
             atualizarTabelaVendasDia();
             atualizarRelatorios();
             atualizarTabelaProdutos();
+            
+            movimentoParaExcluir = null;
         }
 
         function cancelarExclusaoVenda() {
@@ -2516,5 +2548,5 @@
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990e2b9a25b327e9',t:'MTc2MDg1NDgzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'991470e0779527e9',t:'MTc2MDkyMDU4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
