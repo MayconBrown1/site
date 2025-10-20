@@ -922,6 +922,44 @@ if ('serviceWorker' in navigator) {
             });
         }
 
+        let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Previne que o Chrome mostre a mini barra de instalação automaticamente
+  e.preventDefault();
+  // Salva o evento para disparar depois
+  deferredPrompt = e;
+  
+  // Aqui você pode mostrar seu próprio botão de "Instalar"
+  showInstallButton();
+});
+
+function showInstallButton() {
+  const btn = document.createElement('button');
+  btn.textContent = 'Instalar App';
+  btn.style.position = 'fixed';
+  btn.style.bottom = '20px';
+  btn.style.right = '20px';
+  btn.style.padding = '10px 20px';
+  btn.style.background = '#007bff';
+  btn.style.color = '#fff';
+  btn.style.border = 'none';
+  btn.style.borderRadius = '8px';
+  btn.style.zIndex = '1000';
+  document.body.appendChild(btn);
+
+  btn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt(); // mostra o pop-up de instalação
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('User choice:', outcome);
+      deferredPrompt = null;
+      btn.remove(); // remove o botão após instalação
+    }
+  });
+}
+
+
         // Busca e seleção de produtos
         function buscarProduto(termo) {
             const lista = document.getElementById('produtos-lista');
