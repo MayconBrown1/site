@@ -2,7 +2,7 @@
     "name": "Brown Finanças",
     "short_name": "Brown Finanças",
     "description": "Tenha o controle das suas finanças na palma da mão.",
-    "start_url": "/ferramentas/brown-financas",
+    "start_url": "/ferramentas-e-utilitarios/brown-financas",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#121212",
