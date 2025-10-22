@@ -1,0 +1,16 @@
+{
+  "name": "Gerador de QR Code",
+  "short_name": "QR Code",
+  "description": "App para gerar QR Codes com download em PDF.",
+  "start_url": "/ferramentas-e-utilitarios/gerar-qrcode",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/img/gerar-qrcode.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
