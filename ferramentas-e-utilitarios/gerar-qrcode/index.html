@@ -4,85 +4,149 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gerador de QR Code Personalizado</title>
-  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+  <link rel="shortcut icon" href="/img/icone.png" type="image/x-icon">
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
+      box-sizing: border-box;
     }
-    h1 {
-      color: #00e676;
+    .gradient-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
     }
-    input, button, label {
-      width: 90%;
-      max-width: 500px;
-      padding: 12px;
-      margin: 10px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
+    .card-shadow {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
-    input[type="color"] {
-      width: 50px;
-      padding: 0;
+    .input-focus:focus {
+      outline: none;
+      border-color: #00e676;
+      box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.1);
     }
-    input[type="file"] {
-      background: #222;
-      color: white;
+    .btn-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 200, 83, 0.3);
     }
-    input[type="text"] {
-      background: #222;
-      color: white;
-    }
-    button {
-      background: #00c853;
-      color: white;
-      cursor: pointer;
-    }
-    #qr {
-      margin-top: 20px;
-    }
-    #downloadButtons button {
-      margin: 5px;
-      background-color: #00796b;
-    }
-    .logo {
-      margin-bottom: 20px;
-    }
-    .logo img {
-      width: 400px;
-      max-width: 90%;
+    .logo-container {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
   </style>
 </head>
-<body>
-  <!-- LOGO -->
-  <div class="logo">
-    <a href="http://mayconbrown.com.br/" target="_blank">
-      <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo Maycon Brown">
-    </a>
-  </div>
+<body class="gradient-bg min-h-full">
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <!-- Header com Logo -->
+    <header class="text-center mb-12">
+      <div class="logo-container rounded-2xl p-6 mb-8 inline-block">
+        <a href="http://mayconbrown.com.br/" target="_blank" rel="noopener noreferrer">
+          <div class="w-80 h-20 bg-white bg-opacity-10 rounded-lg flex items-center justify-center">
+            <span class="text-white text-xl font-bold">MAYCON BROWN</span>
+          </div>
+        </a>
+      </div>
+      <h1 class="text-4xl font-bold text-white mb-4">
+        Gerador de <span class="text-green-400">QR Code</span> Personalizado
+      </h1>
+      <p class="text-gray-300 text-lg">Crie QR codes personalizados com logo e cores customizadas</p>
+    </header>
 
-  <h1>Gerador de QR Code Personalizado</h1>
+    <div class="grid lg:grid-cols-2 gap-8">
+      <!-- Painel de Configurações -->
+      <section class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8 card-shadow">
+        <h2 class="text-2xl font-semibold text-white mb-6 flex items-center">
+          <svg class="w-6 h-6 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+          </svg>
+          Configurações
+        </h2>
 
-  <input type="text" id="link" placeholder="Cole aqui o link ou texto..." />
-  <br>
-  <label>Cor do QR Code: </label>
-  <input type="color" id="cor" value="#000000" />
-  <br>
-  <label>Logo no centro (opcional):</label>
-  <input type="file" id="logoInput" accept="image/*" />
-  <br>
-  <button onclick="gerarQRCode()">Gerar QR Code</button>
+        <div class="space-y-6">
+          <!-- Input de Link/Texto -->
+          <div>
+            <label for="link" class="block text-sm font-medium text-gray-300 mb-2">
+              Link ou Texto
+            </label>
+            <input 
+              type="text" 
+              id="link" 
+              placeholder="Cole aqui o link ou texto..." 
+              class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 input-focus transition-all duration-200"
+            />
+          </div>
 
-  <canvas id="canvas" style="display: none;"></canvas>
-  <div id="qr"></div>
-  <div id="downloadButtons"></div>
+          <!-- Seletor de Cor -->
+          <div>
+            <label for="cor" class="block text-sm font-medium text-gray-300 mb-2">
+              Cor do QR Code
+            </label>
+            <div class="flex items-center space-x-3">
+              <input 
+                type="color" 
+                id="cor" 
+                value="#000000" 
+                class="w-12 h-12 rounded-lg border-2 border-gray-600 cursor-pointer"
+              />
+              <span class="text-gray-300 text-sm">Escolha a cor principal</span>
+            </div>
+          </div>
+
+          <!-- Upload de Logo -->
+          <div>
+            <label for="logoInput" class="block text-sm font-medium text-gray-300 mb-2">
+              Logo Central (Opcional)
+            </label>
+            <div class="relative">
+              <input 
+                type="file" 
+                id="logoInput" 
+                accept="image/*" 
+                class="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-green-500 file:text-white file:cursor-pointer hover:file:bg-green-600 transition-all duration-200"
+              />
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Formatos aceitos: PNG, JPG, GIF</p>
+          </div>
+
+          <!-- Botão Gerar -->
+          <button 
+            onclick="gerarQRCode()" 
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 px-6 rounded-lg btn-hover transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Gerar QR Code</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Painel de Resultado -->
+      <section class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-2xl p-8 card-shadow">
+        <h2 class="text-2xl font-semibold text-white mb-6 flex items-center">
+          <svg class="w-6 h-6 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          Resultado
+        </h2>
+
+        <div class="text-center">
+          <div id="qr" class="mb-6 min-h-64 flex items-center justify-center">
+            <div class="text-gray-400">
+              <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <p>Seu QR Code aparecerá aqui</p>
+            </div>
+          </div>
+
+          <div id="downloadButtons" class="space-y-3"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Canvas oculto -->
+    <canvas id="canvas" style="display: none;"></canvas>
+  </main>
 
   <script>
     let qrDataURL = "";
@@ -96,15 +160,17 @@
       const downloadDiv = document.getElementById("downloadButtons");
 
       if (!link) {
-        alert("Digite um link ou texto primeiro!");
+        mostrarMensagem("Digite um link ou texto primeiro!", "erro");
         return;
       }
 
-      qrDiv.innerHTML = "";
+      // Limpar resultados anteriores
+      qrDiv.innerHTML = '<div class="text-gray-400"><div class="animate-spin w-8 h-8 border-2 border-green-400 border-t-transparent rounded-full mx-auto mb-2"></div><p>Gerando QR Code...</p></div>';
       downloadDiv.innerHTML = "";
 
       QRCode.toCanvas(canvas, link, {
-        width: 256,
+        width: 300,
+        margin: 2,
         color: {
           dark: cor,
           light: "#ffffff"
@@ -112,6 +178,7 @@
       }, function (err) {
         if (err) {
           console.error(err);
+          mostrarMensagem("Erro ao gerar QR Code", "erro");
           return;
         }
 
@@ -121,9 +188,14 @@
         if (logoInput.files[0]) {
           const logo = new Image();
           logo.onload = () => {
-            const size = 64; // tamanho da logo
+            const size = 80; // tamanho da logo
             const x = (canvas.width - size) / 2;
             const y = (canvas.height - size) / 2;
+            
+            // Fundo branco atrás da logo para melhor visibilidade
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x - 5, y - 5, size + 10, size + 10);
+            
             ctx.drawImage(logo, x, y, size, size);
 
             const url = canvas.toDataURL();
@@ -143,26 +215,55 @@
     }
 
     function mostrarQR(url) {
-      document.getElementById("qr").innerHTML = `<img src="${url}" alt="QR Code">`;
+      document.getElementById("qr").innerHTML = `
+        <div class="bg-white p-4 rounded-xl inline-block">
+          <img src="${url}" alt="QR Code" class="max-w-full h-auto">
+        </div>
+      `;
+      
       document.getElementById("downloadButtons").innerHTML = `
-        <button onclick="baixarPNG()">Baixar PNG</button>
-        <button onclick="baixarPDF()">Baixar PDF</button>
+        <button onclick="baixarPNG()" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>Baixar PNG</span>
+        </button>
+        <button onclick="baixarPDF()" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <span>Baixar PDF</span>
+        </button>
       `;
     }
 
     function baixarPNG() {
-      const a = document.createElement("a");
-      a.href = qrDataURL;
-      a.download = "qrcode.png";
-      a.click();
+      if (!qrDataURL) return;
+      
+      const link = document.createElement("a");
+      link.download = "qrcode.png";
+      link.href = qrDataURL;
+      link.click();
     }
 
     function baixarPDF() {
+      if (!qrDataURL) return;
+      
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF();
-      pdf.addImage(qrDataURL, 'PNG', 50, 40, 100, 100);
+      
+      pdf.addImage(qrDataURL, "PNG", 50, 50, 100, 100);
       pdf.save("qrcode.pdf");
     }
+
+    function mostrarMensagem(texto, tipo) {
+      const cor = tipo === "erro" ? "red" : "green";
+      document.getElementById("qr").innerHTML = `
+        <div class="bg-${cor}-500 bg-opacity-20 border border-${cor}-500 text-${cor}-300 px-4 py-3 rounded-lg">
+          ${texto}
+        </div>
+      `;
+    }
   </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9925be5fe3692800',t:'MTc2MTEwMjAxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
