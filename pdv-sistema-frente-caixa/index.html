@@ -49,25 +49,20 @@
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
-        
         .video-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        
-        .video-container video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.video-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
     </style>
     <script type="application/ld+json">
     {
@@ -150,7 +145,7 @@
         <!-- Video Section -->
         <section class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
-                <div class="flex flex-col lg:flex-row items-center">
+                <div class="flex flex-col lg:flex-row flex-wrap items-center">
                     <div class="lg:w-1/2 mb-10 lg:mb-0 lg:pr-12">
                         <h2 class="text-3xl lg:text-4xl font-bold text-gray-800 mb-6">
                             Veja Como é Simples Usar o Sistema
@@ -178,15 +173,18 @@
                             Assistir Demonstração
                         </button>
                     </div>
-                    <div class="lg:w-1/2">
+                    <div class="w-full lg:w-1/2 -mx-6 sm:mx-0">
                         <div class="video-container">
-                            <video id="demoVideo" controls poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect width='800' height='450' fill='%23f3f4f6'/%3E%3Cg transform='translate(400,225)'%3E%3Ccircle r='50' fill='%233b82f6'/%3E%3Cpolygon points='-15,-20 -15,20 25,0' fill='white'/%3E%3C/g%3E%3Ctext x='400' y='300' text-anchor='middle' fill='%236b7280' font-family='Arial' font-size='24'%3EVídeo Demonstrativo%3C/text%3E%3C/svg%3E">
-                                <source src="/video/pdv.mp4" type="video/mp4">
-                                <p class="text-center text-gray-600 p-8">
-                                    Seu navegador não suporta vídeo HTML5. 
-                                    <a href="/video/pdv.mp4" class="text-blue-600 underline">Clique aqui para baixar o vídeo</a>.
-                                </p>
-                            </video>
+                            <iframe 
+                                width="100%" 
+                                height="315" 
+                                src="https://www.youtube.com/embed/VrS4bEY17-0" 
+                                title="Vídeo Demonstrativo"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                class="rounded-xl shadow-lg">
+                            </iframe>
                         </div>
                     </div>
                 </div>
@@ -636,5 +634,19 @@
             });
         });
     </script>
+
+    <script>
+function playVideo() {
+  const iframe = document.querySelector('.video-container iframe');
+  if (iframe) {
+    const src = iframe.getAttribute('src');
+    if (!src.includes('autoplay=1')) {
+      iframe.setAttribute('src', src + (src.includes('?') ? '&' : '?') + 'autoplay=1');
+      iframe.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+</script>
+
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9919a19c60a927e9',t:'MTc2MDk3NTAxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
