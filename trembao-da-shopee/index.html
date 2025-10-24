@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TremBão da Shopee - Os melhores produtos em um só lugar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100%;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 140, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .shopee-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff8c00;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-top: 140px;
+            padding: 3rem 2rem 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 140, 0, 0.1);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .product-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            line-height: 1.4;
+            transition: color 0.3s ease;
+            margin-bottom: 0.75rem;
+        }
+
+        .product-card:hover .product-name {
+            color: #ff8c00;
+        }
+
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff8c00;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+
+
+        /* Footer */
+        .footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .logo {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                margin-top: 120px;
+                padding: 2rem 1rem;
+            }
+
+            .product-image {
+                height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .logo-container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .shopee-logo {
+                height: 40px;
+            }
+
+            .logo {
+                font-size: 1.8rem;
+            }
+
+            .subtitle {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-container">
+                <h1 class="logo">TremBão da</h1>
+                <img src="/img/shopee.png" alt="Logo Shopee" class="shopee-logo" onerror="this.style.display='none';">
+            </div>
+            <p class="subtitle">Os melhores produtos em um só lugar</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+
+        <!-- ========== ÁREA DOS PRODUTOS ========== -->
+        <!-- Para adicionar um novo produto, copie o bloco <div class="product-card"> completo -->
+        <section class="products-grid" id="productsGrid">
+            
+            <!-- PRODUTO 1 -->
+            <div class="product-card">
+                <a href="https://s.shopee.com.br/7AVC274gvv" class="product-link">
+                    <!-- IMAGEM: Substitua o src pela URL da sua imagem -->
+                    <img src="https://down-br.img.susercontent.com/file/br-11134207-81z1k-mfuoplxh9athd6.webp" alt="Fone de Ouvido Premium" class="product-image" onerror="this.src=''; this.alt='Imagem não disponível'; this.style.background='#f8f9fa'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <!-- NOME: Substitua o texto pelo nome do produto -->
+                    <h3 class="product-name">40 Peças / 46 Peças Jogo De Chave Catraca Caixa De Ferramentas Completa Reversível Soquetes Maleta</h3>
+                    <!-- PREÇO: Substitua pelo preço do produto -->
+                    <p class="product-price">R$28,99</p>
+                </a>
+            </div>
+
+            <!-- PRODUTO 2 -->
+            <div class="product-card">
+                <!-- LINK: Substitua o href pelo link do produto -->
+                <a href="https://s.shopee.com.br/7KoCnFgvLL" class="product-link">
+                    <!-- IMAGEM: Substitua o src pela URL da sua imagem -->
+                    <img src="https://down-br.img.susercontent.com/file/br-11134211-7r98o-lor192lx4tp1bd.webp" alt="Relógio Inteligente" class="product-image" onerror="this.src=''; this.alt='Imagem não disponível'; this.style.background='#f8f9fa'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <!-- NOME: Substitua o texto pelo nome do produto -->
+                    <h3 class="product-name">Massageador Elétrico Alta Frequência Profissional Muscular Massagem</h3>
+                    <!-- PREÇO: Substitua pelo preço do produto -->
+                    <p class="product-price">R$30,99</p>
+                </a>
+            </div>
+
+            <!-- PRODUTO 3 -->
+            <div class="product-card">
+                <!-- LINK: Substitua o href pelo link do produto -->
+                <a href="https://s.shopee.com.br/7pkTNiH8IY" class="product-link">
+                    <!-- IMAGEM: Substitua o src pela URL da sua imagem -->
+                    <img src="https://scontent.fnat16-1.fna.fbcdn.net/v/t45.5328-4/560829355_1465321224586480_1824666426936590120_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=102&ccb=1-7&_nc_sid=247b10&_nc_eui2=AeF4cpFr7yC5Isje1yYlbaHy1o5lrgp27k7WjmWuCnbuTuZD_61cEoA_VDAKXSUsyPZPkSJybM7FCiJqB234VmUe&_nc_ohc=WplldfaVwLIQ7kNvwFGiIvK&_nc_oc=AdkkFGRzmpeM2-Q0T8YstpEyuu6sAutT_pyWiv3dMYo1r7tZoBbbprdcxx97ktg7RZ59DAfRaTNhjI-uUFMh--sw&_nc_zt=23&_nc_ht=scontent.fnat16-1.fna&_nc_gid=fT7ndpvDBqj563b2Size3g&oh=00_Afcaab9V8vwcNLkuTOZ16HeNY-yA5V_vSSK9UeTiFAZKuQ&oe=69018512" alt="Tênis Esportivo" class="product-image" onerror="this.src=''; this.alt='Imagem não disponível'; this.style.background='#f8f9fa'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <!-- NOME: Substitua o texto pelo nome do produto -->
+                    <h3 class="product-name">KIT 10 Pijama short dool baby Micro Estampado Blusa Curta Short Curto SAPEQUINHA</h3>
+                    <!-- PREÇO: Substitua pelo preço do produto -->
+                    <p class="product-price">R$69,90</p>
+                </a>
+            </div>
+
+            <div class="product-card">
+                <a href="https://s.shopee.com.br/9pVXkSODYp" class="product-link">
+                    <img src="https://down-br.img.susercontent.com/file/sg-11134201-7rdvc-m0xgyh1tuamf40.webp" alt="Nome do Produto" class="product-image" onerror="this.src=''; this.alt='Imagem não disponível'; this.style.background='#f8f9fa'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <h3 class="product-name">IPhone 11 64gb/128gb/256gb 100% Original | Celular IPhone Apple</h3>
+                    <p class="product-price">R$1.510,00</p>
+                </a>
+            </div>
+
+            <!-- 
+            ========== TEMPLATE PARA NOVO PRODUTO ==========
+            Copie e cole este bloco para adicionar um novo produto:
+            
+            <div class="product-card">
+                <a href="SEU_LINK_AQUI" class="product-link">
+                    <img src="SUA_IMAGEM_AQUI" alt="Nome do Produto" class="product-image" onerror="this.src=''; this.alt='Imagem não disponível'; this.style.background='#f8f9fa'; this.style.display='flex'; this.style.alignItems='center'; this.style.justifyContent='center';">
+                    <h3 class="product-name">Nome do Produto</h3>
+                    <p class="product-price">R$ 00,00</p>
+                </a>
+            </div>
+            -->
+            
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p class="footer-text">© 2025 TremBão da Shopee – Todos os direitos reservados.</p>
+    </footer>
+
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'993aef60722395fc',t:'MTc2MTMyNDIyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
