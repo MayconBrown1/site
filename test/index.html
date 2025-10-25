@@ -1094,6 +1094,7 @@
 
             if (username === 'admin' && password === settings.adminPassword) {
                 currentUser = { username: 'admin', role: 'admin' };
+                storage.set('currentUser', currentUser); // Save login state
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 showSection('sales');
@@ -1106,9 +1107,23 @@
 
         function logout() {
             currentUser = null;
+            storage.remove('currentUser'); // Remove saved login state
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('mainApp').style.display = 'none';
             clearCart();
+        }
+
+        function checkSavedLogin() {
+            const savedUser = storage.get('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                showSection('sales');
+                loadStoreName();
+                return true;
+            }
+            return false;
         }
 
         // Navigation
@@ -1983,6 +1998,15 @@
                     e.preventDefault();
                 }
                 
+                // Finalize sale shortcut
+                if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.altKey && document.activeElement.tagName !== 'INPUT') {
+                    const finalizeSaleBtn = document.getElementById('finalizeSaleBtn');
+                    if (!finalizeSaleBtn.disabled) {
+                        finalizeSale();
+                    }
+                    e.preventDefault();
+                }
+                
                 // Backspace to remove last item
                 if (e.key === 'Backspace' && document.activeElement.tagName !== 'INPUT' && cart.length > 0) {
                     removeFromCart(cart[cart.length - 1].id);
@@ -2514,6 +2538,13 @@
         // Initialize Application
         document.addEventListener('DOMContentLoaded', function() {
             initializeData();
+            
+            // Check for saved login before showing login screen
+            if (!checkSavedLogin()) {
+                // Only show login screen if no saved login
+                document.getElementById('loginScreen').style.display = 'flex';
+            }
+            
             setupKeyboardShortcuts();
             setupSearch();
             
@@ -2550,5 +2581,5 @@
             showNotification('🏪 PDV Sistema carregado com sucesso!', 'success');
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99447e96e65995fc',t:'MTc2MTQyNDQ2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9944862806cf95fc',t:'MTc2MTQyNDc3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
