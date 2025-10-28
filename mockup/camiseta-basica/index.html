@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup de Camiseta PSD - Frente e Verso Editável</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #ff6b35;
+            color: white;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+
+        .cta-button:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Mockup Gallery */
+        .mockup-gallery {
+            padding: 80px 0;
+            background: #f8fafc;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .mockup-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .mockup-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .mockup-placeholder {
+            height: 250px;
+            background: linear-gradient(45deg, #e2e8f0, #cbd5e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .mockup-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .clickable-image {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .zoom-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .clickable-image:hover .zoom-overlay {
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-image {
+            max-width: 100%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .close:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .mockup-caption {
+            padding: 20px;
+            text-align: center;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: #1e293b;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        /* Photoshop Promo */
+        .photoshop-promo {
+            padding: 60px 0;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+        }
+
+        .promo-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .promo-content {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .promo-icon {
+            flex-shrink: 0;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .promo-text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .promo-text p {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .promo-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e3a8a, #3730a3);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(30, 58, 138, 0.3);
+        }
+
+        .promo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(30, 58, 138, 0.4);
+        }
+
+        /* How it Works */
+        .how-it-works {
+            padding: 80px 0;
+            background: #f1f5f9;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+
+        .how-it-works p {
+            font-size: 1.2rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .testimonials h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: #1e293b;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 15px;
+            color: #475569;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .cta-button {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+
+            .features h2,
+            .how-it-works h2,
+            .testimonials h2 {
+                font-size: 2rem;
+            }
+
+            .promo-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .promo-card {
+                padding: 30px 20px;
+            }
+
+            .promo-text h3 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- Hero Section -->
+  <section class="hero">
+   <div class="container">
+    <h1 id="main-title">Mockup de Camiseta Frente e Verso – Edite no Photoshop e apresente suas artes com realismo profissional!</h1>
+    <p id="subtitle">Perfeito para designers, marcas de roupa e criadores que querem mostrar suas estampas com qualidade de estúdio.</p><a href="https://pay.cakto.com.br/3cbhzvf_625380" rel="noopener noreferrer" class="cta-button" id="cta-button"> 👉 Baixar Agora - R$ 5,99 </a>
+   </div>
+  </section><!-- Mockup Gallery -->
+  <section class="mockup-gallery">
+   <div class="container">
+    <h2>Veja o Mockup em Ação</h2>
+    <div class="gallery-grid">
+     <div class="mockup-item clickable-image" onclick="openModal('/img/FRENTE0002.jpg', 'Frente da Camiseta')"><img src="/img/FRENTE0002.jpg" alt="Frente da Camiseta" class="mockup-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="mockup-placeholder" style="display: none;">
+       <svg width="80" height="80" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" /> <line x1="16" y1="8" x2="2" y2="22" /> <line x1="17.5" y1="15" x2="9" y2="15" />
+       </svg><span style="margin-left: 10px;">Frente da Camiseta</span>
+      </div>
+      <div class="mockup-caption">
+       Vista frontal com design editável
+      </div>
+      <div class="zoom-overlay">
+       <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.35-4.35" /> <line x1="11" y1="8" x2="11" y2="14" /> <line x1="8" y1="11" x2="14" y2="11" />
+       </svg>
+      </div>
+     </div>
+     <div class="mockup-item clickable-image" onclick="openModal('/img/VERSO0002.jpg', 'Verso da Camiseta')"><img src="/img/VERSO0002.jpg" alt="Verso da Camiseta" class="mockup-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <div class="mockup-placeholder" style="display: none;">
+       <svg width="80" height="80" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z" /> <line x1="16" y1="8" x2="2" y2="22" /> <line x1="17.5" y1="15" x2="9" y2="15" />
+       </svg><span style="margin-left: 10px;">Verso da Camiseta</span>
+      </div>
+      <div class="mockup-caption">
+       Vista traseira com área editável
+      </div>
+      <div class="zoom-overlay">
+       <svg width="24" height="24" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="11" cy="11" r="8" /> <path d="m21 21-4.35-4.35" /> <line x1="11" y1="8" x2="11" y2="14" /> <line x1="8" y1="11" x2="14" y2="11" />
+       </svg>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section><!-- Features -->
+  <section class="features">
+   <div class="container">
+    <h2>O que você recebe</h2>
+    <div class="features-grid">
+     <div class="feature-item">
+      <div class="feature-icon">
+       ✅
+      </div>
+      <div class="feature-text">
+       Arquivo PSD totalmente editável
+      </div>
+     </div>
+     <div class="feature-item">
+      <div class="feature-icon">
+       ✅
+      </div>
+      <div class="feature-text">
+       Inclui frente e verso da camiseta
+      </div>
+     </div>
+     <div class="feature-item">
+      <div class="feature-icon">
+       ✅
+      </div>
+      <div class="feature-text">
+       Camadas organizadas e nomeadas
+      </div>
+     </div>
+     <div class="feature-item">
+      <div class="feature-icon">
+       ✅
+      </div>
+      <div class="feature-text">
+       Alta resolução (4500x4500 px)
+      </div>
+     </div>
+     <div class="feature-item">
+      <div class="feature-icon">
+       ✅
+      </div>
+      <div class="feature-text">
+       Compatível com Photoshop CC+
+      </div>
+     </div>
+    </div>
+   </div>
+  </section><!-- Photoshop 2025 Promo -->
+  <section class="photoshop-promo">
+   <div class="container">
+    <div class="promo-card">
+     <div class="promo-content">
+      <div class="promo-icon">
+       <svg width="60" height="60" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /> <path d="M8 12h8" /> <path d="M12 8v8" />
+       </svg>
+      </div>
+      <div class="promo-text">
+       <h3>Precisa do Photoshop 2025?</h3>
+       <p>Baixe a versão mais recente do Adobe Photoshop 2025 com todas as funcionalidades para editar seus mockups perfeitamente!</p><a href="https://mayconbrown.com.br/software/2025/photoshop/" target="_blank" rel="noopener noreferrer" class="promo-button"> 🚀 Baixar Photoshop 2025 </a>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section><!-- How it Works -->
+  <section class="how-it-works">
+   <div class="container">
+    <h2 id="how-it-works-title">Como funciona</h2>
+    <p id="how-it-works-text">Após a compra, você receberá automaticamente o arquivo no seu e-mail, pronto para baixar e usar no Photoshop.</p><a href="https://pay.cakto.com.br/3cbhzvf_625380" rel="noopener noreferrer" class="cta-button"> 👉 Baixar Agora - R$ 5,99 </a>
+   </div>
+  </section><!-- Testimonials -->
+  <section class="testimonials">
+   <div class="container">
+    <h2>O que nossos clientes dizem</h2>
+    <div class="testimonials-grid">
+     <div class="testimonial">
+      <div class="testimonial-text">
+       "Mockup de qualidade profissional! As camadas são muito bem organizadas e o resultado final fica incrível."
+      </div>
+      <div class="testimonial-author">
+       - Ana Silva, Designer
+      </div>
+     </div>
+     <div class="testimonial">
+      <div class="testimonial-text">
+       "Perfeito para apresentar meus designs para clientes. A qualidade é excelente e muito fácil de usar."
+      </div>
+      <div class="testimonial-author">
+       - Carlos Santos, Freelancer
+      </div>
+     </div>
+     <div class="testimonial">
+      <div class="testimonial-text">
+       "Economizei muito tempo com este mockup. Recomendo para qualquer designer que trabalha com estampas."
+      </div>
+      <div class="testimonial-author">
+       - Marina Costa, Agência
+      </div>
+     </div>
+    </div>
+   </div>
+  </section><!-- Footer -->
+  <footer class="footer">
+   <div class="container">
+    <p id="copyright-text">©2025 Maycon Brown</p>
+    <p><a href="https://mayconbrown.com.br/" target="_blank" rel="noopener noreferrer">mayconbrown.com.br</a></p>
+    <p id="footer-notice">Produto digital – entrega automática por e-mail após pagamento.</p>
+   </div>
+  </footer><!-- Modal for Image Zoom -->
+  <div id="imageModal" class="modal" onclick="closeModal()"><span class="close" onclick="closeModal()">×</span>
+   <div class="modal-content" onclick="event.stopPropagation()"><img id="modalImage" class="modal-image" src="" alt="">
+   </div>
+  </div>
+  <script>
+        // Modal Functions
+        function openModal(imageSrc, altText) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            
+            modalImage.src = imageSrc;
+            modalImage.alt = altText;
+            modal.style.display = 'block';
+            
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            
+            // Restore body scroll
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        const defaultConfig = {
+            main_title: "Mockup de Camiseta Frente e Verso – Edite no Photoshop e apresente suas artes com realismo profissional!",
+            subtitle: "Perfeito para designers, marcas de roupa e criadores que querem mostrar suas estampas com qualidade de estúdio.",
+            cta_button: "👉 Baixar Agora - R$ 5,99",
+            how_it_works_title: "Como funciona",
+            how_it_works_text: "Após a compra, você receberá automaticamente o arquivo no seu e-mail, pronto para baixar e usar no Photoshop.",
+            copyright_text: "©2025 Maycon Brown",
+            footer_notice: "Produto digital – entrega automática por e-mail após pagamento.",
+            primary_color: "#667eea",
+            secondary_color: "#ff6b35",
+            background_color: "#ffffff",
+            text_color: "#333333",
+            surface_color: "#f8fafc"
+        };
+
+        async function onConfigChange(config) {
+            // Update text content
+            document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
+            document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+            document.getElementById('cta-button').textContent = config.cta_button || defaultConfig.cta_button;
+            document.getElementById('how-it-works-title').textContent = config.how_it_works_title || defaultConfig.how_it_works_title;
+            document.getElementById('how-it-works-text').textContent = config.how_it_works_text || defaultConfig.how_it_works_text;
+            document.getElementById('copyright-text').textContent = config.copyright_text || defaultConfig.copyright_text;
+            document.getElementById('footer-notice').textContent = config.footer_notice || defaultConfig.footer_notice;
+
+            // Update colors
+            const primaryColor = config.primary_color || defaultConfig.primary_color;
+            const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+            const backgroundColor = config.background_color || defaultConfig.background_color;
+            const textColor = config.text_color || defaultConfig.text_color;
+            const surfaceColor = config.surface_color || defaultConfig.surface_color;
+
+            // Apply colors to elements
+            document.body.style.backgroundColor = backgroundColor;
+            document.body.style.color = textColor;
+            
+            const hero = document.querySelector('.hero');
+            hero.style.background = `linear-gradient(135deg, ${primaryColor} 0%, #764ba2 100%)`;
+            
+            const ctaButtons = document.querySelectorAll('.cta-button');
+            ctaButtons.forEach(button => {
+                button.style.backgroundColor = secondaryColor;
+            });
+
+            const mockupGallery = document.querySelector('.mockup-gallery');
+            const howItWorks = document.querySelector('.how-it-works');
+            mockupGallery.style.backgroundColor = surfaceColor;
+            howItWorks.style.backgroundColor = surfaceColor;
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.primary_color || defaultConfig.primary_color,
+                        set: (value) => {
+                            config.primary_color = value;
+                            window.elementSdk.setConfig({ primary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.secondary_color || defaultConfig.secondary_color,
+                        set: (value) => {
+                            config.secondary_color = value;
+                            window.elementSdk.setConfig({ secondary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.background_color || defaultConfig.background_color,
+                        set: (value) => {
+                            config.background_color = value;
+                            window.elementSdk.setConfig({ background_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.text_color || defaultConfig.text_color,
+                        set: (value) => {
+                            config.text_color = value;
+                            window.elementSdk.setConfig({ text_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.surface_color || defaultConfig.surface_color,
+                        set: (value) => {
+                            config.surface_color = value;
+                            window.elementSdk.setConfig({ surface_color: value });
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["main_title", config.main_title || defaultConfig.main_title],
+                ["subtitle", config.subtitle || defaultConfig.subtitle],
+                ["cta_button", config.cta_button || defaultConfig.cta_button],
+                ["how_it_works_title", config.how_it_works_title || defaultConfig.how_it_works_title],
+                ["how_it_works_text", config.how_it_works_text || defaultConfig.how_it_works_text],
+                ["copyright_text", config.copyright_text || defaultConfig.copyright_text],
+                ["footer_notice", config.footer_notice || defaultConfig.footer_notice]
+            ]);
+        }
+
+        // Initialize SDK
+        if (window.elementSdk) {
+            window.elementSdk.init({
+                defaultConfig,
+                onConfigChange,
+                mapToCapabilities,
+                mapToEditPanelValues
+            });
+        }
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'995744a00513dc24',t:'MTc2MTYyMTMxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
