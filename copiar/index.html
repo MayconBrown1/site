@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Copiar Link</title>
+  <style>
+    :root{font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    html,body{height:100%;margin:0}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#0f172a 0%, #071020 100%);color:#fff}
+    .card{background:rgba(255,255,255,0.04);padding:36px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column;gap:16px;align-items:center}
+    button{appearance:none;border:0;padding:14px 28px;border-radius:10px;font-size:16px;cursor:pointer;background:linear-gradient(90deg,#06b6d4,#3b82f6);color:white;box-shadow:0 6px 18px rgba(59,130,246,0.25);transition:transform .12s ease,box-shadow .12s}
+    button:active{transform:translateY(1px)}
+    .hint{font-size:14px;opacity:.9}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:36px;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 18px rgba(2,6,23,0.6);display:none}
+    .toast.show{display:block;animation:pop .28s ease}
+    @keyframes pop{from{transform:translateX(-50%) translateY(8px) scale(.98);opacity:0}to{transform:translateX(-50%) translateY(0) scale(1);opacity:1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="region" aria-label="Copiar link">
+      <h1 style="margin:0;font-size:18px">Copiar link</h1>
+      <p class="hint">Clique no botão para copiar o link para a área de transferência</p>
+      <button id="copyBtn" aria-live="polite" aria-label="Copiar link para mayconbrown.com.br">Copiar</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Link copiado para a área de transferência!</div>
+
+  <script>
+    (function(){
+      const LINK = 'https://download1323.mediafire.com/r1bvcyvetkagsFbOAcnkZY3NBSZT9PswxFoiQ_uI5c0gK5v77-j69CRXmMhPwzEfIo-ufjsrZrBHq9oYZOaDTQTuN6O9EjrWR2-SSiH1wHp7dwO2t4CGOkdSSmgNZNxRQd84ofBP65weUsXp-289uNDYTX2iEvNsvz0sjbraBCp_LA/g208upwetm41zq9/Microsoft+Visual+C+Todos.zip';
+      const btn = document.getElementById('copyBtn');
+      const toast = document.getElementById('toast');
+
+      function showToast(msg){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(()=> toast.classList.remove('show'), 2000);
+      }
+
+      async function copyText(text){
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          try{
+            await navigator.clipboard.writeText(text);
+            return true;
+          }catch(e){
+            // fallback to execCommand
+          }
+        }
+        // Fallback: create a temporary textarea
+        try{
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly','');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          return ok;
+        }catch(e){
+          return false;
+        }
+      }
+
+      btn.addEventListener('click', async function(){
+        btn.disabled = true;
+        btn.textContent = 'Copiando...';
+        const ok = await copyText(LINK);
+        if(ok){
+          btn.textContent = 'Copiado!';
+          showToast('Link copiado para a área de transferência!');
+        }else{
+          btn.textContent = 'Erro — selecione e copie manualmente';
+          showToast('Não foi possível copiar automaticamente. Selecione e copie: ' + LINK);
+        }
+        setTimeout(()=>{btn.disabled=false;btn.textContent='Copiar'},1500);
+      });
+
+    })();
+  </script>
+</body>
+</html>
