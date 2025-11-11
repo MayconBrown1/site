@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taxas de Entrega - Gabriel</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+<circle cx='5' cy='18' r='3'/>
+<circle cx='19' cy='18' r='3'/>
+<path d='M5 18h14l-3-9h-4l1 3h-3l-2-6H4'/>
+<path d='M16 5h3v4h-3z'/>
+</svg>">
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100%;
+      padding: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0 0 10px 0;
+      font-size: 2.5em;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 1.1em;
+      opacity: 0.95;
+    }
+
+    .search-container {
+      padding: 30px;
+      background: #f8f9fa;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .search-box {
+      position: relative;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 1.2em;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      font-size: 1em;
+      border: 2px solid #e9ecef;
+      border-radius: 50px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    #searchInput:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .table-container {
+      padding: 30px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    th {
+      padding: 18px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 1em;
+      letter-spacing: 0.5px;
+    }
+
+    th:last-child {
+      text-align: right;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #e9ecef;
+      transition: all 0.2s ease;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    tbody tr:hover {
+      background: #e7f0ff;
+      transform: scale(1.01);
+    }
+
+    td {
+      padding: 16px 18px;
+      font-size: 0.95em;
+    }
+
+    td:first-child {
+      font-weight: 500;
+      color: #2d3748;
+    }
+
+    td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: #667eea;
+      font-size: 1.05em;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #718096;
+      font-size: 1.1em;
+      display: none;
+    }
+
+    .no-results.show {
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .header p {
+        font-size: 0.95em;
+      }
+
+      .header {
+        padding: 30px 20px;
+      }
+
+      .search-container,
+      .table-container {
+        padding: 20px;
+      }
+
+      th, td {
+        padding: 12px 10px;
+        font-size: 0.9em;
+      }
+
+      th:last-child,
+      td:last-child {
+        text-align: right;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <div class="header">
+    <h1 id="storeName">Gabriel Entregas</h1>
+    <p id="subtitle">Consulte sua taxa de entrega</p>
+   </div>
+   <div class="search-container">
+    <div class="search-box"><span class="search-icon">🔍</span> <input type="text" id="searchInput" placeholder="Pesquisar..." autocomplete="off">
+    </div>
+   </div>
+   <div class="table-container">
+    <table id="deliveryTable">
+     <thead>
+      <tr>
+       <th>Bairro ou Local</th>
+       <th>Taxa de Entrega (R$)</th>
+      </tr>
+     </thead>
+     <tbody id="tableBody">
+     </tbody>
+    </table>
+    <div class="no-results" id="noResults">
+     Nenhum bairro ou local encontrado 😕
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      store_name: "Gabriel Entregas",
+      subtitle: "Consulte sua taxa de entrega por bairro",
+      search_placeholder: "Pesquisar bairro...",
+      primary_color: "#667eea",
+      secondary_color: "#764ba2",
+      background_color: "#f8f9fa",
+      text_color: "#2d3748",
+      accent_color: "#e7f0ff"
+    };
+
+    const neighborhoods = [
+      { name: "Bela Parnamirim", fee: 8.00 },
+      { name: "Boa Esperança", fee: 8.00 },
+      { name: "Bosque das Colinas", fee: 7.00 },
+      { name: "Cajupiranga", fee: 8.00 },
+      { name: "Centro", fee: 8.00 },
+      { name: "Cohabinal", fee: 7.00 },
+      { name: "Emaús", fee: 15.00 },
+      { name: "Vida Nova", fee: 8.00 },
+      { name: "Liberdade", fee: 8.00 },
+      { name: "Jardim Planalto", fee: 8.00 },
+      { name: "Monte Castelo", fee: 8.00 },
+      { name: "Nova Esperança", fee: 5.00 },
+      { name: "Nova Esperança (santa julia)", fee: 6.00 },
+      { name: "Nova Esperança (alamedas do jardin)", fee: 7.00 },
+      { name: "Nova Esperança (engenho)", fee: 7.00 },
+      { name: "Nova Esperança (bosque brasil)", fee: 8.00 },
+      { name: "Nova Parnamirim", fee: 15.00 },
+      { name: "Parque das Árvores", fee: 14.00 },
+      { name: "Parque das Nações", fee: 14.00 },
+      { name: "Parque de Exposições", fee: 10.00 },
+      { name: "Parque do Jiqui", fee: 15.00 },
+      { name: "Passagem de Areia", fee: 8.00 },
+      { name: "Rosa dos Ventos", fee: 7.00 },
+      { name: "Santa Tereza", fee: 7.00 },
+      { name: "Santos Reis", fee: 7.00 },
+      { name: "Taborda", fee: 14.00 },
+      { name: "Vale do Sol", fee: 6.00 }
+    ];
+
+    let allRows = [];
+
+    function renderTable(data) {
+      const tableBody = document.getElementById('tableBody');
+      const noResults = document.getElementById('noResults');
+      
+      tableBody.innerHTML = '';
+      allRows = [];
+      
+      if (data.length === 0) {
+        noResults.classList.add('show');
+        return;
+      }
+      
+      noResults.classList.remove('show');
+      
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td>R$ ${item.fee.toFixed(2).replace('.', ',')}</td>
+        `;
+        tableBody.appendChild(row);
+        allRows.push({ element: row, name: item.name.toLowerCase() });
+      });
+    }
+
+    function filterTable(searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
+      const noResults = document.getElementById('noResults');
+      let visibleCount = 0;
+      
+      allRows.forEach(row => {
+        if (row.name.includes(term)) {
+          row.element.style.display = '';
+          visibleCount++;
+        } else {
+          row.element.style.display = 'none';
+        }
+      });
+      
+      if (visibleCount === 0) {
+        noResults.classList.add('show');
+      } else {
+        noResults.classList.remove('show');
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      filterTable(e.target.value);
+    });
+
+    async function onConfigChange(config) {
+      document.getElementById('storeName').textContent = config.store_name || defaultConfig.store_name;
+      document.getElementById('subtitle').textContent = config.subtitle || defaultConfig.subtitle;
+      document.getElementById('searchInput').placeholder = config.search_placeholder || defaultConfig.search_placeholder;
+
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+
+      document.body.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      document.querySelector('.header').style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      document.querySelector('thead').style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      document.querySelector('.search-container').style.background = backgroundColor;
+      
+      const evenRows = document.querySelectorAll('tbody tr:nth-child(even)');
+      evenRows.forEach(row => {
+        row.style.background = backgroundColor;
+      });
+
+      document.querySelectorAll('td:first-child').forEach(td => {
+        td.style.color = textColor;
+      });
+
+      document.querySelectorAll('td:last-child').forEach(td => {
+        td.style.color = primaryColor;
+      });
+
+      document.querySelector('.search-icon').style.color = primaryColor;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        #searchInput:focus {
+          border-color: ${primaryColor} !important;
+          box-shadow: 0 0 0 3px ${primaryColor}33 !important;
+        }
+        tbody tr:hover {
+          background: ${accentColor} !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["store_name", config.store_name || defaultConfig.store_name],
+          ["subtitle", config.subtitle || defaultConfig.subtitle],
+          ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder]
+        ])
+      });
+    }
+
+    renderTable(neighborhoods);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99c7c1abf58e6f91',t:'MTc2MjgwMDg0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+
+ <!-- Botão Flutuante WhatsApp -->
+<a href="https://wa.me/+5584996159361?text=Oi%2C%20Gabriel%2C%20preciso%20dos%20seus%20servi%C3%A7os." 
+   target="_blank" 
+   class="whatsapp-float">
+   💬 Falar com o entregador
+</a>
+
+<style>
+.whatsapp-float {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25D366;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 12px 18px;
+  border-radius: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  font-family: Arial, sans-serif;
+  transition: all 0.3s ease;
+  z-index: 9999;
+}
+
+.whatsapp-float:hover {
+  background-color: #1ebe5d;
+  transform: scale(1.05);
+}
+</style>
+
+ <footer style="text: center; padding: 20px 0; font-family: Arial, sans-serif; font-size: 14px; color: #000000;">
+  Feito por: <a href="https://mayconbrown.com.br" rel="noopener" style="color: #007bff; text-decoration: none;">
+    mayconbrown.com.br
+  </a>
+</footer>
+
+ </html>
