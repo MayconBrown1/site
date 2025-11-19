@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Custo de Impressão 3D</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100%;
+      height: 100%;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card {
+      background: #2a2a3e;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      color: #ffffff;
+      text-align: center;
+      margin: 0 0 10px 0;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .description {
+      color: #a0a0b8;
+      text-align: center;
+      margin: 0 0 30px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      color: #e0e0f0;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .currency-symbol {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b6b8f;
+      font-size: 16px;
+      font-weight: 600;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    input {
+      width: 100%;
+      padding: 16px 18px;
+      padding-right: 50px;
+      border: 2px solid #3a3a52;
+      border-radius: 12px;
+      font-size: 18px;
+      background: #1e1e2e;
+      color: #ffffff;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #00d9ff;
+      box-shadow: 0 0 0 4px rgba(0, 217, 255, 0.1);
+    }
+
+    input::placeholder {
+      color: #5a5a70;
+    }
+
+    .result-section {
+      background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
+      border-radius: 12px;
+      padding: 25px;
+      text-align: center;
+      margin-top: 30px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
+
+    .result-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-label {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .result-value {
+      color: #ffffff;
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 30px 25px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .result-value {
+        font-size: 30px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="container">
+   <div class="card">
+    <h1 id="pageTitle">Calculadora de Custo de Impressão 3D</h1>
+    <p class="description" id="descriptionText">Digite o valor do 1kg de filamento e o peso da peça</p>
+    <form id="calculatorForm">
+     <div class="form-group"><label for="filamentPrice" id="filamentLabel">Preço do filamento (1kg)</label>
+      <div class="input-wrapper"><span class="currency-symbol">R$</span> <input type="number" id="filamentPrice" placeholder="0.00" step="0.01" min="0" required>
+      </div>
+     </div>
+     <div class="form-group"><label for="pieceWeight" id="weightLabel">Peso da peça (gramas)</label>
+      <div class="input-wrapper"><span class="currency-symbol">g</span> <input type="number" id="pieceWeight" placeholder="0" step="0.1" min="0" required>
+      </div>
+     </div>
+    </form>
+    <div class="result-section" id="resultSection">
+     <div class="result-label" id="resultLabel">
+      Custo da peça
+     </div>
+     <div class="result-value" id="resultValue">
+      R$ 0,00
+     </div>
+    </div>
+   </div>
+  </main>
+  <script>
+    const defaultConfig = {
+      page_title: "Calculadora de Custo de Impressão 3D",
+      description_text: "Digite o valor do 1kg de filamento e o peso da peça",
+      filament_label: "Preço do filamento (1kg)",
+      weight_label: "Peso da peça (gramas)",
+      result_label: "Custo da peça",
+      primary_color: "#00d9ff",
+      secondary_color: "#2a2a3e",
+      background_color: "#1e1e2e",
+      text_color: "#ffffff",
+      accent_color: "#0099cc",
+      font_family: "Segoe UI",
+      font_size: 16
+    };
+
+    const filamentPriceInput = document.getElementById('filamentPrice');
+    const pieceWeightInput = document.getElementById('pieceWeight');
+    const resultSection = document.getElementById('resultSection');
+    const resultValue = document.getElementById('resultValue');
+
+    function calculateCost() {
+      const filamentPrice = parseFloat(filamentPriceInput.value);
+      const pieceWeight = parseFloat(pieceWeightInput.value);
+
+      if (filamentPrice > 0 && pieceWeight > 0) {
+        const cost = (filamentPrice / 1000) * pieceWeight;
+        resultValue.textContent = `R$ ${cost.toFixed(2).replace('.', ',')}`;
+        resultSection.classList.add('visible');
+      } else {
+        resultSection.classList.remove('visible');
+      }
+    }
+
+    filamentPriceInput.addEventListener('input', calculateCost);
+    pieceWeightInput.addEventListener('input', calculateCost);
+
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Tahoma, Geneva, Verdana, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      document.body.style.fontSize = `${baseSize}px`;
+      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${secondaryColor} 100%)`;
+
+      document.querySelector('.card').style.background = secondaryColor;
+      
+      document.getElementById('pageTitle').textContent = config.page_title || defaultConfig.page_title;
+      document.getElementById('pageTitle').style.color = textColor;
+      document.getElementById('pageTitle').style.fontSize = `${baseSize * 1.75}px`;
+
+      document.getElementById('descriptionText').textContent = config.description_text || defaultConfig.description_text;
+      document.getElementById('descriptionText').style.fontSize = `${baseSize * 0.875}px`;
+
+      document.getElementById('filamentLabel').textContent = config.filament_label || defaultConfig.filament_label;
+      document.getElementById('filamentLabel').style.fontSize = `${baseSize * 0.875}px`;
+
+      document.getElementById('weightLabel').textContent = config.weight_label || defaultConfig.weight_label;
+      document.getElementById('weightLabel').style.fontSize = `${baseSize * 0.875}px`;
+
+      document.getElementById('resultLabel').textContent = config.result_label || defaultConfig.result_label;
+      document.getElementById('resultLabel').style.fontSize = `${baseSize * 0.875}px`;
+
+      document.getElementById('resultValue').style.fontSize = `${baseSize * 2.25}px`;
+
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.style.background = backgroundColor;
+        input.style.color = textColor;
+        input.style.fontSize = `${baseSize * 1.125}px`;
+      });
+
+      resultSection.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["page_title", config.page_title || defaultConfig.page_title],
+          ["description_text", config.description_text || defaultConfig.description_text],
+          ["filament_label", config.filament_label || defaultConfig.filament_label],
+          ["weight_label", config.weight_label || defaultConfig.weight_label],
+          ["result_label", config.result_label || defaultConfig.result_label]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a111b2113c6dc15',t:'MTc2MzU2OTk3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
