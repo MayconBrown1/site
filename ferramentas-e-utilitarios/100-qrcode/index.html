@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de QR Codes</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000000;
+      min-height: 100%;
+      width: 100%;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 2.5rem;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+    }
+
+
+
+    .control-panel {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 40px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333333;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #000000;
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      flex: 1;
+      min-width: 180px;
+      padding: 16px 32px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-generate {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-generate:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.6;
+    }
+
+    .btn-download {
+      background: #000000;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+    }
+
+    .btn-download:hover:not(:disabled) {
+      background: #ffffff;
+      color: #000000;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-download:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.6;
+    }
+
+
+
+
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #ffffff;
+      font-size: 1.1rem;
+      display: none;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .qr-item {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+
+    .qr-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+
+
+    .qr-code-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .qr-code-container canvas {
+      border-radius: 8px;
+    }
+
+    .qr-text {
+      color: #333333;
+      font-weight: 600;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+
+    .message-box {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+      text-align: center;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    .message-box.active {
+      display: block;
+    }
+
+    .message-box.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+
+    .message-box.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 2px solid #10b981;
+    }
+
+    .message-box.warning {
+      background: #fef3c7;
+      color: #92400e;
+      border: 2px solid #f59e0b;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .subtitle {
+        font-size: 0.95rem;
+      }
+
+      .control-panel {
+        padding: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        min-width: 100%;
+        padding: 14px 24px;
+        font-size: 1rem;
+      }
+
+      .qr-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+      }
+
+      .qr-item {
+        padding: 12px;
+      }
+
+      .qr-text {
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .container {
+        padding: 16px 12px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+      }
+
+      .control-panel {
+        padding: 16px;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      label {
+        font-size: 0.85rem;
+      }
+
+      input {
+        padding: 12px;
+        font-size: 0.9rem;
+      }
+
+      button {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+
+      .qr-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .qr-item {
+        padding: 10px;
+      }
+
+      .qr-text {
+        font-size: 0.7rem;
+      }
+
+      .message-box {
+        padding: 12px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <div class="header">
+    <h1 id="pageTitle">Gerador de QR Codes</h1>
+    <p class="subtitle">Gere múltiplos QR Codes sequenciais e exporte para PDF</p>
+   </div>
+   <div class="control-panel">
+    <div class="form-group"><label for="codeInput">Código Inicial:</label> <input type="text" id="codeInput" placeholder="Ex: PNX0000050001" value="PNX0000050001">
+    </div>
+    <div class="form-group"><label for="quantityInput">Quantidade de Códigos:</label> <input type="number" id="quantityInput" min="1" max="1000" value="100">
+    </div>
+    <div class="button-group"><button class="btn-generate" id="generateBtn">Gerar QR Codes</button> <button class="btn-download" id="downloadBtn" disabled>Baixar PDF</button>
+    </div>
+   </div>
+   <div class="loading" id="loading"><span class="loading-spinner"></span> <span id="loadingText">Gerando QR Codes...</span>
+   </div>
+   <div class="message-box" id="messageBox"></div>
+   <div class="qr-grid" id="qrGrid"></div>
+  </div>
+  <script>
+    const defaultConfig = {
+      page_title: "Gerador de QR Codes",
+      generate_button_text: "Gerar QR Codes",
+      download_button_text: "Baixar PDF"
+    };
+
+    let generatedCodes = [];
+    let qrDataUrls = [];
+
+    function parseCode(code) {
+      const match = code.match(/^([A-Za-z]+)(\d+)$/);
+      if (!match) {
+        return null;
+      }
+      return {
+        prefix: match[1],
+        number: match[2],
+        length: match[2].length
+      };
+    }
+
+    function generateSequence(startCode, quantity) {
+      const parsed = parseCode(startCode);
+      if (!parsed) {
+        return null;
+      }
+
+      const codes = [];
+      let currentNumber = parseInt(parsed.number, 10);
+
+      for (let i = 0; i < quantity; i++) {
+        const paddedNumber = String(currentNumber).padStart(parsed.length, '0');
+        codes.push(parsed.prefix + paddedNumber);
+        currentNumber++;
+      }
+
+      return codes;
+    }
+
+    async function generateQRCodes() {
+      const codeInput = document.getElementById('codeInput').value.trim();
+      const quantity = parseInt(document.getElementById('quantityInput').value, 10);
+      const qrGrid = document.getElementById('qrGrid');
+      const generateBtn = document.getElementById('generateBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const loading = document.getElementById('loading');
+
+      if (!codeInput) {
+        showMessage('Por favor, insira um código inicial.', 'error');
+        return;
+      }
+
+      if (isNaN(quantity) || quantity < 1 || quantity > 1000) {
+        showMessage('A quantidade deve estar entre 1 e 1000.', 'error');
+        return;
+      }
+
+      const codes = generateSequence(codeInput, quantity);
+      if (!codes) {
+        showMessage('Formato de código inválido. Use formato como: PNX0000050001', 'error');
+        return;
+      }
+
+      generatedCodes = codes;
+      qrDataUrls = [];
+      qrGrid.innerHTML = '';
+      generateBtn.disabled = true;
+      downloadBtn.disabled = true;
+      loading.classList.add('active');
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      for (let i = 0; i < codes.length; i++) {
+        const code = codes[i];
+        
+        const qrItem = document.createElement('div');
+        qrItem.className = 'qr-item';
+
+        const qrContainer = document.createElement('div');
+        qrContainer.className = 'qr-code-container';
+        qrContainer.id = `qr-${i}`;
+
+        const qrText = document.createElement('div');
+        qrText.className = 'qr-text';
+        qrText.textContent = code;
+
+        qrItem.appendChild(qrContainer);
+        qrItem.appendChild(qrText);
+        qrGrid.appendChild(qrItem);
+
+        new QRCode(qrContainer, {
+          text: code,
+          width: 140,
+          height: 140,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      const qrContainers = document.querySelectorAll('.qr-code-container');
+      qrContainers.forEach(container => {
+        const canvas = container.querySelector('canvas');
+        if (canvas) {
+          qrDataUrls.push(canvas.toDataURL('image/png'));
+        }
+      });
+
+      loading.classList.remove('active');
+      generateBtn.disabled = false;
+      downloadBtn.disabled = false;
+      showMessage(`✅ ${codes.length} QR Codes gerados com sucesso!`, 'success');
+    }
+
+    async function downloadPDF() {
+      if (qrDataUrls.length === 0) {
+        showMessage('Nenhum QR Code gerado. Clique em "Gerar QR Codes" primeiro.', 'error');
+        return;
+      }
+
+      const downloadBtn = document.getElementById('downloadBtn');
+      const loading = document.getElementById('loading');
+      const loadingText = document.getElementById('loadingText');
+
+      downloadBtn.disabled = true;
+      loading.classList.add('active');
+      loadingText.textContent = 'Gerando PDF...';
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const qrSize = 50;
+        const qrX = 0;
+        const qrY = 0;
+
+        for (let i = 0; i < qrDataUrls.length; i++) {
+          if (i > 0) {
+            pdf.addPage();
+          }
+
+          pdf.addImage(qrDataUrls[i], 'PNG', qrX, qrY, qrSize, qrSize);
+
+          if ((i + 1) % 10 === 0) {
+            loadingText.textContent = `Gerando PDF... ${i + 1}/${qrDataUrls.length}`;
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        }
+
+        const pdfBlob = pdf.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'qrcodes.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        loading.classList.remove('active');
+        downloadBtn.disabled = false;
+        loadingText.textContent = 'Gerando PDF...';
+        showMessage('✅ PDF baixado com sucesso!', 'success');
+      } catch (error) {
+        loading.classList.remove('active');
+        downloadBtn.disabled = false;
+        showMessage('❌ Erro ao gerar PDF: ' + error.message, 'error');
+        console.error('Erro ao gerar PDF:', error);
+      }
+    }
+
+    function showMessage(message, type, duration = 5000) {
+      const messageBox = document.getElementById('messageBox');
+      messageBox.innerHTML = message;
+      messageBox.className = `message-box ${type} active`;
+
+      setTimeout(() => {
+        messageBox.classList.remove('active');
+      }, duration);
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', generateQRCodes);
+    document.getElementById('downloadBtn').addEventListener('click', downloadPDF);
+
+    document.getElementById('codeInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        generateQRCodes();
+      }
+    });
+
+    async function onConfigChange(config) {
+      document.getElementById('pageTitle').textContent = 
+        config.page_title || defaultConfig.page_title;
+      document.getElementById('generateBtn').textContent = 
+        config.generate_button_text || defaultConfig.generate_button_text;
+      document.getElementById('downloadBtn').textContent = 
+        config.download_button_text || defaultConfig.download_button_text;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["page_title", config.page_title || defaultConfig.page_title],
+          ["generate_button_text", config.generate_button_text || defaultConfig.generate_button_text],
+          ["download_button_text", config.download_button_text || defaultConfig.download_button_text]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a760fd7b0e427e9',t:'MTc2NDYyODU3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
