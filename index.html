@@ -244,28 +244,6 @@ header::after {
     }
 </style>
 
-<script>
-    function createSnowflakes() {
-        const total = 30; // QUANTIDADE DE FLOCOS
-        for (let i = 0; i < total; i++) {
-            const flake = document.createElement("div");
-            flake.classList.add("snowflake");
-            flake.innerHTML = "❄";
-
-            flake.style.left = Math.random() * 100 + "vw";
-            flake.style.animationDuration = 4 + Math.random() * 6 + "s";
-            flake.style.fontSize = 12 + Math.random() * 18 + "px";
-
-            document.body.appendChild(flake);
-
-            setTimeout(() => flake.remove(), 10000);
-        }
-    }
-
-    // cria neve continuamente
-    setInterval(createSnowflakes, 500);
-</script>
-
 
 <!-- Rodapé -->
 <footer class="bg-white text-gray-800 border-t py-6 mt-16 text-center text-sm">
