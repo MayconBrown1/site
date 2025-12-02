@@ -41,6 +41,33 @@
       margin: 0;
     }
 
+    .theme-toggle {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: clamp(45px, 12vw, 55px);
+      height: clamp(45px, 12vw, 55px);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .theme-toggle:active {
+      transform: scale(0.95);
+    }
+
     .time-settings {
       display: flex;
       gap: 1rem;
@@ -257,7 +284,7 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body>
+ <body><button class="theme-toggle" id="themeToggle" aria-label="Alternar tema">🌙</button>
   <main class="timer-wrapper">
    <h1 class="title" id="title">Temporizador de Treino</h1>
    <div class="time-settings">
@@ -304,7 +331,26 @@
       rest_label: 'DESCANSO'
     };
 
+    const lightTheme = {
+      background_color: '#f1f5f9',
+      sphere_work_color: '#ef4444',
+      sphere_rest_color: '#3b82f6',
+      text_color: '#1e293b',
+      title_color: '#0f172a',
+      control_bg_color: '#e2e8f0'
+    };
+
+    const darkTheme = {
+      background_color: '#1e293b',
+      sphere_work_color: '#ef4444',
+      sphere_rest_color: '#3b82f6',
+      text_color: '#ffffff',
+      title_color: '#f8fafc',
+      control_bg_color: '#334155'
+    };
+
     let config = { ...defaultConfig };
+    let isDarkTheme = true;
 
     let WORK_TIME = 40;
     let REST_TIME = 20;
@@ -352,6 +398,7 @@
     const restTimeDisplay = document.getElementById('restTimeDisplay');
     const workLabel = document.getElementById('workLabel');
     const restLabel = document.getElementById('restLabel');
+    const themeToggle = document.getElementById('themeToggle');
 
     // Função para falar texto usando síntese de voz
     function speak(text) {
@@ -507,6 +554,35 @@
       }
     });
 
+    // Função para alternar tema
+    function toggleTheme() {
+      isDarkTheme = !isDarkTheme;
+      const theme = isDarkTheme ? darkTheme : lightTheme;
+      
+      // Atualiza o ícone do botão
+      themeToggle.textContent = isDarkTheme ? '🌙' : '☀️';
+      themeToggle.style.background = isDarkTheme ? '#fbbf24' : '#475569';
+      themeToggle.style.color = isDarkTheme ? '#1e293b' : '#fbbf24';
+      
+      // Aplica o tema através do SDK se disponível
+      if (window.elementSdk) {
+        window.elementSdk.setConfig({
+          background_color: theme.background_color,
+          text_color: theme.text_color,
+          title_color: theme.title_color,
+          control_bg_color: theme.control_bg_color
+        });
+      } else {
+        // Aplica diretamente se o SDK não estiver disponível
+        config.background_color = theme.background_color;
+        config.text_color = theme.text_color;
+        config.title_color = theme.title_color;
+        config.control_bg_color = theme.control_bg_color;
+        onConfigChange(config);
+      }
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
     startBtn.addEventListener('click', start);
     pauseBtn.addEventListener('click', pause);
     resetBtn.addEventListener('click', reset);
@@ -651,8 +727,12 @@
       config = window.elementSdk.config;
     }
 
+    // Aplica o estilo inicial do botão de tema
+    themeToggle.style.background = '#fbbf24';
+    themeToggle.style.color = '#1e293b';
+
     updateTimeDisplays();
     updateDisplay();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a7e84e814b36f85',t:'MTc2NDcxNzI1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a7e87ab76bb6f85',t:'MTc2NDcxNzM2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
