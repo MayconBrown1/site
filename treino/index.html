@@ -350,7 +350,9 @@
     };
 
     let config = { ...defaultConfig };
-    let isDarkTheme = true;
+    
+    // Carrega a preferência de tema salva ou usa escuro como padrão
+    let isDarkTheme = localStorage.getItem('timerTheme') !== 'light';
 
     let WORK_TIME = 40;
     let REST_TIME = 20;
@@ -411,7 +413,7 @@
           setTimeout(() => {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'pt-BR';
-            utterance.rate = 0.9;
+            utterance.rate = 1.2;
             utterance.pitch = 1.0;
             utterance.volume = 1.0;
             
@@ -469,11 +471,28 @@
         isWorkPhase = !isWorkPhase;
         timeLeft = isWorkPhase ? WORK_TIME : REST_TIME;
         
-        // Fala "TREINAR" ou "DESCANSAR" dependendo da fase
-        if (isWorkPhase) {
-          speak('TREINAR');
-        } else {
-          speak('DESCANSAR');
+        // Fala instantaneamente ao mudar de fase
+        const textToSpeak = isWorkPhase ? 'TREINAR' : 'DESCANSAR';
+        
+        // Cancela qualquer fala anterior imediatamente
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        
+        // Fala imediatamente sem setTimeout
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(textToSpeak);
+          utterance.lang = 'pt-BR';
+          utterance.rate = 1.2;
+          utterance.pitch = 1.0;
+          utterance.volume = 1.0;
+          
+          let voices = window.speechSynthesis.getVoices();
+          const ptVoice = voices.find(voice => voice.lang.includes('pt-BR') || voice.lang.includes('pt'));
+          if (ptVoice) {
+            utterance.voice = ptVoice;
+          }
+          window.speechSynthesis.speak(utterance);
         }
       }
       
@@ -558,6 +577,9 @@
     function toggleTheme() {
       isDarkTheme = !isDarkTheme;
       const theme = isDarkTheme ? darkTheme : lightTheme;
+      
+      // Salva a preferência no localStorage
+      localStorage.setItem('timerTheme', isDarkTheme ? 'dark' : 'light');
       
       // Atualiza o ícone do botão
       themeToggle.textContent = isDarkTheme ? '🌙' : '☀️';
@@ -727,12 +749,25 @@
       config = window.elementSdk.config;
     }
 
-    // Aplica o estilo inicial do botão de tema
-    themeToggle.style.background = '#fbbf24';
-    themeToggle.style.color = '#1e293b';
+    // Aplica o tema salvo ao carregar a página
+    function applyInitialTheme() {
+      const theme = isDarkTheme ? darkTheme : lightTheme;
+      
+      // Atualiza o ícone do botão
+      themeToggle.textContent = isDarkTheme ? '🌙' : '☀️';
+      themeToggle.style.background = isDarkTheme ? '#fbbf24' : '#475569';
+      themeToggle.style.color = isDarkTheme ? '#1e293b' : '#fbbf24';
+      
+      // Aplica o tema
+      config.background_color = theme.background_color;
+      config.text_color = theme.text_color;
+      config.title_color = theme.title_color;
+      config.control_bg_color = theme.control_bg_color;
+    }
 
+    applyInitialTheme();
     updateTimeDisplays();
     updateDisplay();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a7e87ab76bb6f85',t:'MTc2NDcxNzM2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a7e904576b46f85',t:'MTc2NDcxNzcxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
