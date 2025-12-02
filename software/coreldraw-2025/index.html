@@ -694,40 +694,7 @@
         });
     </script>
 
-    <!-- Neve caindo -->
-<style>
-    .snowflake {
-        position: fixed;
-        top: -10px;
-        color: white;
-        font-size: 1em;
-        pointer-events: none;
-        z-index: 9999;
-        animation: fall linear infinite;
-    }
-
-    @keyframes fall {
-        0% { transform: translateY(-10vh); opacity: 1; }
-        100% { transform: translateY(100vh); opacity: 0.5; }
-    }
-</style>
-<script>
-    function createSnowflakes() {
-        const snowflakes = 25; // quantidade
-        for (let i = 0; i < snowflakes; i++) {
-            let flake = document.createElement("div");
-            flake.classList.add("snowflake");
-            flake.innerHTML = "❄";
-            flake.style.left = Math.random() * 100 + "vw";
-            flake.style.animationDuration = 4 + Math.random() * 6 + "s";
-            flake.style.fontSize = 12 + Math.random() * 18 + "px";
-            document.body.appendChild(flake);
-
-            setTimeout(() => flake.remove(), 10000);
-        }
-    }
-    setInterval(createSnowflakes, 500);
-</script>
+     
 
 
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'967f29edb5d96f8c',t:'MTc1Mzk4NjU5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
