@@ -38,7 +38,7 @@
         .gradient-bg { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-red-700 to-red-500">
+<body class="gradient-bg min-h-screen">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-4">
@@ -53,12 +53,6 @@
             </div>
         </div>
     </header>
-    
-    <!-- Faixa Natalina -->
-<div class="w-full bg-red-600 text-white py-2 text-center font-semibold shadow-md">
-    🎄 Promoção de Natal! Licença vitalícia com desconto especial! 🎁
-</div>
-
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-12">
@@ -66,9 +60,7 @@
             <!-- Product Image Section -->
             <div class="bg-gradient-to-br from-gray-50 to-gray-100 p-8 text-center">
                 <div class="max-w-md mx-auto">
-                    <div class="bg-white rounded-xl p-8 shadow-lg border-4 border-red-500 relative overflow-hidden">
-    <div class="absolute -top-2 -right-2 text-4xl">🎅</div>
-    <div class="absolute -bottom-2 -left-2 text-4xl">🎁</div>
+                    <div class="bg-white rounded-xl p-8 shadow-lg border-2 border-dashed border-gray-300">
                         <img src="/img/adobe-illustrator-2024-vitalicio.png" alt="Software"/>
                     </div>
                 </div>
@@ -123,10 +115,9 @@
                     </div>
                     
                     <a href="https://pay.cakto.com.br/DKeToyp" rel="noopener noreferrer">
-                        <button class="bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-12 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mb-4 w-full max-w-md">
-    🎄 Comprar Agora – Especial de Natal 🎁
-</button>
-
+                        <button class="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-12 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl mb-4 w-full max-w-md">
+                            🛒 Comprar Agora
+                        </button>
                     </a>
                     
                     <p class="text-sm text-gray-500">
@@ -191,8 +182,5 @@
             button.disabled = true;
         });
     </script>
-
-     
-
 </body>
 </html>
