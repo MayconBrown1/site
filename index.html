@@ -1,162 +1,282 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17422199106"></script>
+  <head>
+    
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17422199106">
+</script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
+
   gtag('config', 'AW-17422199106');
 </script>
 
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Maycon Brown | Soluções Digitais – Ano Novo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maycon Brown | Soluções Digitais para Softwares, Bordado e Suporte</title>
 
-<!-- SEO ESSENCIAL -->
-<meta name="description" content="Comece o Ano Novo com soluções digitais profissionais: softwares licenciados, matrizes de bordado e suporte remoto com entrega automática.">
-<meta name="keywords" content="softwares, matrizes, ano novo, réveillon, download automático, maycon brown">
-<link rel="canonical" href="https://mayconbrown.com.br/" />
+    <!-- SEO ESSENCIAL -->
+    <meta name="description" content="Soluções digitais com entrega automática: softwares licenciados, matrizes de bordado e formatação remota com suporte rápido e profissional.">
+    <meta name="keywords" content="softwares licenciados, matrizes bordado PES JEF DST, formatação remota, suporte online, download automático, Maycon Brown">
+    <meta name="author" content="Maycon Brown">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://mayconbrown.com.br/" />
 
-<!-- Open Graph -->
-<meta property="og:image" content="https://mayconbrown.com.br/img/logo-brown-preto.png">
+    <!-- Open Graph (Facebook, WhatsApp etc) -->
+    <meta property="og:title" content="Maycon Brown | Soluções Digitais com Entrega Automática">
+    <meta property="og:description" content="Compre softwares, matrizes e formate seu PC com suporte e agilidade. Tudo 100% digital e com entrega imediata.">
+    <meta property="og:image" content="https://mayconbrown.com.br/img/logo-brown-preto.png">
+    <meta property="og:url" content="https://mayconbrown.com.br/">
+    <meta property="og:type" content="website">
 
-<link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Maycon Brown | Soluções Digitais">
+    <meta name="twitter:description" content="Softwares, bordados e formatação com suporte rápido e 100% digital.">
+    <meta name="twitter:image" content="https://mayconbrown.com.br/img/logo-brown-preto.png">
 
-<script src="https://cdn.tailwindcss.com"></script>
+    <!-- Favicon e Manifest -->
+    <link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
+    <link rel="manifest" href="manifest.json" />
 
-<script>
-  function toggleMenu() {
-    const menu = document.getElementById('mobile-menu');
-    menu.classList.toggle('hidden');
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      function toggleMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+      }
+    </script>
+
+    <!-- ESTILO DO FUNDO -->
+    <style>
+      body {
+        background-image: url('img/fundo.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center center;
+        background-size: cover;
+      }
+
+      @media (max-width: 768px) {
+  body {
+    background-position: left top;
+    background-size: auto 100vh;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
-</script>
-
-<style>
-/* 🎆 FUNDO ANO NOVO */
-body {
-  background: linear-gradient(180deg, #020024 0%, #090979 50%, #000000 100%);
-  color: white;
-  font-family: Arial, sans-serif;
 }
 
-/* ✨ Cards com brilho dourado */
+
+
+      /* ANÚNCIO */
+      #popup-anuncio {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+        display: none;
+        animation: fadeIn 0.5s ease;
+        width: 400px;
+        max-width: 95vw;
+        max-height: 90vh;
+        overflow: auto;
+        background: transparent;
+      }
+
+      #popup-anuncio img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      #fechar-anuncio {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: red;
+        color: white;
+        border: none;
+        font-size: 18px;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        z-index: 10000;
+        line-height: 28px;
+        text-align: center;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -60%); }
+        to { opacity: 1; transform: translate(-50%, -50%); }
+      }
+
+      @media (max-width: 600px) {
+        #popup-anuncio {
+          width: 90vw;
+          max-height: 85vh;
+        }
+
+        #fechar-anuncio {
+          width: 24px;
+          height: 24px;
+          font-size: 16px;
+          line-height: 24px;
+        }
+      }
+    </style>
+  </head>
+
+  <body class="text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="index.html">
+          <img src="img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+        </a>
+        <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        <nav class="hidden md:flex space-x-4">
+          <a href="index.html" class="text-indigo-600 font-semibold">Início</a>
+          <a href="softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="contato.html" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+
+      <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+        <nav class="flex flex-col space-y-2">
+          <a href="index.html" class="text-indigo-600 font-semibold">Início</a>
+          <a href="softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="contato.html" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-black bg-opacity-20 text-white py-20 text-center">
+      <div class="container mx-auto px-4 text-center">
+        <h2 class="text-4xl font-bold mb-4">Soluções Digitais para o Seu Dia a Dia</h2>
+        <p class="text-lg mb-6">Softwares, matrizes de bordado, formatação remota e mais com entrega automática e suporte rápido.</p>
+        <a href="softwares.html" class="bg-white text-indigo-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition">Ver Produtos</a>
+      </div>
+    </section>
+
+    <!-- Destaques -->
+<section class="py-16">
+  <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+    <a href="softwares.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Softwares com Licença Vitalícia</h3>
+      <p class="text-gray-400">Receba por download imediato com suporte incluso.</p>
+    </a>
+
+    <a href="matrizes.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Matrizes Profissionais</h3>
+      <p class="text-gray-400">Formatos PES, JEF, DST e muito mais.</p>
+    </a>
+
+    <a href="formatacao.html" class="card-gradient shadow p-6 rounded-xl block transition-transform transform hover:-translate-y-1 hover:shadow-lg">
+      <h3 class="text-white font-semibold mb-2">Formatação 100% Remota</h3>
+      <p class="text-gray-400">Agende e formate seu PC sem sair de casa.</p>
+    </a>
+  </div>
+</section>
+
+<style>
 .card-gradient {
-  background-color: #0f172a;
-  border: 2px solid #facc15;
-  box-shadow: 0 0 20px rgba(250,204,21,0.4);
+  background-color: #1a1a1a; /* fundo escuro */
+  border: 4px solid;
+  border-image-slice: 1;
+  border-width: 4px;
+  border-image-source: linear-gradient(to bottom, #1eff0060, transparent 30%, transparent 70%, #00ff0062); /* degrade laranja em cima e embaixo */
   padding: 1.5rem;
   border-radius: 1rem;
-  transition: 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: block; /* garante que o <a> preencha todo o card */
+  text-decoration: none; /* remove sublinhado do link */
 }
 
 .card-gradient:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 0 35px rgba(250,204,21,0.8);
-}
-
-/* 🌟 Hero com brilho */
-.hero-glow {
-  text-shadow: 0 0 15px rgba(255,215,0,0.9);
-}
-
-/* POPUP */
-#popup-anuncio {
-  display: none;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(21, 255, 0, 0.63);
 }
 </style>
-</head>
 
-<body class="text-white">
 
-<!-- Navbar -->
-<header class="bg-white bg-opacity-90 backdrop-blur-md shadow-md sticky top-0 z-50">
-  <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-    <a href="index.html">
-      <img src="img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
-    </a>
+    <!-- Feedback de Clientes -->
+    <section class="py-12 bg-black bg-opacity-20">
+      <div class="container mx-auto px-4">
+        <h2 class="text-2xl font-bold text-center mb-8 text-white">Feedback de Clientes</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-    <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
-      <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-2.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-3.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-5.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-7.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-4.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-6.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-1.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+          <video controls class="w-full rounded-lg shadow">
+            <source src="video/cliente-softwares-8.mp4" type="video/mp4" />
+            Seu navegador não suporta vídeo.
+          </video>
+        </div>
+      </div>
+    </section>
 
-    <nav class="hidden md:flex space-x-4 text-yellow-700 font-semibold">
-      <a href="index.html" class="text-yellow-900 font-bold">🎆 Início</a>
-      <a href="softwares.html" class="hover:text-yellow-900">Softwares</a>
-      <a href="matrizes.html" class="hover:text-yellow-900">Matrizes</a>
-      <a href="formatacao.html" class="hover:text-yellow-900">Formatação</a>
-      <a href="cardapios.html" class="hover:text-yellow-900">Cardápios</a>
-      <a href="contato.html" class="hover:text-yellow-900">Contato</a>
-    </nav>
-  </div>
+    <!-- ANÚNCIO 
+    <div id="popup-anuncio">
+      <button id="fechar-anuncio">×</button>
+      <a href="https://mayconbrown.com.br/pack-artes-premium-coreldraw-2025.html">
+        <img src="img/pack41.png" alt="Promoção" />
+      </a>
+    </div> -->
 
-  <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
-    <nav class="flex flex-col space-y-2 text-yellow-700 font-semibold">
-      <a href="index.html">🎆 Início</a>
-      <a href="softwares.html">Softwares</a>
-      <a href="matrizes.html">Matrizes</a>
-      <a href="formatacao.html">Formatação</a>
-      <a href="cardapios.html">Cardápios</a>
-      <a href="contato.html">Contato</a>
-    </nav>
-  </div>
-</header>
+    <script>
+      setTimeout(() => {
+        document.getElementById("popup-anuncio").style.display = "block";
+      }, 1500);
+      document.getElementById("fechar-anuncio").addEventListener("click", function () {
+        document.getElementById("popup-anuncio").style.display = "none";
+      });
+    </script>
 
-<!-- HERO -->
-<section class="py-20 text-center hero-glow">
-  <h2 class="text-4xl font-bold mb-4">✨ Feliz Ano Novo! ✨</h2>
-  <p class="text-lg mb-6">
-    Comece o novo ano com soluções digitais profissionais, entrega automática e suporte de confiança.
-  </p>
-  <a href="softwares.html" class="bg-yellow-400 text-black px-6 py-3 rounded-full font-bold shadow-lg hover:bg-yellow-300 transition">
-    🚀 Ver Produtos
-  </a>
-</section>
-
-<!-- Destaques -->
-<section class="py-16">
-  <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-
-    <a href="softwares.html" class="card-gradient block">
-      <h3 class="font-semibold mb-2">💻 Softwares Licenciados</h3>
-      <p class="text-gray-300">Licença vitalícia e download imediato.</p>
-    </a>
-
-    <a href="matrizes.html" class="card-gradient block">
-      <h3 class="font-semibold mb-2">🧵 Matrizes Profissionais</h3>
-      <p class="text-gray-300">Compatíveis com várias máquinas.</p>
-    </a>
-
-    <a href="formatacao.html" class="card-gradient block">
-      <h3 class="font-semibold mb-2">🖥️ Formatação Remota</h3>
-      <p class="text-gray-300">Rápida, segura e sem sair de casa.</p>
-    </a>
-
-  </div>
-</section>
-
-<!-- FEEDBACK -->
-<section class="py-12 bg-white bg-opacity-10 backdrop-blur-md">
-  <div class="container mx-auto px-4">
-    <h2 class="text-2xl font-bold text-center mb-8">🎥 Feedback de Clientes</h2>
-
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <video controls class="w-full rounded-lg shadow"><source src="video/cliente-softwares-1.mp4" type="video/mp4"/></video>
-      <video controls class="w-full rounded-lg shadow"><source src="video/cliente-softwares-2.mp4" type="video/mp4"/></video>
-      <video controls class="w-full rounded-lg shadow"><source src="video/cliente-softwares-3.mp4" type="video/mp4"/></video>
-      <video controls class="w-full rounded-lg shadow"><source src="video/cliente-softwares-4.mp4" type="video/mp4"/></video>
-    </div>
-  </div>
-</section>
-
-<!-- Rodapé -->
-<footer class="bg-white text-gray-800 border-t py-6 mt-16 text-center text-sm">
-  <p>&copy; 2025 Maycon Brown — Começando o ano com tecnologia e qualidade. ✨</p>
-</footer>
-
-</body>
+    <!-- Rodapé -->
+    <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2025 Maycon Brown. Todos os direitos reservados.</p>
+    </footer>
+  </body>
 </html>
