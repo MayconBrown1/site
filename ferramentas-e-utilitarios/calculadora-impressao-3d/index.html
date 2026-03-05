@@ -1,361 +1,239 @@
-<!doctype html>
-<html lang="pt-BR">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculadora de Custo de Impressão 3D</title>
-  <link rel="shortcut icon" href="/img/calculadora.png" type="image/x-icon">
-  <script src="/_sdk/element_sdk.js"></script>
-  <style>
-    body {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100%;
-      height: 100%;
-    }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
 
-    html {
-      height: 100%;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    * {
-      box-sizing: border-box;
-    }
+<title>Calculadora Impressão 3D</title>
 
-    .container {
-      width: 100%;
-      max-width: 500px;
-    }
+<style>
 
-    .card {
-  background: linear-gradient(180deg, #45455f, #242437);
-  border-radius: 18px;
-      padding: 40px;
-      box-shadow:
-    0 10px 30px rgba(0, 255, 42, 0.4),
-    inset 0 1px 0 rgba(0, 255, 21, 0.589);
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 }
 
-    h1 {
-      color: #ffffff;
-      text-align: center;
-      margin: 0 0 10px 0;
-      font-size: 28px;
-      font-weight: 600;
-    }
-
-    .description {
-      color: #a0a0b8;
-      text-align: center;
-      margin: 0 0 30px 0;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      color: #e0e0f0;
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .input-wrapper {
-      position: relative;
-    }
-
-    .currency-symbol {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #8a8aa8;
-      font-size: 14px;
-      font-weight: 600;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    input {
-  width: 100%;
-  padding: 12px 14px;
-  padding-right: 40px;
-  border: 1.5px solid #3a3a52;
-  border-radius: 10px;
-  font-size: 16px;
-  background: #00ff4c36;
-  color: #ffffff;
-  transition: all 0.25s ease;
+body{
+background:linear-gradient(135deg,#141414,#1e1e1e);
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:20px;
 }
 
-    input:focus {
-      border-color: #00d9ff;
-      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
-    }
+.container{
 
-    input::placeholder {
-      color: #5a5a70;
-    }
+width:100%;
+max-width:420px;
 
-    .result-section {
-      background: linear-gradient(135deg, #00d9ff 0%, #0099cc 100%);
-      border-radius: 12px;
-      padding: 25px;
-      text-align: center;
-      margin-top: 30px;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
-    }
+background:rgba(40,40,40,0.9);
 
-    .result-section.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+backdrop-filter:blur(10px);
 
-    .result-label {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 14px;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
+border-radius:18px;
 
-    .result-value {
-      color: #ffffff;
-      font-size: 36px;
-      font-weight: 700;
-    }
+padding:28px;
 
-    @media (max-width: 480px) {
+box-shadow:0 10px 35px rgba(0,0,0,0.6);
+}
 
-  h1 {
-    font-size: 20px;
-    margin-bottom: 6px;
-  }
+h2{
+text-align:center;
+margin-bottom:25px;
+font-weight:600;
+}
 
-  .description {
-    font-size: 13px;
-    margin-bottom: 20px;
-  }
+label{
+font-size:14px;
+opacity:0.9;
+}
 
-  label {
-    font-size: 13px;
-    margin-bottom: 6px;
-  }
+input{
 
-  input {
-    font-size: 15px;
-    padding: 11px 12px;
-    padding-right: 36px;
-  }
+width:100%;
 
-  .result-section {
-    padding: 18px;
-    margin-top: 22px;
-  }
+padding:12px;
 
-  .result-value {
-    font-size: 26px;
-  }
+margin-top:6px;
+margin-bottom:16px;
+
+border-radius:8px;
+
+border:none;
+
+background:#2c2c2c;
+
+color:white;
+
+font-size:15px;
 
 }
 
-  </style>
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
- </head>
- <body>
-  <main class="container">
-   <div class="card">
-    <h1 id="pageTitle">Calculadora de Custo de Impressão 3D</h1>
-    <p class="description" id="descriptionText">Digite o valor do 1kg de filamento e o peso da peça</p>
-    <form id="calculatorForm">
-     <div class="form-group"><label for="filamentPrice" id="filamentLabel">Preço do filamento (1kg)</label>
-      <div class="input-wrapper"><span class="currency-symbol">R$</span> <input type="number" id="filamentPrice" placeholder="0.00" step="0.01" min="0" required>
-      </div>
-     </div>
-     <div class="form-group"><label for="pieceWeight" id="weightLabel">Peso da peça (gramas)</label>
-      <div class="input-wrapper"><span class="currency-symbol">g</span> <input type="number" id="pieceWeight" placeholder="0" step="0.1" min="0" required>
-      </div>
-     </div>
-    </form>
-    <div class="result-section" id="resultSection">
-  <div class="result-label">Custo em Filamento</div>
-  <div class="result-value" id="resultValue">R$ 0,00</div>
+input:focus{
+outline:2px solid #00c853;
+}
 
-  <hr style="margin:20px 0;border:0;border-top:1px solid rgba(255,255,255,0.3);">
+.tempo-grid{
 
-  <div class="result-label">Valor de venda</div>
-  <div class="result-value" id="saleValue">R$ 0,00</div>
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:10px;
+
+}
+
+button{
+
+width:100%;
+
+padding:14px;
+
+background:linear-gradient(135deg,#00c853,#00e676);
+
+border:none;
+
+border-radius:10px;
+
+color:white;
+
+font-size:16px;
+
+font-weight:600;
+
+cursor:pointer;
+
+transition:0.2s;
+
+}
+
+button:hover{
+transform:scale(1.02);
+}
+
+.resultado{
+
+margin-top:20px;
+
+background:#0f0f0f;
+
+border-radius:12px;
+
+padding:18px;
+
+line-height:1.6;
+
+font-size:15px;
+
+box-shadow:inset 0 0 10px rgba(0,0,0,0.6);
+
+}
+
+.total{
+font-weight:600;
+}
+
+.venda{
+color:#00ff88;
+font-weight:700;
+font-size:17px;
+}
+
+@media (max-width:420px){
+
+.container{
+padding:22px;
+}
+
+h2{
+font-size:20px;
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>🖨️ Calculadora Impressão 3D</h2>
+
+<label>Potência da impressora (Watts)</label>
+<input type="number" id="potencia" placeholder="Ex: 350">
+
+<label>Tempo de impressão</label>
+
+<div class="tempo-grid">
+<input type="number" id="horas" placeholder="Horas">
+<input type="number" id="minutos" placeholder="Minutos">
 </div>
-   </div>
-  </main>
-  <script>
-    const defaultConfig = {
-      page_title: "Calculadora de Custo de Impressão 3D",
-      description_text: "Digite o valor do 1kg de filamento e o peso da peça",
-      filament_label: "Preço do filamento (1kg)",
-      weight_label: "Peso da peça (gramas)",
-      result_label: "Custo em Filament",
-      primary_color: "#00d9ff",
-      secondary_color: "#2a2a3e",
-      background_color: "#1e1e2e",
-      text_color: "#ffffff",
-      accent_color: "#0099cc",
-      font_family: "Segoe UI",
-      font_size: 16
-    };
 
-    const filamentPriceInput = document.getElementById('filamentPrice');
-    const pieceWeightInput = document.getElementById('pieceWeight');
-    const resultSection = document.getElementById('resultSection');
-    const resultValue = document.getElementById('resultValue');
+<label>Valor do kWh (R$)</label>
+<input type="number" step="0.01" id="kwh" placeholder="Ex: 0.95">
 
-    const saleValue = document.getElementById('saleValue');
+<label>Peso do filamento usado (gramas)</label>
+<input type="number" step="0.01" id="peso" placeholder="Ex: 120">
 
-function calculateCost() {
-  const filamentPrice = parseFloat(filamentPriceInput.value);
-  const pieceWeight = parseFloat(pieceWeightInput.value);
+<label>Preço do kg do filamento (R$)</label>
+<input type="number" step="0.01" id="filamento" placeholder="Ex: 90">
 
-  if (filamentPrice > 0 && pieceWeight > 0) {
-    const cost = (filamentPrice / 1000) * pieceWeight;
-    const salePrice = cost * 7; // 600% de lucro
+<button onclick="calcular()">Calcular</button>
 
-    resultValue.textContent = `R$ ${cost.toFixed(2).replace('.', ',')}`;
-    saleValue.textContent = `R$ ${salePrice.toFixed(2).replace('.', ',')}`;
+<div class="resultado" id="resultado"></div>
 
-    resultSection.classList.add('visible');
-  } else {
-    resultSection.classList.remove('visible');
-  }
+</div>
+
+<script>
+
+function calcular(){
+
+let potencia = parseFloat(document.getElementById("potencia").value);
+
+let horas = parseFloat(document.getElementById("horas").value) || 0;
+let minutos = parseFloat(document.getElementById("minutos").value) || 0;
+
+let kwh = parseFloat(document.getElementById("kwh").value);
+
+let peso = parseFloat(document.getElementById("peso").value);
+
+let filamento = parseFloat(document.getElementById("filamento").value);
+
+let tempoTotal = horas + (minutos / 60);
+
+let consumo = (potencia/1000) * tempoTotal;
+
+let custoEnergia = consumo * kwh;
+
+let custoFilamento = (peso/1000) * filamento;
+
+let custoTotal = custoEnergia + custoFilamento;
+
+let venda = custoTotal * 6;
+
+document.getElementById("resultado").innerHTML = `
+⏱ Tempo total: <b>${tempoTotal.toFixed(2)} horas</b><br><br>
+
+⚡ Consumo Energia: ${consumo.toFixed(2)} kWh<br>
+
+💡 Custo Energia: R$ ${custoEnergia.toFixed(2)}<br>
+
+🧵 Custo Filamento: R$ ${custoFilamento.toFixed(2)}<br><br>
+
+💰 <span class="total">Custo Total: R$ ${custoTotal.toFixed(2)}</span><br><br>
+
+🏷️ Valor de Venda: <span class="venda">R$ ${venda.toFixed(2)}</span>
+`;
+
 }
 
+</script>
 
-    filamentPriceInput.addEventListener('input', calculateCost);
-    pieceWeightInput.addEventListener('input', calculateCost);
-
-    async function onConfigChange(config) {
-      const customFont = config.font_family || defaultConfig.font_family;
-      const baseFontStack = 'Tahoma, Geneva, Verdana, sans-serif';
-      const baseSize = config.font_size || defaultConfig.font_size;
-      const primaryColor = config.primary_color || defaultConfig.primary_color;
-      const secondaryColor = config.secondary_color || defaultConfig.secondary_color;
-      const backgroundColor = config.background_color || defaultConfig.background_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const accentColor = config.accent_color || defaultConfig.accent_color;
-
-      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
-      document.body.style.fontSize = `${baseSize}px`;
-      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, ${secondaryColor} 100%)`;
-
-      document.querySelector('.card').style.background = secondaryColor;
-      
-      document.getElementById('pageTitle').textContent = config.page_title || defaultConfig.page_title;
-      document.getElementById('pageTitle').style.color = textColor;
-      document.getElementById('pageTitle').style.fontSize = `${baseSize * 1.75}px`;
-
-      document.getElementById('descriptionText').textContent = config.description_text || defaultConfig.description_text;
-      document.getElementById('descriptionText').style.fontSize = `${baseSize * 0.875}px`;
-
-      document.getElementById('filamentLabel').textContent = config.filament_label || defaultConfig.filament_label;
-      document.getElementById('filamentLabel').style.fontSize = `${baseSize * 0.875}px`;
-
-      document.getElementById('weightLabel').textContent = config.weight_label || defaultConfig.weight_label;
-      document.getElementById('weightLabel').style.fontSize = `${baseSize * 0.875}px`;
-
-      document.getElementById('resultLabel').textContent = config.result_label || defaultConfig.result_label;
-      document.getElementById('resultLabel').style.fontSize = `${baseSize * 0.875}px`;
-
-      document.getElementById('resultValue').style.fontSize = `${baseSize * 2.25}px`;
-
-      const inputs = document.querySelectorAll('input');
-      inputs.forEach(input => {
-        input.style.background = backgroundColor;
-        input.style.color = textColor;
-        input.style.fontSize = `${baseSize * 1.125}px`;
-      });
-
-      resultSection.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`;
-    }
-
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities: (config) => ({
-          recolorables: [
-            {
-              get: () => config.background_color || defaultConfig.background_color,
-              set: (value) => {
-                config.background_color = value;
-                window.elementSdk.setConfig({ background_color: value });
-              }
-            },
-            {
-              get: () => config.secondary_color || defaultConfig.secondary_color,
-              set: (value) => {
-                config.secondary_color = value;
-                window.elementSdk.setConfig({ secondary_color: value });
-              }
-            },
-            {
-              get: () => config.text_color || defaultConfig.text_color,
-              set: (value) => {
-                config.text_color = value;
-                window.elementSdk.setConfig({ text_color: value });
-              }
-            },
-            {
-              get: () => config.primary_color || defaultConfig.primary_color,
-              set: (value) => {
-                config.primary_color = value;
-                window.elementSdk.setConfig({ primary_color: value });
-              }
-            },
-            {
-              get: () => config.accent_color || defaultConfig.accent_color,
-              set: (value) => {
-                config.accent_color = value;
-                window.elementSdk.setConfig({ accent_color: value });
-              }
-            }
-          ],
-          borderables: [],
-          fontEditable: {
-            get: () => config.font_family || defaultConfig.font_family,
-            set: (value) => {
-              config.font_family = value;
-              window.elementSdk.setConfig({ font_family: value });
-            }
-          },
-          fontSizeable: {
-            get: () => config.font_size || defaultConfig.font_size,
-            set: (value) => {
-              config.font_size = value;
-              window.elementSdk.setConfig({ font_size: value });
-            }
-          }
-        }),
-        mapToEditPanelValues: (config) => new Map([
-          ["page_title", config.page_title || defaultConfig.page_title],
-          ["description_text", config.description_text || defaultConfig.description_text],
-          ["filament_label", config.filament_label || defaultConfig.filament_label],
-          ["weight_label", config.weight_label || defaultConfig.weight_label],
-          ["result_label", config.result_label || defaultConfig.result_label]
-        ])
-      });
-    }
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a111b2113c6dc15',t:'MTc2MzU2OTk3MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
