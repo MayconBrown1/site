@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comandos de Reparo do Windows</title>
+    <link rel="shortcut icon" href="../img/icone.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      function toggleMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+      }
+
+      function copiarTexto(texto) {
+        navigator.clipboard.writeText(texto);
+        alert("Comando copiado!");
+      }
+    </script>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="../index.html">
+          <img src="../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+        </a>
+
+        <!-- Botão mobile -->
+        <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
+        <!-- Menu normal -->
+        <nav class="hidden md:flex space-x-4">
+          <a href="../index.html" class="hover:text-indigo-600">Início</a>
+          <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="../contato/" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+
+      <!-- Menu mobile -->
+      <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+        <nav class="flex flex-col space-y-2">
+          <a href="../index.html" class="hover:text-indigo-600">Início</a>
+          <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="../contato/" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Título -->
+    <section class="bg-gray-100 py-12">
+      <div class="container mx-auto px-4">
+        <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">
+          Comandos de Reparo do Windows
+        </h2>
+      </div>
+    </section>
+
+    <!-- Comandos -->
+    <main class="flex flex-col items-center justify-center gap-8 min-h-[40vh] px-4">
+
+      <!-- DISM -->
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+        <h3 class="text-xl font-bold mb-3">Reparar Imagem do Windows (DISM)</h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm">
+          DISM /Online /Cleanup-Image /RestoreHealth
+        </div>
+
+        <button onclick="copiarTexto('DISM /Online /Cleanup-Image /RestoreHealth')"
+          class="px-8 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition">
+          Copiar Comando
+        </button>
+      </div>
+
+      <!-- SFC -->
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+        <h3 class="text-xl font-bold mb-3">Verificar Arquivos do Sistema (SFC)</h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm">
+          sfc /scannow
+        </div>
+
+        <button onclick="copiarTexto('sfc /scannow')"
+          class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition">
+          Copiar Comando
+        </button>
+      </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2026 Maycon Brown. Todos os direitos reservados.</p>
+    </footer>
+
+  </body>
+</html>
