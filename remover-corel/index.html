@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remover CorelDRAW</title>
+    <link rel="shortcut icon" href="../img/icone.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      function toggleMenu() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+      }
+
+      function copiarTexto() {
+        const texto = `wmic product where "name like '%%Corel%%'" call uninstall /nointeractive`;
+
+        const textarea = document.createElement("textarea");
+        textarea.value = texto;
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+
+        const btn = document.getElementById("btnCopiar");
+        btn.innerText = "Copiado!";
+        btn.classList.remove("bg-red-600");
+        btn.classList.add("bg-green-600");
+
+        setTimeout(() => {
+          btn.innerText = "Copiar Comando";
+          btn.classList.remove("bg-green-600");
+          btn.classList.add("bg-red-600");
+        }, 2000);
+      }
+    </script>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+
+    <!-- Navbar -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="../index.html">
+          <img src="../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+        </a>
+
+        <!-- Botão mobile -->
+        <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
+        <!-- Menu normal -->
+        <nav class="hidden md:flex space-x-4">
+          <a href="../index.html" class="hover:text-indigo-600">Início</a>
+          <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="../contato/" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+
+      <!-- Menu mobile -->
+      <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+        <nav class="flex flex-col space-y-2">
+          <a href="../index.html" class="hover:text-indigo-600">Início</a>
+          <a href="../softwares.html" class="hover:text-indigo-600">Softwares</a>
+          <a href="../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
+          <a href="../formatacao.html" class="hover:text-indigo-600">Formatação</a>
+          <a href="../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
+          <a href="../contato/" class="hover:text-indigo-600">Contato</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Conteúdo -->
+    <main class="flex flex-col items-center justify-center gap-8 min-h-[60vh] px-4 mt-10">
+
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+        <h3 class="text-xl font-bold mb-3 text-red-600">
+          Remover CorelDRAW completamente
+        </h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm break-words">
+          wmic product where "name like '%%Corel%%'" call uninstall /nointeractive
+        </div>
+
+        <button id="btnCopiar"
+          onclick="copiarTexto()"
+          class="px-8 py-3 bg-red-600 text-white font-bold rounded-xl shadow-lg hover:bg-red-700 transition">
+          Copiar Comando
+        </button>
+      </div>
+
+      <!-- Dica -->
+      <div class="bg-yellow-50 border border-yellow-300 p-4 rounded-xl max-w-xl text-sm text-left">
+        <strong>Dica:</strong> Após remover, limpe resíduos em:
+        <ul class="list-disc pl-5 mt-2">
+          <li>%appdata%</li>
+          <li>%programfiles%</li>
+          <li>%programfiles(x86)%</li>
+        </ul>
+      </div>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
+      <p>&copy; 2026 Maycon Brown. Todos os direitos reservados.</p>
+    </footer>
+
+  </body>
+</html>
