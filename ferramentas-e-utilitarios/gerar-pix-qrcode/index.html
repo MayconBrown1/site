@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador QR Code PIX</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+html, body { height: 100%; margin: 0; }
+* { font-family: 'DM Sans', sans-serif; }
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #10b981; color: #fff; padding: 12px 24px; border-radius: 12px;
+  font-weight: 600; z-index: 999; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+input:focus { outline: none; box-shadow: 0 0 0 2px #22c55e; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full w-full overflow-auto" style="background:#0f1117">
+  <div id="app" class="w-full min-h-full flex flex-col items-center px-4 py-10" style="background:#0f1117">
+   <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+     <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:#1a1d27">
+      <svg width="28" height="28" viewbox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+      </svg>
+     </div>
+     <h1 id="pageTitle" class="text-2xl font-bold text-white mb-1">Gerador QR Code PIX</h1>
+     <p class="text-sm" style="color:#6b7280">Gere códigos PIX válidos para receber pagamentos</p>
+    </div>
+    <div class="rounded-2xl p-6 space-y-4" style="background:#1a1d27">
+     <div>
+      <label class="block text-sm font-medium mb-1.5" style="color:#9ca3af">Chave PIX *</label> <input id="pixKey" type="text" placeholder="CPF, CNPJ, e-mail ou telefone" class="w-full px-4 py-3 rounded-xl text-white text-sm" style="background:#262a36;border:1px solid #333844">
+     </div>
+     <div>
+      <label class="block text-sm font-medium mb-1.5" style="color:#9ca3af">Nome do Recebedor *</label> <input id="pixName" type="text" maxlength="25" placeholder="Máx. 25 caracteres" class="w-full px-4 py-3 rounded-xl text-white text-sm" style="background:#262a36;border:1px solid #333844">
+     </div>
+     <div>
+      <label class="block text-sm font-medium mb-1.5" style="color:#9ca3af">Cidade *</label> <input id="pixCity" type="text" maxlength="15" placeholder="Máx. 15 caracteres" class="w-full px-4 py-3 rounded-xl text-white text-sm" style="background:#262a36;border:1px solid #333844">
+     </div>
+     <div>
+      <label class="block text-sm font-medium mb-1.5" style="color:#9ca3af">Valor (opcional)</label> <input id="pixValue" type="text" placeholder="Ex: 10,50 ou vazio para livre" class="w-full px-4 py-3 rounded-xl text-white text-sm" style="background:#262a36;border:1px solid #333844">
+     </div><button id="btnGenerate" class="w-full py-3.5 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 transition-all hover:brightness-110 active:scale-[0.98]" style="background:#22c55e"> <i data-lucide="qr-code" style="width:18px;height:18px"></i> Gerar QR Code PIX </button>
+     <p id="errorMsg" class="text-red-400 text-xs text-center hidden"></p>
+    </div>
+    <div id="resultArea" class="hidden mt-6 rounded-2xl p-6" style="background:#1a1d27">
+     <div class="flex justify-center mb-5">
+      <div id="qrContainer" class="bg-white rounded-2xl p-4"></div>
+     </div><label class="block text-xs font-medium mb-1.5" style="color:#6b7280">Código Copia e Cola</label>
+     <div class="flex gap-2">
+      <input id="pixCode" readonly class="flex-1 px-3 py-2.5 rounded-xl text-xs text-white truncate" style="background:#262a36;border:1px solid #333844"> <button id="btnCopy" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-white flex items-center gap-1.5 transition-all hover:brightness-110" style="background:#22c55e"> <i data-lucide="copy" style="width:14px;height:14px"></i> Copiar </button>
+     </div><button id="btnDownload" class="w-full mt-4 py-3 rounded-xl font-semibold text-white text-sm flex items-center justify-center gap-2 transition-all hover:brightness-110" style="background:#3b82f6"> <i data-lucide="download" style="width:18px;height:18px"></i> Baixar QR Code PNG </button>
+    </div>
+   </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script>
+// --- CRC16 CCITT Calculation ---
+function crc16(data) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < data.length; i++) {
+    crc ^= data.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if (crc & 0x8000) {
+        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+      } else {
+        crc = (crc << 1) & 0xFFFF;
+      }
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+// --- TLV Encoder ---
+function tlv(tag, value) {
+  const len = value.length.toString().padStart(2, '0');
+  return tag + len + value;
+}
+
+// --- Remove Accents ---
+function removeAccents(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// --- Validate PIX Key ---
+function validatePixKey(key) {
+  key = key.trim();
+  // CPF: 11 digits
+  if (/^\d{11}$/.test(key)) return true;
+  // CNPJ: 14 digits
+  if (/^\d{14}$/.test(key)) return true;
+  // Email: basic validation
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)) return true;
+  // Phone: 11 digits with optional +55
+  if (/^(\+55)?9\d{8,9}$/.test(key.replace(/\D/g, ''))) return true;
+  return false;
+}
+
+// --- Build PIX EMV Payload (BR Code) ---
+function buildPixPayload(pixKey, pixName, pixCity, pixAmount) {
+  pixKey = pixKey.trim();
+  pixName = removeAccents(pixName.trim()).toUpperCase().substring(0, 25);
+  pixCity = removeAccents(pixCity.trim()).toUpperCase().substring(0, 15);
+  
+  let payload = '';
+
+  // 00 - Payload Format Indicator
+  payload += tlv('00', '01');
+
+  // 26 - Merchant Account Information (GUI + PIX Key)
+  const gui = tlv('00', 'br.gov.bcb.pix');
+  const key = tlv('01', pixKey);
+  const mai = tlv('26', gui + key);
+  payload += mai;
+
+  // 52 - Merchant Category Code
+  payload += tlv('52', '0000');
+
+  // 53 - Transaction Currency (986 = BRL)
+  payload += tlv('53', '986');
+
+  // 54 - Transaction Amount (optional, only if value > 0)
+  if (pixAmount && parseFloat(pixAmount) > 0) {
+    const amount = parseFloat(pixAmount).toFixed(2);
+    payload += tlv('54', amount);
+  }
+
+  // 58 - Country Code
+  payload += tlv('58', 'BR');
+
+  // 59 - Merchant Name
+  payload += tlv('59', pixName);
+
+  // 60 - Merchant City
+  payload += tlv('60', pixCity);
+
+  // 62 - Additional Data Field Template (with TXID)
+  const txid = tlv('05', '***');
+  payload += tlv('62', txid);
+
+  // 63 - CRC16 (calculated on full payload with placeholder)
+  payload += '6304';
+  const checksum = crc16(payload);
+  payload = payload.substring(0, payload.length - 4) + '63' + '04' + checksum;
+
+  return payload;
+}
+
+// --- App Logic ---
+const defaultConfig = {
+  page_title: 'Gerador QR Code PIX',
+  background_color: '#0f1117',
+  surface_color: '#1a1d27',
+  text_color: '#ffffff',
+  primary_action_color: '#22c55e',
+  secondary_action_color: '#3b82f6',
+  font_family: 'DM Sans',
+  font_size: 16
+};
+
+let currentQRCanvas = null;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+// Auto uppercase & remove accents
+['pixName', 'pixCity'].forEach(id => {
+  document.getElementById(id).addEventListener('input', function() {
+    const pos = this.selectionStart;
+    this.value = removeAccents(this.value).toUpperCase();
+    this.setSelectionRange(pos, pos);
+  });
+});
+
+document.getElementById('btnGenerate').addEventListener('click', (e) => {
+  e.preventDefault();
+  document.getElementById('errorMsg').classList.add('hidden');
+  
+  const pixKey = document.getElementById('pixKey').value.trim();
+  const pixName = document.getElementById('pixName').value.trim();
+  const pixCity = document.getElementById('pixCity').value.trim();
+  let pixAmount = document.getElementById('pixValue').value.trim().replace(',', '.');
+
+  if (!pixKey) return showError('Informe a chave PIX.');
+  if (!validatePixKey(pixKey)) return showError('Chave PIX inválida (CPF, CNPJ, e-mail ou telefone).');
+  if (!pixName) return showError('Informe o nome do recebedor.');
+  if (!pixCity) return showError('Informe a cidade.');
+
+  const payload = buildPixPayload(pixKey, pixName, pixCity, pixAmount);
+
+  // Display payload
+  document.getElementById('pixCode').value = payload;
+  document.getElementById('resultArea').classList.remove('hidden');
+
+  // Generate QR Code
+  const container = document.getElementById('qrContainer');
+  container.innerHTML = '';
+
+  try {
+    const qr = new QRCode(container, {
+      text: payload,
+      width: 256,
+      height: 256,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Capture canvas for download
+    setTimeout(() => {
+      currentQRCanvas = container.querySelector('canvas');
+      if (!currentQRCanvas) {
+        console.error('Canvas not found');
+      }
+    }, 100);
+  } catch (err) {
+    console.error('QR Error:', err);
+    showError('Erro ao gerar QR Code');
+  }
+});
+
+document.getElementById('btnCopy').addEventListener('click', (e) => {
+  e.preventDefault();
+  const code = document.getElementById('pixCode').value;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('Código PIX copiado!');
+  }).catch(() => {
+    showToast('Erro ao copiar');
+  });
+});
+
+document.getElementById('btnDownload').addEventListener('click', (e) => {
+  e.preventDefault();
+  const container = document.getElementById('qrContainer');
+  const canvas = container.querySelector('canvas');
+  
+  if (!canvas) {
+    showError('Gere um QR Code primeiro');
+    return;
+  }
+  
+  // Convert canvas to SVG
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  
+  // Create SVG with proper dimensions
+  const size = canvas.width;
+  const moduleSize = 10; // Size of each QR module in SVG
+  const svgSize = size * moduleSize;
+  
+  let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${svgSize}" height="${svgSize}" fill="white"/>
+`;
+  
+  // Parse canvas pixels and create SVG rectangles for black pixels
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    
+    // If pixel is black (or dark)
+    if (r < 128 && g < 128 && b < 128) {
+      const pixelIndex = i / 4;
+      const x = (pixelIndex % size) * moduleSize;
+      const y = Math.floor(pixelIndex / size) * moduleSize;
+      svgContent += `  <rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="black"/>\n`;
+    }
+  }
+  
+  svgContent += '</svg>';
+  
+  // Create blob and download
+  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.createElement('a');
+  link.download = 'pix-qrcode.svg';
+  link.href = url;
+  link.click();
+  
+  URL.revokeObjectURL(url);
+  showToast('QR Code SVG baixado!');
+});
+
+// --- Element SDK ---
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const bg = config.background_color || defaultConfig.background_color;
+    const surface = config.surface_color || defaultConfig.surface_color;
+    const text = config.text_color || defaultConfig.text_color;
+    const primary = config.primary_action_color || defaultConfig.primary_action_color;
+    const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+    const font = config.font_family || defaultConfig.font_family;
+    const sz = config.font_size || defaultConfig.font_size;
+
+    document.body.style.background = bg;
+    document.getElementById('app').style.background = bg;
+    document.getElementById('pageTitle').textContent = config.page_title || defaultConfig.page_title;
+
+    document.querySelectorAll('[style*="background:#1a1d27"]').forEach(el => {
+      el.style.background = surface;
+    });
+    
+    document.getElementById('pageTitle').style.color = text;
+    document.getElementById('pageTitle').style.fontFamily = `${font}, sans-serif`;
+    document.getElementById('pageTitle').style.fontSize = `${sz * 1.5}px`;
+
+    document.getElementById('btnGenerate').style.background = primary;
+    document.getElementById('btnCopy').style.background = primary;
+    document.getElementById('btnDownload').style.background = secondary;
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+      { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+      { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: v => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }},
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: v => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }},
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['page_title', config.page_title || defaultConfig.page_title]
+  ])
+});
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9eec46894006f1de',t:'MTc3NjYwNTU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
