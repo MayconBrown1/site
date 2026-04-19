@@ -250,57 +250,15 @@ document.getElementById('btnCopy').addEventListener('click', (e) => {
 
 document.getElementById('btnDownload').addEventListener('click', (e) => {
   e.preventDefault();
-  const container = document.getElementById('qrContainer');
-  const canvas = container.querySelector('canvas');
-  
-  if (!canvas) {
+  if (!currentQRCanvas) {
     showError('Gere um QR Code primeiro');
     return;
   }
-  
-  // Convert canvas to SVG
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
-  
-  // Create SVG with proper dimensions
-  const size = canvas.width;
-  const moduleSize = 10; // Size of each QR module in SVG
-  const svgSize = size * moduleSize;
-  
-  let svgContent = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="${svgSize}" height="${svgSize}" viewBox="0 0 ${svgSize} ${svgSize}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${svgSize}" height="${svgSize}" fill="white"/>
-`;
-  
-  // Parse canvas pixels and create SVG rectangles for black pixels
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i];
-    const g = data[i + 1];
-    const b = data[i + 2];
-    
-    // If pixel is black (or dark)
-    if (r < 128 && g < 128 && b < 128) {
-      const pixelIndex = i / 4;
-      const x = (pixelIndex % size) * moduleSize;
-      const y = Math.floor(pixelIndex / size) * moduleSize;
-      svgContent += `  <rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="black"/>\n`;
-    }
-  }
-  
-  svgContent += '</svg>';
-  
-  // Create blob and download
-  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  
   const link = document.createElement('a');
-  link.download = 'pix-qrcode.svg';
-  link.href = url;
+  link.download = 'pix-qrcode.png';
+  link.href = currentQRCanvas.toDataURL('image/png');
   link.click();
-  
-  URL.revokeObjectURL(url);
-  showToast('QR Code SVG baixado!');
+  showToast('QR Code baixado!');
 });
 
 // --- Element SDK ---
@@ -350,5 +308,5 @@ window.elementSdk.init({
 
 lucide.createIcons();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9eec46894006f1de',t:'MTc3NjYwNTU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9eec3d13a5abf1de',t:'MTc3NjYwNTE2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
