@@ -105,6 +105,44 @@
    </footer>
   </div>
   <script>
+  // Inicializar SDK antes de qualquer coisa
+  window.elementSdk.init({
+    defaultConfig: {
+      company_name: "Catálogo Uny3D",
+      banner_text: "Seja revendedor e lucre 100%!",
+      whatsapp_number: "5511999999999",
+      background_color: "#F0EDE6",
+      header_color: "#1A1A2E",
+      accent_color: "#E94560",
+      text_color: "#1A1A2E",
+      card_color: "#FFFFFF"
+    },
+    onConfigChange: async function(config) {
+      applyConfig(config);
+    },
+    mapToCapabilities: function(config) {
+      return {
+        recolorables: [
+          { get: () => config.background_color || "#F0EDE6", set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+          { get: () => config.card_color || "#FFFFFF", set: (v) => { config.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
+          { get: () => config.text_color || "#1A1A2E", set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => config.accent_color || "#E94560", set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+          { get: () => config.header_color || "#1A1A2E", set: (v) => { config.header_color = v; window.elementSdk.setConfig({ header_color: v }); } }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    },
+    mapToEditPanelValues: function(config) {
+      return new Map([
+        ["company_name", config.company_name || "Catálogo Uny3D"],
+        ["banner_text", config.banner_text || "Seja revendedor e lucre 100%!"],
+        ["whatsapp_number", config.whatsapp_number || "5511999999999"]
+      ]);
+    }
+  });
+
   /* ============================================================
    *  ✏️ EDITE SEUS PRODUTOS AQUI!
    *  
@@ -124,11 +162,11 @@
 
   const produtos = [
     {
-      nome: "Chaveiro Gamer",       // ← Nome do produto
-      preco: 5,                      // ← Preço em reais
-      estoque: 120,                  // ← Quantidade em estoque
-      imagem: "",                    // ← URL da imagem (ou deixe vazio)
-      emoji: "🎮"                   // ← Emoji decorativo
+      nome: "Chaveiro Gamer",
+      preco: 5,
+      estoque: 120,
+      imagem: "",
+      emoji: "🎮"
     },
     {
       nome: "Suporte de Celular",
@@ -154,14 +192,14 @@
     {
       nome: "Organizador de Cabos",
       preco: 5,
-      estoque: 8,           // ← Estoque baixo (destacado)
+      estoque: 8,
       imagem: "",
       emoji: "🔌"
     },
     {
       nome: "Luminária Geek",
       preco: 7,
-      estoque: 0,           // ← Indisponível
+      estoque: 0,
       imagem: "",
       emoji: "💡"
     },
@@ -175,7 +213,7 @@
     {
       nome: "Chaveiro Coração",
       preco: 5,
-      estoque: 3,            // ← Estoque baixo
+      estoque: 3,
       imagem: "",
       emoji: "❤️"
     },
@@ -237,11 +275,7 @@
     }
   ];
 
-  /* ============================================================
-   *  ✏️ NÚMERO DO WHATSAPP PARA PEDIDOS
-   *  Formato: código do país + DDD + número (sem espaços)
-   * ============================================================ */
-  let whatsappNumber = "5511999999999"; // ← Altere seu número aqui
+  let whatsappNumber = "5511999999999";
 
   // ─── Configuração padrão ───
   const defaultConfig = {
@@ -358,38 +392,9 @@
     renderProducts();
   }
 
-  // ─── Inicializar SDK ───
-  window.elementSdk.init({
-    defaultConfig: defaultConfig,
-    onConfigChange: async function(config) {
-      applyConfig(config);
-    },
-    mapToCapabilities: function(config) {
-      return {
-        recolorables: [
-          { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-          { get: () => config.card_color || defaultConfig.card_color, set: (v) => { config.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
-          { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-          { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
-          { get: () => config.header_color || defaultConfig.header_color, set: (v) => { config.header_color = v; window.elementSdk.setConfig({ header_color: v }); } }
-        ],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      };
-    },
-    mapToEditPanelValues: function(config) {
-      return new Map([
-        ["company_name", config.company_name || defaultConfig.company_name],
-        ["banner_text", config.banner_text || defaultConfig.banner_text],
-        ["whatsapp_number", config.whatsapp_number || defaultConfig.whatsapp_number]
-      ]);
-    }
-  });
-
   // Render inicial
   renderProducts();
   lucide.createIcons();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9efc2e408344d8a2',t:'MTc3Njc3MjMyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9efc34de0612f1f6',t:'MTc3Njc3MjU5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
