@@ -6,7 +6,6 @@
   <title>Catálogo 3D</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
   <style>
     * { font-family: 'Outfit', sans-serif; }
@@ -68,7 +67,7 @@
     }
   </style>
   <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+
  </head>
  <body class="h-full">
   <div id="app" class="w-full h-full overflow-auto" style="background-color: #F0EDE6;">
@@ -105,43 +104,7 @@
    </footer>
   </div>
   <script>
-  // Inicializar SDK antes de qualquer coisa
-  window.elementSdk.init({
-    defaultConfig: {
-      company_name: "Catálogo Uny3D",
-      banner_text: "Seja revendedor e lucre 100%!",
-      whatsapp_number: "5511999999999",
-      background_color: "#F0EDE6",
-      header_color: "#1A1A2E",
-      accent_color: "#E94560",
-      text_color: "#1A1A2E",
-      card_color: "#FFFFFF"
-    },
-    onConfigChange: async function(config) {
-      applyConfig(config);
-    },
-    mapToCapabilities: function(config) {
-      return {
-        recolorables: [
-          { get: () => config.background_color || "#F0EDE6", set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-          { get: () => config.card_color || "#FFFFFF", set: (v) => { config.card_color = v; window.elementSdk.setConfig({ card_color: v }); } },
-          { get: () => config.text_color || "#1A1A2E", set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-          { get: () => config.accent_color || "#E94560", set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
-          { get: () => config.header_color || "#1A1A2E", set: (v) => { config.header_color = v; window.elementSdk.setConfig({ header_color: v }); } }
-        ],
-        borderables: [],
-        fontEditable: undefined,
-        fontSizeable: undefined
-      };
-    },
-    mapToEditPanelValues: function(config) {
-      return new Map([
-        ["company_name", config.company_name || "Catálogo Uny3D"],
-        ["banner_text", config.banner_text || "Seja revendedor e lucre 100%!"],
-        ["whatsapp_number", config.whatsapp_number || "5511999999999"]
-      ]);
-    }
-  });
+  
 
   /* ============================================================
    *  ✏️ EDITE SEUS PRODUTOS AQUI!
@@ -300,7 +263,7 @@
     grid.innerHTML = "";
     let available = 0;
 
-    const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+    const config = defaultConfig;
     const accent = config.accent_color || defaultConfig.accent_color;
     const cardBg = config.card_color || defaultConfig.card_color;
     const textCol = config.text_color || defaultConfig.text_color;
@@ -361,7 +324,9 @@
     });
 
     document.getElementById("product-count").textContent = available;
-    lucide.createIcons();
+    if (window.lucide) {
+  lucide.createIcons();
+}
   }
 
   // ─── Aplicar configurações visuais ───
@@ -392,9 +357,13 @@
     renderProducts();
   }
 
-  // Render inicial
+document.addEventListener("DOMContentLoaded", function () {
   renderProducts();
-  lucide.createIcons();
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+});
 </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9efc34de0612f1f6',t:'MTc3Njc3MjU5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
