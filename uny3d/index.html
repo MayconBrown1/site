@@ -125,10 +125,10 @@
 
   const produtos = [
     {
-      nome: "Chaveiro Gamer",
-      preco: 5,
-      estoque: 120,
-      imagem: "",
+      nome: "Chaveiro do Flamengo",
+      preco: 7,
+      estoque: 11,
+      imagem: "/img/uny3d/chaveiro-flamengo.jpg",
       emoji: "🎮"
     },
     {
@@ -287,9 +287,14 @@
       if (isOut) card.style.opacity = "0.55";
 
       card.innerHTML =
-        '<div class="product-img-wrap w-full aspect-square flex items-center justify-center" style="background: linear-gradient(135deg, ' + accent + '15, ' + accent + '08);">' +
-          '<span class="text-6xl md:text-7xl select-none">' + (p.emoji || "📦") + '</span>' +
-        '</div>' +
+        '<div class="product-img-wrap w-full aspect-square flex items-center justify-center" style="background:#f5f5f5;">' +
+
+  (p.imagem
+    ? '<img src="' + p.imagem + '" alt="' + p.nome + '" class="w-full h-full object-cover">'
+    : '<span class="text-6xl md:text-7xl select-none">' + (p.emoji || "📦") + '</span>'
+  ) +
+
+'</div>' +
         '<div class="p-3 md:p-4">' +
           // Badge estoque
           (isLow ?
