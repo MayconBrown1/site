@@ -100,7 +100,7 @@
     <!-- Produtos gerados via JS -->
    </div><!-- FOOTER -->
    <footer class="w-full px-6 py-6 text-center text-xs font-medium" style="color: #1A1A2E; opacity: 0.5;">
-    <p>© 2025 — Todos os direitos reservados</p>
+    <p>© 2026 — Todos os direitos reservados</p>
    </footer>
   </div>
   <script>
@@ -127,6 +127,8 @@
     {
       nome: "Chaveiro do Flamengo",
       preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
       estoque: 11,
       imagem: "/img/uny3d/0001.jpg",
       emoji: "🎮"
@@ -134,6 +136,8 @@
     {
       nome: "Chaveiro turbo roxo/preto",
       preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
       estoque: 2,
       imagem: "/img/uny3d/0002.jpeg",
       emoji: "📱"
@@ -141,101 +145,93 @@
     {
       nome: "Chaveiro turbo branco/preto",
       preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
       estoque: 7,
       imagem: "/img/uny3d/0003.jpeg",
       emoji: "🌱"
     },
     {
-      nome: "Chaveiro roda bbs roxa/cinza",
+      nome: "Chaveiro roda car roxa/cinza",
       preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
       estoque: 2,
       imagem: "/img/uny3d/0004.jpeg",
       emoji: "🎧"
     },
     {
-      nome: "Organizador de Cabos",
+      nome: "Chaveiro capacete de obra amarelo",
       preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
       estoque: 8,
       imagem: "/img/uny3d/0005.jpeg",
       emoji: "🔌"
     },
     {
-      nome: "Luminária Geek",
+      nome: "Chaveiro roda car amarela",
       preco: 7,
-      estoque: 0,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 2,
       imagem: "/img/uny3d/0006.jpeg",
       emoji: "💡"
     },
     {
-      nome: "Porta Canetas",
+      nome: "Chaveiro arma glock preta",
       preco: 5,
-      estoque: 60,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 6,
       imagem: "/img/uny3d/0007.jpeg",
       emoji: "✏️"
     },
     {
-      nome: "Chaveiro Coração",
-      preco: 5,
-      estoque: 3,
+      nome: "Chaveiro banco sport vermelho",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 5,
       imagem: "/img/uny3d/0008.jpeg",
       emoji: "❤️"
     },
     {
-      nome: "Arandela Minimalista",
+      nome: "Chvairo troféu da copa",
       preco: 7,
-      estoque: 34,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 9,
       imagem: "/img/uny3d/0009.jpeg",
       emoji: "🏮"
     },
     {
-      nome: "Suporte para Tablet",
+      nome: "Chaveiro revolve 380",
       preco: 7,
-      estoque: 52,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 6,
       imagem: "/img/uny3d/0010.jpeg",
       emoji: "📲"
     },
     {
-      nome: "Mini Planta em Vaso",
-      preco: 5,
-      estoque: 95,
+      nome: "Chaveiro banco sport preto",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 2,
       imagem: "/img/uny3d/0011.jpeg",
       emoji: "🌿"
     },
     {
-      nome: "Organizador de Mesa",
-      preco: 7,
-      estoque: 28,
+      nome: "Nome",
+      preco: 0.0,
+      precoRevenda: 0.0,
+      minRevenda: 0,
+      estoque: 0,
       imagem: "",
       emoji: "📦"
     },
-    {
-      nome: "Suporte para Controle",
-      preco: 5,
-      estoque: 1,
-      imagem: "",
-      emoji: "🕹️"
-    },
-    {
-      nome: "Carregador Wireless Stand",
-      preco: 7,
-      estoque: 67,
-      imagem: "",
-      emoji: "⚡"
-    },
-    {
-      nome: "Mini Figura Decorativa",
-      preco: 5,
-      estoque: 150,
-      imagem: "",
-      emoji: "🎨"
-    },
-    {
-      nome: "Suporte de Livros",
-      preco: 7,
-      estoque: 41,
-      imagem: "",
-      emoji: "📚"
-    }
   ];
 
   let whatsappNumber = "5584981770146";
@@ -274,8 +270,10 @@
       const isOut = p.estoque === 0;
 
       const msg = encodeURIComponent(
-        "Olá! Tenho interesse no produto: " + p.nome + " (" + formatPrice(p.preco) + ")"
-      );
+  "Olá! Tenho interesse no produto: " + p.nome +
+  "\nPreço varejo: " + formatPrice(p.preco) +
+  (p.precoRevenda ? "\nPreço revenda (" + p.minRevenda + " un): " + formatPrice(p.precoRevenda) : "")
+);
       const wpNum = config.whatsapp_number || whatsappNumber;
       const wpLink = "https://wa.me/" + wpNum + "?text=" + msg;
 
@@ -313,7 +311,20 @@
           // Nome
           '<h3 class="font-bold text-sm md:text-base leading-tight mb-1" style="color:' + textCol + ';">' + p.nome + '</h3>' +
           // Preço
-          '<p class="text-lg md:text-xl font-extrabold mb-3" style="color:' + accent + ';">' + formatPrice(p.preco) + '</p>' +
+          '<div class="mb-3">' +
+
+  // PREÇO VAREJO
+  '<p class="text-sm font-medium" style="color:#555;">Varejo</p>' +
+  '<p class="text-lg font-bold" style="color:' + accent + ';">' + formatPrice(p.preco) + '</p>' +
+
+  // PREÇO REVENDA
+  (p.precoRevenda
+    ? '<p class="text-xs mt-1" style="color:#777;">Revenda (mín. ' + p.minRevenda + ' un.)</p>' +
+      '<p class="text-base font-extrabold text-green-600">' + formatPrice(p.precoRevenda) + '</p>'
+    : ''
+  ) +
+
+'</div>' +
           // Botão WhatsApp
           (isOut ?
             '<button disabled class="w-full py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style="background:#ccc;color:#888;">Indisponível</button>'
