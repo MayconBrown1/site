@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Maycon Brown</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen px-4">
+  <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+    <div class="text-center mb-6">
+      <img src="/img/logo-brown-preto.png" class="w-40 mx-auto" alt="Logo Maycon Brown">
+      <h1 class="text-2xl font-bold mt-4">Área Administrativa</h1>
+      <p class="text-sm text-gray-400 mt-1">Digite seu e-mail e senha para entrar</p>
+    </div>
+
+    <div class="space-y-4">
+      <input type="email" id="email" placeholder="E-mail" class="w-full p-3 rounded bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <input type="password" id="senha" placeholder="Senha" class="w-full p-3 rounded bg-gray-700 border border-gray-600 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <button id="login" class="w-full bg-indigo-600 hover:bg-indigo-700 p-3 rounded text-white font-bold transition">
+        Entrar
+      </button>
+      <p id="erro" class="text-red-400 text-sm hidden"></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+      authDomain: "mayconbrown-bda8c.firebaseapp.com",
+      projectId: "mayconbrown-bda8c",
+      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
+      messagingSenderId: "226624962636",
+      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+      measurementId: "G-Y1BTTK576V"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    document.getElementById("login").addEventListener("click", () => {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(() => {
+          window.location.href = "/admin/index.html"; // ou a página que tu quiser
+        })
+        .catch((error) => {
+          const erroEl = document.getElementById("erro");
+          erroEl.textContent = "Erro: " + error.message;
+          erroEl.classList.remove("hidden");
+        });
+    });
+  </script>
+</body>
+</html>
