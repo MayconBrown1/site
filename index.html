@@ -278,5 +278,152 @@
     <footer class="bg-white border-t py-6 mt-16 text-center text-sm text-gray-500">
       <p>&copy; 2026 Maycon Brown. Todos os direitos reservados.</p>
     </footer>
+
+    <!-- ========================= -->
+<!-- 🔥 ANÚNCIO INFERIOR -->
+<!-- ========================= -->
+
+<style>
+#anuncio-container {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+}
+
+#anuncio-box {
+  position: relative;
+  width: 500px;
+  max-width: 95vw;
+}
+
+#anuncio-box img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+#fechar-anuncio {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  background: #000;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.anuncio-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+#anuncio-prev { left: 5px; }
+#anuncio-next { right: 5px; }
+
+@media (max-width: 600px) {
+  #anuncio-box {
+    width: 90vw;
+  }
+}
+</style>
+
+<div id="anuncio-container">
+  <div id="anuncio-box">
+
+    <span id="fechar-anuncio">✖</span>
+
+    <button id="anuncio-prev" class="anuncio-btn">❮</button>
+    <button id="anuncio-next" class="anuncio-btn">❯</button>
+
+    <a id="anuncio-link" href="#" target="_blank">
+      <img id="anuncio-img" src="" alt="Anúncio">
+    </a>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+const anuncios = [
+  {
+    img: "/img/anuncio/1.png",
+    link: "/contrato-aluguel/"
+  },
+  {
+    img: "/img/anuncio/2.png",
+    link: "/curriculo"
+  }
+];
+
+let index = 0;
+let intervalo;
+
+const container = document.getElementById("anuncio-container");
+const img = document.getElementById("anuncio-img");
+const link = document.getElementById("anuncio-link");
+const fechar = document.getElementById("fechar-anuncio");
+const btnPrev = document.getElementById("anuncio-prev");
+const btnNext = document.getElementById("anuncio-next");
+
+// controle 30 minutos
+const tempoFechado = localStorage.getItem("anuncioFechado");
+
+if (tempoFechado && (Date.now() - tempoFechado < 1800000)) {
+  container.style.display = "none";
+} else {
+  iniciar();
+}
+
+function mostrar() {
+  img.src = anuncios[index].img;
+  link.href = anuncios[index].link;
+}
+
+function iniciar() {
+  mostrar();
+  intervalo = setInterval(() => {
+    index = (index + 1) % anuncios.length;
+    mostrar();
+  }, 3000);
+}
+
+// avançar
+btnNext.onclick = () => {
+  clearInterval(intervalo);
+  index = (index + 1) % anuncios.length;
+  mostrar();
+  iniciar();
+};
+
+// voltar
+btnPrev.onclick = () => {
+  clearInterval(intervalo);
+  index = (index - 1 + anuncios.length) % anuncios.length;
+  mostrar();
+  iniciar();
+};
+
+// fechar
+fechar.onclick = () => {
+  container.style.display = "none";
+  localStorage.setItem("anuncioFechado", Date.now());
+};
+
+});
+</script>
+
+</body>
+</html>
   </body>
 </html>
