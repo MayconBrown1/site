@@ -26,6 +26,47 @@
         
         .slide-up { animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        #anuncio-container {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#anuncio-box {
+  width: 90%;
+  max-width: 800px;
+  position: relative;
+  animation: fadeIn 0.5s;
+}
+
+#anuncio-box img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+#fechar-anuncio {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
     </style>
 </head>
 <body class="bg-gray-100 min-h-full">
@@ -2763,5 +2804,69 @@ function showInstallButton() {
             calcularSaldoCaixa();
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+const anuncios = [
+  {
+    img: "/img/anuncio/1.png",
+    link: "/contrato-aluguel/"
+  },
+  {
+    img: "/img/anuncio/2.png",
+    link: "/curriculo"
+  },
+
+];
+
+let index = 0;
+
+const container = document.getElementById("anuncio-container");
+const img = document.getElementById("anuncio-img");
+const link = document.getElementById("anuncio-link");
+const fechar = document.getElementById("fechar-anuncio");
+
+// controle de tempo (30 minutos)
+const tempoFechado = localStorage.getItem("anuncioFechado");
+
+if (tempoFechado && (Date.now() - tempoFechado < 1800000)) {
+  container.style.display = "none";
+} else {
+  iniciarCarrossel();
+}
+
+function iniciarCarrossel() {
+  function trocar() {
+    img.src = anuncios[index].img;
+    link.href = anuncios[index].link;
+
+    index = (index + 1) % anuncios.length;
+  }
+
+  trocar();
+  setInterval(trocar, 3000);
+}
+
+// botão fechar
+fechar.onclick = function () {
+  container.style.display = "none";
+  localStorage.setItem("anuncioFechado", Date.now());
+};
+
+});
+</script>
+
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<div id="anuncio-container">
+  <div id="anuncio-box">
+    <span id="fechar-anuncio">✖</span>
+    
+    <a id="anuncio-link" href="#" target="_blank">
+      <img id="anuncio-img" src="" alt="Anúncio">
+    </a>
+
+  </div>
+</div>
+
+</body>
 </html>
