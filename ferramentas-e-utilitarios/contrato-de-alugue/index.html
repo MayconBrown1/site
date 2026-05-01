@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contrato de Locação</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Merriweather:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+  body { font-family: 'DM Sans', sans-serif; }
+  .contract-text { font-family: 'Merriweather', Georgia, serif; }
+  input, select { transition: border-color 0.2s, box-shadow 0.2s; }
+  input:focus, select:focus { border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.12); }
+  .section-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px; margin-bottom: 20px; }
+  .btn-generate { background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%); transition: transform 0.15s, box-shadow 0.15s; }
+  .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,58,95,0.3); }
+  @media print { .no-print { display: none !important; } }
+  #contract-output { font-size: 13px; line-height: 1.7; color: #1a1a1a; }
+  #contract-output p { margin-bottom: 10px; text-align: justify; }
+  .sig-line { border-bottom: 1px solid #333; width: 300px; margin: 0 auto; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-slate-50 overflow-auto">
+  <div class="w-full h-full overflow-auto"><!-- FORM SECTION -->
+   <div class="no-print max-w-4xl mx-auto px-4 py-8">
+    <div class="text-center mb-8">
+     <img src="https://mayconbrown.com.br/img/logo-brown-preto.png" alt="Logo" loading="lazy" style="height:60px;margin:0 auto 16px auto;display:block;" onerror="console.error('Logo failed to load:', this.src); this.style.display='none';">
+     <div class="inline-flex items-center gap-2 bg-white border border-slate-200 rounded-full px-4 py-1.5 text-xs font-medium text-slate-500 mb-4"><i data-lucide="file-text" style="width:14px;height:14px"></i> Documento Jurídico
+     </div>
+     <h1 id="page-title" class="text-3xl font-bold text-slate-800">Gerador de Contrato de Locação</h1>
+     <p class="text-slate-500 mt-2">Preencha os dados abaixo para gerar o contrato completo</p>
+    </div>
+    <form id="contract-form" onsubmit="return false;"><!-- LOCADOR -->
+     <div class="section-card">
+      <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="user" style="width:18px;height:18px;color:#1e3a5f"></i> Dados do Locador</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Nome Completo</label><input id="loc_nome" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" required>
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Estado Civil</label><input id="loc_estado" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" placeholder="Solteiro(a), Casado(a)...">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Profissão</label><input id="loc_prof" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">RG</label><input id="loc_rg" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">CPF</label><input id="loc_cpf" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Endereço (Rua, Nº, Bairro)</label><input id="loc_end" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Cidade / UF</label><input id="loc_cidade" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">CEP</label><input id="loc_cep" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+      </div>
+     </div><!-- LOCATÁRIO -->
+     <div class="section-card">
+      <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="user-check" style="width:18px;height:18px;color:#1e3a5f"></i> Dados do Locatário</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Nome Completo</label><input id="locat_nome" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" required>
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Estado Civil</label><input id="locat_estado" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Profissão</label><input id="locat_prof" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">RG</label><input id="locat_rg" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">CPF</label><input id="locat_cpf" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+      </div>
+     </div><!-- IMÓVEL -->
+     <div class="section-card">
+      <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="home" style="width:18px;height:18px;color:#1e3a5f"></i> Dados do Imóvel</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+       <div class="md:col-span-2">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Endereço (Rua)</label><input id="im_end" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Número</label><input id="im_num" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Complemento</label><input id="im_comp" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Bairro</label><input id="im_bairro" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Cidade / UF</label><input id="im_cidade" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">CEP</label><input id="im_cep" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+      </div>
+     </div><!-- CONTRATO -->
+     <div class="section-card">
+      <h2 class="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2"><i data-lucide="clipboard" style="width:18px;height:18px;color:#1e3a5f"></i> Dados do Contrato</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Prazo (meses)</label><input id="ct_prazo" type="number" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" value="12">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Valor do Aluguel (R$)</label><input id="ct_valor" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" placeholder="1.500,00" oninput="atualizarExtenso()">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Valor por Extenso</label><input id="ct_extenso" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none bg-slate-100" readonly>
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Dia do Pagamento</label><input id="ct_dia" type="number" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" value="5">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Multa (%)</label><input id="ct_multa" type="number" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" value="10">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Juros (%)</label><input id="ct_juros" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" value="1">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Dias Atraso p/ Rescisão</label><input id="ct_atraso" type="number" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none" value="30">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Foro (Cidade/UF)</label><input id="ct_foro" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+       <div>
+        <label class="block text-sm font-medium text-slate-600 mb-1">Data do Contrato</label><input id="ct_data" type="date" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none">
+       </div>
+      </div>
+     </div>
+     <div class="flex flex-col sm:flex-row gap-3 mt-6"><button type="button" onclick="gerarContrato()" class="flex-1 bg-slate-800 text-white font-semibold rounded-xl py-3 px-6 flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors"> <i data-lucide="eye" style="width:18px;height:18px"></i> Visualizar Contrato </button> <button type="button" onclick="gerarPDF()" class="flex-1 btn-generate text-white font-semibold rounded-xl py-3 px-6 flex items-center justify-center gap-2"> <i data-lucide="download" style="width:18px;height:18px"></i> Gerar PDF do Contrato </button>
+     </div>
+    </form>
+   </div><!-- CONTRACT OUTPUT -->
+   <div id="contract-wrapper" class="max-w-4xl mx-auto px-4 pb-12" style="min-height:0;">
+    <div id="contract-output" class="contract-text bg-white p-10 rounded-xl border border-slate-200 shadow-sm" style="display:none;"></div>
+   </div>
+  </div>
+  <script>
+const defaultConfig = {
+  page_title: 'Gerador de Contrato de Locação',
+  background_color: '#f8fafc',
+  surface_color: '#ffffff',
+  text_color: '#1e293b',
+  primary_action_color: '#1e3a5f',
+  secondary_action_color: '#475569',
+  font_family: 'DM Sans',
+  font_size: 16
+};
+
+function applyConfig(config) {
+  const c = { ...defaultConfig, ...config };
+  document.body.style.backgroundColor = c.background_color;
+  document.getElementById('page-title').textContent = c.page_title;
+  document.querySelectorAll('.section-card').forEach(el => el.style.backgroundColor = c.surface_color);
+  document.querySelectorAll('h1, h2').forEach(el => el.style.color = c.text_color);
+  const font = c.font_family + ", 'DM Sans', sans-serif";
+  document.body.style.fontFamily = font;
+  const base = c.font_size || 16;
+  document.querySelectorAll('label').forEach(el => el.style.fontSize = (base * 0.85) + 'px');
+  document.querySelectorAll('input').forEach(el => el.style.fontSize = base + 'px');
+}
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => applyConfig(config),
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: v => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => config.surface_color || defaultConfig.surface_color, set: v => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => config.text_color || defaultConfig.text_color, set: v => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: v => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+        { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: v => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: v => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: v => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['page_title', config.page_title || defaultConfig.page_title]
+    ])
+  });
+}
+
+function v(id) { return document.getElementById(id).value.trim(); }
+
+function atualizarExtenso() {
+  const valorStr = document.getElementById('ct_valor').value.trim();
+  if (!valorStr) {
+    document.getElementById('ct_extenso').value = '';
+    return;
+  }
+  const valorLimpo = valorStr.replace(/\D/g, '');
+  const numero = parseInt(valorLimpo) || 0;
+  const extenso = converterParaExtenso(numero);
+  document.getElementById('ct_extenso').value = extenso + ' reais';
+}
+
+function converterParaExtenso(num) {
+  const unidades = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const especiais = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+  const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+  const escala = ['', 'mil', 'milhão', 'bilhão', 'trilhão'];
+
+  if (num === 0) return 'zero';
+
+  let resultado = '';
+  let escalaIdx = 0;
+
+  while (num > 0) {
+    let grupo = num % 1000;
+    if (grupo !== 0) {
+      resultado = converterGrupo(grupo, unidades, especiais, dezenas) + (escala[escalaIdx] ? ' ' + escala[escalaIdx] : '') + (resultado ? ' ' + resultado : '');
+    }
+    num = Math.floor(num / 1000);
+    escalaIdx++;
+  }
+
+  return resultado.trim();
+}
+
+function converterGrupo(num, unidades, especiais, dezenas) {
+  let resultado = '';
+  
+  const centenas = Math.floor(num / 100);
+  if (centenas > 0) {
+    const cent = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+    resultado += cent[centenas];
+  }
+
+  const resto = num % 100;
+  if (resto !== 0) {
+    if (resultado) resultado += ' e ';
+    if (resto < 10) {
+      resultado += unidades[resto];
+    } else if (resto < 20) {
+      resultado += especiais[resto - 10];
+    } else {
+      const dez = Math.floor(resto / 10);
+      const un = resto % 10;
+      resultado += dezenas[dez];
+      if (un > 0) {
+        resultado += ' e ' + unidades[un];
+      }
+    }
+  }
+
+  return resultado;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '___/___/______';
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function gerarContrato() {
+  const d = {
+    loc_nome: v('loc_nome') || '_______________', loc_estado: v('loc_estado') || '___________', loc_prof: v('loc_prof') || '___________',
+    loc_rg: v('loc_rg') || '___________', loc_cpf: v('loc_cpf') || '___________', loc_end: v('loc_end') || '_______________',
+    loc_cidade: v('loc_cidade') || '___________', loc_cep: v('loc_cep') || '________',
+    locat_nome: v('locat_nome') || '_______________', locat_estado: v('locat_estado') || '___________', locat_prof: v('locat_prof') || '___________',
+    locat_rg: v('locat_rg') || '___________', locat_cpf: v('locat_cpf') || '___________',
+    im_end: v('im_end') || '_______________', im_num: v('im_num') || '____', im_comp: v('im_comp') || '____',
+    im_bairro: v('im_bairro') || '___________', im_cidade: v('im_cidade') || '___________', im_cep: v('im_cep') || '________',
+    ct_prazo: v('ct_prazo') || '12', ct_valor: v('ct_valor') || '___________', ct_extenso: v('ct_extenso') || '___________',
+    ct_dia: v('ct_dia') || '5', ct_multa: v('ct_multa') || '10', ct_juros: v('ct_juros') || '1',
+    ct_atraso: v('ct_atraso') || '30', ct_foro: v('ct_foro') || '___________', ct_data: formatDate(v('ct_data'))
+  };
+
+  const imovelCompleto = `${d.im_end}, nº ${d.im_num}, ${d.im_comp}, Bairro ${d.im_bairro}, ${d.im_cidade}, CEP ${d.im_cep}`;
+
+  const html = `
+<div style="font-family: 'Merriweather', Georgia, serif; font-size: 13px; line-height: 1.8; color: #1a1a1a; max-width: 700px; margin: 0 auto;">
+  <h1 style="text-align:center; font-size:18px; font-weight:700; margin-bottom:4px; letter-spacing:1px;">CONTRATO DE LOCAÇÃO DE IMÓVEL RESIDENCIAL</h1>
+  <hr style="border:none; border-top:2px solid #1e3a5f; margin:12px 0 24px;">
+
+  <p>Pelo presente instrumento particular de contrato de locação de imóvel residencial, de um lado, como <strong>LOCADOR(A)</strong>, <strong>${d.loc_nome}</strong>, ${d.loc_estado}, ${d.loc_prof}, portador(a) do RG nº ${d.loc_rg} e CPF nº ${d.loc_cpf}, residente e domiciliado(a) à ${d.loc_end}, ${d.loc_cidade}, CEP ${d.loc_cep}; e de outro lado, como <strong>LOCATÁRIO(A)</strong>, <strong>${d.locat_nome}</strong>, ${d.locat_estado}, ${d.locat_prof}, portador(a) do RG nº ${d.locat_rg} e CPF nº ${d.locat_cpf}, têm entre si justo e contratado o seguinte:</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA PRIMEIRA — DO OBJETO</h2>
+  <p>O presente contrato tem como objeto a locação do imóvel residencial situado à <strong>${imovelCompleto}</strong>, de propriedade do(a) LOCADOR(A), que o cede ao(à) LOCATÁRIO(A) exclusivamente para fins residenciais.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA SEGUNDA — DO PRAZO</h2>
+  <p>A locação terá o prazo de <strong>${d.ct_prazo} (${extensoMeses(d.ct_prazo)}) meses</strong>, com início na data de assinatura deste contrato, podendo ser prorrogado por acordo entre as partes, mediante termo aditivo por escrito. Findo o prazo contratual, caso o(a) LOCATÁRIO(A) permaneça no imóvel sem oposição do(a) LOCADOR(A), a locação será prorrogada por prazo indeterminado, mantidas as demais condições contratuais.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA TERCEIRA — DO ALUGUEL E FORMA DE PAGAMENTO</h2>
+  <p>O valor mensal do aluguel é de <strong>R$ ${d.ct_valor} (${d.ct_extenso})</strong>, que deverá ser pago pelo(a) LOCATÁRIO(A) até o dia <strong>${d.ct_dia}</strong> de cada mês, mediante depósito bancário, transferência eletrônica ou outra forma previamente acordada entre as partes.</p>
+  <p>O valor do aluguel será reajustado anualmente pelo índice IGP-M (Índice Geral de Preços do Mercado) da FGV, ou por outro índice que venha a substituí-lo, aplicado sobre o valor vigente do aluguel.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA QUARTA — DA MULTA E JUROS POR ATRASO</h2>
+  <p>Em caso de atraso no pagamento do aluguel, incidirá multa de <strong>${d.ct_multa}% (${extensoPorcentagem(d.ct_multa)} por cento)</strong> sobre o valor do aluguel, acrescida de juros moratórios de <strong>${d.ct_juros}% (${extensoPorcentagem(d.ct_juros)} por cento)</strong> ao mês, calculados pro rata die, a partir do vencimento até a data do efetivo pagamento.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA QUINTA — DA UTILIZAÇÃO DO IMÓVEL</h2>
+  <p>O imóvel objeto deste contrato destina-se exclusivamente ao uso residencial do(a) LOCATÁRIO(A) e de seus familiares, sendo vedada a sublocação, cessão ou empréstimo, total ou parcial, sem o consentimento prévio e por escrito do(a) LOCADOR(A).</p>
+  <p>O(A) LOCATÁRIO(A) se obriga a manter o imóvel em perfeitas condições de higiene, limpeza e conservação, devolvendo-o ao final da locação nas mesmas condições em que o recebeu, ressalvado o desgaste natural pelo uso regular.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA SEXTA — DAS BENFEITORIAS</h2>
+  <p>Quaisquer benfeitorias ou modificações no imóvel somente poderão ser realizadas com autorização prévia e expressa do(a) LOCADOR(A), por escrito. As benfeitorias necessárias, ainda que não autorizadas, serão indenizáveis. As benfeitorias úteis, se autorizadas, serão indenizáveis e permitirão o exercício do direito de retenção. As benfeitorias voluptuárias não serão indenizáveis, podendo o(a) LOCATÁRIO(A) retirá-las, desde que não cause dano ao imóvel.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA SÉTIMA — DAS DESPESAS E ENCARGOS</h2>
+  <p>Ficam a cargo do(a) LOCATÁRIO(A), durante toda a vigência do contrato, as despesas de consumo de água, energia elétrica, gás, telefone, internet, condomínio (se houver), IPTU, taxas de lixo e demais encargos que incidam sobre o imóvel, devendo comprová-los sempre que solicitado pelo(a) LOCADOR(A).</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA OITAVA — DA VISTORIA</h2>
+  <p>As partes realizarão vistoria do imóvel no início e no término da locação, documentando por escrito e, se possível, por fotografias, o estado de conservação do imóvel e de seus componentes. O laudo de vistoria inicial fará parte integrante deste contrato como anexo.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA NONA — DA RESCISÃO</h2>
+  <p>O presente contrato poderá ser rescindido:</p>
+  <p style="margin-left:20px;">a) Por mútuo acordo entre as partes, mediante aviso prévio de 30 (trinta) dias por escrito;</p>
+  <p style="margin-left:20px;">b) Pelo(a) LOCADOR(A), em caso de descumprimento de qualquer cláusula contratual pelo(a) LOCATÁRIO(A), especialmente o atraso no pagamento do aluguel por período superior a <strong>${d.ct_atraso} (${extensoDias(d.ct_atraso)}) dias</strong>;</p>
+  <p style="margin-left:20px;">c) Pelo(a) LOCATÁRIO(A), a qualquer tempo, mediante aviso prévio de 30 (trinta) dias e pagamento de multa rescisória equivalente a 3 (três) aluguéis vigentes, proporcional ao período restante do contrato;</p>
+  <p style="margin-left:20px;">d) Nas demais hipóteses previstas na Lei nº 8.245/1991 (Lei do Inquilinato).</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA DÉCIMA — DA DEVOLUÇÃO DO IMÓVEL</h2>
+  <p>Ao término da locação, o(a) LOCATÁRIO(A) se obriga a devolver o imóvel nas mesmas condições em que o recebeu, conforme laudo de vistoria, livre de pessoas e objetos pessoais, no prazo máximo de 30 (trinta) dias após a comunicação de desocupação.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA DÉCIMA PRIMEIRA — DA GARANTIA</h2>
+  <p>Como garantia das obrigações assumidas neste contrato, o(a) LOCATÁRIO(A) oferece caução no valor equivalente a 3 (três) meses de aluguel, a ser devolvida ao final da locação, corrigida monetariamente, após a verificação do cumprimento de todas as obrigações contratuais e a entrega do imóvel em conformidade com o laudo de vistoria.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA DÉCIMA SEGUNDA — DAS DISPOSIÇÕES GERAIS</h2>
+  <p>O presente contrato é regido pela Lei nº 8.245, de 18 de outubro de 1991, e subsidiariamente pelo Código Civil Brasileiro.</p>
+  <p>Quaisquer alterações neste contrato somente terão validade se feitas por escrito, mediante termo aditivo assinado por ambas as partes.</p>
+  <p>As partes declaram ter lido e compreendido todas as cláusulas deste contrato, concordando integralmente com seus termos.</p>
+
+  <h2 style="font-size:14px; font-weight:700; margin:20px 0 8px; color:#1e3a5f;">CLÁUSULA DÉCIMA TERCEIRA — DO FORO</h2>
+  <p>Fica eleito o foro da comarca de <strong>${d.ct_foro}</strong> para dirimir quaisquer dúvidas ou litígios oriundos do presente contrato, com renúncia expressa de qualquer outro, por mais privilegiado que seja.</p>
+
+  <p style="margin-top:24px;">E por estarem de pleno acordo, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença de 2 (duas) testemunhas.</p>
+
+  <p style="text-align:center; margin-top:16px;"><strong>${d.ct_foro}, ${d.ct_data}.</strong></p>
+
+  <div style="margin-top:50px;">
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:40px;">
+      <div style="text-align:center; flex:1; min-width:250px;">
+        <div style="border-bottom:1px solid #333; margin-bottom:6px; height:40px;"></div>
+        <strong>${d.loc_nome}</strong><br><span style="font-size:11px;">LOCADOR(A)</span>
+      </div>
+      <div style="text-align:center; flex:1; min-width:250px;">
+        <div style="border-bottom:1px solid #333; margin-bottom:6px; height:40px;"></div>
+        <strong>${d.locat_nome}</strong><br><span style="font-size:11px;">LOCATÁRIO(A)</span>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:40px; margin-top:50px;">
+      <div style="text-align:center; flex:1; min-width:250px;">
+        <div style="border-bottom:1px solid #333; margin-bottom:6px; height:40px;"></div>
+        <span style="font-size:12px;">TESTEMUNHA 1</span><br>
+        <span style="font-size:11px;">Nome: ________________________</span><br>
+        <span style="font-size:11px;">CPF: _________________________</span>
+      </div>
+      <div style="text-align:center; flex:1; min-width:250px;">
+        <div style="border-bottom:1px solid #333; margin-bottom:6px; height:40px;"></div>
+        <span style="font-size:12px;">TESTEMUNHA 2</span><br>
+        <span style="font-size:11px;">Nome: ________________________</span><br>
+        <span style="font-size:11px;">CPF: _________________________</span>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+  const output = document.getElementById('contract-output');
+  output.innerHTML = html;
+  output.style.display = 'block';
+  output.scrollIntoView({ behavior: 'smooth' });
+}
+
+function extensoMeses(n) {
+  const nomes = ['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze',
+    'treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove','vinte','vinte e um','vinte e dois',
+    'vinte e três','vinte e quatro','vinte e cinco','vinte e seis','vinte e sete','vinte e oito','vinte e nove',
+    'trinta','trinta e um','trinta e dois','trinta e três','trinta e quatro','trinta e cinco','trinta e seis'];
+  const num = parseInt(n);
+  return nomes[num] || n;
+}
+function extensoPorcentagem(n) { return extensoMeses(n); }
+function extensoDias(n) { return extensoMeses(n); }
+
+function gerarPDF() {
+  gerarContrato();
+  const el = document.getElementById('contract-output');
+  // Small delay to ensure rendering
+  setTimeout(() => {
+    const opt = {
+      margin: [15, 15, 15, 15],
+      filename: 'contrato-locacao.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    html2pdf().set(opt).from(el).save();
+  }, 500);
+}
+
+// Set today's date as default
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('ct_data').value = today;
+  lucide.createIcons();
+  applyConfig(defaultConfig);
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4f744cd15fe550',t:'MTc3NzY0NTUxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
