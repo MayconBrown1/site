@@ -1,315 +1,266 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Controle de Clientes</title>
-  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    function toggleMenu() {
-      const menu = document.getElementById('mobile-menu');
-      menu.classList.toggle('hidden');
-    }
-  </script>
 </head>
 
-<body class="bg-gray-50 text-gray-800">
-  <!-- Navbar -->
-  <header class="bg-white shadow-md sticky top-0 z-50">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <a href="../../index.html">
-        <img src="../../img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
-      </a>
-      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-      </button>
-      <nav class="hidden md:flex space-x-4">
-        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
-        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
-        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
-        <a class="text-indigo-600 font-semibold">/ Controle de Clientes</a>
-        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
-        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
-        <a href="../../contato/" class="hover:text-indigo-600">Contato</a>
-      </nav>
-    </div>
-    <div id="mobile-menu" class="hidden md:hidden px-4 pb-2">
-      <nav class="flex flex-col space-y-2">
-        <a href="../../index.html" class="hover:text-indigo-600">Início</a>
-        <a href="../../softwares.html" class="hover:text-indigo-600">Softwares</a>
-        <a href="../index.html" class="hover:text-indigo-600">/ Ferramentas e Utilitários</a>
-        <a class="text-indigo-600 font-semibold">/ Controle de Clientes</a>
-        <a href="../../matrizes.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="../../formatacao.html" class="hover:text-indigo-600">Formatação</a>
-        <a href="../../cardapios.html" class="hover:text-indigo-600">Cardápios</a>
-        <a href="../../contato/" class="hover:text-indigo-600">Contato</a>
-      </nav>
-    </div>
-  </header>
-
 <body class="bg-gray-900 text-white p-4">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-center p-6 mb-4">Controle de Clientes</h1>
 
-    <div class="bg-black rounded-xl shadow-md p-6 mb-6 fade-in">
-      <form id="clientForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 relative">
-        <input type="hidden" id="idOriginal">
-        <input type="text" id="nome" placeholder="Nome do Cliente" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white" required>
-        <input type="text" id="whatsapp" placeholder="WhatsApp" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <input type="email" id="email" placeholder="Email" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <input type="text" id="endereco" placeholder="Endereço (opcional)" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <input type="text" id="produto" placeholder="Produto ou Serviço" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <input type="number" id="valor" placeholder="Valor Pago (ex: 19,99)" step="0.01" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <input type="date" id="data" class="p-3 rounded-xl border border-gray-600 bg-gray-900 text-white">
-        <button type="submit" class="col-span-1 md:col-span-2 bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition">Salvar Cliente</button>
-        <div id="mensagemSucesso" class="absolute top-full mt-2 left-0 col-span-2 text-green-400 font-medium hidden fade-in">Cliente salvo com sucesso!</div>
-      </form>
-    </div>
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold text-center mb-2">Controle de Clientes</h1>
 
-    <div class="bg-black rounded-xl shadow-md p-6 mb-6 fade-in">
-      <input type="text" id="pesquisa" placeholder="Pesquisar por nome, WhatsApp ou e-mail" class="p-3 w-full rounded-xl border border-gray-600 bg-gray-900 text-white mb-4">
-      <div id="resultado" class="fade-in"></div>
-    </div>
+  <p id="contadorClientes" class="text-center text-green-400 mb-6"></p>
 
-    <div class="bg-black rounded-xl shadow-md p-6 fade-in flex flex-col md:flex-row gap-4 justify-between items-center">
-      <button onclick="fazerBackup()" class="bg-green-600 text-white p-3 rounded-xl hover:bg-green-700 transition w-full md:w-auto">Fazer Backup</button>
-      <input type="file" id="uploadBackup" accept="application/json" class="hidden" />
-      <button onclick="document.getElementById('uploadBackup').click()" class="bg-yellow-600 text-white p-3 rounded-xl hover:bg-yellow-700 transition w-full md:w-auto">Restaurar Backup</button>
-    </div>
+  <!-- FORM -->
+  <div class="bg-black p-6 rounded-xl mb-6">
+    <form id="clientForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input type="hidden" id="idOriginal">
 
-    <button onclick="limparTudo()" class="bg-red-500 text-white p-3 rounded-xl hover:bg-red-600 transition w-full md:w-auto mt-4">Limpar Todos os Dados</button>
+      <input id="nome" placeholder="Nome" class="p-3 rounded bg-gray-800">
+      <input id="whatsapp" placeholder="WhatsApp" class="p-3 rounded bg-gray-800">
+      <input id="email" placeholder="Email" class="p-3 rounded bg-gray-800">
+      <input id="endereco" placeholder="Endereço" class="p-3 rounded bg-gray-800">
+
+      <input id="produto" placeholder="Serviço / Produto" class="p-3 rounded bg-gray-800">
+      <input id="valor" type="number" step="0.01" placeholder="Valor" class="p-3 rounded bg-gray-800">
+      <input id="data" type="date" class="p-3 rounded bg-gray-800">
+
+      <button class="col-span-2 bg-blue-600 p-3 rounded">Salvar</button>
+    </form>
   </div>
 
-  <script>
-    let clientes = JSON.parse(localStorage.getItem('clientes')) || {};
+  <!-- BACKUP + PESQUISA -->
+  <div class="bg-black p-6 rounded-xl mb-6">
 
-    const form = document.getElementById('clientForm');
-    const pesquisa = document.getElementById('pesquisa');
-    const resultado = document.getElementById('resultado');
-    const uploadBackup = document.getElementById('uploadBackup');
-    const mensagemSucesso = document.getElementById('mensagemSucesso');
+    <div class="flex flex-col md:flex-row gap-3 mb-4">
+      <button onclick="fazerBackup()" class="bg-green-600 px-4 py-2 rounded">
+        Fazer Backup
+      </button>
 
-    function salvarLocalmente() {
-      localStorage.setItem('clientes', JSON.stringify(clientes));
-    }
+      <button onclick="document.getElementById('inputBackup').click()" class="bg-yellow-600 px-4 py-2 rounded">
+        Restaurar Backup
+      </button>
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+      <input type="file" id="inputBackup" accept="application/json" class="hidden">
 
-      const idOriginal = form.idOriginal.value;
-      const nome = form.nome.value.trim();
-      const whatsapp = form.whatsapp.value.trim();
-      const email = form.email.value.trim();
-      const endereco = form.endereco.value.trim();
-      const produto = form.produto.value.trim();
-      const valor = form.valor.value.trim();
-      const data = form.data.value;
+      <button onclick="copiarEmails()" class="bg-blue-600 px-4 py-2 rounded">
+        Copiar e-mails
+      </button>
+    </div>
 
-      if (!nome) return alert('O nome do cliente é obrigatório.');
+    <input id="pesquisa" placeholder="Pesquisar..." class="w-full p-3 rounded bg-gray-800 mb-4">
 
-let id = idOriginal || crypto.randomUUID();
+    <div id="resultado"></div>
+  </div>
+</div>
 
-if (!clientes[id]) {
-  clientes[id] = {
-    id,
-    nome,
-    whatsapp,
-    email,
-    endereco,
-    historico: []
-  };
-} else {
-  clientes[id].nome = nome;
-  clientes[id].whatsapp = whatsapp;
-  clientes[id].email = email;
-  clientes[id].endereco = endereco;
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center">
+  <div class="bg-gray-800 p-6 rounded-xl max-w-lg w-full">
+    <h2 id="modalNome" class="text-xl font-bold mb-4"></h2>
+
+    <div id="modalConteudo"></div>
+
+    <button onclick="mostrarFormularioServico()" class="bg-blue-600 p-2 rounded w-full mt-3">
+      + Adicionar Serviço
+    </button>
+
+    <div id="formServico" class="hidden mt-4">
+      <input id="novoProduto" placeholder="Serviço" class="w-full p-2 mb-2 bg-gray-700 rounded">
+      <input id="novoValor" type="number" placeholder="Valor" class="w-full p-2 mb-2 bg-gray-700 rounded">
+      <input id="novaData" type="date" class="w-full p-2 mb-2 bg-gray-700 rounded">
+
+      <button onclick="salvarServico()" class="bg-green-600 p-2 rounded w-full">
+        Salvar Serviço
+      </button>
+    </div>
+
+    <button onclick="fecharModal()" class="mt-4 bg-red-600 p-2 rounded w-full">Fechar</button>
+  </div>
+</div>
+
+<script>
+let clientes = JSON.parse(localStorage.getItem('clientes')) || {};
+let clienteAtual = null;
+
+const form = document.getElementById('clientForm');
+const pesquisa = document.getElementById('pesquisa');
+const resultado = document.getElementById('resultado');
+const contador = document.getElementById('contadorClientes');
+
+function salvar() {
+  localStorage.setItem('clientes', JSON.stringify(clientes));
 }
 
-// Se os 3 campos de histórico estiverem preenchidos, adiciona
-if (produto && valor && data) {
-  clientes[id].historico.push({ produto, valor, data });
-  clientes[id].historico.sort((a, b) => new Date(b.data) - new Date(a.data));
-} else if (produto || valor || data) {
-  // Se apenas alguns dos campos forem preenchidos, alerta o usuário
-  return alert('Para adicionar ao histórico, preencha produto, valor e data.');
-}
+// FORM
+form.addEventListener('submit', e => {
+  e.preventDefault();
 
-salvarLocalmente();
+  const idOriginal = form.idOriginal.value;
+  const nome = form.nome.value.trim();
+  const whatsapp = form.whatsapp.value.trim();
+  const email = form.email.value.trim();
+  const endereco = form.endereco.value.trim();
+  const produto = form.produto.value.trim();
+  const valor = form.valor.value.trim();
+  const data = form.data.value;
 
-mensagemSucesso.classList.remove('hidden');
-setTimeout(() => mensagemSucesso.classList.add('hidden'), 3000);
+  if (!nome) return alert("Nome obrigatório");
 
-form.reset();
-form.idOriginal.value = '';
-atualizarClientes();
+  let id = idOriginal || crypto.randomUUID();
 
-    });
-
-    function atualizarClientes() {
-      const termo = pesquisa.value.toLowerCase();
-      resultado.innerHTML = '';
-
-      const listaClientes = Object.values(clientes).sort((a, b) => a.nome.localeCompare(b.nome));
-
-      let encontrou = false;
-
-      for (const c of listaClientes) {
-        if (
-          termo === '' ||
-          c.nome.toLowerCase().includes(termo) ||
-          (c.whatsapp && c.whatsapp.includes(termo)) ||
-          (c.email && c.email.toLowerCase().includes(termo))
-        ) {
-          exibirCliente(c);
-          encontrou = true;
-        }
-      }
-
-      if (!encontrou) {
-        resultado.innerHTML = `<p class="text-red-400">Nenhum cliente encontrado.</p>`;
-      }
-    }
-
-    function exibirCliente(c) {
-      const historicoHTML = c.historico.map(h => `
-        <li class="mb-1">📦 ${h.produto} - 💰 R$ ${h.valor} - 📅 ${h.data}</li>
-      `).join('');
-
-      const clienteHTML = document.createElement('div');
-      clienteHTML.className = 'p-4 bg-gray-700 rounded-xl border border-gray-600 mb-4 text-white';
-      clienteHTML.innerHTML = `
-        <h2 class="text-xl font-semibold">${c.nome} <span class="text-green-400">(Cliente cadastrado)</span></h2>
-        <p>📱 WhatsApp: <a href="https://wa.me/55${c.whatsapp}" target="_blank" class="text-blue-400 underline">${c.whatsapp || 'Não informado'}</a></p>
-        <p>✉️ Email: ${c.email || 'Não informado'}</p>
-        <p>🏠 Endereço: ${c.endereco || 'Não informado'}</p>
-        <p class="mt-2 font-medium">Histórico de compras:</p>
-        <ul class="list-disc list-inside text-gray-200">${historicoHTML}</ul>
-        <div class="flex flex-wrap gap-2 mt-4">
-          <button onclick="removerCliente('${c.id}')" class="bg-red-600 text-white px-4 py-2 rounded-xl hover:bg-red-700 transition">Remover Cliente</button>
-          <button onclick="copiarDadosCliente('${c.id}')" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition">Copiar Dados</button>
-          <button onclick="editarCliente('${c.id}')" class="bg-yellow-600 text-white px-4 py-2 rounded-xl hover:bg-yellow-700 transition">Editar</button>
-        </div>
-      `;
-      resultado.appendChild(clienteHTML);
-    }
-
-    function removerCliente(id) {
-      if (confirm(`Tem certeza que deseja remover este cliente?`)) {
-        delete clientes[id];
-        salvarLocalmente();
-        alert('Cliente removido com sucesso!');
-        atualizarClientes();
-      }
-    }
-
-    function copiarDadosCliente(id) {
-      const c = clientes[id];
-      if (!c) return alert('Cliente não encontrado.');
-
-      let dados = `Cliente: ${c.nome}\n`;
-      dados += `WhatsApp: ${c.whatsapp || 'Não informado'}\n`;
-      dados += `Email: ${c.email || 'Não informado'}\n`;
-      dados += `Endereço: ${c.endereco || 'Não informado'}\n\n`;
-      dados += `Histórico de compras:\n`;
-      c.historico.forEach(h => {
-        dados += `- ${h.produto}, R$ ${h.valor}, em ${h.data}\n`;
-      });
-
-      navigator.clipboard.writeText(dados)
-        .then(() => alert('Dados copiados para a área de transferência!'))
-        .catch(() => alert('Erro ao copiar os dados.'));
-    }
-
-    function editarCliente(id) {
-      const c = clientes[id];
-      if (!c) return alert('Cliente não encontrado.');
-      form.idOriginal.value = id;
-      form.nome.value = c.nome;
-      form.whatsapp.value = c.whatsapp || '';
-      form.email.value = c.email || '';
-      form.endereco.value = c.endereco || '';
-      form.produto.value = '';
-      form.valor.value = '';
-      form.data.value = '';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function fazerBackup() {
-  const json = JSON.stringify(clientes, null, 2);
-
-  if ('showSaveFilePicker' in window) {
-    // Navegadores modernos
-    (async () => {
-      try {
-        const handle = await window.showSaveFilePicker({
-          suggestedName: 'backup_clientes.json',
-          types: [{
-            description: 'Arquivo JSON',
-            accept: { 'application/json': ['.json'] }
-          }]
-        });
-        const writable = await handle.createWritable();
-        await writable.write(json);
-        await writable.close();
-        alert('Backup salvo com sucesso!');
-      } catch (error) {
-        alert('Backup cancelado ou falhou.');
-        console.error(error);
-      }
-    })();
+  if (!clientes[id]) {
+    clientes[id] = { id, nome, whatsapp, email, endereco, historico: [] };
   } else {
-    // Fallback para navegadores mais antigos
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'backup_clientes.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    Object.assign(clientes[id], { nome, whatsapp, email, endereco });
+  }
+
+  if (produto && valor && data) {
+    clientes[id].historico.push({ produto, valor, data });
+  }
+
+  salvar();
+  form.reset();
+  atualizar();
+});
+
+// PESQUISA
+pesquisa.addEventListener('input', atualizar);
+
+function atualizar() {
+  const termo = pesquisa.value.toLowerCase();
+  resultado.innerHTML = '';
+
+  const lista = Object.values(clientes);
+  contador.innerText = `Total de clientes: ${lista.length}`;
+
+  lista.forEach(c => {
+    if (
+      termo === '' ||
+      c.nome.toLowerCase().includes(termo) ||
+      (c.whatsapp && c.whatsapp.includes(termo)) ||
+      (c.email && c.email.toLowerCase().includes(termo))
+    ) {
+      const div = document.createElement('div');
+      div.className = 'p-4 bg-gray-700 rounded mb-3 cursor-pointer';
+      div.innerHTML = `
+        <strong>${c.nome}</strong><br>
+        📱 ${c.whatsapp || '-'}<br>
+        ✉️ ${c.email || '-'}
+      `;
+      div.onclick = () => abrirModal(c.id);
+      resultado.appendChild(div);
+    }
+  });
+
+  if (!resultado.innerHTML) {
+    resultado.innerHTML = `<p class="text-red-400">Nenhum encontrado</p>`;
   }
 }
 
-    uploadBackup.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+// MODAL
+function abrirModal(id) {
+  clienteAtual = id;
+  document.getElementById('modal').classList.remove('hidden');
+  renderModal();
+}
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        try {
-          clientes = JSON.parse(event.target.result);
-          salvarLocalmente();
-          alert('Backup restaurado com sucesso!');
-          atualizarClientes();
-        } catch (error) {
-          alert('Erro ao restaurar backup. Verifique o arquivo.');
-        }
-      };
-      reader.readAsText(file);
-    });
+function renderModal() {
+  const c = clientes[clienteAtual];
+  document.getElementById('modalNome').innerText = c.nome;
 
-    function limparTudo() {
-      if (confirm('Tem certeza que deseja apagar TODOS os clientes?')) {
-        localStorage.removeItem('clientes');
-        clientes = {};
-        resultado.innerHTML = '';
-        alert('Todos os dados foram apagados.');
-      }
-    }
+  let total = 0;
+  let html = `<p>📱 ${c.whatsapp || '-'}</p><p>✉️ ${c.email || '-'}</p><hr class="my-3">`;
 
-    // Exibir clientes ao carregar
-    window.addEventListener('DOMContentLoaded', () => {
-      atualizarClientes();
-    });
-  </script>
+  c.historico.forEach(h => {
+    total += parseFloat(h.valor);
+    html += `
+      <div class="mb-2 p-2 bg-gray-700 rounded">
+        ${h.produto} - R$ ${h.valor} - ${h.data}
+      </div>`;
+  });
+
+  html += `<p class="text-green-400 font-bold">Total: R$ ${total.toFixed(2)}</p>`;
+  document.getElementById('modalConteudo').innerHTML = html;
+}
+
+function mostrarFormularioServico() {
+  document.getElementById('formServico').classList.toggle('hidden');
+}
+
+function salvarServico() {
+  const produto = novoProduto.value;
+  const valor = novoValor.value;
+  const data = novaData.value;
+
+  if (!produto || !valor || !data) return alert("Preencha tudo");
+
+  clientes[clienteAtual].historico.push({ produto, valor, data });
+
+  salvar();
+  renderModal();
+  atualizar();
+}
+
+// EMAILS
+function copiarEmails() {
+  const emails = [...new Set(
+    Object.values(clientes)
+      .map(c => c.email?.trim())
+      .filter(e => e && e.includes('@'))
+  )];
+
+  navigator.clipboard.writeText(emails.join(', '))
+    .then(() => alert("Copiado!"));
+}
+
+// BACKUP
+async function fazerBackup() {
+  const json = JSON.stringify(clientes, null, 2);
+
+  if ('showSaveFilePicker' in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: 'backup_clientes.json',
+        types: [{ accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(json);
+      await writable.close();
+      alert('Backup salvo!');
+    } catch {}
+  } else {
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'backup_clientes.json';
+    a.click();
+  }
+}
+
+// RESTAURAR
+document.getElementById('inputBackup').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    clientes = JSON.parse(e.target.result);
+    salvar();
+    atualizar();
+    alert('Backup restaurado!');
+  };
+  reader.readAsText(file);
+});
+
+function fecharModal() {
+  document.getElementById('modal').classList.add('hidden');
+}
+
+window.addEventListener('DOMContentLoaded', atualizar);
+</script>
+
 </body>
-
 </html>
