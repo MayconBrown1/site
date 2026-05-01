@@ -2816,15 +2816,17 @@ const anuncios = [
     img: "/img/anuncio/2.png",
     link: "/curriculo"
   },
-
 ];
 
 let index = 0;
+let intervalo;
 
 const container = document.getElementById("anuncio-container");
 const img = document.getElementById("anuncio-img");
 const link = document.getElementById("anuncio-link");
 const fechar = document.getElementById("fechar-anuncio");
+const btnPrev = document.getElementById("anuncio-prev");
+const btnNext = document.getElementById("anuncio-next");
 
 // controle de tempo (30 minutos)
 const tempoFechado = localStorage.getItem("anuncioFechado");
@@ -2835,17 +2837,35 @@ if (tempoFechado && (Date.now() - tempoFechado < 1800000)) {
   iniciarCarrossel();
 }
 
-function iniciarCarrossel() {
-  function trocar() {
-    img.src = anuncios[index].img;
-    link.href = anuncios[index].link;
-
-    index = (index + 1) % anuncios.length;
-  }
-
-  trocar();
-  setInterval(trocar, 3000);
+function mostrarAnuncio() {
+  img.src = anuncios[index].img;
+  link.href = anuncios[index].link;
 }
+
+function iniciarCarrossel() {
+  mostrarAnuncio();
+
+  intervalo = setInterval(() => {
+    index = (index + 1) % anuncios.length;
+    mostrarAnuncio();
+  }, 3000);
+}
+
+// Botão avançar
+btnNext.onclick = function () {
+  clearInterval(intervalo);
+  index = (index + 1) % anuncios.length;
+  mostrarAnuncio();
+  iniciarCarrossel();
+};
+
+// Botão voltar
+btnPrev.onclick = function () {
+  clearInterval(intervalo);
+  index = (index - 1 + anuncios.length) % anuncios.length;
+  mostrarAnuncio();
+  iniciarCarrossel();
+};
 
 // botão fechar
 fechar.onclick = function () {
@@ -2856,17 +2876,54 @@ fechar.onclick = function () {
 });
 </script>
 
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99148dacd57f27e9',t:'MTc2MDkyMTc2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 <div id="anuncio-container">
-  <div id="anuncio-box">
-    <span id="fechar-anuncio">✖</span>
+  <div id="anuncio-box" style="position: relative; display: inline-block;">
     
+    <span id="fechar-anuncio" style="
+      position:absolute;
+      top:5px;
+      right:10px;
+      cursor:pointer;
+      font-size:18px;
+      background:#000;
+      color:#fff;
+      padding:2px 6px;
+      border-radius:50%;
+    ">✖</span>
+
+    <!-- Botão voltar -->
+    <button id="anuncio-prev" style="
+      position:absolute;
+      left:5px;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(0,0,0,0.5);
+      color:#fff;
+      border:none;
+      padding:8px 10px;
+      cursor:pointer;
+      border-radius:50%;
+      font-size:16px;
+    ">❮</button>
+
+    <!-- Botão avançar -->
+    <button id="anuncio-next" style="
+      position:absolute;
+      right:5px;
+      top:50%;
+      transform:translateY(-50%);
+      background:rgba(0,0,0,0.5);
+      color:#fff;
+      border:none;
+      padding:8px 10px;
+      cursor:pointer;
+      border-radius:50%;
+      font-size:16px;
+    ">❯</button>
+
     <a id="anuncio-link" href="#" target="_blank">
-      <img id="anuncio-img" src="" alt="Anúncio">
+      <img id="anuncio-img" src="" alt="Anúncio" style="display:block; max-width:100%;">
     </a>
 
   </div>
 </div>
-
-</body>
-</html>
