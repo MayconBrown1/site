@@ -26,6 +26,26 @@
   overflow-wrap: break-word;
   word-break: break-word;
 }
+.opiniao-btn{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: #2d89ef;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  z-index: 999;
+  transition: 0.3s;
+}
+
+.opiniao-btn:hover{
+  background: #1b5dbf;
+  transform: scale(1.05);
+}
   .sig-line { border-bottom: 1px solid #333; width: 300px; margin: 0 auto; }
 </style>
   <style>body { box-sizing: border-box; }</style>
@@ -477,5 +497,12 @@ document.addEventListener('DOMContentLoaded', () => {
   applyConfig(defaultConfig);
 });
 </script>
+
+<a href="https://mayconbrown.com.br/contato/" 
+   class="opiniao-btn"
+   target="_blank">
+   💬 O que podemos melhorar?
+</a>
+
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4f744cd15fe550',t:'MTc3NzY0NTUxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
