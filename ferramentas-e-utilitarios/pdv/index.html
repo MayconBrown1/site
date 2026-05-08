@@ -66,6 +66,26 @@
   from { opacity: 0; transform: translateY(20px);}
   to { opacity: 1; transform: translateY(0);}
 }
+.opiniao-btn{
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background: #2d89ef;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  z-index: 999;
+  transition: 0.3s;
+}
+
+.opiniao-btn:hover{
+  background: #1b5dbf;
+  transform: scale(1.05);
+}
 
     </style>
 </head>
@@ -2875,6 +2895,12 @@ fechar.onclick = function () {
 
 });
 </script>
+
+<a href="https://mayconbrown.com.br/contato/" 
+   class="opiniao-btn"
+   target="_blank">
+   💬 O que podemos melhorar?
+</a>
 
 <div id="anuncio-container">
   <div id="anuncio-box" style="position: relative; display: inline-block;">
