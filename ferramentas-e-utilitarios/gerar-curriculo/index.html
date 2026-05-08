@@ -2,168 +2,494 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gerador de Currículo</title>
+
   <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
-    body {
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
       font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #121212;
-      color: #ffffff;
+      background:#0f0f0f;
+      color:#fff;
+      padding:30px 15px;
     }
-    header {
-      text-align: center;
-      padding: 20px;
+
+    header{
+      text-align:center;
+      margin-bottom:30px;
     }
-    header img {
-      width: 200px;
+
+    header img{
+      width:220px;
+      max-width:90%;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 10px;
+
+    .container{
+      max-width:1200px;
+      margin:auto;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:25px;
     }
-    form {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+
+    .box{
+      background:#1a1a1a;
+      border-radius:15px;
+      padding:25px;
+      box-shadow:0 0 20px rgba(0,0,0,0.4);
     }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
+
+    h2{
+      text-align:center;
+      margin-bottom:20px;
+      font-size:28px;
     }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: none;
-      border-radius: 5px;
-      background-color: #2a2a2a;
-      color: white;
+
+    h3{
+      margin-top:20px;
+      margin-bottom:10px;
+      color:#2d89ef;
     }
-    #foto {
-      margin-top: 10px;
+
+    label{
+      display:block;
+      margin-top:15px;
+      margin-bottom:6px;
+      font-weight:bold;
+      font-size:14px;
     }
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      background-color: #2d89ef;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 16px;
+
+    input,
+    textarea{
+      width:100%;
+      background:#2a2a2a;
+      border:none;
+      outline:none;
+      color:white;
+      padding:12px;
+      border-radius:8px;
+      font-size:15px;
     }
-    button:hover {
-      background-color: #1b5dbf;
+
+    textarea{
+      resize:vertical;
+    }
+
+    input::placeholder,
+    textarea::placeholder{
+      color:#aaa;
+    }
+
+    .optional{
+      color:#999;
+      font-size:12px;
+      font-weight:normal;
+    }
+
+    button{
+      width:100%;
+      padding:14px;
+      margin-top:25px;
+      border:none;
+      border-radius:10px;
+      background:#2d89ef;
+      color:white;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:0.3s;
+    }
+
+    button:hover{
+      background:#1b5dbf;
+    }
+
+    /* PREVIEW */
+
+    .preview{
+      background:white;
+      color:#000;
+      min-height:100%;
+      border-radius:10px;
+      overflow:hidden;
+    }
+
+    .preview-topo{
+      background:#2d89ef;
+      color:white;
+      padding:30px;
+      display:flex;
+      align-items:center;
+      gap:20px;
+    }
+
+    .preview-topo img{
+      width:100px;
+      height:100px;
+      object-fit:cover;
+      border-radius:10px;
+      border:3px solid white;
+    }
+
+    .preview-nome{
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .preview-contato{
+      margin-top:5px;
+      font-size:14px;
+    }
+
+    .preview-content{
+      padding:30px;
+    }
+
+    .secao{
+      margin-bottom:25px;
+    }
+
+    .secao h4{
+      font-size:18px;
+      margin-bottom:10px;
+      color:#2d89ef;
+      border-bottom:2px solid #eee;
+      padding-bottom:5px;
+    }
+
+    .secao p{
+      line-height:1.6;
+      white-space:pre-line;
+    }
+
+    @media(max-width:900px){
+      .container{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <img src="/img/logo-brown-branco.png" alt="Logo Maycon Brown">
-  </header>
-  <h2>Crie seu Currículo Simples e Rápido</h2>
-  <form id="curriculoForm">
-    <label>Digite seu nome completo:</label>
-    <input type="text" id="nome" required>
 
-    <label>Seu e-mail para contato:</label>
-    <input type="email" id="email" required>
+<header>
+  <img src="/img/logo-brown-branco.png" alt="Logo">
+</header>
 
-    <label>Seu número de telefone (com DDD):</label>
-    <input type="text" id="telefone" required>
+<div class="container">
 
-    <label>Endereço onde você mora:</label>
-    <input type="text" id="endereco" required>
+  <!-- FORMULÁRIO -->
 
-    <label>Fale um pouco sobre você e sua experiência:</label>
-    <textarea id="resumo" rows="4" required></textarea>
+  <div class="box">
 
-    <label>Onde você já trabalhou? E o que fazia?</label>
-    <textarea id="experiencia" rows="4" required></textarea>
+    <h2>Crie seu Currículo</h2>
 
-    <label>Qual a sua escolaridade ou cursos feitos?</label>
-    <textarea id="formacao" rows="3" required></textarea>
+    <form id="curriculoForm">
 
-    <label>Liste suas habilidades (Ex: Informática, Vendas, Atendimento):</label>
-    <textarea id="habilidades" rows="2"></textarea>
+      <h3>Dados Pessoais</h3>
 
-    <label>Idiomas que você fala (Ex: Português, Inglês):</label>
-    <textarea id="idiomas" rows="2"></textarea>
+      <label>Nome completo</label>
+      <input type="text" id="nome" placeholder="Digite seu nome" required>
 
-    <label>Envie sua foto 3x4:</label>
-    <input type="file" id="foto" accept="image/*">
+      <label>E-mail</label>
+      <input type="email" id="email" placeholder="Digite seu e-mail">
 
-    <button type="button" onclick="gerarPDF()">Baixar Currículo em PDF</button>
-  </form>
+      <label>Telefone com DDD</label>
+      <input type="text" id="telefone" placeholder="(84) 99999-9999" required>
 
-  <script>
-    async function gerarPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+      <label>Cidade / Endereço</label>
+      <input type="text" id="endereco" placeholder="Onde você mora">
 
-      const nome = document.getElementById("nome").value;
-      const email = document.getElementById("email").value;
-      const telefone = document.getElementById("telefone").value;
-      const endereco = document.getElementById("endereco").value;
-      const resumo = document.getElementById("resumo").value;
-      const experiencia = document.getElementById("experiencia").value;
-      const formacao = document.getElementById("formacao").value;
-      const habilidades = document.getElementById("habilidades").value;
-      const idiomas = document.getElementById("idiomas").value;
-      const foto = document.getElementById("foto").files[0];
+      <label>Objetivo profissional</label>
+      <input type="text" id="objetivo" placeholder="Ex: Atendimento, vendas, auxiliar administrativo">
 
-      if (foto) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const imgData = e.target.result;
-          doc.addImage(imgData, 'JPEG', 150, 10, 40, 50);
-          montarTexto();
-        };
-        reader.readAsDataURL(foto);
-      } else {
-        montarTexto();
+      <h3>Sobre Você</h3>
+
+      <label>Resumo profissional</label>
+      <textarea id="resumo" rows="4"
+      placeholder="Fale um pouco sobre você, suas qualidades e experiências"></textarea>
+
+      <label>Experiência profissional</label>
+      <textarea id="experiencia" rows="4"
+      placeholder="Onde trabalhou e o que fazia"></textarea>
+
+      <label>Formação e cursos</label>
+      <textarea id="formacao" rows="3"
+      placeholder="Escolaridade, cursos, certificados"></textarea>
+
+      <label>Habilidades <span class="optional">(opcional)</span></label>
+      <textarea id="habilidades" rows="2"
+      placeholder="Informática, vendas, atendimento..."></textarea>
+
+      <label>Idiomas <span class="optional">(opcional)</span></label>
+      <textarea id="idiomas" rows="2"
+      placeholder="Português, Inglês..."></textarea>
+
+      <label>Foto profissional <span class="optional">(opcional)</span></label>
+      <input type="file" id="foto" accept="image/*">
+
+      <button type="button" onclick="gerarPDF()">
+        Baixar Currículo em PDF
+      </button>
+
+    </form>
+
+  </div>
+
+  <!-- PREVIEW -->
+
+  <div class="box">
+
+    <h2>Pré-visualização</h2>
+
+    <div class="preview" id="preview">
+
+      <div class="preview-topo">
+
+        <img id="previewFoto"
+        src="https://cdn-icons-png.flaticon.com/512/847/847969.png">
+
+        <div>
+          <div class="preview-nome" id="previewNome">
+            Seu Nome
+          </div>
+
+          <div class="preview-contato" id="previewContato">
+            Seu contato aparecerá aqui
+          </div>
+        </div>
+
+      </div>
+
+      <div class="preview-content">
+
+        <div class="secao">
+          <h4>Objetivo Profissional</h4>
+          <p id="previewObjetivo">-</p>
+        </div>
+
+        <div class="secao">
+          <h4>Resumo Profissional</h4>
+          <p id="previewResumo">-</p>
+        </div>
+
+        <div class="secao">
+          <h4>Experiência Profissional</h4>
+          <p id="previewExperiencia">-</p>
+        </div>
+
+        <div class="secao">
+          <h4>Formação Acadêmica</h4>
+          <p id="previewFormacao">-</p>
+        </div>
+
+        <div class="secao">
+          <h4>Habilidades</h4>
+          <p id="previewHabilidades">-</p>
+        </div>
+
+        <div class="secao">
+          <h4>Idiomas</h4>
+          <p id="previewIdiomas">-</p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  const campos = [
+    "nome",
+    "email",
+    "telefone",
+    "endereco",
+    "objetivo",
+    "resumo",
+    "experiencia",
+    "formacao",
+    "habilidades",
+    "idiomas"
+  ];
+
+  campos.forEach(id => {
+    document.getElementById(id).addEventListener("input", atualizarPreview);
+  });
+
+  document.getElementById("foto").addEventListener("change", function(e){
+
+    const file = e.target.files[0];
+
+    if(file){
+
+      const reader = new FileReader();
+
+      reader.onload = function(event){
+        document.getElementById("previewFoto").src = event.target.result;
       }
 
-      function montarTexto() {
-        let y = 20;
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(nome, 10, y); y += 10;
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
+      reader.readAsDataURL(file);
+    }
 
-        doc.text(`Email: ${email}`, 10, y); y += 10;
-        doc.text(`Telefone: ${telefone}`, 10, y); y += 10;
-        doc.text(`Endereço: ${endereco}`, 10, y); y += 15;
+  });
 
-        function adicionarBloco(titulo, conteudo) {
-          if (conteudo.trim() !== "") {
-            doc.setFont(undefined, 'bold');
-            doc.text(`${titulo}`, 10, y); y += 7;
-            doc.setFont(undefined, 'normal');
-            const texto = doc.splitTextToSize(conteudo, 180);
-            doc.text(texto, 10, y);
-            y += texto.length * 7 + 5;
-          }
+  function atualizarPreview(){
+
+    const nome = document.getElementById("nome").value || "Seu Nome";
+
+    const email = document.getElementById("email").value;
+    const telefone = document.getElementById("telefone").value;
+    const endereco = document.getElementById("endereco").value;
+
+    document.getElementById("previewNome").innerText = nome;
+
+    document.getElementById("previewContato").innerHTML = `
+      ${telefone || ""}
+      ${email ? " • " + email : ""}
+      <br>
+      ${endereco || ""}
+    `;
+
+    document.getElementById("previewObjetivo").innerText =
+      document.getElementById("objetivo").value || "-";
+
+    document.getElementById("previewResumo").innerText =
+      document.getElementById("resumo").value || "-";
+
+    document.getElementById("previewExperiencia").innerText =
+      document.getElementById("experiencia").value || "-";
+
+    document.getElementById("previewFormacao").innerText =
+      document.getElementById("formacao").value || "-";
+
+    document.getElementById("previewHabilidades").innerText =
+      document.getElementById("habilidades").value || "-";
+
+    document.getElementById("previewIdiomas").innerText =
+      document.getElementById("idiomas").value || "-";
+
+  }
+
+  async function gerarPDF(){
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const nome = document.getElementById("nome").value;
+    const email = document.getElementById("email").value;
+    const telefone = document.getElementById("telefone").value;
+    const endereco = document.getElementById("endereco").value;
+    const objetivo = document.getElementById("objetivo").value;
+    const resumo = document.getElementById("resumo").value;
+    const experiencia = document.getElementById("experiencia").value;
+    const formacao = document.getElementById("formacao").value;
+    const habilidades = document.getElementById("habilidades").value;
+    const idiomas = document.getElementById("idiomas").value;
+
+    const foto = document.getElementById("foto").files[0];
+
+    let y = 20;
+
+    if(foto){
+
+      const reader = new FileReader();
+
+      reader.onload = function(e){
+
+        const imgData = e.target.result;
+
+        doc.addImage(imgData, 'JPEG', 155, 10, 30, 40);
+
+        montarPDF();
+
+      }
+
+      reader.readAsDataURL(foto);
+
+    } else {
+
+      montarPDF();
+
+    }
+
+    function montarPDF(){
+
+      doc.setFontSize(22);
+      doc.setFont(undefined, 'bold');
+      doc.text(nome, 10, y);
+
+      y += 12;
+
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+
+      if(telefone){
+        doc.text(`Telefone: ${telefone}`, 10, y);
+        y += 7;
+      }
+
+      if(email){
+        doc.text(`Email: ${email}`, 10, y);
+        y += 7;
+      }
+
+      if(endereco){
+        doc.text(`Endereço: ${endereco}`, 10, y);
+        y += 10;
+      }
+
+      function adicionarBloco(titulo, conteudo){
+
+        if(conteudo.trim() !== ""){
+
+          doc.setFontSize(14);
+          doc.setFont(undefined, 'bold');
+          doc.text(titulo, 10, y);
+
+          y += 7;
+
+          doc.setFontSize(11);
+          doc.setFont(undefined, 'normal');
+
+          const texto = doc.splitTextToSize(conteudo, 180);
+
+          doc.text(texto, 10, y);
+
+          y += texto.length * 6 + 8;
+
         }
 
-        adicionarBloco("Resumo Profissional:", resumo);
-        adicionarBloco("Experiência Profissional:", experiencia);
-        adicionarBloco("Formação Acadêmica:", formacao);
-        adicionarBloco("Habilidades:", habilidades);
-        adicionarBloco("Idiomas:", idiomas);
-
-        doc.save("curriculo.pdf");
       }
+
+      adicionarBloco("Objetivo Profissional", objetivo);
+      adicionarBloco("Resumo Profissional", resumo);
+      adicionarBloco("Experiência Profissional", experiencia);
+      adicionarBloco("Formação Acadêmica", formacao);
+      adicionarBloco("Habilidades", habilidades);
+      adicionarBloco("Idiomas", idiomas);
+
+      doc.save(`${nome || "curriculo"}.pdf`);
+
     }
-  </script>
+
+  }
+
+  atualizarPreview();
+
+</script>
+
 </body>
 </html>
