@@ -1,220 +1,816 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gerador de Orçamento Profissional</title>
-  <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+
+  <link rel="shortcut icon" href="/img/icone.png" type="image/x-icon">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #121212;
-      color: #fff;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
     }
-    header {
-      background-color: #1e1e1e;
-      padding: 10px;
-      text-align: center;
+
+    body{
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background:
+      linear-gradient(135deg,#0f172a,#111827,#1e293b);
+      color:#fff;
+      min-height:100vh;
+      padding:20px;
     }
-    header img {
-      width: 400px;
-      margin: 10px auto;
-      display: block;
+
+    .container{
+      max-width:950px;
+      margin:auto;
     }
-    main {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
+
+    .topo{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border-radius:22px;
+      padding:18px 24px;
+      margin-bottom:25px;
+
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      flex-wrap:wrap;
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
+
+    .logo-topo{
+      display:flex;
+      align-items:center;
+      gap:15px;
     }
-    label {
-      display: block;
-      margin-top: 15px;
+
+    .logo-topo img{
+      width:120px;
+      height:60px;
+      object-fit:contain;
+      background:#fff;
+      border-radius:12px;
+      padding:6px;
+      box-shadow:0 5px 20px rgba(0,0,0,0.25);
     }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin-top: 5px;
-      font-size: 16px;
+
+    .topo h1{
+      font-size:24px;
+      font-weight:700;
     }
-    button {
-      background-color: #00c853;
-      color: white;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      margin-top: 20px;
-      width: 100%;
-      font-size: 18px;
-      cursor: pointer;
+
+    .topo p{
+      color:#cbd5e1;
+      font-size:14px;
+      margin-top:4px;
     }
-    #servicos-container {
-      margin-top: 15px;
-      background-color: #222;
-      padding: 15px;
-      border-radius: 10px;
+
+    .card{
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:22px;
+      padding:25px;
+      margin-bottom:20px;
+      backdrop-filter: blur(10px);
     }
+
+    .card h2{
+      font-size:20px;
+      margin-bottom:20px;
+      color:#fff;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .full{
+      grid-column:1 / -1;
+    }
+
+    .campo{
+      display:flex;
+      flex-direction:column;
+    }
+
+    label{
+      font-size:14px;
+      margin-bottom:8px;
+      color:#dbeafe;
+      font-weight:600;
+    }
+
+    input,
+    textarea,
+    select{
+      width:100%;
+      background:#0f172a;
+      border:1px solid #334155;
+      color:#fff;
+      padding:14px;
+      border-radius:12px;
+      outline:none;
+      font-size:15px;
+      transition:0.2s;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus{
+      border-color:#22c55e;
+      box-shadow:0 0 0 3px rgba(34,197,94,0.15);
+    }
+
+    textarea{
+      resize:vertical;
+      min-height:100px;
+    }
+
+    .servico-item{
+      background:#0f172a;
+      border:1px solid #334155;
+      border-radius:18px;
+      padding:18px;
+      margin-bottom:15px;
+    }
+
+    .servico-grid{
+      display:grid;
+      grid-template-columns:2fr 1fr 1fr;
+      gap:15px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:14px;
+      padding:14px 20px;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      transition:0.2s;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+    }
+
+    .btn-add{
+      background:#2563eb;
+      color:#fff;
+      width:100%;
+      margin-top:15px;
+    }
+
+    .btn-pdf{
+      background:#22c55e;
+      color:#fff;
+      width:100%;
+      padding:18px;
+      font-size:17px;
+      margin-top:20px;
+    }
+
+    .btn-remover{
+      background:#ef4444;
+      color:#fff;
+      margin-top:15px;
+      width:100%;
+    }
+
+    .preview-logo{
+      width:100%;
+      max-width:180px;
+      height:90px;
+      object-fit:contain;
+      background:#fff;
+      border-radius:14px;
+      padding:8px;
+      margin-top:12px;
+      display:none;
+    }
+
+    .resumo-box{
+      background:#0f172a;
+      border:1px solid #334155;
+      border-radius:18px;
+      padding:18px;
+      margin-top:20px;
+    }
+
+    .linha-resumo{
+      display:flex;
+      justify-content:space-between;
+      margin-bottom:10px;
+      font-size:15px;
+    }
+
+    .linha-total{
+      border-top:1px solid #334155;
+      padding-top:12px;
+      margin-top:12px;
+      font-size:20px;
+      font-weight:bold;
+      color:#22c55e;
+    }
+
+    .rodape{
+      text-align:center;
+      color:#94a3b8;
+      font-size:13px;
+      margin-top:25px;
+    }
+
+    @media(max-width:768px){
+
+      .grid,
+      .servico-grid{
+        grid-template-columns:1fr;
+      }
+
+      .topo{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .topo h1{
+        font-size:20px;
+      }
+    }
+    .opiniao-btn{
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background: rgba(45, 137, 239, 0.75);
+  color: white;
+  padding: 14px 18px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+  z-index: 999;
+  transition: 0.3s;
+}
+
+.opiniao-btn:hover{
+  background: #1b5dbf;
+  transform: scale(1.05);
+}
   </style>
 </head>
 <body>
-  <header>
-    <a href="http://mayconbrown.com.br/">
-      <img src="https://mayconbrown.com.br/img/svg/logobranca.svg" alt="Logo Maycon Brown">
-    </a>
-  </header>
-  <main>
-    <h2>Gerador de Orçamento Profissional</h2><label>📷 Logo da empresa:</label>
-<input type="file" id="logoUpload" accept="image/png, image/jpeg" />
 
-<label>🏢 Nome da empresa:</label>
-<input type="text" id="empresa" />
+<div class="container">
 
-<label>🔢 CNPJ:</label>
-<input type="text" id="cnpj" />
+  <div class="topo">
 
-<label>📍 Endereço:</label>
-<input type="text" id="endereco" />
+    <div class="logo-topo">
+      <img src="/img/logo-brown-preto.png" alt="Logo">
+      <div>
+        <h1>Gerador de Orçamento</h1>
+        <p>Crie orçamentos profissionais em PDF</p>
+      </div>
+    </div>
 
-<label>📞 WhatsApp da empresa:</label>
-<input type="text" id="whatsEmpresa" />
+  </div>
 
-<label>📧 E-mail comercial:</label>
-<input type="email" id="emailEmpresa" />
+  <div class="card">
+    <h2>🏢 Dados da Empresa</h2>
 
-<hr/>
+    <div class="grid">
 
-<label>👤 Nome do cliente:</label>
-<input type="text" id="cliente" />
+      <div class="campo full">
+        <label>Logo da empresa</label>
+        <input type="file" id="logoUpload" accept="image/png, image/jpeg" onchange="previewLogo(event)">
+        <img id="preview" class="preview-logo">
+      </div>
 
-<label>📱 WhatsApp do cliente:</label>
-<input type="text" id="whatsCliente" />
+      <div class="campo">
+        <label>Nome da empresa</label>
+        <input type="text" id="empresa">
+      </div>
 
-<label>📧 E-mail do cliente:</label>
-<input type="email" id="emailCliente" />
+      <div class="campo">
+        <label>CNPJ</label>
+        <input type="text" id="cnpj">
+      </div>
 
-<div id="servicos-container">
-  <label>🛠️ Serviço:</label>
-  <input type="text" class="servico" placeholder="Ex: Formatação de computador" />
-  <label>💰 Valor:</label>
-  <input type="number" class="valor" placeholder="Ex: 100" />
+      <div class="campo full">
+        <label>Endereço</label>
+        <input type="text" id="endereco">
+      </div>
+
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="text" id="whatsEmpresa">
+      </div>
+
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="emailEmpresa">
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>👤 Dados do Cliente</h2>
+
+    <div class="grid">
+
+      <div class="campo">
+        <label>Nome do cliente</label>
+        <input type="text" id="cliente">
+      </div>
+
+      <div class="campo">
+        <label>WhatsApp</label>
+        <input type="text" id="whatsCliente">
+      </div>
+
+      <div class="campo full">
+        <label>E-mail</label>
+        <input type="email" id="emailCliente">
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🛠️ Serviços</h2>
+
+    <div id="servicos-container">
+
+      <div class="servico-item">
+
+        <div class="servico-grid">
+
+          <div class="campo">
+            <label>Serviço</label>
+            <input type="text" class="servico" placeholder="Ex: Criação de arte">
+          </div>
+
+          <div class="campo">
+            <label>Quantidade</label>
+            <input type="number" class="quantidade" value="1">
+          </div>
+
+          <div class="campo">
+            <label>Valor</label>
+            <input type="number" class="valor" placeholder="0.00" oninput="atualizarResumo()">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <button class="btn btn-add" onclick="adicionarServico()">
+      ➕ Adicionar outro serviço
+    </button>
+
+  </div>
+
+  <div class="card">
+    <h2>💸 Desconto</h2>
+
+    <div class="grid">
+
+      <div class="campo">
+        <label>Tipo de desconto</label>
+        <select id="tipoDesconto" onchange="atualizarResumo()">
+          <option value="nenhum">Sem desconto</option>
+          <option value="porcentagem">Porcentagem (%)</option>
+          <option value="valor">Valor fixo (R$)</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Valor do desconto</label>
+        <input type="number" id="desconto" placeholder="0" oninput="atualizarResumo()">
+      </div>
+
+    </div>
+
+    <div class="resumo-box">
+
+      <div class="linha-resumo">
+        <span>Subtotal:</span>
+        <span id="subtotalTexto">R$ 0,00</span>
+      </div>
+
+      <div class="linha-resumo">
+        <span>Desconto:</span>
+        <span id="descontoTexto">R$ 0,00</span>
+      </div>
+
+      <div class="linha-resumo linha-total">
+        <span>Total:</span>
+        <span id="totalTexto">R$ 0,00</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>📄 Informações do Orçamento</h2>
+
+    <div class="grid">
+
+      <div class="campo">
+        <label>Número do orçamento</label>
+        <input type="text" id="numeroOrcamento" value="#000001">
+      </div>
+
+      <div class="campo">
+        <label>Validade do orçamento</label>
+        <input type="text" id="validade" placeholder="Ex: 7 dias">
+      </div>
+
+      <div class="campo full">
+        <label>Observações</label>
+        <textarea id="observacoes"></textarea>
+      </div>
+
+    </div>
+
+    <button class="btn btn-pdf" onclick="gerarPDF()">
+      📄 Gerar PDF Profissional
+    </button>
+
+  </div>
+
+  <div class="rodape">
+    Sistema profissional de geração de orçamento
+  </div>
+
 </div>
 
-<button onclick="adicionarServico()">➕ Adicionar outro serviço</button>
+<script>
 
-<label>🗒️ Observações (prazo, condições, etc):</label>
-<textarea id="observacoes" rows="4"></textarea>
+function previewLogo(event){
 
-<button onclick="gerarPDF()">📄 Gerar Orçamento em PDF</button>
+  const file = event.target.files[0];
 
-  </main>  <script>
-    function adicionarServico() {
-      const container = document.getElementById("servicos-container");
+  if(file){
 
-      const label1 = document.createElement("label");
-      label1.textContent = "🛠️ Serviço:";
-      const servico = document.createElement("input");
-      servico.type = "text";
-      servico.className = "servico";
-      servico.placeholder = "Ex: Instalação de sistema";
+    const preview = document.getElementById("preview");
 
-      const label2 = document.createElement("label");
-      label2.textContent = "💰 Valor:";
-      const valor = document.createElement("input");
-      valor.type = "number";
-      valor.className = "valor";
-      valor.placeholder = "Ex: 50";
+    preview.src = URL.createObjectURL(file);
 
-      container.appendChild(label1);
-      container.appendChild(servico);
-      container.appendChild(label2);
-      container.appendChild(valor);
-    }
+    preview.style.display = "block";
+  }
+}
 
-    async function gerarPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+function adicionarServico(){
 
-      const empresa = document.getElementById("empresa").value;
-      const cnpj = document.getElementById("cnpj").value;
-      const endereco = document.getElementById("endereco").value;
-      const whatsEmpresa = document.getElementById("whatsEmpresa").value;
-      const emailEmpresa = document.getElementById("emailEmpresa").value;
-      const cliente = document.getElementById("cliente").value;
-      const whatsCliente = document.getElementById("whatsCliente").value;
-      const emailCliente = document.getElementById("emailCliente").value;
-      const observacoes = document.getElementById("observacoes").value;
+  const container = document.getElementById("servicos-container");
 
-      let y = 20;
+  const div = document.createElement("div");
 
-      const logoFile = document.getElementById("logoUpload").files[0];
-      if (logoFile) {
-        const reader = new FileReader();
-        reader.onloadend = function () {
-          const base64 = reader.result;
-          doc.addImage(base64, 'PNG', 140, 10, 50, 20);
-          gerarConteudoPDF();
-        };
-        reader.readAsDataURL(logoFile);
-      } else {
-        gerarConteudoPDF();
-      }
+  div.className = "servico-item";
 
-      function gerarConteudoPDF() {
-        y += 10;
-        doc.setFontSize(12);
-        doc.text(`Empresa: ${empresa}`, 15, y);
-        doc.text(`CNPJ: ${cnpj}`, 15, y + 8);
-        doc.text(`Endereço: ${endereco}`, 15, y + 16);
-        doc.text(`WhatsApp: ${whatsEmpresa}`, 15, y + 24);
-        doc.text(`E-mail: ${emailEmpresa}`, 15, y + 32);
+  div.innerHTML = `
 
-        y += 50;
-        doc.setFontSize(13);
-        doc.text("Dados do Cliente:", 15, y);
-        doc.setFontSize(12);
-        doc.text(`Nome: ${cliente}`, 15, y + 8);
-        doc.text(`WhatsApp: ${whatsCliente}`, 15, y + 16);
-        doc.text(`E-mail: ${emailCliente}`, 15, y + 24);
+    <div class="servico-grid">
 
-        y += 35;
-        doc.setFontSize(13);
-        doc.text("Serviços:", 15, y);
-        let total = 0;
+      <div class="campo">
+        <label>Serviço</label>
+        <input type="text" class="servico">
+      </div>
 
-        const servicos = document.querySelectorAll(".servico");
-        const valores = document.querySelectorAll(".valor");
+      <div class="campo">
+        <label>Quantidade</label>
+        <input type="number" class="quantidade" value="1" oninput="atualizarResumo()">
+      </div>
 
-        servicos.forEach((el, i) => {
-          const nome = el.value;
-          const valor = parseFloat(valores[i].value);
-          if (nome && !isNaN(valor)) {
-            y += 8;
-            doc.setFontSize(12);
-            doc.text(`- ${nome}: R$ ${valor.toFixed(2)}`, 20, y);
-            total += valor;
-          }
-        });
+      <div class="campo">
+        <label>Valor</label>
+        <input type="number" class="valor" placeholder="0.00" oninput="atualizarResumo()">
+      </div>
 
-        y += 12;
-        doc.setFontSize(13);
-        doc.text(`Total: R$ ${total.toFixed(2)}`, 15, y);
+    </div>
 
-        y += 15;
-        doc.setFontSize(12);
-        doc.text("Observações:", 15, y);
+    <button class="btn btn-remover" onclick="removerServico(this)">
+      Remover serviço
+    </button>
+
+  `;
+
+  container.appendChild(div);
+
+  atualizarResumo();
+}
+
+function removerServico(botao){
+
+  botao.parentElement.remove();
+
+  atualizarResumo();
+}
+
+function formatarMoeda(valor){
+
+  return valor.toLocaleString('pt-BR', {
+    style:'currency',
+    currency:'BRL'
+  });
+}
+
+function calcularTotais(){
+
+  const valores = document.querySelectorAll(".valor");
+  const quantidades = document.querySelectorAll(".quantidade");
+
+  let subtotal = 0;
+
+  valores.forEach((campo, index)=>{
+
+    const valor = parseFloat(campo.value) || 0;
+    const qtd = parseFloat(quantidades[index].value) || 1;
+
+    subtotal += valor * qtd;
+  });
+
+  const tipoDesconto = document.getElementById("tipoDesconto").value;
+  const descontoInput = parseFloat(document.getElementById("desconto").value) || 0;
+
+  let descontoFinal = 0;
+
+  if(tipoDesconto === "porcentagem"){
+
+    descontoFinal = subtotal * (descontoInput / 100);
+
+  }else if(tipoDesconto === "valor"){
+
+    descontoFinal = descontoInput;
+  }
+
+  if(descontoFinal > subtotal){
+    descontoFinal = subtotal;
+  }
+
+  const total = subtotal - descontoFinal;
+
+  return {
+    subtotal,
+    descontoFinal,
+    total
+  };
+}
+
+function atualizarResumo(){
+
+  const totais = calcularTotais();
+
+  document.getElementById("subtotalTexto").innerText =
+    formatarMoeda(totais.subtotal);
+
+  document.getElementById("descontoTexto").innerText =
+    "- " + formatarMoeda(totais.descontoFinal);
+
+  document.getElementById("totalTexto").innerText =
+    formatarMoeda(totais.total);
+}
+
+async function gerarPDF(){
+
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF();
+
+  const empresa = document.getElementById("empresa").value;
+  const cnpj = document.getElementById("cnpj").value;
+  const endereco = document.getElementById("endereco").value;
+  const whatsEmpresa = document.getElementById("whatsEmpresa").value;
+  const emailEmpresa = document.getElementById("emailEmpresa").value;
+
+  const cliente = document.getElementById("cliente").value;
+  const whatsCliente = document.getElementById("whatsCliente").value;
+  const emailCliente = document.getElementById("emailCliente").value;
+
+  const observacoes = document.getElementById("observacoes").value;
+  const validade = document.getElementById("validade").value;
+  const numeroOrcamento = document.getElementById("numeroOrcamento").value;
+
+  const tipoDesconto = document.getElementById("tipoDesconto").value;
+  const descontoInput = parseFloat(document.getElementById("desconto").value) || 0;
+
+  const totais = calcularTotais();
+
+  let y = 20;
+
+  doc.setFillColor(15,23,42);
+  doc.rect(0,0,210,35,'F');
+
+  const logoFile = document.getElementById("logoUpload").files[0];
+
+  if(logoFile){
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+      const img = new Image();
+
+      img.onload = function(){
+
+        let largura = 35;
+        let altura = (img.height * largura) / img.width;
+
+        if(altura > 18){
+          altura = 18;
+          largura = (img.width * altura) / img.height;
+        }
+
+        doc.addImage(
+          e.target.result,
+          'PNG',
+          160,
+          8,
+          largura,
+          altura
+        );
+
+        gerarConteudo();
+      };
+
+      img.src = e.target.result;
+    };
+
+    reader.readAsDataURL(logoFile);
+
+  }else{
+
+    gerarConteudo();
+  }
+
+  function gerarConteudo(){
+
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20);
+    doc.text("ORÇAMENTO",15,20);
+
+    doc.setFontSize(10);
+    doc.text(`Nº ${numeroOrcamento}`,15,28);
+
+    doc.setTextColor(0,0,0);
+
+    y = 50;
+
+    doc.setFontSize(14);
+    doc.text("Dados da Empresa",15,y);
+
+    doc.setFontSize(11);
+
+    y += 10;
+    doc.text(`Empresa: ${empresa}`,15,y);
+
+    y += 7;
+    doc.text(`CNPJ: ${cnpj}`,15,y);
+
+    y += 7;
+    doc.text(`Endereço: ${endereco}`,15,y);
+
+    y += 7;
+    doc.text(`WhatsApp: ${whatsEmpresa}`,15,y);
+
+    y += 7;
+    doc.text(`E-mail: ${emailEmpresa}`,15,y);
+
+    y += 15;
+
+    doc.setFontSize(14);
+    doc.text("Dados do Cliente",15,y);
+
+    doc.setFontSize(11);
+
+    y += 10;
+    doc.text(`Cliente: ${cliente}`,15,y);
+
+    y += 7;
+    doc.text(`WhatsApp: ${whatsCliente}`,15,y);
+
+    y += 7;
+    doc.text(`E-mail: ${emailCliente}`,15,y);
+
+    y += 18;
+
+    doc.setFillColor(30,41,59);
+    doc.rect(15,y,180,10,'F');
+
+    doc.setTextColor(255,255,255);
+
+    doc.text("Serviço",18,y+7);
+    doc.text("Qtd",120,y+7);
+    doc.text("Valor",150,y+7);
+
+    doc.setTextColor(0,0,0);
+
+    y += 15;
+
+    const servicos = document.querySelectorAll(".servico");
+    const quantidades = document.querySelectorAll(".quantidade");
+    const valores = document.querySelectorAll(".valor");
+
+    servicos.forEach((item,index)=>{
+
+      const nome = item.value;
+      const qtd = parseFloat(quantidades[index].value) || 1;
+      const valor = parseFloat(valores[index].value) || 0;
+
+      if(nome){
+
+        const subtotal = qtd * valor;
+
+        doc.text(nome,18,y);
+        doc.text(String(qtd),123,y);
+        doc.text(`R$ ${subtotal.toFixed(2)}`,150,y);
+
         y += 8;
-        doc.setFontSize(11);
-        const linhas = doc.splitTextToSize(observacoes, 180);
-        doc.text(linhas, 15, y);
-
-        doc.save(`Orcamento_${cliente.replace(/\s/g, "_")}.pdf`);
       }
+    });
+
+    y += 10;
+
+    doc.line(15,y,195,y);
+
+    y += 12;
+
+    doc.setFontSize(12);
+    doc.text(`Subtotal: R$ ${totais.subtotal.toFixed(2)}`,130,y);
+
+    y += 8;
+
+    let textoDesconto = "";
+
+    if(tipoDesconto === "porcentagem"){
+      textoDesconto = `Desconto (${descontoInput}%):`;
+    }else if(tipoDesconto === "valor"){
+      textoDesconto = `Desconto:`;
+    }else{
+      textoDesconto = `Desconto:`;
     }
-  </script></body>
+
+    doc.text(`${textoDesconto} R$ ${totais.descontoFinal.toFixed(2)}`,130,y);
+
+    y += 10;
+
+    doc.setFontSize(16);
+    doc.text(`TOTAL: R$ ${totais.total.toFixed(2)}`,130,y);
+
+    y += 20;
+
+    doc.setFontSize(13);
+    doc.text("Observações",15,y);
+
+    y += 8;
+
+    doc.setFontSize(11);
+
+    const linhas = doc.splitTextToSize(
+      observacoes || "Nenhuma observação.",
+      180
+    );
+
+    doc.text(linhas,15,y);
+
+    y += 25;
+
+    doc.text(`Validade do orçamento: ${validade}`,15,y);
+
+    y += 20;
+
+    doc.line(60,y,150,y);
+
+    y += 7;
+
+    doc.text(empresa || "Assinatura da empresa",80,y);
+
+    doc.save(`Orcamento_${cliente || "cliente"}.pdf`);
+  }
+}
+
+atualizarResumo();
+
+</script>
+
+<a href="https://mayconbrown.com.br/contato/" 
+   class="opiniao-btn"
+   target="_blank">
+   💬 O que podemos melhorar?
+</a>
+
+</body>
 </html>
