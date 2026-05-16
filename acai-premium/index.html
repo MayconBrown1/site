@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Açaí Premium 24 Horas</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Dancing+Script:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
+* { box-sizing: border-box; }
+
+:root {
+  --purple-dark: #1a0a2e;
+  --purple-mid: #2d1b4e;
+  --purple-light: #6b21a8;
+  --gold: #d4af37;
+  --gold-light: #f0d060;
+  --neon-purple: #a855f7;
+  --neon-pink: #ec4899;
+}
+
+.app-wrapper {
+  background: linear-gradient(135deg, var(--purple-dark) 0%, #0f0520 50%, #1a0a2e 100%);
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.glow-text {
+  text-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple);
+}
+
+.glow-gold {
+  text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+}
+
+.glow-box {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3), 0 0 30px rgba(168, 85, 247, 0.1);
+}
+
+.glow-box-gold {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+}
+
+.neon-border {
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.badge-24h {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #1a0a2e;
+  font-weight: 700;
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.8); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.float-anim { animation: float 3s ease-in-out infinite; }
+
+.chip-selected {
+  background: linear-gradient(135deg, var(--purple-light), var(--neon-purple)) !important;
+  border-color: var(--neon-purple) !important;
+  color: white !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+}
+
+.promo-glow {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--purple-light), var(--neon-purple));
+  transition: all 0.3s;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  transform: scale(1.02);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #1a0a2e;
+  transition: all 0.3s;
+}
+.btn-gold:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+  transform: scale(1.02);
+}
+
+.whatsapp-float {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+  background: #25d366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  animation: float 3s ease-in-out infinite;
+}
+
+.cart-float {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 999;
+  background: linear-gradient(135deg, var(--purple-mid), var(--purple-dark));
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  position: relative;
+  display: inline-block;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon-purple), transparent);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal {
+  background: linear-gradient(135deg, #1e1040, var(--purple-dark));
+  border-top: 2px solid var(--neon-purple);
+  border-radius: 20px 20px 0 0;
+  max-height: 85%;
+  width: 100%;
+  max-width: 500px;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.input-field {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: white;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.input-field:focus {
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="app-wrapper" id="app">
+   <!-- Header -->
+   <header class="text-center pt-8 pb-4 px-4">
+    <div class="float-anim inline-block mb-2">
+     <span class="badge-24h text-xs px-3 py-1 rounded-full">🕐 ABERTO 24H</span>
+    </div>
+    <h1 id="store-name" class="text-3xl font-black text-white glow-text mt-3" style="font-family:'Dancing Script',cursive; font-size:2.5rem;">Açaí Premium 24 Horas</h1>
+    <p id="slogan" class="text-purple-300 mt-2 text-sm font-light">Mais que açaí, uma experiência Premium!</p>
+   </header><!-- Banner -->
+   <div class="mx-4 mb-6 rounded-2xl overflow-hidden promo-glow p-4 text-center">
+    <p class="text-gold-light font-bold text-lg glow-gold">🔥 PROMOÇÃO DA NOITE</p>
+    <p class="text-white text-sm mt-1">Toda quinta: 2 açaís 500ml por <span class="text-green-400 font-bold">R$ 19,99</span></p>
+   </div><!-- Cardápio Tradicional -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">🍇 Cardápio Tradicional</h2>
+    <div class="grid gap-4 mt-6" id="menu-items"></div>
+   </section><!-- Combos Premium -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">👑 Combos Premium</h2>
+    <div class="grid gap-4 mt-6" id="combo-items"></div>
+   </section><!-- Promoções -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">🎉 Promoções</h2>
+    <div class="grid gap-4 mt-6" id="promo-items"></div>
+   </section><!-- Cart Float -->
+   <div class="cart-float" id="cart-bar" style="display:none;" onclick="openCart()">
+    <div class="flex items-center justify-between">
+     <div class="flex items-center gap-3">
+      <div class="bg-purple-600 rounded-full w-10 h-10 flex items-center justify-center">
+       <i data-lucide="shopping-bag" class="w-5 h-5 text-white"></i>
+      </div>
+      <div>
+       <p class="text-white font-bold text-sm" id="cart-count">0 itens</p>
+       <p class="text-purple-300 text-xs" id="cart-total">R$ 0,00</p>
+      </div>
+     </div><span class="btn-primary text-white text-sm font-bold px-4 py-2 rounded-full">Ver Pedido</span>
+    </div>
+   </div><!-- WhatsApp Float --> <a class="whatsapp-float" id="whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer">
+    <svg width="28" height="28" fill="white" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.1-1.127l-.29-.174-3.01.894.81-2.96-.186-.3A8 8 0 1112 20z" />
+    </svg></a> <!-- Cart Modal -->
+   <div class="overlay" id="cart-modal" style="display:none;" onclick="closeCartOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-bold text-xl">🛒 Seu Pedido</h3><button onclick="closeCart()" class="text-purple-300 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div id="cart-items-list" class="space-y-3 mb-4"></div>
+     <div class="border-t border-purple-700 pt-4 mb-4">
+      <div class="flex justify-between text-white font-bold text-lg">
+       <span>Total:</span> <span id="modal-total">R$ 0,00</span>
+      </div>
+     </div><!-- Delivery/Pickup -->
+     <div id="delivery-section">
+      <p class="text-white font-semibold mb-3">Como deseja receber?</p>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+       <button onclick="selectDelivery('entrega')" id="btn-entrega" class="neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900">🛵 Entrega</button> <button onclick="selectDelivery('retirada')" id="btn-retirada" class="neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900">🏪 Retirada</button>
+      </div><!-- Delivery Form -->
+      <div id="form-entrega" style="display:none;" class="space-y-3 mb-4">
+       <input class="input-field" placeholder="Seu nome" id="inp-nome"> <input class="input-field" placeholder="Rua" id="inp-rua"> <input class="input-field" placeholder="Número" id="inp-numero"> <input class="input-field" placeholder="Bairro" id="inp-bairro"> <input class="input-field" placeholder="Referência" id="inp-ref">
+      </div>
+      <div id="form-retirada" style="display:none;" class="space-y-3 mb-4">
+       <input class="input-field" placeholder="Seu nome" id="inp-nome-ret">
+      </div><!-- Payment -->
+      <div id="payment-section" style="display:none;">
+       <p class="text-white font-semibold mb-3">Pagamento</p>
+       <div class="grid grid-cols-3 gap-2 mb-3">
+        <button onclick="selectPayment('pix')" class="pay-btn neon-border rounded-xl py-3 text-white text-xs font-semibold transition-all hover:bg-purple-900">💠 PIX</button> <button onclick="selectPayment('cartao')" class="pay-btn neon-border rounded-xl py-3 text-white text-xs font-semibold transition-all hover:bg-purple-900">💳 Cartão</button> <button onclick="selectPayment('dinheiro')" class="pay-btn neon-border rounded-xl py-3 text-white text-xs font-semibold transition-all hover:bg-purple-900">💵 Dinheiro</button>
+       </div>
+       <div id="troco-section" style="display:none;" class="mb-4">
+        <input class="input-field" placeholder="Troco para quanto? (R$)" id="inp-troco" type="number">
+        <p class="text-green-400 text-xs mt-1" id="troco-calc"></p>
+       </div>
+      </div><!-- Finalize --> <button id="btn-finalizar" style="display:none;" onclick="finalizarPedido()" class="btn-gold w-full py-4 rounded-2xl font-bold text-lg mt-4 flex items-center justify-center gap-2">
+       <svg width="22" height="22" fill="#1a0a2e" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.1-1.127l-.29-.174-3.01.894.81-2.96-.186-.3A8 8 0 1112 20z" />
+       </svg> FINALIZAR PEDIDO NO WHATSAPP </button>
+     </div>
+    </div>
+   </div><!-- Addons Modal -->
+   <div class="overlay" id="addons-modal" style="display:none;" onclick="closeAddonsOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-bold text-lg">Escolha os Adicionais</h3><button onclick="closeAddons()" class="text-purple-300 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div><!-- Base Selection -->
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🎨 Base</p>
+     <div class="grid grid-cols-3 gap-2 mb-4" id="base-list"></div><!-- Addons Info -->
+     <div class="bg-purple-900 rounded-lg p-3 mb-4 border border-yellow-500 border-opacity-50">
+      <p class="text-yellow-300 text-xs font-semibold">📌 Primeiros 3 adicionais = GRÁTIS</p>
+      <p class="text-yellow-300 text-xs">Cada adicional extra = R$ 1,00</p>
+      <p class="text-white text-xs mt-2" id="addons-counter">Selecionados: 0</p>
+     </div><!-- Addons -->
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
+     <div class="flex flex-wrap gap-2 mb-4" id="addons-list"></div>
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍓 Frutas</p>
+     <div class="flex flex-wrap gap-2 mb-6" id="fruits-list"></div><button onclick="confirmAddons()" class="btn-primary w-full py-3 rounded-xl text-white font-bold">Confirmar</button>
+    </div>
+   </div>
+  </div>
+  <script>
+// Data
+const menuItems = [
+  { id: 'm1', name: 'Açaí 200ml', size: '200ml', price: 7.99, emoji: '🥤' },
+  { id: 'm2', name: 'Açaí 300ml', size: '300ml', price: 10.99, emoji: '🥤' },
+  { id: 'm3', name: 'Açaí 500ml', size: '500ml', price: 16.99, emoji: '🫐' },
+];
+
+const combos = [
+  { id: 'c1', name: 'Combo 4 Brothers', desc: '4 açaís 200ml', price: 24.99, emoji: '👊' },
+  { id: 'c2', name: 'Combo Doublé Premium', desc: '2 açaís 300ml', price: 17.99, emoji: '✨' },
+  { id: 'c3', name: 'Combo Doublé Gold', desc: '2 açaís 500ml', price: 29.90, emoji: '👑' },
+];
+
+const promos = [
+  { id: 'p1', name: 'Promoção da Noite', desc: '2 açaís 500ml • Toda quinta', oldPrice: 29.90, price: 19.99, emoji: '🌙', saving: 9.91 },
+  { id: 'p2', name: 'Segundou Premium', desc: '2 açaís 300ml + 2 adicionais cada', oldPrice: 21.98, price: 14.90, emoji: '🔥', saving: 7.08 },
+];
+
+const addons = ['Jujuba','Farinha Láctea','M&M\'s','Chocoball','Gotas de Chocolate','Ovomaltine','Paçoca','Granola','Marshmallow','Amendoim Triturado','Leite em Pó','Granulado'];
+const fruits = ['Banana','Morango','Kiwi'];
+
+let cart = [];
+let currentItemForAddons = null;
+let selectedAddons = [];
+let selectedBase = 'both'; // 'acai', 'ninho', 'both'
+let deliveryType = null;
+let paymentType = null;
+
+const bases = ['Açaí Puro', 'Creme de Ninho', 'Ambos'];
+
+// Render menu
+function renderMenu() {
+  const container = document.getElementById('menu-items');
+  container.innerHTML = menuItems.map(item => `
+    <div class="neon-border rounded-2xl p-4 card-hover" style="background:rgba(30,16,64,0.8);">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">${item.emoji}</span>
+          <div>
+            <h3 class="text-white font-bold">${item.name}</h3>
+            <p class="text-purple-300 text-sm">${item.size}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-green-400 font-bold text-lg">R$ ${item.price.toFixed(2).replace('.',',')}</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <button onclick="openAddonsFor('${item.id}')" class="btn-primary text-white text-sm font-semibold px-4 py-2 rounded-full">Escolher Adicionais</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCombos() {
+  const container = document.getElementById('combo-items');
+  container.innerHTML = combos.map(item => `
+    <div class="gold-border rounded-2xl p-4 card-hover" style="background:rgba(30,16,64,0.9);">
+      <div class="flex items-center gap-1 mb-2">
+        <span class="badge-24h text-[10px] px-2 py-0.5 rounded-full">24H</span>
+        <span class="text-gold text-xs font-semibold" style="color:var(--gold)">PREMIUM</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">${item.emoji}</span>
+          <div>
+            <h3 class="text-white font-bold">${item.name}</h3>
+            <p class="text-purple-300 text-xs">${item.desc}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-green-400 font-bold text-lg">R$ ${item.price.toFixed(2).replace('.',',')}</p>
+        </div>
+      </div>
+      <button onclick="addToCart('${item.id}','combo')" class="btn-gold w-full mt-3 py-2 rounded-full font-bold text-sm">Escolher Adicionais</button>
+    </div>
+  `).join('');
+}
+
+function renderPromos() {
+  const container = document.getElementById('promo-items');
+  container.innerHTML = promos.map(item => `
+    <div class="promo-glow rounded-2xl p-4 card-hover">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">${item.emoji}</span>
+        <div class="flex-1">
+          <h3 class="text-white font-bold">${item.name}</h3>
+          <p class="text-purple-300 text-xs">${item.desc}</p>
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-red-400 line-through text-xs">R$ ${item.oldPrice.toFixed(2).replace('.',',')}</span>
+            <span class="text-green-400 font-bold">R$ ${item.price.toFixed(2).replace('.',',')}</span>
+          </div>
+          <span class="text-yellow-300 text-[10px]">💰 Economia: R$ ${item.saving.toFixed(2).replace('.',',')}</span>
+        </div>
+      </div>
+      <button onclick="addToCart('${item.id}','promo')" class="btn-primary w-full mt-3 py-2 rounded-full text-white font-bold text-sm">Escolher Adicionais</button>
+    </div>
+  `).join('');
+}
+
+// Addons modal
+function openAddonsFor(itemId) {
+  currentItemForAddons = itemId;
+  selectedAddons = [];
+  selectedBase = 'both';
+  renderAddonsModal();
+  document.getElementById('addons-modal').style.display = 'flex';
+}
+
+function renderAddonsModal() {
+  document.getElementById('base-list').innerHTML = bases.map((b, i) => `
+    <button onclick="selectBase(this,'${['acai','ninho','both'][i]}')" class="neon-border rounded-full px-3 py-2 text-xs text-purple-200 transition-all font-semibold">${b}</button>
+  `).join('');
+  document.getElementById('addons-list').innerHTML = addons.map(a => `
+    <button onclick="toggleAddon(this,'${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all">${a}</button>
+  `).join('');
+  document.getElementById('fruits-list').innerHTML = fruits.map(f => `
+    <button onclick="toggleAddon(this,'${f}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all">${f}</button>
+  `).join('');
+  selectBase(document.querySelector('#base-list button'), 'both');
+  updateAddonsCounter();
+}
+
+function selectBase(el, base) {
+  selectedBase = base;
+  document.querySelectorAll('#base-list button').forEach(b => b.classList.remove('chip-selected'));
+  el.classList.add('chip-selected');
+}
+
+function updateAddonsCounter() {
+  const extra = Math.max(0, selectedAddons.length - 3);
+  const cost = extra * 1.00;
+  let text = `Selecionados: ${selectedAddons.length}`;
+  if (extra > 0) {
+    text += ` | +R$ ${cost.toFixed(2).replace('.',',')} (${extra} extras)`;
+  }
+  document.getElementById('addons-counter').textContent = text;
+}
+
+function toggleAddon(el, name) {
+  const idx = selectedAddons.indexOf(name);
+  if (idx > -1) { selectedAddons.splice(idx, 1); el.classList.remove('chip-selected'); }
+  else { selectedAddons.push(name); el.classList.add('chip-selected'); }
+  updateAddonsCounter();
+}
+
+function confirmAddons() {
+  addToCart(currentItemForAddons, 'menu', [...selectedAddons], selectedBase);
+  closeAddons();
+}
+
+function closeAddons() { document.getElementById('addons-modal').style.display = 'none'; }
+function closeAddonsOutside(e) { if (e.target === e.currentTarget) closeAddons(); }
+
+// Cart
+function addToCart(id, type, addonsArr, baseSelected) {
+  let item;
+  if (type === 'menu') item = menuItems.find(i => i.id === id);
+  else if (type === 'combo') item = combos.find(i => i.id === id);
+  else item = promos.find(i => i.id === id);
+
+  const extra = Math.max(0, (addonsArr || []).length - 3);
+  const addonsCost = extra * 1.00;
+
+  const cartItem = { 
+    ...item, 
+    qty: 1, 
+    addons: addonsArr || [], 
+    base: baseSelected || 'both',
+    addonsCost: addonsCost
+  };
+
+  const existing = cart.find(c => 
+    c.id === id && 
+    c.base === cartItem.base &&
+    JSON.stringify(c.addons) === JSON.stringify(cartItem.addons)
+  );
+
+  if (existing) { existing.qty++; }
+  else { cart.push(cartItem); }
+  
+  updateCartBar();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCartBar();
+  renderCartModal();
+}
+
+function changeQty(index, delta) {
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  updateCartBar();
+  renderCartModal();
+}
+
+function getTotal() { 
+  return cart.reduce((sum, i) => {
+    const itemCost = (i.price + i.addonsCost) * i.qty;
+    return sum + itemCost;
+  }, 0);
+}
+
+function updateCartBar() {
+  const bar = document.getElementById('cart-bar');
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  if (count > 0) {
+    bar.style.display = 'block';
+    document.getElementById('cart-count').textContent = count + (count === 1 ? ' item' : ' itens');
+    document.getElementById('cart-total').textContent = 'R$ ' + getTotal().toFixed(2).replace('.',',');
+  } else { bar.style.display = 'none'; }
+}
+
+function openCart() {
+  renderCartModal();
+  document.getElementById('cart-modal').style.display = 'flex';
+}
+
+function closeCart() { document.getElementById('cart-modal').style.display = 'none'; }
+function closeCartOutside(e) { if (e.target === e.currentTarget) closeCart(); }
+
+function renderCartModal() {
+  const list = document.getElementById('cart-items-list');
+  if (cart.length === 0) {
+    list.innerHTML = '<p class="text-purple-300 text-center text-sm">Carrinho vazio</p>';
+  } else {
+    list.innerHTML = cart.map((item, i) => {
+      const itemTotal = (item.price + item.addonsCost) * item.qty;
+      let baseName = item.base === 'acai' ? 'Açaí Puro' : item.base === 'ninho' ? 'Creme de Ninho' : 'Ambos';
+      return `
+      <div class="neon-border rounded-xl p-3" style="background:rgba(30,16,64,0.6);">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-white font-semibold text-sm">${item.name}</p>
+            <p class="text-yellow-300 text-[10px] font-semibold">Base: ${baseName}</p>
+            ${item.addons && item.addons.length ? `<p class="text-purple-300 text-[10px]">+ ${item.addons.join(', ')}</p>` : ''}
+            ${item.addonsCost > 0 ? `<p class="text-green-400 text-[10px]">Extra adicionais: +R$ ${item.addonsCost.toFixed(2).replace('.',',')}</p>` : ''}
+          </div>
+          <p class="text-green-400 font-bold text-sm">R$ ${itemTotal.toFixed(2).replace('.',',')}</p>
+        </div>
+        <div class="flex items-center justify-between mt-2">
+          <div class="flex items-center gap-2">
+            <button onclick="changeQty(${i},-1)" class="qty-btn bg-purple-700 text-white">−</button>
+            <span class="text-white font-bold text-sm">${item.qty}</span>
+            <button onclick="changeQty(${i},1)" class="qty-btn bg-purple-700 text-white">+</button>
+          </div>
+          <button onclick="removeFromCart(${i})" class="text-red-400 text-xs">Remover</button>
+        </div>
+      </div>
+    `;
+    }).join('');
+  }
+  document.getElementById('modal-total').textContent = 'R$ ' + getTotal().toFixed(2).replace('.',',');
+  lucide.createIcons();
+}
+
+// Delivery
+function selectDelivery(type) {
+  deliveryType = type;
+  document.getElementById('btn-entrega').className = type === 'entrega' ? 'chip-selected rounded-xl py-3 font-semibold text-sm' : 'neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900';
+  document.getElementById('btn-retirada').className = type === 'retirada' ? 'chip-selected rounded-xl py-3 font-semibold text-sm' : 'neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900';
+  document.getElementById('form-entrega').style.display = type === 'entrega' ? 'block' : 'none';
+  document.getElementById('form-retirada').style.display = type === 'retirada' ? 'block' : 'none';
+  document.getElementById('payment-section').style.display = 'block';
+}
+
+function selectPayment(type) {
+  paymentType = type;
+  document.querySelectorAll('.pay-btn').forEach(b => b.className = 'pay-btn neon-border rounded-xl py-3 text-white text-xs font-semibold transition-all hover:bg-purple-900');
+  event.currentTarget.classList.add('chip-selected');
+  document.getElementById('troco-section').style.display = type === 'dinheiro' ? 'block' : 'none';
+  document.getElementById('btn-finalizar').style.display = 'flex';
+
+  if (type === 'dinheiro') {
+    document.getElementById('inp-troco').addEventListener('input', calcTroco);
+  }
+}
+
+function calcTroco() {
+  const val = parseFloat(document.getElementById('inp-troco').value);
+  const total = getTotal();
+  if (val && val > total) {
+    document.getElementById('troco-calc').textContent = `Troco: R$ ${(val - total).toFixed(2).replace('.',',')}`;
+  } else {
+    document.getElementById('troco-calc').textContent = '';
+  }
+}
+
+// Finalize
+function finalizarPedido() {
+  const nome = deliveryType === 'entrega' ? document.getElementById('inp-nome').value : document.getElementById('inp-nome-ret').value;
+  if (!nome) { showToast('Preencha seu nome!'); return; }
+  if (cart.length === 0) { showToast('Carrinho vazio!'); return; }
+
+  let msg = `🍇 *PEDIDO - AÇAÍ PREMIUM 24H*\n\n`;
+  msg += `👤 *Nome:* ${nome}\n`;
+  msg += `📦 *Tipo:* ${deliveryType === 'entrega' ? 'Entrega' : 'Retirada'}\n`;
+
+  if (deliveryType === 'entrega') {
+    const rua = document.getElementById('inp-rua').value;
+    const num = document.getElementById('inp-numero').value;
+    const bairro = document.getElementById('inp-bairro').value;
+    const ref = document.getElementById('inp-ref').value;
+    msg += `📍 *Endereço:* ${rua}, ${num} - ${bairro}\n`;
+    if (ref) msg += `📌 *Ref:* ${ref}\n`;
+  }
+
+  msg += `\n🛒 *ITENS:*\n`;
+  cart.forEach(item => {
+    let baseName = item.base === 'acai' ? 'Açaí Puro' : item.base === 'ninho' ? 'Creme de Ninho' : 'Ambos';
+    const itemTotal = (item.price + item.addonsCost) * item.qty;
+    msg += `• ${item.qty}x ${item.name} (${baseName}) - R$ ${itemTotal.toFixed(2).replace('.',',')}\n`;
+    if (item.addons && item.addons.length) msg += `  ↳ Adicionais: ${item.addons.join(', ')}\n`;
+    if (item.addonsCost > 0) msg += `  ↳ Extra: +R$ ${item.addonsCost.toFixed(2).replace('.',',')}\n`;
+  });
+
+  msg += `\n💰 *Total: R$ ${getTotal().toFixed(2).replace('.',',')}*\n`;
+  msg += `💳 *Pagamento:* ${paymentType === 'pix' ? 'PIX' : paymentType === 'cartao' ? 'Cartão' : 'Dinheiro'}\n`;
+
+  if (paymentType === 'dinheiro') {
+    const troco = document.getElementById('inp-troco').value;
+    if (troco) msg += `💵 *Troco para:* R$ ${parseFloat(troco).toFixed(2).replace('.',',')}\n`;
+  }
+
+  const whatsapp = window.elementSdk?.config?.whatsapp_number || '5511999999999';
+  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// Toast
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 left-4 right-4 z-[9999] bg-red-600 text-white text-sm font-semibold px-4 py-3 rounded-xl text-center';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Init
+renderMenu();
+renderCombos();
+renderPromos();
+lucide.createIcons();
+
+// Element SDK
+const defaultConfig = {
+  store_name: 'Açaí Premium 24 Horas',
+  slogan: 'Mais que açaí, uma experiência Premium!',
+  whatsapp_number: '5511999999999',
+  background_color: '#1a0a2e',
+  surface_color: '#2d1b4e',
+  text_color: '#ffffff',
+  primary_color: '#a855f7',
+  accent_color: '#d4af37',
+  font_family: 'Outfit',
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    document.getElementById('store-name').textContent = config.store_name || defaultConfig.store_name;
+    document.getElementById('slogan').textContent = config.slogan || defaultConfig.slogan;
+
+    const font = config.font_family || defaultConfig.font_family;
+    document.body.style.fontFamily = `${font}, sans-serif`;
+
+    const size = config.font_size || defaultConfig.font_size;
+    document.body.style.fontSize = size + 'px';
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+      { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
+      { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['store_name', config.store_name || defaultConfig.store_name],
+    ['slogan', config.slogan || defaultConfig.slogan],
+    ['whatsapp_number', config.whatsapp_number || defaultConfig.whatsapp_number],
+  ])
+});
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc63890c3b4f622',t:'MTc3ODg5MDg3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
