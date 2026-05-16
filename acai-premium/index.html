@@ -285,6 +285,33 @@ html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
        </svg> FINALIZAR PEDIDO NO WHATSAPP </button>
      </div>
     </div>
+   </div><!-- Combo/Promo Config Modal -->
+   <div class="overlay" id="combo-config-modal" style="display:none;" onclick="closeComboModalOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-bold text-lg">⚙️ Configure Cada Açaí</h3><button onclick="closeComboModal()" class="text-purple-300 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div id="combo-items-config" class="space-y-4 mb-6"></div>
+     <div class="border-t border-purple-700 pt-4">
+      <button onclick="confirmComboSetup()" class="btn-gold w-full py-3 rounded-xl text-white font-bold">✓ Adicionar ao Carrinho</button>
+     </div>
+    </div>
+   </div><!-- Combo Addons Selector -->
+   <div class="overlay" id="combo-addons-selector" style="display:none;" onclick="closeComboAddonsSelector()">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-white font-bold text-lg">Adicionar Itens</h3><button onclick="closeComboAddonsSelector()" class="text-purple-300 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div class="bg-purple-900 rounded-lg p-3 mb-4 border border-yellow-500 border-opacity-50">
+      <p class="text-yellow-300 text-xs font-semibold">📌 Primeiros 3 = GRÁTIS</p>
+      <p class="text-yellow-300 text-xs">Cada extra = R$ 1,00</p>
+      <p class="text-white text-xs mt-2" id="combo-addons-counter">Selecionados: 0</p>
+     </div>
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
+     <div class="flex flex-wrap gap-2 mb-4" id="combo-addons-list"></div>
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍓 Frutas</p>
+     <div class="flex flex-wrap gap-2 mb-6" id="combo-fruits-list"></div><button onclick="confirmComboAddons()" class="btn-primary w-full py-3 rounded-xl text-white font-bold">Confirmar</button>
+    </div>
    </div><!-- Addons Modal -->
    <div class="overlay" id="addons-modal" style="display:none;" onclick="closeAddonsOutside(event)">
     <div class="modal" onclick="event.stopPropagation()">
@@ -324,7 +351,7 @@ const promos = [
   { id: 'p2', name: 'Segundou Premium', desc: '2 açaís 300ml + 2 adicionais cada', oldPrice: 21.98, price: 14.90, emoji: '🔥', saving: 7.08 },
 ];
 
-const addons = ['Jujuba','Farinha Láctea','M&M\'s','Chocoball','Gotas de Chocolate','Ovomaltine','Paçoca','Granola','Marshmallow','Amendoim Triturado','Leite em Pó','Granulado'];
+const addons = ['Jujuba','Farinha Láctea','M&Ms','Chocoball','Gotas de Chocolate','Ovomaltine','Paçoca','Granola','Marshmallow','Amendoim Triturado','Leite em Pó','Granulado'];
 const fruits = ['Banana','Morango','Kiwi'];
 
 let cart = [];
@@ -380,7 +407,7 @@ function renderCombos() {
           <p class="text-green-400 font-bold text-lg">R$ ${item.price.toFixed(2).replace('.',',')}</p>
         </div>
       </div>
-      <button onclick="addToCart('${item.id}','combo')" class="btn-gold w-full mt-3 py-2 rounded-full font-bold text-sm">Escolher Adicionais</button>
+      <button onclick="openComboModal('${item.id}')" class="btn-gold w-full mt-3 py-2 rounded-full font-bold text-sm">Escolher Adicionais</button>
     </div>
   `).join('');
 }
@@ -401,9 +428,179 @@ function renderPromos() {
           <span class="text-yellow-300 text-[10px]">💰 Economia: R$ ${item.saving.toFixed(2).replace('.',',')}</span>
         </div>
       </div>
-      <button onclick="addToCart('${item.id}','promo')" class="btn-primary w-full mt-3 py-2 rounded-full text-white font-bold text-sm">Escolher Adicionais</button>
+      <button onclick="openPromoModal('${item.id}')" class="btn-primary w-full mt-3 py-2 rounded-full text-white font-bold text-sm">Escolher Adicionais</button>
     </div>
   `).join('');
+}
+
+// Combo/Promo modal
+let comboModalData = null;
+let comboItemsSetup = [];
+
+function openComboModal(comboId) {
+  const combo = combos.find(c => c.id === comboId);
+  comboModalData = combo;
+  
+  // Determinar quantidade de açaís no combo
+  let numAcais = 4;
+  if (comboId === 'c2' || comboId === 'c3') numAcais = 2;
+  
+  comboItemsSetup = Array(numAcais).fill(null).map((_, i) => ({
+    index: i,
+    base: 'both',
+    addons: []
+  }));
+  
+  renderComboModal();
+  document.getElementById('combo-config-modal').style.display = 'flex';
+}
+
+function openPromoModal(promoId) {
+  const promo = promos.find(p => p.id === promoId);
+  comboModalData = { ...promo, type: 'promo' };
+  
+  // Determinar quantidade de açaís na promo
+  let numAcais = 2;
+  comboItemsSetup = Array(numAcais).fill(null).map((_, i) => ({
+    index: i,
+    base: 'both',
+    addons: []
+  }));
+  
+  renderComboModal();
+  document.getElementById('combo-config-modal').style.display = 'flex';
+}
+
+function renderComboModal() {
+  const container = document.getElementById('combo-items-config');
+  container.innerHTML = comboItemsSetup.map((item, idx) => `
+    <div class="neon-border rounded-xl p-3" style="background:rgba(30,16,64,0.6);">
+      <p class="text-gold text-sm font-bold mb-2" style="color:var(--gold)">Açaí ${idx + 1}</p>
+      <div class="grid grid-cols-3 gap-2 mb-3" id="base-combo-${idx}"></div>
+      <p class="text-purple-300 text-xs font-semibold mb-2">Adicionais (${item.addons.length})</p>
+      <div class="flex flex-wrap gap-2 mb-2" id="addons-combo-${idx}"></div>
+      <button onclick="openComboAddonsSelector(${idx})" class="btn-primary text-xs w-full py-1.5 rounded-lg text-white font-semibold">+ Adicionar</button>
+    </div>
+  `).join('');
+
+  comboItemsSetup.forEach((item, idx) => {
+    const baseContainer = document.getElementById(`base-combo-${idx}`);
+    baseContainer.innerHTML = bases.map((b, i) => `
+      <button onclick="selectComboBase(this,${idx},'${['acai','ninho','both'][i]}')" class="neon-border rounded-full px-2 py-1 text-[10px] text-purple-200 transition-all font-semibold">${b}</button>
+    `).join('');
+    selectComboBase(baseContainer.children[item.base === 'acai' ? 0 : item.base === 'ninho' ? 1 : 2], idx, item.base);
+
+    const addonsContainer = document.getElementById(`addons-combo-${idx}`);
+    addonsContainer.innerHTML = item.addons.map(a => `
+      <span class="chip-selected text-[10px] px-2 py-1 rounded-full">${a}</span>
+    `).join('');
+  });
+}
+
+function selectComboBase(el, idx, base) {
+  comboItemsSetup[idx].base = base;
+  const container = el.parentElement;
+  container.querySelectorAll('button').forEach(b => b.classList.remove('chip-selected'));
+  el.classList.add('chip-selected');
+}
+
+let currentComboIdx = null;
+let currentComboAddons = [];
+
+function openComboAddonsSelector(idx) {
+  currentComboIdx = idx;
+  currentComboAddons = [...comboItemsSetup[idx].addons];
+  renderComboAddonsSelector();
+  document.getElementById('combo-addons-selector').style.display = 'flex';
+}
+
+function renderComboAddonsSelector() {
+  document.getElementById('combo-addons-list').innerHTML = addons.map(a => `
+    <button onclick="toggleComboAddon('${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all ${currentComboAddons.includes(a) ? 'chip-selected' : ''}">${a}</button>
+  `).join('');
+  document.getElementById('combo-fruits-list').innerHTML = fruits.map(f => `
+    <button onclick="toggleComboAddon('${f}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all ${currentComboAddons.includes(f) ? 'chip-selected' : ''}">${f}</button>
+  `).join('');
+  updateComboAddonsCounter();
+}
+
+function toggleComboAddon(name) {
+  const idx = currentComboAddons.indexOf(name);
+  if (idx > -1) {
+    currentComboAddons.splice(idx, 1);
+    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
+      if (b.textContent.trim() === name) b.classList.remove('chip-selected');
+    });
+  } else {
+    currentComboAddons.push(name);
+    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
+      if (b.textContent.trim() === name) b.classList.add('chip-selected');
+    });
+  }
+  updateComboAddonsCounter();
+}
+
+function updateComboAddonsCounter() {
+  const extra = Math.max(0, currentComboAddons.length - 3);
+  const cost = extra * 1.00;
+  let text = `Selecionados: ${currentComboAddons.length}`;
+  if (extra > 0) {
+    text += ` | +R$ ${cost.toFixed(2).replace('.',',')} (${extra} extras)`;
+  }
+  document.getElementById('combo-addons-counter').textContent = text;
+}
+
+function confirmComboAddons() {
+  comboItemsSetup[currentComboIdx].addons = [...currentComboAddons];
+  renderComboModal();
+  closeComboAddonsSelector();
+}
+
+function closeComboAddonsSelector() {
+  document.getElementById('combo-addons-selector').style.display = 'none';
+}
+
+function confirmComboSetup() {
+  // Adicionar cada açaí do combo ao carrinho
+  comboItemsSetup.forEach(item => {
+    const extra = Math.max(0, item.addons.length - 3);
+    const addonsCost = extra * 1.00;
+    
+    const cartItem = {
+      id: comboModalData.id,
+      name: comboModalData.name,
+      price: comboModalData.price / comboItemsSetup.length,
+      emoji: comboModalData.emoji,
+      qty: 1,
+      addons: item.addons,
+      base: item.base,
+      addonsCost: addonsCost,
+      isCombo: true
+    };
+    
+    const existing = cart.find(c =>
+      c.id === cartItem.id &&
+      c.base === cartItem.base &&
+      JSON.stringify(c.addons) === JSON.stringify(cartItem.addons)
+    );
+    
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push(cartItem);
+    }
+  });
+  
+  updateCartBar();
+  closeComboModal();
+}
+
+function closeComboModal() {
+  document.getElementById('combo-config-modal').style.display = 'none';
+}
+
+function closeComboModalOutside(e) {
+  if (e.target === e.currentTarget) closeComboModal();
 }
 
 // Addons modal
@@ -631,7 +828,7 @@ function finalizarPedido() {
     if (troco) msg += `💵 *Troco para:* R$ ${parseFloat(troco).toFixed(2).replace('.',',')}\n`;
   }
 
-  const whatsapp = window.elementSdk?.config?.whatsapp_number || '5511999999999';
+  const whatsapp = window.elementSdk?.config?.whatsapp_number || '5584987576968';
   const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 }
@@ -655,7 +852,7 @@ lucide.createIcons();
 const defaultConfig = {
   store_name: 'Açaí Premium 24 Horas',
   slogan: 'Mais que açaí, uma experiência Premium!',
-  whatsapp_number: '5511999999999',
+  whatsapp_number: '5585987411599',
   background_color: '#1a0a2e',
   surface_color: '#2d1b4e',
   text_color: '#ffffff',
@@ -696,5 +893,5 @@ window.elementSdk.init({
   ])
 });
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc63890c3b4f622',t:'MTc3ODg5MDg3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
