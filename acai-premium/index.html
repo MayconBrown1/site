@@ -188,6 +188,17 @@ html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
   outline: none;
   transition: border-color 0.3s;
 }
+
+/* SELECT DOS BAIRROS */
+select.input-field {
+  background: white;
+  color: black;
+}
+
+select.input-field option {
+  background: white;
+  color: black;
+}
 .input-field:focus {
   border-color: var(--neon-purple);
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
@@ -266,7 +277,29 @@ html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
        <button onclick="selectDelivery('entrega')" id="btn-entrega" class="neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900">🛵 Entrega</button> <button onclick="selectDelivery('retirada')" id="btn-retirada" class="neon-border rounded-xl py-3 text-white font-semibold text-sm transition-all hover:bg-purple-900">🏪 Retirada</button>
       </div><!-- Delivery Form -->
       <div id="form-entrega" style="display:none;" class="space-y-3 mb-4">
-       <input class="input-field" placeholder="Seu nome" id="inp-nome"> <input class="input-field" placeholder="Rua" id="inp-rua"> <input class="input-field" placeholder="Número" id="inp-numero"> <input class="input-field" placeholder="Bairro" id="inp-bairro"> <input class="input-field" placeholder="Referência" id="inp-ref">
+       <input class="input-field" placeholder="Seu nome" id="inp-nome"> <input class="input-field" placeholder="Rua" id="inp-rua"> <input class="input-field" placeholder="Número" id="inp-numero"> <select class="input-field" id="inp-bairro" onchange="updateDeliveryFee()">
+  <option value="">Selecione o bairro</option>
+  <option value="BELA PARNAMIRIM">BELA PARNAMIRIM</option>
+  <option value="SANTA TEREZA">SANTA TEREZA</option>
+  <option value="FRANBOYNS">FRANBOYNS</option>
+  <option value="PASSAGEM DE AREIA">PASSAGEM DE AREIA</option>
+  <option value="ROSA DOS VENTOS">ROSA DOS VENTOS</option>
+  <option value="SANTOS REIS">SANTOS REIS</option>
+  <option value="MONTE CASTELO">MONTE CASTELO</option>
+  <option value="VIDA NOVA">VIDA NOVA</option>
+  <option value="VALE DO SOL">VALE DO SOL</option>
+  <option value="NOVA ESPERANÇA">NOVA ESPERANÇA</option>
+  <option value="BOSQUE DAS COLINAS">BOSQUE DAS COLINAS</option>
+  <option value="BOSQUE BRASIL">BOSQUE BRASIL</option>
+  <option value="JAPECANGA">JAPECANGA</option>
+  <option value="CAJUPIRANGA">CAJUPIRANGA</option>
+  <option value="JARDIM PLANALTO">JARDIM PLANALTO</option>
+  <option value="LIBERDADE">LIBERDADE</option>
+</select>
+
+<p class="text-green-400 text-sm mt-2 font-bold" id="delivery-fee-text">
+Taxa de entrega: R$ 0,00
+</p> <input class="input-field" placeholder="Referência" id="inp-ref">
       </div>
       <div id="form-retirada" style="display:none;" class="space-y-3 mb-4">
        <input class="input-field" placeholder="Seu nome" id="inp-nome-ret">
@@ -352,7 +385,11 @@ const promos = [
 ];
 
 const addons = ['Jujuba','Farinha Láctea','M&Ms','Chocoball','Gotas de Chocolate','Ovomaltine','Paçoca','Granola','Marshmallow','Amendoim Triturado','Leite em Pó','Granulado'];
-const fruits = ['Banana','Morango','Kiwi'];
+const fruits = [
+  { name: 'Banana', available: true },
+  { name: 'Morango', available: false },
+  { name: 'Kiwi', available: false }
+];
 
 let cart = [];
 let currentItemForAddons = null;
@@ -360,6 +397,26 @@ let selectedAddons = [];
 let selectedBase = 'both'; // 'acai', 'ninho', 'both'
 let deliveryType = null;
 let paymentType = null;
+let deliveryFee = 0;
+
+const neighborhoodFees = {
+  "BELA PARNAMIRIM": 5,
+  "SANTA TEREZA": 6,
+  "FRANBOYNS": 5,
+  "PASSAGEM DE AREIA": 5,
+  "ROSA DOS VENTOS": 5,
+  "SANTOS REIS": 6,
+  "MONTE CASTELO": 6,
+  "VIDA NOVA": 7,
+  "VALE DO SOL": 6,
+  "NOVA ESPERANÇA": 7,
+  "BOSQUE DAS COLINAS": 9,
+  "BOSQUE BRASIL": 12,
+  "JAPECANGA": 12,
+  "CAJUPIRANGA": 10,
+  "JARDIM PLANALTO": 10,
+  "LIBERDADE": 10
+};
 
 const bases = ['Açaí Puro', 'Creme de Ninho', 'Ambos'];
 
@@ -413,24 +470,69 @@ function renderCombos() {
 }
 
 function renderPromos() {
+  const today = new Date().getDay();
+  // Domingo=0 | Segunda=1 | Quinta=4
+
   const container = document.getElementById('promo-items');
-  container.innerHTML = promos.map(item => `
-    <div class="promo-glow rounded-2xl p-4 card-hover">
+
+  container.innerHTML = promos.map(item => {
+
+    let available = true;
+    let unavailableText = '';
+
+    // Promoção de quinta
+    if (item.id === 'p1' && today !== 4) {
+      available = false;
+      unavailableText = 'Disponível somente na quinta-feira';
+    }
+
+    // Promoção de segunda
+    if (item.id === 'p2' && today !== 1) {
+      available = false;
+      unavailableText = 'Disponível somente na segunda-feira';
+    }
+
+    return `
+    <div class="promo-glow rounded-2xl p-4 card-hover ${!available ? 'opacity-50' : ''}">
       <div class="flex items-center gap-3">
         <span class="text-3xl">${item.emoji}</span>
+
         <div class="flex-1">
           <h3 class="text-white font-bold">${item.name}</h3>
           <p class="text-purple-300 text-xs">${item.desc}</p>
+
           <div class="flex items-center gap-2 mt-1">
-            <span class="text-red-400 line-through text-xs">R$ ${item.oldPrice.toFixed(2).replace('.',',')}</span>
-            <span class="text-green-400 font-bold">R$ ${item.price.toFixed(2).replace('.',',')}</span>
+            <span class="text-red-400 line-through text-xs">
+              R$ ${item.oldPrice.toFixed(2).replace('.',',')}
+            </span>
+
+            <span class="text-green-400 font-bold">
+              R$ ${item.price.toFixed(2).replace('.',',')}
+            </span>
           </div>
-          <span class="text-yellow-300 text-[10px]">💰 Economia: R$ ${item.saving.toFixed(2).replace('.',',')}</span>
+
+          <span class="text-yellow-300 text-[10px]">
+            💰 Economia: R$ ${item.saving.toFixed(2).replace('.',',')}
+          </span>
+
+          ${!available ? `
+            <p class="text-red-400 text-[11px] mt-2 font-semibold">
+              ${unavailableText}
+            </p>
+          ` : ''}
         </div>
       </div>
-      <button onclick="openPromoModal('${item.id}')" class="btn-primary w-full mt-3 py-2 rounded-full text-white font-bold text-sm">Escolher Adicionais</button>
+
+      <button
+        onclick="${available ? `openPromoModal('${item.id}')` : ''}"
+        class="${available ? 'btn-primary' : 'bg-gray-700 cursor-not-allowed'} w-full mt-3 py-2 rounded-full text-white font-bold text-sm"
+        ${!available ? 'disabled' : ''}
+      >
+        ${available ? 'Escolher Adicionais' : 'Indisponível Hoje'}
+      </button>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 // Combo/Promo modal
@@ -519,8 +621,24 @@ function renderComboAddonsSelector() {
     <button onclick="toggleComboAddon('${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all ${currentComboAddons.includes(a) ? 'chip-selected' : ''}">${a}</button>
   `).join('');
   document.getElementById('combo-fruits-list').innerHTML = fruits.map(f => `
-    <button onclick="toggleComboAddon('${f}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all ${currentComboAddons.includes(f) ? 'chip-selected' : ''}">${f}</button>
-  `).join('');
+  <button 
+    onclick="${f.available ? `toggleComboAddon('${f.name}')` : ''}"
+    class="
+      neon-border 
+      rounded-full 
+      px-3 
+      py-1.5 
+      text-xs 
+      transition-all
+      ${currentComboAddons.includes(f.name) && f.available ? 'chip-selected' : ''}
+      ${!f.available ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-60' : 'text-purple-200'}
+    "
+    ${!f.available ? 'disabled' : ''}
+  >
+    ${f.name}
+    ${!f.available ? ' ❌' : ''}
+  </button>
+`).join('');
   updateComboAddonsCounter();
 }
 
@@ -620,8 +738,23 @@ function renderAddonsModal() {
     <button onclick="toggleAddon(this,'${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all">${a}</button>
   `).join('');
   document.getElementById('fruits-list').innerHTML = fruits.map(f => `
-    <button onclick="toggleAddon(this,'${f}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-purple-200 transition-all">${f}</button>
-  `).join('');
+  <button 
+    onclick="${f.available ? `toggleAddon(this,'${f.name}')` : ''}"
+    class="
+      neon-border 
+      rounded-full 
+      px-3 
+      py-1.5 
+      text-xs 
+      transition-all
+      ${f.available ? 'text-purple-200' : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-60'}
+    "
+    ${!f.available ? 'disabled' : ''}
+  >
+    ${f.name}
+    ${!f.available ? ' ❌' : ''}
+  </button>
+`).join('');
   selectBase(document.querySelector('#base-list button'), 'both');
   updateAddonsCounter();
 }
@@ -700,11 +833,28 @@ function changeQty(index, delta) {
   renderCartModal();
 }
 
+function updateDeliveryFee() {
+  const bairro = document.getElementById('inp-bairro').value;
+
+  deliveryFee = neighborhoodFees[bairro] || 0;
+
+  document.getElementById('delivery-fee-text').textContent =
+    'Taxa de entrega: R$ ' + deliveryFee.toFixed(2).replace('.', ',');
+
+  updateCartBar();
+
+  if (document.getElementById('cart-modal').style.display === 'flex') {
+    renderCartModal();
+  }
+}
+
 function getTotal() { 
-  return cart.reduce((sum, i) => {
+  const subtotal = cart.reduce((sum, i) => {
     const itemCost = (i.price + i.addonsCost) * i.qty;
     return sum + itemCost;
   }, 0);
+
+  return subtotal + deliveryFee;
 }
 
 function updateCartBar() {
@@ -819,7 +969,10 @@ function finalizarPedido() {
     if (item.addons && item.addons.length) msg += `  ↳ Adicionais: ${item.addons.join(', ')}\n`;
     if (item.addonsCost > 0) msg += `  ↳ Extra: +R$ ${item.addonsCost.toFixed(2).replace('.',',')}\n`;
   });
-
+  
+  if (deliveryType === 'entrega') {
+  msg += `🚚 *Taxa de entrega:* R$ ${deliveryFee.toFixed(2).replace('.',',')}\n`;
+}
   msg += `\n💰 *Total: R$ ${getTotal().toFixed(2).replace('.',',')}*\n`;
   msg += `💳 *Pagamento:* ${paymentType === 'pix' ? 'PIX' : paymentType === 'cartao' ? 'Cartão' : 'Dinheiro'}\n`;
 
