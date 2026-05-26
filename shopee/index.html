@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo de Produtos</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    html, body { height: 100%; margin: 0; }
+    .product-card {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.5s ease forwards;
+    }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    .product-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #ee4d2d; border-radius: 4px; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full bg-gray-50">
+  <div id="app" class="w-full h-full overflow-auto">
+   <!-- Header -->
+   <header class="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center gap-3">
+     <h1 id="page-title" class="text-2xl font-bold text-gray-900 shrink-0">🛒 Achados da Shopee</h1>
+     <div class="relative w-full sm:max-w-md ml-auto">
+      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i> <input id="search-input" type="text" placeholder="Buscar produtos..." class="w-full pl-10 pr-4 py-2.5 rounded-full border border-gray-200 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 transition-all">
+     </div>
+    </div>
+   </header><!-- Products Grid -->
+   <main class="max-w-7xl mx-auto px-4 py-8">
+    <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    <p id="no-results" class="hidden text-center text-gray-500 py-16 text-lg">Nenhum produto encontrado 😕</p>
+   </main>
+  </div>
+  <script>
+    // ==========================================
+    // PRODUTOS - Adicione novos produtos aqui!
+    // ==========================================
+    const produtos = [
+      {
+        nome: "Kit Álbum Copa Do Mundo FIFA 2026 Brochura + 7/21/35/70 Figurinhas Pacotes Colecionáveis Originais",
+        preco: "R$37,90 - R$147,90",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-820lw-mnw3cl5mq7sy0c.webp",
+        link: "https://s.shopee.com.br/7pqONUBQrU"
+      },
+      {
+        nome: "Copo Termico 473ml Personalizado Brasil Com Abridor integrado e Tampa - Tema Copa do Mundo",
+        preco: "R$44,90 - R$49,90",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-820lu-mmiv5l9yvbwne0.webp",
+        link: "https://s.shopee.com.br/70HHO61pIK"
+      },
+      {
+        nome: "Cropped Top Feminino Personalizado Copa 2026 ESTHER BRAZIL",
+        preco: "R$29,44",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-7r98o-mallotfak3v317.webp",
+        link: "https://s.shopee.com.br/9zusxhoKEE"
+      },
+      {
+        nome: "Kit Moletom Brasil Unissex Casaco Flanelado Algodão Premium",
+        preco: "R$71,96 - R$119,93",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-81zu3-mktrr54ipds30b.webp",
+        link: "https://s.shopee.com.br/4VZwPfCK7U"
+      },
+      {
+        nome: "Porta Figurinhas Copa Do Mundo Caixa Maleta Organizadora em alto relevo dourado taça da copa 2026",
+        preco: "R$40,90",
+        imagem: "https://down-br.img.susercontent.com/file/sg-11134201-81zvz-mmqggjcvsz5t71.webp",
+        link: "https://s.shopee.com.br/3B4YpGo99b"
+      },
+      {
+        nome: "Blusa Feminina Brasil T-shirt Verão Algodão",
+        preco: "R$31,96 - R$35,96",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-81zul-mku7d8k8n2f661.webp",
+        link: "https://s.shopee.com.br/20sbRCYyAu"
+      },
+      {
+        nome: "Regatas do Brasil Feminina Ribana Copa Bandeira BORDADA",
+        preco: "R$26,90",
+        imagem: "https://down-br.img.susercontent.com/file/br-11134207-820l8-mnevdqtnmm0x97.webp",
+        link: "https://s.shopee.com.br/1Lcue3jFXp"
+      },
+      {
+        nome: "40 Peças / 46 Peças Jogo De Chave Catraca Caixa De Ferramentas Completa Reversível Soquetes Maleta",
+        preco: "R$29,90",
+        imagem: "https://down-tx-br.img.susercontent.com/br-11134207-81z1k-mfrvxdr9i96v11.webp",
+        link: "https://s.shopee.com.br/AAEJARz3dx"
+      }
+    ];
+
+    // Render products
+    function renderProducts(filter = '') {
+      const grid = document.getElementById('products-grid');
+      const noResults = document.getElementById('no-results');
+      const filtered = produtos.filter(p => p.nome.toLowerCase().includes(filter.toLowerCase()));
+
+      grid.innerHTML = '';
+      noResults.classList.toggle('hidden', filtered.length > 0);
+
+      filtered.forEach((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'product-card bg-white rounded-xl overflow-hidden border border-gray-100 cursor-pointer flex flex-col';
+        card.style.animationDelay = `${i * 0.05}s`;
+        card.innerHTML = `
+          <div class="aspect-square bg-gray-100 overflow-hidden">
+            <img src="${p.imagem}" alt="${p.nome}" loading="lazy" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" onerror="this.style.background='linear-gradient(135deg,#fee2e2,#fed7aa)';this.alt='Imagem indisponível';this.src='';">
+          </div>
+          <div class="p-3 flex flex-col flex-1">
+            <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mb-2 flex-1">${p.nome}</h3>
+            <p class="text-lg font-bold text-orange-600 mb-2">${p.preco}</p>
+            <a href="${p.link}" target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2 rounded-lg transition-colors">Comprar Agora</a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Search
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      renderProducts(e.target.value);
+    });
+
+    // Initial render
+    renderProducts();
+    lucide.createIcons();
+
+    // ==========================================
+    // Element SDK
+    // ==========================================
+    const defaultConfig = {
+      page_title: '🛍️ Achados da Shopee',
+      search_placeholder: 'Buscar produtos...',
+      background_color: '#f9fafb',
+      surface_color: '#ffffff',
+      text_color: '#1f2937',
+      primary_action: '#f97316',
+      secondary_action: '#ea580c'
+    };
+
+    function applyConfig(config) {
+      const title = document.getElementById('page-title');
+      const search = document.getElementById('search-input');
+      const app = document.getElementById('app');
+
+      title.textContent = config.page_title || defaultConfig.page_title;
+      search.placeholder = config.search_placeholder || defaultConfig.search_placeholder;
+      app.style.backgroundColor = config.background_color || defaultConfig.background_color;
+    }
+
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => { applyConfig(config); },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+          { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+          { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+          { get: () => config.primary_action || defaultConfig.primary_action, set: (v) => { config.primary_action = v; window.elementSdk.setConfig({ primary_action: v }); } },
+          { get: () => config.secondary_action || defaultConfig.secondary_action, set: (v) => { config.secondary_action = v; window.elementSdk.setConfig({ secondary_action: v }); } }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || 'DM Sans',
+          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+        },
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['page_title', config.page_title || defaultConfig.page_title],
+        ['search_placeholder', config.search_placeholder || defaultConfig.search_placeholder]
+      ])
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a01f3068c927a660',t:'MTc3OTgyMzc3MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
