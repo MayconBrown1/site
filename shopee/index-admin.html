@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Painel Admin</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{
+      font-family:'DM Sans',sans-serif;
+    }
+
+    body{
+      background:#f5f5f5;
+    }
+
+    .card{
+      box-shadow:0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .loading{
+      pointer-events:none;
+      opacity:.7;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen">
+
+  <!-- TOPO -->
+  <header class="bg-white border-b sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+      <h1 class="text-2xl font-bold text-gray-800">
+        ⚙️ Painel de Controle
+      </h1>
+
+      <span class="text-sm bg-orange-100 text-orange-700 px-3 py-1 rounded-full font-semibold">
+        Firebase + Cloudinary
+      </span>
+
+    </div>
+  </header>
+
+  <!-- CONTEÚDO -->
+  <main class="max-w-7xl mx-auto p-4 grid lg:grid-cols-3 gap-6">
+
+    <!-- FORM -->
+    <section class="lg:col-span-1">
+
+      <div class="card bg-white rounded-3xl p-5">
+
+        <h2 class="text-xl font-bold text-gray-800 mb-5">
+          Adicionar Produto
+        </h2>
+
+        <form id="formProduto" class="space-y-4">
+
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
+              Nome do Produto
+            </label>
+
+            <input
+              type="text"
+              id="nome"
+              required
+              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              placeholder="Digite o nome"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
+              Preço
+            </label>
+
+            <input
+              type="text"
+              id="preco"
+              required
+              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              placeholder="R$ 00,00"
+            />
+          </div>
+
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
+              Link do Produto
+            </label>
+
+            <input
+              type="url"
+              id="link"
+              required
+              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
+              placeholder="https://..."
+            />
+          </div>
+
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
+              Imagem
+            </label>
+
+            <input
+              type="file"
+              id="imagem"
+              accept="image/*"
+              required
+              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 bg-white"
+            />
+          </div>
+
+          <button
+            id="btnSalvar"
+            type="submit"
+            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition"
+          >
+            Salvar Produto
+          </button>
+
+        </form>
+
+      </div>
+
+    </section>
+
+    <!-- PRODUTOS -->
+    <section class="lg:col-span-2">
+
+      <div class="card bg-white rounded-3xl p-5">
+
+        <div class="flex items-center justify-between mb-5">
+
+          <h2 class="text-xl font-bold text-gray-800">
+            Produtos Cadastrados
+          </h2>
+
+          <button
+            onclick="carregarProdutos()"
+            class="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl text-sm font-semibold"
+          >
+            Atualizar
+          </button>
+
+        </div>
+
+        <div
+          id="listaProdutos"
+          class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FIREBASE -->
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      deleteDoc,
+      doc,
+      serverTimestamp,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    // =========================================
+    // FIREBASE
+    // =========================================
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBjFcs1Qa8mM4r9h1jhZNK6FVo2nLRaBrg",
+      authDomain: "cardapio-lella-salgados.firebaseapp.com",
+      projectId: "cardapio-lella-salgados",
+      storageBucket: "cardapio-lella-salgados.firebasestorage.app",
+      messagingSenderId: "768114063966",
+      appId: "1:768114063966:web:228f8f855f6fef54b992cf"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
+
+    // =========================================
+    // CLOUDINARY
+    // =========================================
+
+    /*
+      IMPORTANTE:
+
+      TROQUE ABAIXO PELOS SEUS DADOS
+    */
+
+    const CLOUD_NAME = "drpd9kv7g";
+
+    /*
+      VOCÊ PRECISA CRIAR UM UPLOAD PRESET
+      NO CLOUDINARY.
+
+      NOME EXEMPLO:
+      produtos_publicos
+    */
+
+    const UPLOAD_PRESET = "produtos_publicos";
+
+    // =========================================
+    // ELEMENTOS
+    // =========================================
+
+    const form = document.getElementById("formProduto");
+
+    const btnSalvar = document.getElementById("btnSalvar");
+
+    const listaProdutos = document.getElementById("listaProdutos");
+
+    // =========================================
+    // ENVIAR IMAGEM CLOUDINARY
+    // =========================================
+
+    async function uploadImagem(file){
+
+      const formData = new FormData();
+
+      formData.append("file", file);
+
+      formData.append("upload_preset", UPLOAD_PRESET);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      const data = await response.json();
+
+      return data.secure_url;
+
+    }
+
+    // =========================================
+    // SALVAR PRODUTO
+    // =========================================
+
+    form.addEventListener("submit", async (e) => {
+
+      e.preventDefault();
+
+      try{
+
+        btnSalvar.innerText = "Enviando...";
+        btnSalvar.classList.add("loading");
+
+        const nome = document.getElementById("nome").value;
+
+        const preco = document.getElementById("preco").value;
+
+        const link = document.getElementById("link").value;
+
+        const imagem = document.getElementById("imagem").files[0];
+
+        // upload imagem
+        const imagemURL = await uploadImagem(imagem);
+
+        // salvar firebase
+        await addDoc(collection(db, "produtos"), {
+
+          nome,
+          preco,
+          link,
+          imagem: imagemURL,
+          criadoEm: serverTimestamp()
+
+        });
+
+        alert("Produto cadastrado com sucesso!");
+
+        form.reset();
+
+        carregarProdutos();
+
+      }catch(error){
+
+        console.error(error);
+
+        alert("Erro ao salvar produto!");
+
+      }finally{
+
+        btnSalvar.innerText = "Salvar Produto";
+        btnSalvar.classList.remove("loading");
+
+      }
+
+    });
+
+    // =========================================
+    // CARREGAR PRODUTOS
+    // =========================================
+
+    async function carregarProdutos(){
+
+      listaProdutos.innerHTML = `
+        <div class="col-span-full text-center py-10 text-gray-500">
+          Carregando produtos...
+        </div>
+      `;
+
+      try{
+
+        const snapshot = await getDocs(
+  collection(db, "produtos")
+);
+
+        listaProdutos.innerHTML = "";
+
+        snapshot.forEach((docItem) => {
+
+          const produto = docItem.data();
+
+          const div = document.createElement("div");
+
+          div.className = `
+            border
+            border-gray-100
+            rounded-2xl
+            overflow-hidden
+            bg-white
+          `;
+
+          div.innerHTML = `
+
+            <div class="aspect-square bg-gray-100 overflow-hidden">
+
+              <img
+                src="${produto.imagem}"
+                class="w-full h-full object-cover"
+              >
+
+            </div>
+
+            <div class="p-4">
+
+              <h3 class="font-bold text-gray-800 line-clamp-2 mb-2">
+                ${produto.nome}
+              </h3>
+
+              <p class="text-orange-600 font-bold text-lg mb-3">
+                ${produto.preco}
+              </p>
+
+              <div class="flex gap-2">
+
+                <a
+                  href="${produto.link}"
+                  target="_blank"
+                  class="flex-1 text-center bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl text-sm font-semibold"
+                >
+                  Abrir
+                </a>
+
+                <button
+                  class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl text-sm font-semibold"
+                  onclick="deletarProduto('${docItem.id}')"
+                >
+                  Excluir
+                </button>
+
+              </div>
+
+            </div>
+
+          `;
+
+          listaProdutos.appendChild(div);
+
+        });
+
+      }catch(error){
+
+        console.error(error);
+
+        listaProdutos.innerHTML = `
+          <div class="col-span-full text-center py-10 text-red-500">
+            Erro ao carregar produtos.
+          </div>
+        `;
+
+      }
+
+    }
+
+    // =========================================
+    // EXCLUIR
+    // =========================================
+
+    window.deletarProduto = async (id) => {
+
+      const confirmar = confirm("Deseja excluir esse produto?");
+
+      if(!confirmar) return;
+
+      try{
+
+        await deleteDoc(doc(db, "produtos", id));
+
+        carregarProdutos();
+
+      }catch(error){
+
+        console.error(error);
+
+        alert("Erro ao excluir!");
+
+      }
+
+    }
+
+    // =========================================
+    // INICIAR
+    // =========================================
+
+    carregarProdutos();
+
+  </script>
+
+</body>
+</html>
