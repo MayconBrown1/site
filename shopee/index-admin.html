@@ -104,18 +104,18 @@
           </div>
 
           <div>
-            <label class="text-sm font-semibold text-gray-700">
-              Imagem
-            </label>
+  <label class="text-sm font-semibold text-gray-700">
+    Link da Imagem
+  </label>
 
-            <input
-              type="file"
-              id="imagem"
-              accept="image/*"
-              required
-              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 bg-white"
-            />
-          </div>
+  <input
+    type="url"
+    id="imagem"
+    required
+    class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
+    placeholder="https://site.com/imagem.jpg"
+  />
+</div>
 
           <button
             id="btnSalvar"
@@ -229,32 +229,6 @@
     const listaProdutos = document.getElementById("listaProdutos");
 
     // =========================================
-    // ENVIAR IMAGEM CLOUDINARY
-    // =========================================
-
-    async function uploadImagem(file){
-
-      const formData = new FormData();
-
-      formData.append("file", file);
-
-      formData.append("upload_preset", UPLOAD_PRESET);
-
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData
-        }
-      );
-
-      const data = await response.json();
-
-      return data.secure_url;
-
-    }
-
-    // =========================================
     // SALVAR PRODUTO
     // =========================================
 
@@ -273,10 +247,7 @@
 
         const link = document.getElementById("link").value;
 
-        const imagem = document.getElementById("imagem").files[0];
-
-        // upload imagem
-        const imagemURL = await uploadImagem(imagem);
+        const imagemURL = document.getElementById("imagem").value;
 
         // salvar firebase
         await addDoc(collection(db, "produtos"), {
@@ -324,9 +295,12 @@
 
       try{
 
-        const snapshot = await getDocs(
-  collection(db, "produtos")
-);
+        const q = query(
+          collection(db, "produtos"),
+          orderBy("criadoEm", "desc")
+        );
+
+        const snapshot = await getDocs(q);
 
         listaProdutos.innerHTML = "";
 
