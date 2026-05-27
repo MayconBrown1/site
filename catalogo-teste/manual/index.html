@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Montador de Catálogo</title>
+
+  <style>
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:#0f172a;
+      color:white;
+      padding:30px;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    h1{
+      margin-bottom:30px;
+      font-size:32px;
+    }
+
+    .card{
+      background:#1e293b;
+      border-radius:16px;
+      padding:20px;
+      margin-bottom:20px;
+      border:1px solid rgba(255,255,255,0.08);
+    }
+
+    .topo{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:15px;
+    }
+
+    h2{
+      font-size:22px;
+    }
+
+    button{
+      border:none;
+      background:#2563eb;
+      color:white;
+      padding:12px 18px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+      transition:0.2s;
+    }
+
+    button:hover{
+      transform:scale(1.03);
+    }
+
+    .firebase{
+      background:#f59e0b;
+      color:black;
+      width:100%;
+      margin-top:10px;
+    }
+
+    .copiado{
+      background:#16a34a !important;
+    }
+
+    textarea{
+      width:100%;
+      height:350px;
+      background:#0f172a;
+      color:white;
+      border:1px solid #334155;
+      border-radius:12px;
+      padding:15px;
+      resize:vertical;
+      font-size:14px;
+      outline:none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Montador de Catálogo</h1>
+
+    <!-- ========================= -->
+    <!-- INDEX -->
+    <!-- ========================= -->
+
+    <div class="card">
+
+      <div class="topo">
+
+        <h2>INDEX</h2>
+
+        <button onclick="copiar('index', this)">
+          Copiar INDEX
+        </button>
+
+      </div>
+
+      <textarea id="index"></textarea>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- INDEX ADMIN -->
+    <!-- ========================= -->
+
+    <div class="card">
+
+      <div class="topo">
+
+        <h2>INDEX-ADMIN</h2>
+
+        <button onclick="copiar('admin', this)">
+          Copiar INDEX-ADMIN
+        </button>
+
+      </div>
+
+      <textarea id="admin"></textarea>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- FIREBASE RULES -->
+    <!-- ========================= -->
+
+    <div class="card">
+
+      <div class="topo">
+
+        <h2>REGRAS FIREBASE</h2>
+
+        <button onclick="copiar('rules', this)">
+          Copiar Regras
+        </button>
+
+      </div>
+
+<textarea id="rules">
+
+rules_version = '2';
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    match /produtos/{produtoId} {
+
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+
+    }
+
+  }
+
+}
+
+</textarea>
+
+    </div>
+
+
+    <!-- BOTÃO FIREBASE -->
+
+    <button class="firebase" onclick="abrirFirebase()">
+      Abrir Firebase
+    </button>
+
+  </div>
+
+  <script>
+
+    async function carregarArquivos(){
+
+      try{
+
+        // INDEX
+        const respostaIndex = await fetch(
+          '/catalogo-teste/index.html'
+        );
+
+        const htmlIndex = await respostaIndex.text();
+
+        document.getElementById("index").value = htmlIndex;
+
+
+        // ADMIN
+        const respostaAdmin = await fetch(
+          '/catalogo-teste/index-admin.html'
+        );
+
+        const htmlAdmin = await respostaAdmin.text();
+
+        document.getElementById("admin").value = htmlAdmin;
+
+      }catch(erro){
+
+        console.log("Erro ao carregar arquivos", erro);
+
+      }
+
+    }
+
+    carregarArquivos();
+
+
+    function copiar(id, botao){
+
+      const texto = document.getElementById(id).value;
+
+      navigator.clipboard.writeText(texto);
+
+      const textoOriginal = botao.innerText;
+
+      botao.innerText = "Copiado!";
+      botao.classList.add("copiado");
+
+      setTimeout(() => {
+
+        botao.innerText = textoOriginal;
+        botao.classList.remove("copiado");
+
+      }, 2000);
+
+    }
+
+    function abrirFirebase(){
+
+      window.open(
+        "https://console.firebase.google.com/",
+        "_blank"
+      );
+
+    }
+
+  </script>
+
+</body>
+</html>

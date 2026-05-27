@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Catálogo Digital</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{
+      font-family:'DM Sans',sans-serif;
+    }
+
+    body{
+      background:#f5f5f5;
+    }
+
+    .product-card{
+      transition:.25s;
+      animation:fade .4s ease;
+    }
+
+    .product-card:hover{
+      transform:translateY(-5px);
+      box-shadow:0 15px 35px rgba(0,0,0,.12);
+    }
+
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(15px);
+      }
+      to{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    ::-webkit-scrollbar{
+      width:8px;
+    }
+
+    ::-webkit-scrollbar-thumb{
+      background:#ff5a1f;
+      border-radius:10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-50 bg-white border-b shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row gap-3 items-center">
+
+      <h1 class="text-2xl font-bold text-gray-800">
+        Catálogo Digital
+      </h1>
+
+      <div class="relative w-full md:max-w-md md:ml-auto">
+        <i data-lucide="search"
+           class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400">
+        </i>
+
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Buscar produtos..."
+          class="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400"
+        />
+      </div>
+
+    </div>
+  </header>
+
+  <!-- PRODUTOS -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+
+    <div
+      id="productsGrid"
+      class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    </div>
+
+    <div
+      id="emptyState"
+      class="hidden text-center py-20 text-gray-500 text-lg">
+      Nenhum produto encontrado 😢
+    </div>
+
+  </main>
+
+  <!-- FIREBASE -->
+  <script type="module">
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      orderBy
+    } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    // =========================================
+    // FIREBASE CONFIG
+    // =========================================
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC6SMTatXkPS3ZbGlFB_Z8GJO9RUJJrg1c",
+  authDomain: "teste-catalogo-ba45d.firebaseapp.com",
+  projectId: "teste-catalogo-ba45d",
+  storageBucket: "teste-catalogo-ba45d.firebasestorage.app",
+  messagingSenderId: "764502618457",
+  appId: "1:764502618457:web:2f58ba7b1d1f629ecd9c48"
+    };
+
+    // =========================================
+    // INICIAR FIREBASE
+    // =========================================
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
+
+    // =========================================
+    // ELEMENTOS
+    // =========================================
+
+    const productsGrid = document.getElementById("productsGrid");
+    const searchInput = document.getElementById("searchInput");
+    const emptyState = document.getElementById("emptyState");
+
+    let todosProdutos = [];
+
+    // =========================================
+    // BUSCAR PRODUTOS
+    // =========================================
+
+    async function carregarProdutos(){
+
+      try{
+
+        const produtosRef = collection(db, "produtos");
+
+        const snapshot = await getDocs(
+  collection(db, "produtos")
+);
+
+        todosProdutos = [];
+
+        snapshot.forEach((doc) => {
+
+          todosProdutos.push({
+            id: doc.id,
+            ...doc.data()
+          });
+
+        });
+
+        renderizarProdutos(todosProdutos);
+
+      }catch(error){
+
+        console.error(error);
+
+        productsGrid.innerHTML = `
+          <div class="col-span-full text-center text-red-500 py-20">
+            Erro ao carregar produtos.
+          </div>
+        `;
+
+      }
+
+    }
+
+    // =========================================
+    // RENDERIZAR
+    // =========================================
+
+    function renderizarProdutos(produtos){
+
+      productsGrid.innerHTML = "";
+
+      if(produtos.length === 0){
+
+        emptyState.classList.remove("hidden");
+
+        return;
+
+      }
+
+      emptyState.classList.add("hidden");
+
+      produtos.forEach((produto, index) => {
+
+        const card = document.createElement("div");
+
+        card.className = `
+          product-card
+          bg-white
+          rounded-2xl
+          overflow-hidden
+          border
+          border-gray-100
+          flex
+          flex-col
+        `;
+
+        card.style.animationDelay = `${index * 0.05}s`;
+
+        card.innerHTML = `
+
+          <div class="aspect-square bg-gray-100 overflow-hidden">
+
+            <img
+              src="${produto.imagem}"
+              alt="${produto.nome}"
+              class="w-full h-full object-cover hover:scale-105 transition duration-300"
+              loading="lazy"
+              onerror="this.src='https://placehold.co/600x600?text=Sem+Imagem'"
+            >
+
+          </div>
+
+          <div class="p-3 flex flex-col flex-1">
+
+            <h2 class="text-sm text-gray-800 font-medium line-clamp-2 mb-2 flex-1">
+              ${produto.nome}
+            </h2>
+
+            <div class="text-orange-600 font-bold text-xl mb-3">
+              ${produto.preco}
+            </div>
+
+            <a
+              href="${produto.link}"
+              target="_blank"
+              class="bg-orange-500 hover:bg-orange-600 text-white text-center py-2.5 rounded-xl font-semibold transition"
+            >
+              Comprar Agora
+            </a>
+
+          </div>
+
+        `;
+
+        productsGrid.appendChild(card);
+
+      });
+
+    }
+
+    // =========================================
+    // PESQUISA
+    // =========================================
+
+    searchInput.addEventListener("input", () => {
+
+      const termo = searchInput.value.toLowerCase();
+
+      const filtrados = todosProdutos.filter((produto) => {
+
+        return produto.nome.toLowerCase().includes(termo);
+
+      });
+
+      renderizarProdutos(filtrados);
+
+    });
+
+    // =========================================
+    // INICIAR
+    // =========================================
+
+    carregarProdutos();
+
+    // ÍCONES
+    lucide.createIcons();
+
+  </script>
+
+</body>
+</html>
