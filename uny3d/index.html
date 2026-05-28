@@ -218,12 +218,13 @@
           <div class="aspect-square bg-gray-100 overflow-hidden">
 
             <img
-              src="${produto.imagem}"
-              alt="${produto.nome}"
-              class="w-full h-full object-cover hover:scale-105 transition duration-300"
-              loading="lazy"
-              onerror="this.src='https://placehold.co/600x600?text=Sem+Imagem'"
-            >
+  src="${produto.imagem}"
+  alt="${produto.nome}"
+  class="w-full h-full object-cover hover:scale-105 transition duration-300 cursor-zoom-in"
+  loading="lazy"
+  onclick="abrirImagem('${produto.imagem}')"
+  onerror="this.src='https://placehold.co/600x600?text=Sem+Imagem'"
+>
 
           </div>
 
@@ -313,7 +314,73 @@ Pode me passar mais informações?`
     // ÍCONES
     lucide.createIcons();
 
+    // =========================================
+// MODAL IMAGEM
+// =========================================
+
+const imageModal = document.getElementById("imageModal");
+
+const modalImage = document.getElementById("modalImage");
+
+const closeModal = document.getElementById("closeModal");
+
+// abrir
+window.abrirImagem = (src) => {
+
+  modalImage.src = src;
+
+  imageModal.classList.remove("hidden");
+
+  imageModal.classList.add("flex");
+
+}
+
+// fechar botão
+closeModal.addEventListener("click", () => {
+
+  imageModal.classList.add("hidden");
+
+  imageModal.classList.remove("flex");
+
+});
+
+// fechar clicando fora
+imageModal.addEventListener("click", (e) => {
+
+  if(e.target === imageModal){
+
+    imageModal.classList.add("hidden");
+
+    imageModal.classList.remove("flex");
+
+  }
+
+});
+
   </script>
+
+  <!-- MODAL IMAGEM -->
+<div
+  id="imageModal"
+  class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[9999] p-4"
+>
+
+  <!-- BOTÃO FECHAR -->
+  <button
+    id="closeModal"
+    class="absolute top-5 right-5 text-white text-5xl font-light hover:scale-110 transition"
+  >
+    &times;
+  </button>
+
+  <!-- IMAGEM -->
+  <img
+    id="modalImage"
+    src=""
+    class="max-w-full max-h-full rounded-2xl shadow-2xl object-contain"
+  >
+
+</div>
 
 </body>
 </html>
