@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Uny3D</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="shortcut icon" href="/img/uny3d/Uny3D.jpg" type="image/x-icon">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <style>
+* { font-family: sans-serif; }
+html, body { height: 100%; margin: 0; }
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+.product-img-wrap {
+  overflow: hidden;
+}
+
+.fade-up {
+  animation: fadeUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto" style="background-color: #F0EDE6;">
+   <!-- HEADER -->
+   <header class="w-full px-6 py-5 flex items-center justify-between" style="background-color: #1A1A2E;">
+    <div class="flex items-center gap-3">
+     <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: #E94560;">
+      <svg width="22" height="22" viewbox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z" /><path d="M2 17l10 5 10-5" /><path d="M2 12l10 5 10-5" />
+      </svg>
+     </div>
+     <h1 id="company-name" class="text-xl font-bold tracking-tight" style="color: #F0EDE6;">Catálogo Uny3D</h1>
+    </div>
+    <div class="flex items-center gap-2 text-sm font-medium" style="color: #F0EDE6; opacity: 0.7;">
+     <i data-lucide="printer" style="width:16px;height:16px;"></i> <span>Impressão 3D</span>
+    </div>
+   </header><!-- BANNER -->
+   <div class="w-full px-4 py-3">
+    <div id="banner" class="banner-shine w-full rounded-2xl px-6 py-8 md:py-10 text-center" style="background: linear-gradient(135deg, #E94560, #C73659, #E94560, #FF6B81); color: #F0EDE6;">
+     <div class="flex items-center justify-center gap-2 mb-2">
+      <i data-lucide="trending-up" style="width:28px;height:28px;"></i>
+     </div>
+     <p id="banner-text" class="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight">Seja revendedor e lucre até 100%!</p>
+     <p class="mt-2 text-sm font-medium opacity-80">Produtos prontos para revenda com alta margem de lucro</p>
+    </div>
+   </div><!-- FILTRO / INFO -->
+   <div class="px-4 md:px-6 py-4">
+    <p class="text-sm font-semibold" style="color: #1A1A2E;"><span id="product-count">0</span> produtos disponíveis</p>
+   </div><!-- GRID DE PRODUTOS -->
+   <div id="products-grid" class="px-4 md:px-6 pb-10 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <!-- Produtos gerados via JS -->
+   </div><!-- FOOTER -->
+   <footer class="w-full px-6 py-6 text-center text-xs font-medium" style="color: #1A1A2E; opacity: 0.5;">
+    <p>© 2026 — Todos os direitos reservados</p>
+   </footer>
+  </div>
+  <script>
+  
+
+  /* ============================================================
+   *  ✏️ EDITE SEUS PRODUTOS AQUI!
+   *  
+   *  Para adicionar um novo produto, copie o bloco abaixo
+   *  e cole dentro do array "produtos":
+   *  
+   *  {
+   *    nome: "Nome do Produto",    // ← Altere o nome aqui
+   *    preco: 7,                   // ← Altere o preço aqui (número)
+   *    estoque: 50,                // ← Altere o estoque aqui
+   *    imagem: "img/produto.png",  // ← Altere a imagem aqui
+   *    emoji: "🎮"                 // ← Emoji exibido como ícone
+   *  },
+   *
+   *  DICA: Se não tiver imagem, basta colocar um emoji diferente!
+   * ============================================================ */
+
+  const produtos = [
+    {
+      nome: "Chaveiro do Flamengo",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 11,
+      imagem: "/img/uny3d/0001.jpg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro turbo - roxo/preto",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 1,
+      imagem: "/img/uny3d/0002.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro turbo - branco/preto",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 7,
+      imagem: "/img/uny3d/0003.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro roda car - roxa/cinza",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 2,
+      imagem: "/img/uny3d/0004.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro capacete de obra - amarelo",
+      preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 8,
+      imagem: "/img/uny3d/0005.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro roda car - amarela",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 2,
+      imagem: "/img/uny3d/0006.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro arma glock - preta",
+      preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 6,
+      imagem: "/img/uny3d/0007.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro banco sport - vermelho",
+      preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 5,
+      imagem: "/img/uny3d/0008.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chvairo troféu da copa",
+      preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 8,
+      imagem: "/img/uny3d/0009.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro revolve 380",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 6,
+      imagem: "/img/uny3d/0010.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro banco sport - preto",
+      preco: 5,
+      precoRevenda: 2.5,
+      minRevenda: 10,
+      estoque: 2,
+      imagem: "/img/uny3d/0011.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Pegador Multiuso Fixa Prime 10un - Preto",
+      preco: 6,
+      precoRevenda: 4,
+      minRevenda: 10,
+      estoque: 13,
+      imagem: "/img/uny3d/0012.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Pegador Multiuso Fixa Prime 10un - Branco",
+      preco: 6,
+      precoRevenda: 4,
+      minRevenda: 10,
+      estoque: 11,
+      imagem: "/img/uny3d/0013.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Suporte duplo controle PS5 - Preto",
+      preco: 35,
+      precoRevenda: 17.5,
+      minRevenda: 10,
+      estoque: 1,
+      imagem: "/img/uny3d/0014.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Suporte controle PS5 - Preto",
+      preco: 30,
+      precoRevenda: 15,
+      minRevenda: 10,
+      estoque: 2,
+      imagem: "/img/uny3d/0015.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro roda car - preto/cinza",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 0,
+      imagem: "/img/uny3d/0016.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro turbo - preto/cinza",
+      preco: 7,
+      precoRevenda: 3.5,
+      minRevenda: 10,
+      estoque: 0,
+      imagem: "/img/uny3d/0017.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro redondo personalziado com foto",
+      preco: 10,
+      precoRevenda: 3.5,
+      minRevenda: 20,
+      estoque: 22,
+      imagem: "/img/uny3d/0018.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro Retângulo personalziado com foto",
+      preco: 10,
+      precoRevenda: 3.5,
+      minRevenda: 20,
+      estoque: 12,
+      imagem: "/img/uny3d/0019.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Chaveiro crânio - preto",
+      preco: 10,
+      precoRevenda: 5,
+      minRevenda: 10,
+      estoque: 5,
+      imagem: "/img/uny3d/0020.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Porta lata Monster - Consultar Cor",
+      preco: 40,
+      precoRevenda: 20,
+      minRevenda: 10,
+      estoque: 1,
+      imagem: "/img/uny3d/0021.jpeg",
+      emoji: "📦"
+    },
+    {
+      nome: "Bumerang - Consultar Cor",
+      preco: 10,
+      precoRevenda: 4,
+      minRevenda: 10,
+      estoque: 1,
+      imagem: "/img/uny3d/0022.jpeg",
+      emoji: "📦"
+    },
+  ];
+
+  let whatsappNumber = "5584981770146";
+
+  // ─── Configuração padrão ───
+  const defaultConfig = {
+    company_name: "Catálogo Uny3D",
+    banner_text: "Seja revendedor e lucre até 100%!",
+    whatsapp_number: "5584981770146",
+    background_color: "#F0EDE6",
+    header_color: "#1A1A2E",
+    accent_color: "#E94560",
+    text_color: "#1A1A2E",
+    card_color: "#FFFFFF"
+  };
+
+  // ─── Formatar preço em reais ───
+  function formatPrice(value) {
+    return "R$ " + value.toFixed(2).replace(".", ",");
+  }
+
+  // ─── Gerar HTML dos produtos ───
+  function renderProducts() {
+    const grid = document.getElementById("products-grid");
+    grid.innerHTML = "";
+    let available = 0;
+
+    const config = defaultConfig;
+    const accent = config.accent_color || defaultConfig.accent_color;
+    const cardBg = config.card_color || defaultConfig.card_color;
+    const textCol = config.text_color || defaultConfig.text_color;
+
+    produtos.forEach(function(p, i) {
+      if (p.estoque > 0) available++;
+      const isLow = p.estoque > 0 && p.estoque < 10;
+      const isOut = p.estoque === 0;
+
+      const msg = encodeURIComponent(
+  "Olá! Tenho interesse no produto: " + p.nome +
+  "\nPreço varejo: " + formatPrice(p.preco) +
+  (p.precoRevenda ? "\nPreço revenda (" + p.minRevenda + " un): " + formatPrice(p.precoRevenda) : "")
+);
+      const wpNum = config.whatsapp_number || whatsappNumber;
+      const wpLink = "https://wa.me/" + wpNum + "?text=" + msg;
+
+      const card = document.createElement("div");
+      card.className = "product-card rounded-2xl overflow-hidden fade-up";
+      card.style.animationDelay = (i * 0.08) + "s";
+      card.style.backgroundColor = cardBg;
+      card.style.border = "1px solid rgba(0,0,0,0.06)";
+      if (isOut) card.style.opacity = "0.55";
+
+      card.innerHTML =
+        '<div class="product-img-wrap w-full aspect-square flex items-center justify-center" style="background:#f5f5f5;">' +
+
+  (p.imagem
+  ? '<img src="' + p.imagem + '" alt="' + p.nome + '" class="w-full h-full object-cover cursor-pointer produto-img" data-img="' + p.imagem + '">'
+    : '<span class="text-6xl md:text-7xl select-none">' + (p.emoji || "📦") + '</span>'
+  ) +
+
+'</div>' +
+        '<div class="p-3 md:p-4">' +
+          // Badge estoque
+          (isLow ?
+            '<span class="badge-low inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-2" style="background:#FFF3CD;color:#856404;">' +
+              '<i data-lucide="alert-triangle" style="width:11px;height:11px;"></i> Últimas ' + p.estoque + ' un.' +
+            '</span>'
+          : isOut ?
+            '<span class="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-2" style="background:#F8D7DA;color:#842029;">' +
+              'Indisponível' +
+            '</span>'
+          :
+            '<span class="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full mb-2" style="background:#D1E7DD;color:#0F5132;">' +
+              'Em estoque: ' + p.estoque + ' un.' +
+            '</span>'
+          ) +
+          // Nome
+          '<h3 class="font-bold text-sm md:text-base leading-tight mb-1" style="color:' + textCol + ';">' + p.nome + '</h3>' +
+          // Preço
+          '<div class="mb-3">' +
+
+  // PREÇO VAREJO
+  '<p class="text-sm font-medium" style="color:#555;">Varejo</p>' +
+  '<p class="text-lg font-bold" style="color:' + accent + ';">' + formatPrice(p.preco) + '</p>' +
+
+  // PREÇO REVENDA
+  (p.precoRevenda
+    ? '<p class="text-xs mt-1" style="color:#777;">Revenda (mín. ' + p.minRevenda + ' un.)</p>' +
+      '<p class="text-base font-extrabold text-green-600">' + formatPrice(p.precoRevenda) + '</p>'
+    : ''
+  ) +
+
+'</div>' +
+          // Botão WhatsApp
+          (isOut ?
+            '<button disabled class="w-full py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style="background:#ccc;color:#888;">Indisponível</button>'
+          :
+            '<a href="' + wpLink + '" target="_blank" rel="noopener noreferrer" class="whatsapp-btn w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 no-underline" style="background:#25D366;color:white;display:flex;">' +
+              '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.13.556 4.13 1.528 5.87L0 24l6.305-1.654A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82a9.78 9.78 0 01-5.26-1.532l-.378-.224-3.916 1.027 1.045-3.82-.247-.393A9.78 9.78 0 012.18 12 9.82 9.82 0 0112 2.18 9.82 9.82 0 0121.82 12 9.82 9.82 0 0112 21.82z"/></svg>' +
+              'Comprar' +
+            '</a>'
+          ) +
+        '</div>';
+
+      grid.appendChild(card);
+      setTimeout(() => {
+  document.querySelectorAll(".produto-img").forEach(img => {
+    img.addEventListener("click", function() {
+      abrirImagem(this.getAttribute("data-img"));
+    });
+  });
+}, 100);
+    });
+
+    document.getElementById("product-count").textContent = available;
+    if (window.lucide) {
+  lucide.createIcons();
+}
+  }
+
+  // ─── Aplicar configurações visuais ───
+  function applyConfig(config) {
+    const bg = config.background_color || defaultConfig.background_color;
+    const header = config.header_color || defaultConfig.header_color;
+    const accent = config.accent_color || defaultConfig.accent_color;
+    const text = config.text_color || defaultConfig.text_color;
+    const card = config.card_color || defaultConfig.card_color;
+
+    document.getElementById("app").style.backgroundColor = bg;
+    document.querySelector("header").style.backgroundColor = header;
+
+    const companyEl = document.getElementById("company-name");
+    companyEl.textContent = config.company_name || defaultConfig.company_name;
+    companyEl.style.color = bg;
+
+    const bannerEl = document.getElementById("banner");
+    bannerEl.style.background = "linear-gradient(135deg, " + accent + ", " + accent + "cc, " + accent + ", " + accent + "88)";
+    bannerEl.style.backgroundSize = "200% 100%";
+    bannerEl.style.color = bg;
+
+    document.getElementById("banner-text").textContent = config.banner_text || defaultConfig.banner_text;
+
+    if (config.whatsapp_number) whatsappNumber = config.whatsapp_number;
+
+    // Re-render products with new colors
+    renderProducts();
+  }
+
+document.addEventListener("DOMContentLoaded", function () {
+  renderProducts();
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+});
+function abrirImagem(src){
+  const modal = document.getElementById("modal-img");
+  const img = document.getElementById("modal-img-content");
+
+  img.src = src;
+  modal.style.display = "flex";
+}
+
+// fechar ao clicar fora
+window.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("modal-img");
+
+  if(modal){
+    modal.addEventListener("click", function(){
+      this.style.display = "none";
+    });
+  }
+});
+let zoom = 1;
+
+const modalImg = document.getElementById("modal-img-content");
+
+modalImg.addEventListener("wheel", function(e){
+  e.preventDefault();
+
+  zoom += e.deltaY * -0.001;
+  zoom = Math.min(Math.max(1, zoom), 4);
+
+  this.style.transform = `scale(${zoom})`;
+});
+</script>
+
+<div id="modal-img" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+justify-content:center;
+align-items:center;
+z-index:999;
+">
+
+<img id="modal-img-content" style="
+max-width:90%;
+max-height:90%;
+border-radius:10px;
+cursor:zoom-in;
+transition: transform 0.3s ease;
+">
+</div>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9efc34de0612f1f6',t:'MTc3Njc3MjU5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
