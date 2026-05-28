@@ -98,6 +98,18 @@
 
     <h1>Montador de Catálogo</h1>
 
+    <!-- BOTÃO FIREBASE -->
+
+    <button class="firebase" onclick="abrirFirebase()"
+style="margin-bottom:10px;">
+  Abrir Firebase
+</button>
+
+<button class="firebase" onclick="abrirCloudinary()"
+style="margin-bottom:30px;">
+  Abrir Cloudinary
+</button>
+
     <!-- ========================= -->
     <!-- INDEX -->
     <!-- ========================= -->
@@ -179,17 +191,6 @@ service cloud.firestore {
 
 </textarea>
 
-    </div>
-
-
-    <!-- BOTÃO FIREBASE -->
-
-    <button class="firebase" onclick="abrirFirebase()">
-      Abrir Firebase
-    </button>
-
-  </div>
-
   <script>
 
     async function carregarArquivos(){
@@ -254,6 +255,15 @@ service cloud.firestore {
       );
 
     }
+
+    function abrirCloudinary(){
+
+  window.open(
+    "https://console.cloudinary.com/app/",
+    "_blank"
+  );
+
+}
 
   </script>
 
