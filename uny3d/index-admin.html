@@ -212,6 +212,7 @@
       addDoc,
       getDocs,
       deleteDoc,
+      updateDoc,
       doc,
       serverTimestamp,
       query,
@@ -267,6 +268,8 @@
 
     const listaProdutos = document.getElementById("listaProdutos");
 
+    let editandoId = null;
+
     // =========================================
     // SALVAR PRODUTO
     // =========================================
@@ -292,24 +295,52 @@ const estoque = document.getElementById("estoque").value;
 
         const imagemURL = document.getElementById("imagem").value;
 
-        // salvar firebase
-        await addDoc(collection(db, "produtos"), {
+        // =========================================
+// EDITAR
+// =========================================
 
-  nome,
-  preco,
-  precoRevenda,
-  minimoRevenda,
-  estoque,
-  imagem: imagemURL,
-  criadoEm: serverTimestamp()
+if(editandoId){
 
-});
+  await updateDoc(doc(db, "produtos", editandoId), {
 
-        alert("Produto cadastrado com sucesso!");
+    nome,
+    preco,
+    precoRevenda,
+    minimoRevenda,
+    estoque,
+    imagem: imagemURL
 
-        form.reset();
+  });
 
-        carregarProdutos();
+  alert("Produto atualizado!");
+
+  editandoId = null;
+
+  btnSalvar.innerText = "Salvar Produto";
+
+}else{
+
+  // NOVO PRODUTO
+  await addDoc(collection(db, "produtos"), {
+
+    nome,
+    preco,
+    precoRevenda,
+    minimoRevenda,
+    estoque,
+    imagem: imagemURL,
+    criadoEm: serverTimestamp()
+
+  });
+
+  alert("Produto cadastrado com sucesso!");
+
+}
+
+// CONTINUA AQUI
+form.reset();
+
+carregarProdutos();
 
       }catch(error){
 
@@ -395,7 +426,22 @@ const estoque = document.getElementById("estoque").value;
   Estoque: ${produto.estoque || 0}
 </p>
 
-              <div>
+              <div class="flex gap-2">
+
+                <button
+  class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold"
+  onclick="editarProduto(
+    '${docItem.id}',
+    '${produto.nome}',
+    '${produto.preco}',
+    '${produto.precoRevenda || ""}',
+    '${produto.minimoRevenda || ""}',
+    '${produto.estoque || ""}',
+    '${produto.imagem}'
+  )"
+>
+  Editar
+</button>
 
                 <button
                   class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl text-sm font-semibold"
@@ -453,6 +499,43 @@ const estoque = document.getElementById("estoque").value;
       }
 
     }
+
+    // =========================================
+// EDITAR PRODUTO
+// =========================================
+
+window.editarProduto = (
+  id,
+  nome,
+  preco,
+  precoRevenda,
+  minimoRevenda,
+  estoque,
+  imagem
+) => {
+
+  editandoId = id;
+
+  document.getElementById("nome").value = nome;
+
+  document.getElementById("preco").value = preco;
+
+  document.getElementById("precoRevenda").value = precoRevenda;
+
+  document.getElementById("minimoRevenda").value = minimoRevenda;
+
+  document.getElementById("estoque").value = estoque;
+
+  document.getElementById("imagem").value = imagem;
+
+  btnSalvar.innerText = "Atualizar Produto";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+}
 
     // =========================================
     // INICIAR
