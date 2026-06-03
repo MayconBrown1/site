@@ -430,7 +430,22 @@ const promos = [
   { id: 'p2', name: 'Segundou Premium', desc: '2 açaís 300ml + 2 adicionais cada', oldPrice: 21.98, price: 14.90, emoji: '🔥', saving: 7.08 },
 ];
 
-const addons = ['Jujuba','Farinha Láctea','M&Ms','Chocoball','Gotas de Chocolate','Ovomaltine','Paçoca','Granola','Marshmallow','Amendoim Triturado','Leite em Pó','Granulado'];
+const addons = [
+  { name: 'M&Ms', available: true },
+  { name: 'Chocopawer', available: true },
+  { name: 'Amendoim Triturado', available: true },
+  { name: 'Granola', available: true },
+  { name: 'Farinha Láctea', available: true },
+  { name: 'Jujuba', available: true },
+
+  { name: 'Chocoball', available: false },
+  { name: 'Gotas de Chocolate', available: false },
+  { name: 'Ovomaltine', available: false },
+  { name: 'Paçoca', available: false },
+  { name: 'Marshmallow', available: false },
+  { name: 'Leite em Pó', available: false },
+  { name: 'Granulado', available: false }
+];
 const fruits = [
   { name: 'Banana', available: true },
   { name: 'Morango', available: false },
@@ -464,7 +479,25 @@ const neighborhoodFees = {
   "LIBERDADE": 10
 };
 
-const bases = ['Açaí Puro', 'Creme de Ninho', 'Ambos'];
+const bases = [
+  {
+    name: 'Açaí Puro',
+    value: 'acai',
+    available: true
+  },
+
+  {
+    name: 'Creme de Ninho',
+    value: 'ninho',
+    available: false
+  },
+
+  {
+    name: 'Ambos',
+    value: 'both',
+    available: false
+  }
+];
 
 // Render menu
 function renderMenu() {
@@ -671,9 +704,30 @@ function openComboAddonsSelector(idx) {
 }
 
 function renderComboAddonsSelector() {
-  document.getElementById('combo-addons-list').innerHTML = addons.map(a => `
-    <button onclick="toggleComboAddon('${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-gray-900 transition-all ${currentComboAddons.includes(a) ? 'chip-selected' : ''}">${a}</button>
-  `).join('');
+  document.getElementById('combo-addons-list').innerHTML =
+addons.map(a => `
+  <button
+    onclick="${a.available ? `toggleComboAddon('${a.name}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-1.5
+      text-xs
+      transition-all
+      ${currentComboAddons.includes(a.name) && a.available
+        ? 'chip-selected'
+        : ''}
+      ${!a.available
+        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+        : 'text-gray-900'}
+    "
+    ${!a.available ? 'disabled' : ''}
+  >
+    ${a.name}
+    ${!a.available ? ' ❌' : ''}
+  </button>
+`).join('');
   document.getElementById('combo-fruits-list').innerHTML = fruits.map(f => `
   <button 
     onclick="${f.available ? `toggleComboAddon('${f.name}')` : ''}"
@@ -787,12 +841,46 @@ function openAddonsFor(itemId) {
 }
 
 function renderAddonsModal() {
-  document.getElementById('base-list').innerHTML = bases.map((b, i) => `
-    <button onclick="selectBase(this,'${['acai','ninho','both'][i]}')" class="neon-border rounded-full px-3 py-2 text-xs text-gray-900 transition-all font-semibold">${b}</button>
-  `).join('');
+  document.getElementById('base-list').innerHTML = bases.map(b => `
+  <button
+    onclick="${b.available ? `selectBase(this,'${b.value}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-2
+      text-xs
+      transition-all
+      ${b.available
+        ? 'text-gray-900'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'}
+    "
+    ${!b.available ? 'disabled' : ''}
+  >
+    ${b.name}
+    ${!b.available ? ' ❌' : ''}
+  </button>
+`).join('');
   document.getElementById('addons-list').innerHTML = addons.map(a => `
-    <button onclick="toggleAddon(this,'${a}')" class="neon-border rounded-full px-3 py-1.5 text-xs text-gray-900 transition-all">${a}</button>
-  `).join('');
+  <button
+    onclick="${a.available ? `toggleAddon(this,'${a.name}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-1.5
+      text-xs
+      transition-all
+      ${a.available
+        ? 'text-gray-900'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'}
+    "
+    ${!a.available ? 'disabled' : ''}
+  >
+    ${a.name}
+    ${!a.available ? ' ❌' : ''}
+  </button>
+`).join('');
   document.getElementById('fruits-list').innerHTML = fruits.map(f => `
   <button 
     onclick="${f.available ? `toggleAddon(this,'${f.name}')` : ''}"
