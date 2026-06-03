@@ -230,9 +230,19 @@ select.input-field option {
     <p id="slogan" class="text-purple-300 mt-2 text-sm font-light">Mais que açaí, uma experiência Premium!</p>
    </header><!-- Banner -->
    <div class="mx-4 mb-6 rounded-2xl overflow-hidden promo-glow p-4 text-center">
-    <p class="text-gold-light font-bold text-lg glow-gold">🔥 PROMOÇÃO DA NOITE</p>
-    <p class="text-white text-sm mt-1">Toda quinta: 2 açaís 500ml por <span class="text-green-400 font-bold">R$ 21,99</span></p>
-   </div><!-- Cardápio Tradicional -->
+    <p class="text-gold-light font-bold text-lg glow-gold">
+        ⚽ PROMOÇÃO ESPECIAL COPA DO MUNDO
+    </p>
+
+    <p class="text-white text-sm mt-1">
+        2 açaís 500ml por
+        <span class="text-green-400 font-bold">R$ 23,50</span>
+    </p>
+
+    <p class="text-yellow-300 text-xs mt-1">
+        Válida até 30/06/2026
+    </p>
+</div><!-- Cardápio Tradicional -->
    <section class="px-4 mb-8">
     <h2 class="section-title mb-6">🍇 Cardápio Tradicional</h2>
     <div class="grid gap-4 mt-6" id="menu-items"></div>
@@ -380,6 +390,15 @@ const combos = [
 ];
 
 const promos = [
+  {
+  id: 'p3',
+  name: 'Promoção Especial Copa do Mundo',
+  desc: '2 açaís 500ml • Até 30/06/2026',
+  oldPrice: 29.90,
+  price: 23.50,
+  emoji: '⚽',
+  saving: 6.40
+},
   { id: 'p1', name: 'Promoção da Noite', desc: '2 açaís 500ml • Toda quinta', oldPrice: 29.90, price: 21.99, emoji: '🌙', saving: 9.91 },
   { id: 'p2', name: 'Segundou Premium', desc: '2 açaís 300ml + 2 adicionais cada', oldPrice: 21.98, price: 14.90, emoji: '🔥', saving: 7.08 },
 ];
@@ -491,6 +510,14 @@ function renderPromos() {
       available = false;
       unavailableText = 'Disponível somente na segunda-feira';
     }
+
+    const now = new Date();
+const copaLimit = new Date('2026-06-30T23:59:59');
+
+if (item.id === 'p3' && now > copaLimit) {
+  available = false;
+  unavailableText = 'Promoção encerrada';
+}
 
     return `
     <div class="promo-glow rounded-2xl p-4 card-hover ${!available ? 'opacity-50' : ''}">
