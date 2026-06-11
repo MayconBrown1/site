@@ -1,29 +1,67 @@
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
+
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17422199106">
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'AW-17422199106');
+</script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Softwares Admin</title>
-    <link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
+    <title>Softwares | Maycon Brown</title>
+    <link rel="shortcut icon" href="/img/icone.png" type="image/x-icon">
+    <meta name="description" content="Softwares completos para design, edição, segurança, manutenção, bordado e muito mais. Tudo com entrega automática e suporte rápido.">
+  <meta name="keywords" content="softwares para pc, programas com licença vitalícia, ferramentas digitais, download automático, softwares maycon brown, design, edição, produtividade, manutenção">
+  <meta name="author" content="Maycon Brown">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://mayconbrown.com.br/softwares.html" />
+  
+  <meta property="og:title" content="Softwares Profissionais para Download | Maycon Brown">
+  <meta property="og:description" content="Softwares essenciais para produtividade, design, bordado, segurança e mais. Licença vitalícia e suporte rápido.">
+  <meta property="og:url" content="https://mayconbrown.com.br/softwares.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://mayconbrown.com.br/img/logo-brown-preto.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Softwares Profissionais para Download | Maycon Brown">
+  <meta name="twitter:description" content="Download imediato de softwares para produtividade, edição, segurança e mais.">
+  <meta name="twitter:image" content="https://mayconbrown.com.br/img/logo-brown-preto.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Softwares Profissionais",
+    "description": "Softwares para produtividade, design gráfico, manutenção de PC, segurança, edição de vídeo, bordado e mais com entrega automática.",
+    "url": "https://mayconbrown.com.br/softwares.html"
+  }
+  </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Script simples para alternar menu mobile
-        function toggleMenu() {
-          const menu = document.getElementById('mobile-menu');
-          if (menu.classList.contains('hidden')) {
-            menu.classList.remove('hidden');
-          } else {
-            menu.classList.add('hidden');
-          }
-        }
-      </script>
-    </head>
+    function toggleMenu() {
+      const menu = document.getElementById('mobile-menu');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+      } else {
+        menu.classList.add('hidden');
+      }
+    }
+  </script>
+</head>
     <body class="bg-gray-50 text-gray-800">
       <!-- Navbar -->
       <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-          <a href="admin/index.html">
-              <img src="img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
+          <a href="/admin/">
+              <img src="/img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
           </a>
           <!-- Botão para mobile -->
           <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
@@ -34,11 +72,9 @@
   
           <!-- Menu normal -->
           <nav class="hidden md:flex space-x-4">
-            <a href="admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="/admin/" class="hover:text-indigo-600">Início</a>
             <a href="softwares-admin.html" class="text-indigo-600 font-semibold">Softwares</a>
             <a href="matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-            <!--  <a href="formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
-            <a href="cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
             <a href="painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
           </nav>
         </div>
@@ -46,11 +82,9 @@
         <!-- Menu mobile -->
         <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
           <nav class="flex flex-col space-y-2">
-            <a href="admin/index.html" class="hover:text-indigo-600">Início</a>
+            <a href="/admin/" class="hover:text-indigo-600">Início</a>
             <a href="softwares-admin.html" class="text-indigo-600 font-semibold">Softwares</a>
             <a href="matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-          <!--  <a href="formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
-            <a href="cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
             <a href="painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
           </nav>
         </div>
@@ -59,135 +93,153 @@
     <!-- Conteúdo -->
     <main class="py-16">
       <div class="container mx-auto px-4 max-w-4xl">
-        <h2 class="text-3xl font-bold mb-6 text-center">Softwares Profissionais Admin</h2>
+        <h2 class="text-3xl font-bold mb-6 text-center">Softwares Profissionais</h2>
         <p class="text-black mb-12 text-center">
           Softwares desenvolvidos para aumentar sua produtividade e facilitar tarefas do dia a dia.
         </p>
 
         <div class="grid md:grid-cols-2 gap-8">
+          <div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    CorelDRAW
+  </h3>
+
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781210582/coredraw_p8rlrb.png"
+       alt="CorelDRAW"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/coreldraw/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
           <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🎨 Design Gráfico e Edição de Imagens - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Crie e edite artes profissionais com os melhores softwares de design e imagem.
-            </p>
-         <!--   <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/design-grafico-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Adobe
+  </h3>
+
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781205695/adobe_izqgde.png"
+       alt="Adobe"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/adobe/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
           <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">📹 Edição de Vídeo e Multimídia - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Ferramentas completas para editar vídeos, criar animações e produzir conteúdo visual.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/edicao-video-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Autodesk
+  </h3>
+
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781205925/autodesk_ns2mpp.png"
+       alt="autodesk"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/autodesk/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
           <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🧾 Escritório e Produtividade - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Pacotes essenciais para redigir, calcular, organizar tarefas e aumentar sua produtividade.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/escritorio-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Microsoft
+  </h3>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🖥️ Sistemas Operacionais e Ativadores - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Instale, ative e gerencie sistemas como Windows com praticidade e segurança.
-            </p>
-         <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/sistemas-ativadores-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781206374/Microsoft_dpp9nw.png"
+       alt="microsoft"
+       class="w-full h-40 object-contain mb-4">
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🔒 Segurança e Antivírus - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Proteja seu computador contra vírus, malwares e ameaças digitais com eficiência.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/seguranca-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <a href="/software/microsoft/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🧠 Desenvolvimento e Programação - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Ambientes, linguagens e ferramentas para programadores e desenvolvedores de software.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/programacao-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Wondershare
+  </h3>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🛠️ Manutenção e Otimização de PC - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Deixe seu PC mais rápido, limpo e otimizado com ferramentas confiáveis de manutenção.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/manutencao-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781206931/Wondershare_xqqnke.png"
+       alt="wondershare"
+       class="w-full h-40 object-contain mb-4">
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🎮 Jogos e Emuladores - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Softwares para rodar seus games favoritos no PC e simular consoles clássicos.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/jogos-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <a href="/software/wondershare/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🎼 Áudio e Produção Musical - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Crie músicas, edite áudio e produza sons com programas de alto nível profissional.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/audio-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    LightBurn
+  </h3>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🧵 Bordado e Corte a Laser - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Ferramentas especializadas para criação de matrizes, bordados e cortes precisos.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/bordado-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781207060/LightBurn_tdqff8.png"
+       alt="lightburn"
+       class="w-full h-40 object-contain mb-4">
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">📡 Ferramentas para Internet - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Acesse, navegue e baixe com mais segurança, velocidade e praticidade.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/internet-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <a href="/software/lightburn/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">🏗️ Modelagem 3D e Arquitetura</h3>
-            <p class="text-gray-400 mb-4">
-              Softwares para criação de modelos 3D, desenhos técnicos e projetos arquitetônicos com precisão.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/modelagem-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Wilcom
+  </h3>
 
-          <div class="bg-black shadow-lg rounded-xl p-6">
-            <h3 class="text-white font-semibold mb-2">📦 Ferramentas Diversas - Admin</h3>
-            <p class="text-gray-400 mb-4">
-              Utilitários essenciais para o dia a dia digital: compactação, acesso remoto, gravação e mais.
-            </p>
-          <!--  <p class="font-bold text-indigo-600 mb-4">R$ 79,99</p> -->
-            <a href="/software/diversas-admin.html"  class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
-          </div>
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781207169/Wilcom_cjfxjp.png"
+       alt="wilcom"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/wilcom/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    Rhinoceros
+  </h3>
+
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781207376/Rhinoceros_o2ueq7.png"
+       alt="rhinoceros"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/rhinoceros/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
+
+<div class="bg-black shadow-lg rounded-xl p-6">
+  <h3 class="text-white font-semibold mb-4 text-center">
+    SketchUp
+  </h3>
+
+  <img src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1781207527/SketchUp_fs2ntr.png"
+       alt="sketchup"
+       class="w-full h-40 object-contain mb-4">
+
+  <a href="/software/sketchup/index-admin.html"
+     class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">
+     Editar
+  </a>
+</div>
+
 
         </div>
       </div>
     </main>
 
-    <!-- Botão flutuante de Sair -->
+        <!-- Botão flutuante de Sair -->
   <button id="logout" class="fixed top-14 right-14 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg z-50">
     Sair
   </button>
