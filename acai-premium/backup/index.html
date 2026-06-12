@@ -1,0 +1,1577 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Açaí Premium 24 Horas</title>
+  <link rel="shortcut icon" href="https://res.cloudinary.com/drpd9kv7g/image/upload/v1780523423/acai-e-lanches-premium_sljg56.png" type="image/x-icon">
+  <link rel="manifest" href="/acai-premium/manifest.json">
+  <meta name="theme-color" content="#1a0a2e">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Açaí Premium">
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/drpd9kv7g/image/upload/v1780523423/acai-e-lanches-premium_sljg56.png">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://www.gstatic.com">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Dancing+Script:wght@700&amp;display=swap" rel="stylesheet">
+  <style>
+html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
+* { box-sizing: border-box; }
+
+:root {
+  --purple-dark: #ffffff;
+  --purple-mid: #faf5ff;
+
+  --purple-light: #8b5cf6;
+
+  --gold: #7c3aed;
+  --gold-light: #a855f7;
+
+  --neon-purple: #7e22ce;
+  --neon-pink: #c084fc;
+}
+
+.app-wrapper {
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #faf5ff 50%,
+    #f3e8ff 100%
+  );
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+.glow-text {
+  text-shadow: 0 0 10px var(--neon-purple), 0 0 20px var(--neon-purple), 0 0 40px var(--neon-purple);
+}
+
+.glow-gold {
+  text-shadow: 0 0 10px var(--gold), 0 0 20px var(--gold);
+}
+
+.glow-box {
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3), 0 0 30px rgba(168, 85, 247, 0.1);
+}
+
+.glow-box-gold {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+}
+
+.neon-border {
+  border: 1px solid rgba(168, 85, 247, 0.7);
+}
+
+.gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.4);
+}
+
+.badge-24h {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #1a0a2e;
+  font-weight: 700;
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.8); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.float-anim { animation: float 3s ease-in-out infinite; }
+
+.chip-selected {
+  background: linear-gradient(135deg, var(--purple-light), var(--neon-purple)) !important;
+  border-color: var(--neon-purple) !important;
+  color: white !important;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+}
+
+.promo-glow {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(168, 85, 247, 0.1));
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--purple-light), var(--neon-purple));
+  transition: all 0.3s;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  transform: scale(1.02);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold), var(--gold-light));
+  color: #1a0a2e;
+  transition: all 0.3s;
+}
+.btn-gold:hover {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+  transform: scale(1.02);
+}
+
+.whatsapp-float {
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+  background: #25d366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  animation: float 3s ease-in-out infinite;
+}
+
+.cart-float {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 999;
+  background: #ffffff;
+  border: 2px solid #9333ea;
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 -4px 20px rgba(124,58,237,0.15);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6b21a8;
+  position: relative;
+  display: inline-block;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon-purple), transparent);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal {
+  background: #ffffff;
+  border-top: 2px solid var(--neon-purple);
+  border-radius: 20px 20px 0 0;
+  max-height: 85%;
+  width: 100%;
+  max-width: 500px;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.input-field {
+  background: #ffffff;
+  border: 1px solid #9333ea;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #111827;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+/* SELECT DOS BAIRROS */
+select.input-field {
+  background: white;
+  color: black;
+}
+
+select.input-field option {
+  background: white;
+  color: black;
+}
+.input-field:focus {
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.text-gold {
+  color: #7c3aed;
+}
+
+.text-success {
+  color: #15803d;
+}
+
+.text-info {
+  color: #581c87;
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div class="app-wrapper" id="app">
+   <!-- Header -->
+   <header class="text-center pt-8 pb-4 px-4">
+    <div class="float-anim inline-block mb-2">
+  <img
+    src="https://res.cloudinary.com/drpd9kv7g/image/upload/v1780523423/acai-e-lanches-premium_sljg56.png"
+    alt="Açaí Premium"
+    class="mx-auto"
+    style="width:120px; height:auto;"
+  >
+</div>
+    <h1 id="store-name" class="text-3xl font-black text-purple-800 mt-3"></h1>
+    <p id="slogan" class="bg-purple-50 mt-2 text-sm font-light"></p>
+   </header><!-- Banner (controlado pelo administrador via Firebase) -->
+   <div class="mx-4 mb-6 rounded-2xl overflow-hidden promo-glow p-4 text-center" id="promo-banner" style="display:none;">
+    <p class="text-gold-light font-bold text-lg glow-gold" id="banner-titulo"></p>
+    <p class="text-gray-900 text-sm mt-1" id="banner-texto"></p>
+    <img id="banner-imagem" style="display:none; max-width:100%; border-radius:12px; margin-top:8px;">
+</div>
+
+<!-- Cardápio Tradicional -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">🍇 Cardápio Tradicional</h2>
+    <div class="grid gap-4 mt-6" id="menu-items"></div>
+   </section><!-- Combos Premium -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">👑 Combos Premium</h2>
+    <div class="grid gap-4 mt-6" id="combo-items"></div>
+   </section><!-- Promoções -->
+   <section class="px-4 mb-8">
+    <h2 class="section-title mb-6">🎉 Promoções</h2>
+    <div class="grid gap-4 mt-6" id="promo-items"></div>
+   </section><!-- Cart Float -->
+   <div class="cart-float" id="cart-bar" style="display:none;" onclick="openCart()">
+    <div class="flex items-center justify-between">
+     <div class="flex items-center gap-3">
+      <div class="bg-purple-600 rounded-full w-10 h-10 flex items-center justify-center">
+       <i data-lucide="shopping-bag" class="w-5 h-5 text-gray-900"></i>
+      </div>
+      <div>
+       <p class="text-gray-900 font-bold text-sm" id="cart-count">0 itens</p>
+       <p class="bg-purple-50 text-xs" id="cart-total">R$ 0,00</p>
+      </div>
+     </div><span class="btn-primary text-gray-900 text-sm font-bold px-4 py-2 rounded-full">Ver Pedido</span>
+    </div>
+   </div><!-- WhatsApp Float --> <a class="whatsapp-float" id="whatsapp-btn" href="https://wa.me/5584987576968" target="_blank" rel="noopener noreferrer">
+    <svg width="28" height="28" fill="white" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.1-1.127l-.29-.174-3.01.894.81-2.96-.186-.3A8 8 0 1112 20z" />
+    </svg></a> <!-- Cart Modal -->
+   <div class="overlay" id="cart-modal" style="display:none;" onclick="closeCartOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-gray-900 font-bold text-xl">🛒 Seu Pedido</h3><button onclick="closeCart()" class="bg-purple-50 hover:text-gray-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div id="cart-items-list" class="space-y-3 mb-4"></div>
+     <div class="border-t border-purple-700 pt-4 mb-4">
+      <div class="flex justify-between text-gray-900 font-bold text-lg">
+       <span>Total:</span> <span id="modal-total">R$ 0,00</span>
+      </div>
+     </div><!-- Delivery/Pickup -->
+     <div id="delivery-section">
+      <p class="text-gray-900 font-semibold mb-3">Como deseja receber?</p>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+       <button onclick="selectDelivery('entrega')" id="btn-entrega" class="neon-border rounded-xl py-3 text-gray-900 font-semibold transition-all hover:bg-purple-900 hover:text-white">🛵 Entrega</button> <button onclick="selectDelivery('retirada')" id="btn-retirada" class="neon-border rounded-xl py-3 hover:text-white font-semibold text-sm transition-all hover:bg-purple-900">🏪 Retirada</button>
+      </div><!-- Delivery Form -->
+      <div id="form-entrega" style="display:none;" class="space-y-3 mb-4">
+       <input class="input-field" placeholder="Seu nome" id="inp-nome"> <input class="input-field" placeholder="Rua" id="inp-rua"> <input class="input-field" placeholder="Número" id="inp-numero"> <select class="input-field" id="inp-bairro" onchange="updateDeliveryFee()">
+  <option value="">Selecione o bairro</option>
+</select>
+
+<p class="text-green-700 text-sm mt-2 font-bold" id="delivery-fee-text">
+Taxa de entrega: R$ 0,00
+</p> <input class="input-field" placeholder="Referência" id="inp-ref">
+      </div>
+      <div id="form-retirada" style="display:none;" class="space-y-3 mb-4">
+       <input class="input-field" placeholder="Seu nome" id="inp-nome-ret">
+      </div><!-- Payment -->
+      <div id="payment-section" style="display:none;">
+       <p class="text-gray-900 font-semibold mb-3">Pagamento</p>
+       <div class="grid grid-cols-3 gap-2 mb-3">
+        <button onclick="selectPayment('pix', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💠 PIX</button> <button onclick="selectPayment('cartao', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💳 Cartão</button> <button onclick="selectPayment('dinheiro', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💵 Dinheiro</button>
+       </div>
+       <div id="troco-section" style="display:none;" class="mb-4">
+        <input class="input-field" placeholder="Troco para quanto? (R$)" id="inp-troco" type="number">
+        <p class="text-green-700 text-xs mt-1" id="troco-calc"></p>
+       </div>
+      </div><!-- Finalize --> <button id="btn-finalizar" style="display:none;" onclick="finalizarPedido()" class="btn-gold w-full py-4 rounded-2xl font-bold text-lg mt-4 flex items-center justify-center gap-2">
+       <svg width="22" height="22" fill="#1a0a2e" viewbox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a8 8 0 01-4.1-1.127l-.29-.174-3.01.894.81-2.96-.186-.3A8 8 0 1112 20z" />
+       </svg> FINALIZAR PEDIDO NO WHATSAPP </button>
+     </div>
+    </div>
+   </div><!-- Combo/Promo Config Modal -->
+   <div class="overlay" id="combo-config-modal" style="display:none;" onclick="closeComboModalOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-gray-900 font-bold text-lg">⚙️ Configure Cada Açaí</h3><button onclick="closeComboModal()" class="bg-purple-50 hover:text-gray-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div id="combo-items-config" class="space-y-4 mb-6"></div>
+     <div class="border-t border-purple-700 pt-4">
+      <button onclick="confirmComboSetup()" class="btn-gold w-full py-3 rounded-xl text-gray-900 font-bold">✓ Adicionar ao Carrinho</button>
+     </div>
+    </div>
+   </div><!-- Combo Addons Selector -->
+   <div class="overlay" id="combo-addons-selector" style="display:none;" onclick="closeComboAddonsSelector()">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-gray-900 font-bold text-lg">Adicionar Itens</h3><button onclick="closeComboAddonsSelector()" class="bg-purple-50 hover:text-gray-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div>
+     <div class="bg-purple-900 rounded-lg p-3 mb-4 border border-yellow-500 border-opacity-50">
+      <p class="text-white text-xs font-semibold">
+📌 Primeiros 3 = GRÁTIS
+</p>
+      <p class="text-white text-xs">Cada extra = R$ 1,00</p>
+      <p class="text-purple-200 text-xs mt-2" id="combo-addons-counter">Selecionados: 0</p>
+     </div>
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
+     <div class="flex flex-wrap gap-2 mb-4" id="combo-addons-list"></div><button onclick="confirmComboAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
+    </div>
+   </div><!-- Addons Modal -->
+   <div class="overlay" id="addons-modal" style="display:none;" onclick="closeAddonsOutside(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-4">
+      <h3 class="text-gray-900 font-bold text-lg">Escolha os Adicionais</h3><button onclick="closeAddons()" class="bg-purple-50 hover:text-gray-900"><i data-lucide="x" class="w-6 h-6"></i></button>
+     </div><!-- Base Selection -->
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🎨 Base</p>
+     <div class="grid grid-cols-3 gap-2 mb-4" id="base-list"></div><!-- Addons Info -->
+     <div class="bg-purple-900 rounded-lg p-3 mb-4 border border-yellow-500 border-opacity-50">
+      <p class="text-white text-xs font-semibold">📌 Primeiros 3 Acompanhamentos = GRÁTIS</p>
+      <p class="text-white text-xs">Cada adicional extra = R$ 1,00</p>
+      <p class="text-gray-900 text-xs mt-2" id="addons-counter">Selecionados: 0</p>
+     </div><!-- Addons -->
+     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
+     <div class="flex flex-wrap gap-2 mb-4" id="addons-list"></div><button onclick="confirmAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
+    </div>
+   </div>
+  </div>
+  <script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyCVBy07-wb0_aV2NDJvPu9mRxxmOgar42Y",
+authDomain: "acai-premium-5e49f.firebaseapp.com",
+projectId: "acai-premium-5e49f",
+storageBucket: "acai-premium-5e49f.firebasestorage.app",
+messagingSenderId: "195073257294",
+appId: "1:195073257294:web:4c2a1d43af712f6f60b81f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.db = db;
+window.collection = collection;
+window.getDocs = getDocs;
+window.doc = doc;
+window.getDoc = getDoc;
+
+let menuItems = [];
+
+let combos = [];
+
+let promos = [];
+
+let addons = [];
+
+let cart = [];
+let currentItemForAddons = null;
+let selectedAddons = [];
+let selectedBase = 'acai'; // 'acai', 'ninho', 'both'
+let deliveryType = null;
+let paymentType = null;
+let deliveryFee = 0;
+let neighborhoodFees = {};
+
+// Bases de açaí (Açaí Puro / Creme de Ninho / Ambos) — disponibilidade
+// agora é controlada pelo administrador (coleção configuracoes/bases).
+let bases = [
+  { value: 'acai',  name: 'Açaí Puro',     available: true },
+  { value: 'ninho', name: 'Creme de Ninho', available: true },
+  { value: 'both',  name: 'Ambos',          available: true }
+];
+
+// ==========================================
+// CORREÇÃO: ADIÇÃO DAS FUNÇÕES EM FALTA PARA OS MODAIS
+// ==========================================
+window.closeAddons = function() {
+  document.getElementById('addons-modal').style.display = 'none';
+}
+
+window.closeAddonsOutside = function(event) {
+  if (event.target.id === 'addons-modal') {
+    closeAddons();
+  }
+}
+
+window.closeComboModal = function() {
+  document.getElementById('combo-config-modal').style.display = 'none';
+}
+
+window.closeComboModalOutside = function(event) {
+  if (event.target.id === 'combo-config-modal') {
+    closeComboModal();
+  }
+}
+
+window.closeCartOutside = function(event) {
+  if (event.target.id === 'cart-modal') {
+    closeCart();
+  }
+}
+
+window.selectComboBase = function(button, idx, value) {
+  if (!comboItemsSetup[idx]) return;
+  comboItemsSetup[idx].base = value;
+  
+  // Atualiza visualmente os botões do combo
+  const container = document.getElementById(`base-combo-${idx}`);
+  if (container) {
+    const buttons = container.querySelectorAll('button');
+    buttons.forEach(btn => btn.classList.remove('chip-selected', 'bg-purple-600', 'text-white'));
+    button.classList.add('chip-selected', 'bg-purple-600', 'text-white');
+  }
+}
+// ==========================================
+
+// Render menu
+function renderMenu() {
+  const container = document.getElementById('menu-items');
+  container.innerHTML = menuItems.map(item => `
+    <div class="neon-border rounded-2xl p-4 card-hover" style="background:#fcfcff;">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          ${
+(item.image || item.foto)
+?
+
+`<img
+src="${item.image || item.foto}"
+class="w-14 h-14 rounded-full object-cover">`
+
+:
+
+`<span class="text-3xl">
+${item.emoji || '🍇'}
+</span>`
+
+}
+          <div>
+            <h3 class="text-gray-900 font-bold">
+${item.name || item.nome}
+</h3>
+            <p class="bg-purple-50 text-sm">${item.size}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-green-700 font-bold text-lg">R$ ${Number(item.price || item.preco || 0)
+.toFixed(2)
+.replace('.',',')}</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <button onclick="openAddonsFor('${item.id}')" class="btn-primary text-gray-900 text-sm font-semibold px-4 py-2 rounded-full">Escolher Adicionais</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCombos() {
+  const container = document.getElementById('combo-items');
+  container.innerHTML = combos.map(item => `
+    <div class="gold-border rounded-2xl p-4 card-hover" style="background:#fcfcff;">
+      <div class="flex items-center gap-1 mb-2">
+        <span class="badge-24h text-[10px] px-2 py-0.5 rounded-full">24H</span>
+        <span class="text-gold text-xs font-semibold" style="color:var(--gold)">PREMIUM</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          ${
+(item.image || item.foto)
+?
+
+`<img
+src="${item.image || item.foto}"
+class="w-14 h-14 rounded-full object-cover">`
+
+:
+
+`<span class="text-3xl">
+${item.emoji || '👑'}
+</span>`
+}
+          <div>
+            <h3 class="text-gray-900 font-bold">${item.name}</h3>
+            <p class="bg-purple-50 text-xs">${item.desc}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-green-700 font-bold text-lg">R$ ${Number(item.price || item.preco || 0)
+.toFixed(2)
+.replace('.',',')}</p>
+        </div>
+      </div>
+      <button onclick="openComboModal('${item.id}')" class="btn-gold w-full mt-3 py-2 rounded-full font-bold text-sm">Escolher Adicionais</button>
+    </div>
+  `).join('');
+}
+
+function renderPromos() {
+  const today = new Date().getDay();
+  // Domingo=0 | Segunda=1 | Quinta=4
+
+  const container = document.getElementById('promo-items');
+
+  container.innerHTML = promos.map(item => {
+
+    // CORREÇÃO: o admin não salva o campo "saving" (economia).
+    // Calculamos aqui a partir de oldPrice - price para não
+    // quebrar com "Cannot read properties of undefined (toFixed)",
+    // erro que travava renderPromos() e fazia a seção de
+    // promoções nunca aparecer.
+    const oldPriceNum = Number(item.oldPrice || 0);
+    const priceNum = Number(item.price || item.preco || 0);
+    const saving = Math.max(0, oldPriceNum - priceNum);
+
+    let available = true;
+    let unavailableText = '';
+
+    // Promoção de quinta
+    if (item.id === 'p1' && today !== 4) {
+      available = false;
+      unavailableText = 'Disponível somente na quinta-feira';
+    }
+
+    // Promoção de segunda
+    if (item.id === 'p2' && today !== 1) {
+      available = false;
+      unavailableText = 'Disponível somente na segunda-feira';
+    }
+
+    const now = new Date();
+const copaLimit = new Date('2026-06-30T23:59:59');
+
+if (item.id === 'p3' && now > copaLimit) {
+  available = false;
+  unavailableText = 'Promoção encerrada';
+}
+
+    return `
+    <div class="promo-glow rounded-2xl p-4 card-hover ${!available ? 'opacity-50' : ''}">
+      <div class="flex items-center gap-3">
+        ${
+(item.image || item.foto)
+?
+
+`<img
+src="${item.image || item.foto}"
+class="w-14 h-14 rounded-full object-cover">`
+
+:
+
+`<span class="text-3xl">
+${item.emoji || '🔥'}
+</span>`
+}
+
+        <div class="flex-1">
+          <h3 class="text-gray-900 font-bold">${item.name}</h3>
+          <p class="bg-purple-50 text-xs">${item.desc}</p>
+
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-red-400 line-through text-xs">
+              R$ ${oldPriceNum.toFixed(2).replace('.',',')}
+            </span>
+
+            <span class="text-green-700 font-bold">
+              R$ ${priceNum
+.toFixed(2)
+.replace('.',',')}
+            </span>
+          </div>
+
+          <span class="text-purple-700 text-[10px]">
+            💰 Economia: R$ ${saving.toFixed(2).replace('.',',')}
+          </span>
+
+          ${!available ? `
+            <p class="text-red-400 text-[11px] mt-2 font-semibold">
+              ${unavailableText}
+            </p>
+          ` : ''}
+        </div>
+      </div>
+
+      <button
+        onclick="${available ? `openPromoModal('${item.id}')` : ''}"
+        class="${available ? 'btn-primary' : 'bg-gray-300 text-gray-600 cursor-not-allowed'} w-full mt-3 py-2 rounded-full text-gray-900 font-bold text-sm"
+        ${!available ? 'disabled' : ''}
+      >
+        ${available ? 'Escolher Adicionais' : 'Indisponível Hoje'}
+      </button>
+    </div>
+    `;
+  }).join('');
+}
+
+// Combo/Promo modal
+let comboModalData = null;
+let comboItemsSetup = [];
+
+function openComboModal(comboId) {
+  const combo = combos.find(c => c.id === comboId);
+  comboModalData = combo;
+  
+  // CORREÇÃO: o admin salva "quantidadeAcais" ao criar o combo,
+  // mas isso era ignorado e usava IDs fixos antigos (c2/c3) que
+  // não existem mais (o Firestore gera IDs aleatórios). Agora usa
+  // o valor salvo, com 4 como padrão se não existir.
+  let numAcais = Number(combo?.quantidadeAcais) || 4;
+  
+  comboItemsSetup = Array(numAcais).fill(null).map((_, i) => ({
+    index: i,
+    base: 'both',
+    addons: []
+  }));
+  
+  renderComboModal();
+  document.getElementById('combo-config-modal').style.display = 'flex';
+}
+
+function openPromoModal(promoId) {
+  const promo = promos.find(p => p.id === promoId);
+  comboModalData = { ...promo, type: 'promo' };
+  
+  // Determinar quantidade de açaís na promo
+  let numAcais = 2;
+  comboItemsSetup = Array(numAcais).fill(null).map((_, i) => ({
+    index: i,
+    base: 'both',
+    addons: []
+  }));
+  
+  renderComboModal();
+  document.getElementById('combo-config-modal').style.display = 'flex';
+}
+
+function renderComboModal() {
+  const container = document.getElementById('combo-items-config');
+  container.innerHTML = comboItemsSetup.map((item, idx) => `
+    <div class="neon-border rounded-xl p-3" style="background:#fcfcff;">
+      <p class="text-gold text-sm font-bold mb-2" style="color:var(--gold)">Açaí ${idx + 1}</p>
+      <div class="grid grid-cols-3 gap-2 mb-3" id="base-combo-${idx}"></div>
+      <p class="bg-purple-50 text-xs font-semibold mb-2">Adicionais (${item.addons.length})</p>
+      <div class="flex flex-wrap gap-2 mb-2" id="addons-combo-${idx}"></div>
+      <button onclick="openComboAddonsSelector(${idx})" class="btn-primary text-xs w-full py-1.5 rounded-lg text-gray-900 font-semibold">+ Adicionar</button>
+    </div>
+  `).join('');
+
+  comboItemsSetup.forEach((item, idx) => {
+    const baseContainer = document.getElementById(`base-combo-${idx}`);
+    baseContainer.innerHTML = bases.map(b => `
+  <button
+    onclick="${b.available ? `selectComboBase(this,${idx},'${b.value}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-2
+      py-1
+      text-[10px]
+      transition-all
+      font-semibold
+      ${!b.available
+        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+        : 'text-gray-900'}
+    "
+    ${!b.available ? 'disabled' : ''}
+  >
+    ${b.name}
+    ${!b.available ? ' ❌' : ''}
+  </button>
+`).join('');
+    let baseAlvo = item.base;
+    if (!bases.find(b => b.value === baseAlvo)?.available) {
+      const primeiraDisponivel = bases.find(b => b.available);
+      baseAlvo = primeiraDisponivel ? primeiraDisponivel.value : baseAlvo;
+    }
+
+    const selectedButton =
+  [...baseContainer.children].find(btn =>
+    btn.textContent.includes(
+      bases.find(b => b.value === baseAlvo)?.name
+    )
+  );
+
+if(selectedButton){
+  selectComboBase(selectedButton, idx, baseAlvo);
+}
+
+    const addonsContainer = document.getElementById(`addons-combo-${idx}`);
+    addonsContainer.innerHTML = item.addons.map(a => `
+      <span class="chip-selected text-[10px] px-2 py-1 rounded-full">${a}</span>
+    `).join('');
+  });
+}
+
+function selectComboBase(el, idx, base) {
+  comboItemsSetup[idx].base = base;
+  const container = el.parentElement;
+  container.querySelectorAll('button').forEach(b => b.classList.remove('chip-selected'));
+  el.classList.add('chip-selected');
+}
+
+let currentComboIdx = null;
+let currentComboAddons = [];
+
+function openComboAddonsSelector(idx) {
+  currentComboIdx = idx;
+  currentComboAddons = [...comboItemsSetup[idx].addons];
+  renderComboAddonsSelector();
+  document.getElementById('combo-addons-selector').style.display = 'flex';
+}
+
+function renderComboAddonsSelector() {
+  document.getElementById('combo-addons-list').innerHTML =
+addons.map(a => `
+  <button
+    onclick="${a.available ? `toggleComboAddon('${a.name}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-1.5
+      text-xs
+      transition-all
+      ${currentComboAddons.includes(a.name) && a.available
+        ? 'chip-selected'
+        : ''}
+      ${!a.available
+        ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+        : 'text-gray-900'}
+    "
+    ${!a.available ? 'disabled' : ''}
+  >
+    ${a.name}
+    ${!a.available ? ' ❌' : ''}
+  </button>
+`).join('');
+  updateComboAddonsCounter();
+}
+
+function toggleComboAddon(name) {
+  const idx = currentComboAddons.indexOf(name);
+  if (idx > -1) {
+    currentComboAddons.splice(idx, 1);
+    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
+      if (b.textContent.trim() === name) b.classList.remove('chip-selected');
+    });
+  } else {
+    currentComboAddons.push(name);
+    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
+      if (b.textContent.trim() === name) b.classList.add('chip-selected');
+    });
+  }
+  updateComboAddonsCounter();
+}
+
+function updateComboAddonsCounter() {
+  const extra = Math.max(0, currentComboAddons.length - 3);
+  const cost = extra * 1.00;
+  let text = `Selecionados: ${currentComboAddons.length}`;
+  if (extra > 0) {
+    text += ` | +R$ ${cost.toFixed(2).replace('.',',')} (${extra} extras)`;
+  }
+  document.getElementById('combo-addons-counter').textContent = text;
+}
+
+function confirmComboAddons() {
+  comboItemsSetup[currentComboIdx].addons = [...currentComboAddons];
+  renderComboModal();
+  closeComboAddonsSelector();
+}
+
+function closeComboAddonsSelector() {
+  document.getElementById('combo-addons-selector').style.display = 'none';
+}
+
+function confirmComboSetup() {
+  // Adicionar cada açaí do combo ao carrinho
+  const comboGroupId = Date.now();
+  comboItemsSetup.forEach(item => {
+    const extra = Math.max(0, item.addons.length - 3);
+    const addonsCost = extra * 1.00;
+    
+    const cartItem = {
+      id: comboModalData.id,
+      name: comboModalData.name,
+      price: comboModalData.price / comboItemsSetup.length,
+      emoji: comboModalData.emoji,
+      qty: 1,
+      addons: item.addons,
+      base: item.base,
+      addonsCost: addonsCost,
+      isCombo: true,
+comboGroupId: comboGroupId
+    };
+    
+    const existing = cart.find(c =>
+      c.id === cartItem.id &&
+      c.base === cartItem.base &&
+      JSON.stringify(c.addons) === JSON.stringify(cartItem.addons)
+    );
+    
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push(cartItem);
+    }
+  });
+  
+  updateCartBar();
+  closeComboModal();
+}
+
+function closeComboModal() {
+  document.getElementById('combo-config-modal').style.display = 'none';
+}
+
+function closeComboModalOutside(e) {
+  if (e.target === e.currentTarget) closeComboModal();
+}
+
+// Addons modal
+function openAddonsFor(itemId) {
+  currentItemForAddons = itemId;
+  selectedAddons = [];
+  selectedBase = 'acai';
+  renderAddonsModal();
+  document.getElementById('addons-modal').style.display = 'flex';
+}
+
+window.openAddonsFor = openAddonsFor;
+
+function renderAddonsModal() {
+  document.getElementById('base-list').innerHTML = bases.map(b => `
+  <button
+    onclick="${b.available ? `selectBase(this,'${b.value}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-2
+      text-xs
+      transition-all
+      ${b.available
+        ? 'text-gray-900'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'}
+    "
+    ${!b.available ? 'disabled' : ''}
+  >
+    ${b.name}
+    ${!b.available ? ' ❌' : ''}
+  </button>
+`).join('');
+  document.getElementById('addons-list').innerHTML = addons.map(a => `
+  <button
+    onclick="${a.available ? `toggleAddon(this,'${a.name}')` : ''}"
+    class="
+      neon-border
+      rounded-full
+      px-3
+      py-1.5
+      text-xs
+      transition-all
+      ${a.available
+        ? 'text-gray-900'
+        : 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'}
+    "
+    ${!a.available ? 'disabled' : ''}
+  >
+    ${a.name}
+    ${!a.available ? ' ❌' : ''}
+  </button>
+`).join('');
+  const primeiraBaseDisponivel = bases.find(b => b.available);
+  const baseInicial = primeiraBaseDisponivel ? primeiraBaseDisponivel.value : 'acai';
+  selectedBase = baseInicial;
+  const botoesBase = [...document.querySelectorAll('#base-list button')];
+  const botaoInicial = botoesBase.find(btn => btn.textContent.includes(
+    bases.find(b => b.value === baseInicial)?.name || ''
+  ));
+  if (botaoInicial) selectBase(botaoInicial, baseInicial);
+  updateAddonsCounter();
+}
+
+function selectBase(el, base) {
+  selectedBase = base;
+  document.querySelectorAll('#base-list button').forEach(b => b.classList.remove('chip-selected'));
+  el.classList.add('chip-selected');
+}
+
+function updateAddonsCounter() {
+  const extra = Math.max(0, selectedAddons.length - 3);
+  const cost = extra * 1.00;
+  let text = `Selecionados: ${selectedAddons.length}`;
+  if (extra > 0) {
+    text += ` | +R$ ${cost.toFixed(2).replace('.',',')} (${extra} extras)`;
+  }
+  document.getElementById('addons-counter').textContent = text;
+}
+
+function toggleAddon(el, name) {
+  const idx = selectedAddons.indexOf(name);
+  if (idx > -1) { selectedAddons.splice(idx, 1); el.classList.remove('chip-selected'); }
+  else { selectedAddons.push(name); el.classList.add('chip-selected'); }
+  updateAddonsCounter();
+}
+
+function confirmAddons() {
+  addToCart(currentItemForAddons, 'menu', [...selectedAddons], selectedBase);
+  closeAddons();
+}
+
+function closeAddons() { document.getElementById('addons-modal').style.display = 'none'; }
+function closeAddonsOutside(e) { if (e.target === e.currentTarget) closeAddons(); }
+
+// Cart
+function addToCart(id, type, addonsArr, baseSelected) {
+  let item;
+  console.log(
+'Produto clicado:',
+id,
+type
+);
+  if (type === 'menu') item = menuItems.find(i => i.id === id);
+  else if (type === 'combo') item = combos.find(i => i.id === id);
+  else item = promos.find(i => i.id === id);
+
+  const extra = Math.max(0, (addonsArr || []).length - 3);
+  const addonsCost = extra * 1.00;
+
+  console.log(item);
+
+  const cartItem = { 
+    ...item, 
+    qty: 1, 
+    addons: addonsArr || [], 
+    base: baseSelected || 'both',
+    addonsCost: addonsCost
+  };
+
+  const existing = cart.find(c => 
+    c.id === id && 
+    c.base === cartItem.base &&
+    JSON.stringify(c.addons) === JSON.stringify(cartItem.addons)
+  );
+
+  if (existing) { existing.qty++; }
+  else { cart.push(cartItem); }
+  
+  updateCartBar();
+}
+
+function removeFromCart(index) {
+
+  if (cart[index].isCombo) {
+
+    const groupId = cart[index].comboGroupId;
+
+    cart = cart.filter(item =>
+      item.comboGroupId !== groupId
+    );
+
+  } else {
+
+    cart.splice(index, 1);
+
+  }
+
+  updateCartBar();
+  renderCartModal();
+}
+
+function changeQty(index, delta) {
+  if(cart[index].isCombo){
+  showToast('Combos não podem ser alterados.');
+  return;
+}
+  cart[index].qty += delta;
+  if (cart[index].qty <= 0) cart.splice(index, 1);
+  updateCartBar();
+  renderCartModal();
+}
+
+// CORREÇÃO: o banner promocional agora é controlado pelo
+// administrador (salvo em configuracoes/loja) em vez de ficar
+// fixo no HTML. Só aparece se "Banner ativo" estiver marcado.
+function renderBanner(loja) {
+  const banner = document.getElementById('promo-banner');
+  if (!banner) return;
+
+  if (!loja || !loja.bannerAtivo) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  document.getElementById('banner-titulo').textContent = loja.bannerTitulo || '';
+  document.getElementById('banner-texto').textContent = loja.bannerTexto || '';
+
+  const img = document.getElementById('banner-imagem');
+  if (loja.bannerImagem) {
+    img.src = loja.bannerImagem;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+
+  banner.style.display = 'block';
+}
+
+// CORREÇÃO: preenche o <select> de bairros dinamicamente com os
+// bairros cadastrados no painel admin (collection "bairros"),
+// mostrando o nome e a taxa de entrega de cada um.
+function renderBairros() {
+  const select = document.getElementById('inp-bairro');
+  if (!select) return;
+
+  const valorAtual = select.value;
+
+  const opcoes = Object.keys(neighborhoodFees).sort();
+
+  select.innerHTML = '<option value="">Selecione o bairro</option>' +
+    opcoes.map(nome => {
+      const taxa = Number(neighborhoodFees[nome] || 0);
+      return `<option value="${nome}">${nome} - R$ ${taxa.toFixed(2).replace('.',',')}</option>`;
+    }).join('');
+
+  // Mantém o bairro selecionado, se ainda existir na lista
+  if (valorAtual && opcoes.includes(valorAtual)) {
+    select.value = valorAtual;
+  }
+}
+
+function updateDeliveryFee() {
+  const bairro = document.getElementById('inp-bairro').value;
+
+  deliveryFee = neighborhoodFees[bairro] || 0;
+
+  document.getElementById('delivery-fee-text').textContent =
+    'Taxa de entrega: R$ ' + deliveryFee.toFixed(2).replace('.', ',');
+
+  updateCartBar();
+
+  if (document.getElementById('cart-modal').style.display === 'flex') {
+    renderCartModal();
+  }
+}
+
+function getTotal() { 
+  const subtotal = cart.reduce((sum, i) => {
+    const itemCost = (i.price + i.addonsCost) * i.qty;
+    return sum + itemCost;
+  }, 0);
+
+  return subtotal + deliveryFee;
+}
+
+function updateCartBar() {
+  const bar = document.getElementById('cart-bar');
+  const count = cart.reduce((s, i) => s + i.qty, 0);
+  if (count > 0) {
+    bar.style.display = 'block';
+    document.getElementById('cart-count').textContent = count + (count === 1 ? ' item' : ' itens');
+    document.getElementById('cart-total').textContent = 'R$ ' + getTotal().toFixed(2).replace('.',',');
+  } else { bar.style.display = 'none'; }
+}
+
+function openCart() {
+  renderCartModal();
+  document.getElementById('cart-modal').style.display = 'flex';
+}
+
+function closeCart() { document.getElementById('cart-modal').style.display = 'none'; }
+function closeCartOutside(e) { if (e.target === e.currentTarget) closeCart(); }
+
+function renderCartModal() {
+  const list = document.getElementById('cart-items-list');
+  if (cart.length === 0) {
+    list.innerHTML = '<p class="bg-purple-50 text-center text-sm">Carrinho vazio</p>';
+  } else {
+    list.innerHTML = cart.map((item, i) => {
+      const itemTotal = (item.price + item.addonsCost) * item.qty;
+      let baseName = item.base === 'acai' ? 'Açaí Puro' : item.base === 'ninho' ? 'Creme de Ninho' : 'Ambos';
+      return `
+      <div class="neon-border rounded-xl p-3" style="background:#fcfcff;">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-900 font-semibold text-sm">${item.name}</p>
+            <p class="text-purple-900 text-[10px] font-bold">
+Base: ${baseName}
+</p>
+            ${item.addons && item.addons.length ? `<p class="text-purple-800 text-[10px] font-medium">
++ ${item.addons.join(', ')}
+</p>` : ''}
+            ${item.addonsCost > 0 ? `<p class="text-green-700 text-[10px]">Extra adicionais: +R$ ${item.addonsCost.toFixed(2).replace('.',',')}</p>` : ''}
+          </div>
+          <p class="text-green-700 font-bold text-sm">R$ ${itemTotal.toFixed(2).replace('.',',')}</p>
+        </div>
+        <div class="flex items-center justify-between mt-2">
+
+  ${
+    item.isCombo
+?
+`
+<button
+  onclick="removeFromCart(${i})"
+  class="text-red-400 text-xs font-semibold">
+  Remover Combo
+</button>
+`
+    :
+    `
+    <div class="flex items-center gap-2">
+      <button onclick="changeQty(${i},-1)" class="qty-btn bg-purple-700 text-white">−</button>
+      <span class="text-gray-900 font-bold text-sm">${item.qty}</span>
+      <button onclick="changeQty(${i},1)" class="qty-btn bg-purple-700 text-white">+</button>
+    </div>
+
+    <button onclick="removeFromCart(${i})" class="text-red-400 text-xs">
+      Remover
+    </button>
+    `
+  }
+
+</div>
+      </div>
+    `;
+    }).join('');
+  }
+  document.getElementById('modal-total').textContent = 'R$ ' + getTotal().toFixed(2).replace('.',',');
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+}
+
+// Delivery
+function selectDelivery(type) {
+  deliveryType = type;
+  document.getElementById('btn-entrega').className = type === 'entrega' ? 'chip-selected rounded-xl py-3 font-semibold text-sm' : 'neon-border rounded-xl py-3 text-gray-900 font-semibold text-sm transition-all hover:bg-purple-900';
+  document.getElementById('btn-retirada').className = type === 'retirada' ? 'chip-selected rounded-xl py-3 font-semibold text-sm' : 'neon-border rounded-xl py-3 text-gray-900 font-semibold text-sm transition-all hover:bg-purple-900';
+  document.getElementById('form-entrega').style.display = type === 'entrega' ? 'block' : 'none';
+  document.getElementById('form-retirada').style.display = type === 'retirada' ? 'block' : 'none';
+  document.getElementById('payment-section').style.display = 'block';
+}
+
+function selectPayment(type, evt) {
+  paymentType = type;
+  document.querySelectorAll('.pay-btn').forEach(b => b.className = 'pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900');
+  const target = (evt && evt.currentTarget) || (window.event && window.event.currentTarget);
+  if (target) target.classList.add('chip-selected');
+  document.getElementById('troco-section').style.display = type === 'dinheiro' ? 'block' : 'none';
+  document.getElementById('btn-finalizar').style.display = 'flex';
+
+  if (type === 'dinheiro') {
+    document.getElementById('inp-troco').addEventListener('input', calcTroco);
+  }
+}
+
+function calcTroco() {
+  const val = parseFloat(document.getElementById('inp-troco').value);
+  const total = getTotal();
+  if (val && val > total) {
+    document.getElementById('troco-calc').textContent = `Troco: R$ ${(val - total).toFixed(2).replace('.',',')}`;
+  } else {
+    document.getElementById('troco-calc').textContent = '';
+  }
+}
+
+// Finalize
+function finalizarPedido() {
+  const nome = deliveryType === 'entrega' ? document.getElementById('inp-nome').value : document.getElementById('inp-nome-ret').value;
+  if (!nome) { showToast('Preencha seu nome!'); return; }
+  if (cart.length === 0) { showToast('Carrinho vazio!'); return; }
+
+  let msg = `🍇 *PEDIDO - AÇAÍ PREMIUM 24H*\n\n`;
+  msg += `👤 *Nome:* ${nome}\n`;
+  msg += `📦 *Tipo:* ${deliveryType === 'entrega' ? 'Entrega' : 'Retirada'}\n`;
+
+  if (deliveryType === 'entrega') {
+    const rua = document.getElementById('inp-rua').value;
+    const num = document.getElementById('inp-numero').value;
+    const bairro = document.getElementById('inp-bairro').value;
+    const ref = document.getElementById('inp-ref').value;
+    msg += `📍 *Endereço:* ${rua}, ${num} - ${bairro}\n`;
+    if (ref) msg += `📌 *Ref:* ${ref}\n`;
+  }
+
+  msg += `\n🛒 *ITENS:*\n`;
+  cart.forEach(item => {
+    let baseName = item.base === 'acai' ? 'Açaí Puro' : item.base === 'ninho' ? 'Creme de Ninho' : 'Ambos';
+    const itemTotal = (item.price + item.addonsCost) * item.qty;
+    msg += `• ${item.qty}x ${item.name} (${baseName}) - R$ ${itemTotal.toFixed(2).replace('.',',')}\n`;
+    if (item.addons && item.addons.length) msg += `  ↳ Adicionais: ${item.addons.join(', ')}\n`;
+    if (item.addonsCost > 0) msg += `  ↳ Extra: +R$ ${item.addonsCost.toFixed(2).replace('.',',')}\n`;
+  });
+  
+  if (deliveryType === 'entrega') {
+  msg += `🚚 *Taxa de entrega:* R$ ${deliveryFee.toFixed(2).replace('.',',')}\n`;
+}
+  msg += `\n💰 *Total: R$ ${getTotal().toFixed(2).replace('.',',')}*\n`;
+  msg += `💳 *Pagamento:* ${paymentType === 'pix' ? 'PIX' : paymentType === 'cartao' ? 'Cartão' : 'Dinheiro'}\n`;
+
+  if (paymentType === 'dinheiro') {
+    const troco = document.getElementById('inp-troco').value;
+    if (troco) msg += `💵 *Troco para:* R$ ${parseFloat(troco).toFixed(2).replace('.',',')}\n`;
+  }
+
+  const whatsapp = window.elementSdk?.config?.whatsapp_number || '5584987576968';
+  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// Toast
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 left-4 right-4 z-[9999] bg-red-600 text-white text-sm font-semibold px-4 py-3 rounded-xl text-center';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// Init
+async function carregarFirestore() {
+
+  async function carregarBanco() {
+
+  // CORREÇÃO DE VELOCIDADE: antes, cada coleção era buscada uma
+  // por vez (await sequencial) — produtos, depois combos, depois
+  // promoções, depois adicionais, depois bairros,
+  // depois configurações. Cada uma dessas buscas espera a anterior
+  // terminar, somando todos os tempos de rede. Agora todas são
+  // buscadas em paralelo com Promise.all, então o tempo total é
+  // igual ao da busca mais lenta, não a soma de todas.
+  const [
+    produtosSnap,
+    combosSnap,
+    promoSnap,
+    addSnap,
+    bairrosSnap,
+    configSnap,
+    basesConfigSnap
+  ] = await Promise.all([
+    getDocs(collection(db,'produtos')),
+    getDocs(collection(db,'combos')),
+    getDocs(collection(db,'promocoes')),
+    getDocs(collection(db,'adicionais')),
+    getDocs(collection(db,'bairros')),
+    getDoc(doc(db,'configuracoes','loja')),
+    getDoc(doc(db,'configuracoes','bases'))
+  ]);
+
+  // PRODUTOS
+  menuItems = [];
+
+  produtosSnap.forEach(docSnap=>{
+
+  const d = docSnap.data();
+
+  // CORREÇÃO: produtos criados pelo admin salvam o campo "available",
+  // mas aqui só era checado "ativo". Agora aceita os dois para não
+  // esconder produtos novos do cardápio.
+  if(d.ativo || d.available){
+
+  menuItems.push({
+  id:docSnap.id,
+  ...d
+  });
+
+  }
+
+  });
+
+  // COMBOS
+  combos = [];
+
+  combosSnap.forEach(docSnap=>{
+
+  const d = docSnap.data();
+
+  if(d.ativo){
+
+  combos.push({
+  id:docSnap.id,
+  ...d
+  });
+
+  }
+
+  });
+
+  // PROMOÇÕES
+  promos = [];
+
+  const hoje = new Date();
+  const diaSemana = hoje.getDay();
+
+  promoSnap.forEach(docSnap=>{
+
+  const p = docSnap.data();
+
+  if(!p.ativo)
+  return;
+
+  // CORREÇÃO: quando nenhum dia da semana é marcado no admin,
+  // "diasSemana" é salvo como array vazio []. Um array vazio é
+  // "truthy" em JS, então a condição antiga sempre escondia a
+  // promoção (mesmo sem nenhum dia selecionado, que deveria
+  // significar "válida todos os dias"). Agora só filtra por dia
+  // se houver pelo menos um dia configurado.
+  if(
+  p.diasSemana &&
+  p.diasSemana.length > 0 &&
+  !p.diasSemana.includes(diaSemana)
+  )
+  return;
+
+  if(
+  p.dataInicio &&
+  hoje < new Date(p.dataInicio)
+  )
+  return;
+
+  if(
+  p.dataFim &&
+  hoje > new Date(p.dataFim + 'T23:59:59')
+  )
+  return;
+
+  promos.push({
+  id:docSnap.id,
+  ...p
+  });
+
+  });
+
+  // ADICIONAIS
+  addons = [];
+
+  addSnap.forEach(docSnap=>{
+  addons.push(docSnap.data());
+  });
+
+  // BASES DE AÇAÍ (Açaí Puro / Creme de Ninho / Ambos)
+  // Disponibilidade controlada pelo administrador.
+  const basesData = basesConfigSnap.exists() ? basesConfigSnap.data() : {};
+
+  bases = bases.map(b => ({
+    ...b,
+    available: basesData[b.value] !== undefined ? basesData[b.value] : true
+  }));
+
+  // BAIRROS
+  neighborhoodFees = {};
+
+  bairrosSnap.forEach(docSnap=>{
+
+  const b = docSnap.data();
+
+  neighborhoodFees[b.nome] = b.taxa;
+
+  });
+
+  // CORREÇÃO: o <select> de bairros era fixo no HTML e não tinha
+  // relação com os bairros cadastrados no admin. Agora é preenchido
+  // dinamicamente com os bairros vindos do Firestore.
+  renderBairros();
+
+  // CONFIGURAÇÕES DA LOJA (nome, slogan, banner)
+  // CORREÇÃO: nome/slogan/banner agora vêm SOMENTE do Firestore
+  // (configuracoes/loja), controlados pelo administrador. O bloco
+  // do elementSdk que sobrescrevia esses valores foi removido do
+  // fluxo principal.
+  if(configSnap.exists()){
+
+  const loja = configSnap.data();
+
+  document.getElementById('store-name').textContent =
+    loja.nome || 'Açaí Premium 24 Horas';
+
+  document.getElementById('slogan').textContent =
+    loja.slogan || '';
+
+  renderBanner(loja);
+
+  } else {
+
+  document.getElementById('store-name').textContent = 'Açaí Premium 24 Horas';
+  document.getElementById('slogan').textContent = '';
+
+  }
+
+  renderMenu();
+
+  renderCombos();
+
+  renderPromos();
+
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+
+  }
+
+  await carregarBanco();
+
+}
+// CORREÇÃO: as funções usadas nos onclick do HTML (abrir carrinho,
+// adicionar adicionais, finalizar pedido, etc.) precisam estar
+// disponíveis em window ANTES de qualquer código que possa falhar
+// (como o elementSdk, que só existe na plataforma de preview).
+// Antes, esse Object.assign ficava no final do script, depois do
+// window.elementSdk.init(...) — se elementSdk não existisse, o
+// script quebrava ali e NENHUM botão do site funcionava.
+Object.assign(window, {
+  openAddonsFor,
+  confirmAddons,
+  closeAddons,
+  closeAddonsOutside,
+  toggleAddon,
+  selectBase,
+  openComboModal,
+  openPromoModal,
+  openComboAddonsSelector,
+  toggleComboAddon,
+  confirmComboAddons,
+  confirmComboSetup,
+  closeComboModal,
+  closeComboModalOutside,
+  closeComboAddonsSelector,
+  selectComboBase,
+  removeFromCart,
+  changeQty,
+  openCart,
+  closeCart,
+  closeCartOutside,
+  selectDelivery,
+  selectPayment,
+  updateDeliveryFee,
+  finalizarPedido
+});
+
+carregarFirestore().catch(err => {
+  console.error('Erro ao carregar dados do Firestore:', err);
+  showToast('Erro ao carregar cardápio. Veja o console (F12).');
+});
+
+
+// Element SDK
+const defaultConfig = {
+  store_name: 'Açaí Premium 24 Horas',
+  slogan: 'Mais que açaí, uma experiência Premium!',
+  whatsapp_number: '5585987411599',
+  background_color: '#1a0a2e',
+  surface_color: '#2d1b4e',
+  text_color: '#ffffff',
+  primary_color: '#a855f7',
+  accent_color: '#d4af37',
+  font_family: 'Outfit',
+  font_size: 16
+};
+
+// CORREÇÃO: window.elementSdk só existe quando a página é aberta
+// dentro da plataforma de preview (script /_sdk/element_sdk.js).
+// Se você hospedar este arquivo em outro lugar (Hostinger, Netlify,
+// etc.), esse script não existe e "window.elementSdk.init" daria
+// erro e travaria TODO o restante do código — incluindo a exposição
+// das funções dos botões. Por isso agora isso só roda se existir.
+//
+// CORREÇÃO 2: nome da loja e slogan agora são controlados SOMENTE
+// pelo administrador via Firebase (configuracoes/loja). Por isso
+// o onConfigChange não sobrescreve mais "store-name" e "slogan".
+if (window.elementSdk && typeof window.elementSdk.init === 'function') {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const font = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${font}, sans-serif`;
+
+      const size = config.font_size || defaultConfig.font_size;
+      document.body.style.fontSize = size + 'px';
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+        { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
+        { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['store_name', config.store_name || defaultConfig.store_name],
+      ['slogan', config.slogan || defaultConfig.slogan],
+      ['whatsapp_number', config.whatsapp_number || defaultConfig.whatsapp_number],
+    ])
+  });
+}
+
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((err) => {
+      console.log('Falha ao registrar Service Worker:', err);
+    });
+  });
+}
+</script>
+</body>
+</html>

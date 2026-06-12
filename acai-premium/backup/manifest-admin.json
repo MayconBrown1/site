@@ -1,13 +1,13 @@
 {
-  "name": "Açaí Premium 24 Horas",
-  "short_name": "Açaí Premium",
-  "description": "Cardápio digital do Açaí Premium 24 Horas - peça pelo WhatsApp",
-  "start_url": "/acai-premium/index.html",
-  "scope": "/acai-premium/",
+  "name": "Painel Admin - Açaí Premium",
+  "short_name": "Admin Açaí",
+  "description": "Painel administrativo do Açaí Premium 24 Horas",
+  "start_url": "./admin.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1a0a2e",
-  "theme_color": "#1a0a2e",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "https://res.cloudinary.com/drpd9kv7g/image/upload/v1780523423/acai-e-lanches-premium_sljg56.png",

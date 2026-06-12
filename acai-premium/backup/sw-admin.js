@@ -1,7 +1,7 @@
-const CACHE_NAME = 'acai-premium-cardapio-v1';
+const CACHE_NAME = 'acai-premium-admin-v1';
 const ASSETS = [
-  './index.html',
-  './manifest.json'
+  './admin.html',
+  './manifest-admin.json'
 ];
 
 self.addEventListener('install', (event) => {
