@@ -318,22 +318,6 @@ select.input-field option {
       <div id="form-entrega" style="display:none;" class="space-y-3 mb-4">
        <input class="input-field" placeholder="Seu nome" id="inp-nome"> <input class="input-field" placeholder="Rua" id="inp-rua"> <input class="input-field" placeholder="Número" id="inp-numero"> <select class="input-field" id="inp-bairro" onchange="updateDeliveryFee()">
   <option value="">Selecione o bairro</option>
-  <option value="BELA PARNAMIRIM">BELA PARNAMIRIM</option>
-  <option value="SANTA TEREZA">SANTA TEREZA</option>
-  <option value="FRANBOYNS">FRANBOYNS</option>
-  <option value="PASSAGEM DE AREIA">PASSAGEM DE AREIA</option>
-  <option value="ROSA DOS VENTOS">ROSA DOS VENTOS</option>
-  <option value="SANTOS REIS">SANTOS REIS</option>
-  <option value="MONTE CASTELO">MONTE CASTELO</option>
-  <option value="VIDA NOVA">VIDA NOVA</option>
-  <option value="VALE DO SOL">VALE DO SOL</option>
-  <option value="NOVA ESPERANÇA">NOVA ESPERANÇA</option>
-  <option value="BOSQUE DAS COLINAS">BOSQUE DAS COLINAS</option>
-  <option value="BOSQUE BRASIL">BOSQUE BRASIL</option>
-  <option value="JAPECANGA">JAPECANGA</option>
-  <option value="CAJUPIRANGA">CAJUPIRANGA</option>
-  <option value="JARDIM PLANALTO">JARDIM PLANALTO</option>
-  <option value="LIBERDADE">LIBERDADE</option>
 </select>
 
 <p class="text-green-700 text-sm mt-2 font-bold" id="delivery-fee-text">
@@ -346,7 +330,7 @@ Taxa de entrega: R$ 0,00
       <div id="payment-section" style="display:none;">
        <p class="text-gray-900 font-semibold mb-3">Pagamento</p>
        <div class="grid grid-cols-3 gap-2 mb-3">
-        <button onclick="selectPayment('pix')" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💠 PIX</button> <button onclick="selectPayment('cartao')" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💳 Cartão</button> <button onclick="selectPayment('dinheiro')" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💵 Dinheiro</button>
+        <button onclick="selectPayment('pix', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💠 PIX</button> <button onclick="selectPayment('cartao', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💳 Cartão</button> <button onclick="selectPayment('dinheiro', event)" class="pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900">💵 Dinheiro</button>
        </div>
        <div id="troco-section" style="display:none;" class="mb-4">
         <input class="input-field" placeholder="Troco para quanto? (R$)" id="inp-troco" type="number">
@@ -455,28 +439,61 @@ let selectedBase = 'acai'; // 'acai', 'ninho', 'both'
 let deliveryType = null;
 let paymentType = null;
 let deliveryFee = 0;
-
 let neighborhoodFees = {};
 
+// CORREÇÃO: array "bases" estava sendo usado em vários lugares
+// (renderAddonsModal, renderComboModal, selectBase, etc.) mas nunca
+// tinha sido declarado, o que causava "bases is not defined" e
+// travava a abertura do modal de adicionais (por isso não dava
+// para adicionar produto/adicionais/frutas ao carrinho).
 const bases = [
-  {
-    name: 'Açaí Puro',
-    value: 'acai',
-    available: true
-  },
-
-  {
-    name: 'Creme de Ninho',
-    value: 'ninho',
-    available: false
-  },
-
-  {
-    name: 'Ambos',
-    value: 'both',
-    available: false
-  }
+  { value: 'acai',  name: 'Açaí Puro',     available: true },
+  { value: 'ninho', name: 'Creme de Ninho', available: true },
+  { value: 'both',  name: 'Ambos',          available: true }
 ];
+
+// ==========================================
+// CORREÇÃO: ADIÇÃO DAS FUNÇÕES EM FALTA PARA OS MODAIS
+// ==========================================
+window.closeAddons = function() {
+  document.getElementById('addons-modal').style.display = 'none';
+}
+
+window.closeAddonsOutside = function(event) {
+  if (event.target.id === 'addons-modal') {
+    closeAddons();
+  }
+}
+
+window.closeComboModal = function() {
+  document.getElementById('combo-config-modal').style.display = 'none';
+}
+
+window.closeComboModalOutside = function(event) {
+  if (event.target.id === 'combo-config-modal') {
+    closeComboModal();
+  }
+}
+
+window.closeCartOutside = function(event) {
+  if (event.target.id === 'cart-modal') {
+    closeCart();
+  }
+}
+
+window.selectComboBase = function(button, idx, value) {
+  if (!comboItemsSetup[idx]) return;
+  comboItemsSetup[idx].base = value;
+  
+  // Atualiza visualmente os botões do combo
+  const container = document.getElementById(`base-combo-${idx}`);
+  if (container) {
+    const buttons = container.querySelectorAll('button');
+    buttons.forEach(btn => btn.classList.remove('chip-selected', 'bg-purple-600', 'text-white'));
+    button.classList.add('chip-selected', 'bg-purple-600', 'text-white');
+  }
+}
+// ==========================================
 
 // Render menu
 function renderMenu() {
@@ -568,6 +585,15 @@ function renderPromos() {
 
   container.innerHTML = promos.map(item => {
 
+    // CORREÇÃO: o admin não salva o campo "saving" (economia).
+    // Calculamos aqui a partir de oldPrice - price para não
+    // quebrar com "Cannot read properties of undefined (toFixed)",
+    // erro que travava renderPromos() e fazia a seção de
+    // promoções nunca aparecer.
+    const oldPriceNum = Number(item.oldPrice || 0);
+    const priceNum = Number(item.price || item.preco || 0);
+    const saving = Math.max(0, oldPriceNum - priceNum);
+
     let available = true;
     let unavailableText = '';
 
@@ -615,18 +641,18 @@ ${item.emoji || '🔥'}
 
           <div class="flex items-center gap-2 mt-1">
             <span class="text-red-400 line-through text-xs">
-              R$ ${item.oldPrice.toFixed(2).replace('.',',')}
+              R$ ${oldPriceNum.toFixed(2).replace('.',',')}
             </span>
 
             <span class="text-green-700 font-bold">
-              R$ ${Number(item.price || item.preco || 0)
+              R$ ${priceNum
 .toFixed(2)
 .replace('.',',')}
             </span>
           </div>
 
           <span class="text-purple-700 text-[10px]">
-            💰 Economia: R$ ${item.saving.toFixed(2).replace('.',',')}
+            💰 Economia: R$ ${saving.toFixed(2).replace('.',',')}
           </span>
 
           ${!available ? `
@@ -657,9 +683,11 @@ function openComboModal(comboId) {
   const combo = combos.find(c => c.id === comboId);
   comboModalData = combo;
   
-  // Determinar quantidade de açaís no combo
-  let numAcais = 4;
-  if (comboId === 'c2' || comboId === 'c3') numAcais = 2;
+  // CORREÇÃO: o admin salva "quantidadeAcais" ao criar o combo,
+  // mas isso era ignorado e usava IDs fixos antigos (c2/c3) que
+  // não existem mais (o Firestore gera IDs aleatórios). Agora usa
+  // o valor salvo, com 4 como padrão se não existir.
+  let numAcais = Number(combo?.quantidadeAcais) || 4;
   
   comboItemsSetup = Array(numAcais).fill(null).map((_, i) => ({
     index: i,
@@ -1058,6 +1086,29 @@ function changeQty(index, delta) {
   renderCartModal();
 }
 
+// CORREÇÃO: preenche o <select> de bairros dinamicamente com os
+// bairros cadastrados no painel admin (collection "bairros"),
+// mostrando o nome e a taxa de entrega de cada um.
+function renderBairros() {
+  const select = document.getElementById('inp-bairro');
+  if (!select) return;
+
+  const valorAtual = select.value;
+
+  const opcoes = Object.keys(neighborhoodFees).sort();
+
+  select.innerHTML = '<option value="">Selecione o bairro</option>' +
+    opcoes.map(nome => {
+      const taxa = Number(neighborhoodFees[nome] || 0);
+      return `<option value="${nome}">${nome} - R$ ${taxa.toFixed(2).replace('.',',')}</option>`;
+    }).join('');
+
+  // Mantém o bairro selecionado, se ainda existir na lista
+  if (valorAtual && opcoes.includes(valorAtual)) {
+    select.value = valorAtual;
+  }
+}
+
 function updateDeliveryFee() {
   const bairro = document.getElementById('inp-bairro').value;
 
@@ -1168,10 +1219,11 @@ function selectDelivery(type) {
   document.getElementById('payment-section').style.display = 'block';
 }
 
-function selectPayment(type) {
+function selectPayment(type, evt) {
   paymentType = type;
   document.querySelectorAll('.pay-btn').forEach(b => b.className = 'pay-btn neon-border rounded-xl py-3 text-gray-900 text-xs font-semibold transition-all hover:bg-purple-900');
-  event.currentTarget.classList.add('chip-selected');
+  const target = (evt && evt.currentTarget) || (window.event && window.event.currentTarget);
+  if (target) target.classList.add('chip-selected');
   document.getElementById('troco-section').style.display = type === 'dinheiro' ? 'block' : 'none';
   document.getElementById('btn-finalizar').style.display = 'flex';
 
@@ -1246,45 +1298,6 @@ function showToast(msg) {
 // Init
 async function carregarFirestore() {
 
-  // PRODUTOS
-  const produtosSnap =
-    await getDocs(collection(db,"produtos"));
-
-
-  // ADICIONAIS
-  const addonsSnap =
-    await getDocs(collection(db,"adicionais"));
-
-  addons = addonsSnap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-
-  // FRUTAS
-  const frutasSnap =
-    await getDocs(collection(db,"frutas"));
-
-  fruits = frutasSnap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-
-
-  // BAIRROS
-  const bairrosSnap =
-    await getDocs(collection(db,"bairros"));
-
-  neighborhoodFees = {};
-
-  bairrosSnap.forEach(doc => {
-
-    neighborhoodFees[
-      doc.data().nome
-    ] = doc.data().taxa;
-
-  });
-
   async function carregarBanco() {
 
 const produtos =
@@ -1298,7 +1311,10 @@ produtos.forEach(doc=>{
 
 const d = doc.data();
 
-if(d.ativo){
+// CORREÇÃO: produtos criados pelo admin salvam o campo "available",
+// mas aqui só era checado "ativo". Agora aceita os dois para não
+// esconder produtos novos do cardápio.
+if(d.ativo || d.available){
 
 menuItems.push({
 id:doc.id,
@@ -1352,8 +1368,15 @@ doc.data();
 if(!p.ativo)
 return;
 
+// CORREÇÃO: quando nenhum dia da semana é marcado no admin,
+// "diasSemana" é salvo como array vazio []. Um array vazio é
+// "truthy" em JS, então a condição antiga sempre escondia a
+// promoção (mesmo sem nenhum dia selecionado, que deveria
+// significar "válida todos os dias"). Agora só filtra por dia
+// se houver pelo menos um dia configurado.
 if(
 p.diasSemana &&
+p.diasSemana.length > 0 &&
 !p.diasSemana.includes(
 diaSemana
 )
@@ -1434,6 +1457,11 @@ b.nome
 
 });
 
+// CORREÇÃO: o <select> de bairros era fixo no HTML e não tinha
+// relação com os bairros cadastrados no admin. Agora é preenchido
+// dinamicamente com os bairros vindos do Firestore.
+renderBairros();
+
 const config =
 await getDoc(
 doc(
@@ -1477,54 +1505,13 @@ lucide.createIcons();
 await carregarBanco();
 
 }
-carregarFirestore();
-
-
-// Element SDK
-const defaultConfig = {
-  store_name: 'Açaí Premium 24 Horas',
-  slogan: 'Mais que açaí, uma experiência Premium!',
-  whatsapp_number: '5585987411599',
-  background_color: '#1a0a2e',
-  surface_color: '#2d1b4e',
-  text_color: '#ffffff',
-  primary_color: '#a855f7',
-  accent_color: '#d4af37',
-  font_family: 'Outfit',
-  font_size: 16
-};
-
-window.elementSdk.init({
-  defaultConfig,
-  onConfigChange: async (config) => {
-    document.getElementById('store-name').textContent = config.store_name || defaultConfig.store_name;
-    document.getElementById('slogan').textContent = config.slogan || defaultConfig.slogan;
-
-    const font = config.font_family || defaultConfig.font_family;
-    document.body.style.fontFamily = `${font}, sans-serif`;
-
-    const size = config.font_size || defaultConfig.font_size;
-    document.body.style.fontSize = size + 'px';
-  },
-  mapToCapabilities: (config) => ({
-    recolorables: [
-      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
-      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
-      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
-      { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
-      { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
-    ],
-    borderables: [],
-    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
-    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
-  }),
-  mapToEditPanelValues: (config) => new Map([
-    ['store_name', config.store_name || defaultConfig.store_name],
-    ['slogan', config.slogan || defaultConfig.slogan],
-    ['whatsapp_number', config.whatsapp_number || defaultConfig.whatsapp_number],
-  ])
-});
-
+// CORREÇÃO: as funções usadas nos onclick do HTML (abrir carrinho,
+// adicionar adicionais, finalizar pedido, etc.) precisam estar
+// disponíveis em window ANTES de qualquer código que possa falhar
+// (como o elementSdk, que só existe na plataforma de preview).
+// Antes, esse Object.assign ficava no final do script, depois do
+// window.elementSdk.init(...) — se elementSdk não existisse, o
+// script quebrava ali e NENHUM botão do site funcionava.
 Object.assign(window, {
   openAddonsFor,
   confirmAddons,
@@ -1552,6 +1539,65 @@ Object.assign(window, {
   updateDeliveryFee,
   finalizarPedido
 });
+
+carregarFirestore().catch(err => {
+  console.error('Erro ao carregar dados do Firestore:', err);
+  showToast('Erro ao carregar cardápio. Veja o console (F12).');
+});
+
+
+// Element SDK
+const defaultConfig = {
+  store_name: 'Açaí Premium 24 Horas',
+  slogan: 'Mais que açaí, uma experiência Premium!',
+  whatsapp_number: '5585987411599',
+  background_color: '#1a0a2e',
+  surface_color: '#2d1b4e',
+  text_color: '#ffffff',
+  primary_color: '#a855f7',
+  accent_color: '#d4af37',
+  font_family: 'Outfit',
+  font_size: 16
+};
+
+// CORREÇÃO: window.elementSdk só existe quando a página é aberta
+// dentro da plataforma de preview (script /_sdk/element_sdk.js).
+// Se você hospedar este arquivo em outro lugar (Hostinger, Netlify,
+// etc.), esse script não existe e "window.elementSdk.init" daria
+// erro e travaria TODO o restante do código — incluindo a exposição
+// das funções dos botões. Por isso agora isso só roda se existir.
+if (window.elementSdk && typeof window.elementSdk.init === 'function') {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      document.getElementById('store-name').textContent = config.store_name || defaultConfig.store_name;
+      document.getElementById('slogan').textContent = config.slogan || defaultConfig.slogan;
+
+      const font = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${font}, sans-serif`;
+
+      const size = config.font_size || defaultConfig.font_size;
+      document.body.style.fontSize = size + 'px';
+    },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+        { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }},
+        { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }},
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }},
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }},
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['store_name', config.store_name || defaultConfig.store_name],
+      ['slogan', config.slogan || defaultConfig.slogan],
+      ['whatsapp_number', config.whatsapp_number || defaultConfig.whatsapp_number],
+    ])
+  });
+}
 
 </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>

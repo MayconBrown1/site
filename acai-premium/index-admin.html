@@ -343,6 +343,30 @@ Salvar Combo
 
 </div>
 
+<div class="card">
+
+<table class="table">
+
+<thead>
+
+<tr>
+<th>Imagem</th>
+<th>Nome</th>
+<th>Preço</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="listaCombos">
+
+</tbody>
+
+</table>
+
+</div>
+
 </div>
 
 <!-- PROMOÇÕES -->
@@ -469,54 +493,6 @@ Salvar Promoção
 
 </div>
 
-<!-- BANNER -->
-
-<div class="card mt-6">
-
-<h3 class="text-xl font-bold mb-4">
-Banner Promocional
-</h3>
-
-<input
-id="bannerTitulo"
-placeholder="Título">
-
-<br><br>
-
-<textarea
-id="bannerTexto"
-placeholder="Texto">
-</textarea>
-
-<br><br>
-
-<input
-id="bannerImagem"
-placeholder="URL da imagem">
-
-<br><br>
-
-<label>
-
-<input
-type="checkbox"
-id="bannerAtivo">
-
-Banner ativo
-
-</label>
-
-<br><br>
-
-<button
-class="btn-success btn"
-onclick="salvarBanner()">
-
-Salvar Banner
-
-</button>
-
-</div>
 
 <!-- FIREBASE -->
 
@@ -644,7 +620,8 @@ window.salvarProduto = async function(){
             price: Number(produtoPreco.value),
             emoji: produtoEmoji.value,
             image: produtoImagem.value,
-            available: produtoAtivo.checked
+            available: produtoAtivo.checked,
+            ativo: produtoAtivo.checked
         }
     );
     alert("Produto salvo com sucesso!");
@@ -974,6 +951,8 @@ document
 
 }
 
+window.showTab = showTab;
+
 async function salvarAdicional(){
 
 await addDoc(
@@ -990,6 +969,8 @@ alert("Adicional salvo");
 location.reload();
 
 }
+
+window.salvarAdicional = salvarAdicional;
 
 async function salvarFruta(){
 
@@ -1008,6 +989,8 @@ location.reload();
 
 }
 
+window.salvarFruta = salvarFruta;
+
 async function salvarBairro(){
 
 await addDoc(
@@ -1025,6 +1008,8 @@ alert("Bairro salvo");
 location.reload();
 
 }
+
+window.salvarBairro = salvarBairro;
 
 async function salvarConfiguracoes(){
 
@@ -1049,6 +1034,8 @@ alert(
 );
 
 }
+
+window.salvarConfiguracoes = salvarConfiguracoes;
 
 async function carregarConfiguracoes(){
 
@@ -1100,6 +1087,8 @@ location.reload();
 
 }
 
+window.excluirDocumento = excluirDocumento;
+
 async function alterarStatus(
 colecao,
 id,
@@ -1121,6 +1110,8 @@ available: !status
 location.reload();
 
 }
+
+window.alterarStatus = alterarStatus;
 
 async function carregarListas(){
 
@@ -1273,6 +1264,134 @@ class="btn-danger btn"
 onclick="
 excluirDocumento(
 'frutas',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+// CORREÇÃO: faltava carregar e listar Combos e Promoções na tela
+// de administração (por isso não apareciam para editar/remover).
+const combosList =
+await getDocs(
+collection(db,'combos')
+);
+
+combosList.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaCombos.innerHTML += `
+<tr>
+
+<td>
+<img
+src="${d.image||''}"
+style="
+width:50px;
+height:50px;
+object-fit:cover;
+border-radius:8px;">
+</td>
+
+<td>${d.name}</td>
+
+<td>
+R$ ${d.price}
+</td>
+
+<td>
+${d.ativo ? 'Ativo' : 'Oculto'}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="
+alterarStatus(
+'combos',
+'${docSnap.id}',
+${d.ativo}
+)">
+${d.ativo ? 'Ocultar' : 'Mostrar'}
+</button>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'combos',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+const promocoesList =
+await getDocs(
+collection(db,'promocoes')
+);
+
+promocoesList.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaPromocoes.innerHTML += `
+<tr>
+
+<td>
+<img
+src="${d.image||''}"
+style="
+width:50px;
+height:50px;
+object-fit:cover;
+border-radius:8px;">
+</td>
+
+<td>${d.name}</td>
+
+<td>
+R$ ${d.price}
+</td>
+
+<td>
+${d.ativo ? 'Ativo' : 'Oculto'}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="
+alterarStatus(
+'promocoes',
+'${docSnap.id}',
+${d.ativo}
+)">
+${d.ativo ? 'Ocultar' : 'Mostrar'}
+</button>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'promocoes',
 '${docSnap.id}'
 )">
 Excluir
