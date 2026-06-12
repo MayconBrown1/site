@@ -2,7 +2,7 @@
   "name": "Açaí Premium 24 Horas",
   "short_name": "Açaí Premium",
   "description": "Cardápio digital do Açaí Premium 24 Horas - peça pelo WhatsApp",
-  "start_url": "./index.html",
+  "start_url": "https://mayconbrown.com.br/acai-premium/",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
