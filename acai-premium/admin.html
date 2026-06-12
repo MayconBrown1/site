@@ -10,10 +10,15 @@
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
 background:#0f172a;
 color:white;
 font-family:Arial,sans-serif;
+margin:0;
 }
 
 .sidebar{
@@ -24,17 +29,22 @@ left:0;
 top:0;
 background:#111827;
 overflow:auto;
+z-index:100;
+transition:transform 0.25s ease;
 }
 
 .main{
 margin-left:260px;
 padding:20px;
+max-width:100%;
 }
 
 .card{
 background:#1e293b;
 border-radius:16px;
 padding:20px;
+max-width:100%;
+overflow-x:hidden;
 }
 
 input,select,textarea{
@@ -44,6 +54,7 @@ border-radius:10px;
 background:#0f172a;
 border:1px solid #334155;
 color:white;
+font-size:16px;
 }
 
 button{
@@ -55,6 +66,9 @@ background:#9333ea;
 padding:10px 16px;
 border-radius:10px;
 font-weight:bold;
+border:none;
+color:white;
+font-size:15px;
 }
 
 .btn-danger{
@@ -63,6 +77,10 @@ background:#dc2626;
 
 .btn-success{
 background:#16a34a;
+}
+
+.btn-edit{
+background:#2563eb;
 }
 
 .table{
@@ -81,12 +99,204 @@ text-align:left;
 display:none;
 }
 
+.topbar{
+display:none;
+}
+
+.acoes-cell{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+}
+
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:1000;
+padding:16px;
+}
+
+.modal-box{
+background:#1e293b;
+border-radius:16px;
+padding:20px;
+width:100%;
+max-width:480px;
+max-height:90vh;
+overflow-y:auto;
+}
+
+/* ============ MOBILE STYLES ============ */
+@media (max-width: 768px){
+
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#111827;
+padding:12px 16px;
+position:sticky;
+top:0;
+z-index:90;
+}
+
+.topbar h1{
+font-size:1.1rem;
+margin:0;
+}
+
+.topbar button{
+background:#9333ea;
+border:none;
+color:white;
+padding:8px 12px;
+border-radius:8px;
+font-size:1.2rem;
+}
+
+.sidebar{
+transform:translateX(-100%);
+width:220px;
+padding-top:10px;
+}
+
+.sidebar.open{
+transform:translateX(0);
+}
+
+.sidebar-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.5);
+z-index:99;
+}
+
+.sidebar-overlay.show{
+display:block;
+}
+
+.main{
+margin-left:0;
+padding:12px;
+}
+
+.main h2{
+font-size:1.4rem !important;
+margin-bottom:12px !important;
+}
+
+.main h3{
+font-size:1.05rem !important;
+}
+
+.card{
+padding:14px;
+border-radius:12px;
+margin-bottom:12px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr) !important;
+gap:8px !important;
+}
+
+.card h3{
+font-size:0.8rem;
+}
+
+.card p.text-4xl{
+font-size:1.6rem !important;
+}
+
+input,select,textarea{
+padding:10px;
+font-size:14px;
+margin-bottom:8px;
+}
+
+.btn{
+padding:10px 14px;
+font-size:14px;
+width:100%;
+margin-bottom:6px;
+}
+
+.table thead{
+display:none;
+}
+
+.table, .table tbody, .table tr, .table td{
+display:block;
+width:100%;
+}
+
+.table tr{
+background:#0f172a;
+border-radius:12px;
+margin-bottom:12px;
+padding:10px;
+border:1px solid #334155;
+}
+
+.table td{
+border-bottom:none;
+padding:6px 4px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+text-align:right;
+}
+
+.table td:before{
+content:attr(data-label);
+font-weight:bold;
+color:#94a3b8;
+text-align:left;
+flex-shrink:0;
+}
+
+.table td img{
+margin-left:auto;
+}
+
+.acoes-cell{
+justify-content:flex-end;
+width:100%;
+}
+
+.acoes-cell .btn{
+width:auto;
+flex:1;
+font-size:12px;
+padding:8px 6px;
+}
+
+.modal-box{
+padding:14px;
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
+<div class="topbar">
+<h1>🍇 Painel Admin</h1>
+<button onclick="toggleSidebar()">☰</button>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
 
 <div class="p-5">
 
@@ -986,6 +1196,34 @@ Salvar Configurações
 
 </div>
 
+<!-- MODAL DE EDIÇÃO -->
+
+<div id="modalEdicao" class="modal-overlay hidden">
+
+<div class="modal-box">
+
+<h3 class="text-xl font-bold mb-4" id="modalTitulo">
+Editar Item
+</h3>
+
+<div id="modalCampos"></div>
+
+<div style="display:flex; gap:10px; margin-top:10px;">
+
+<button class="btn-success btn" style="flex:1" onclick="salvarEdicao()">
+Salvar
+</button>
+
+<button class="btn btn-danger" style="flex:1" onclick="fecharModal()">
+Cancelar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
 <script>
 
 function showTab(tab){
@@ -1002,9 +1240,30 @@ document
 .getElementById(tab+'-tab')
 .classList.remove('hidden');
 
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+if(sidebar){
+sidebar.classList.remove('open');
+}
+if(overlay){
+overlay.classList.remove('show');
+}
+
 }
 
 window.showTab = showTab;
+
+function toggleSidebar(){
+
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+
+sidebar.classList.toggle('open');
+overlay.classList.toggle('show');
+
+}
+
+window.toggleSidebar = toggleSidebar;
 
 async function salvarAdicional(){
 
@@ -1191,6 +1450,147 @@ location.reload();
 
 window.alterarStatus = alterarStatus;
 
+// ============ MODAL DE EDIÇÃO ============
+
+let edicaoAtual = { colecao:null, id:null };
+
+const camposPorColecao = {
+produtos:[
+{key:'name', label:'Nome', type:'text'},
+{key:'size', label:'Tamanho', type:'text'},
+{key:'price', label:'Preço', type:'number'},
+{key:'emoji', label:'Emoji', type:'text'},
+{key:'image', label:'URL da Imagem', type:'text'}
+],
+combos:[
+{key:'name', label:'Nome', type:'text'},
+{key:'desc', label:'Descrição', type:'textarea'},
+{key:'price', label:'Preço', type:'number'},
+{key:'quantidadeAcais', label:'Quantidade de Açaís', type:'number'},
+{key:'emoji', label:'Emoji', type:'text'},
+{key:'image', label:'URL da Imagem', type:'text'}
+],
+promocoes:[
+{key:'name', label:'Nome', type:'text'},
+{key:'desc', label:'Descrição', type:'textarea'},
+{key:'price', label:'Preço Promocional', type:'number'},
+{key:'oldPrice', label:'Preço Antigo', type:'number'},
+{key:'emoji', label:'Emoji', type:'text'},
+{key:'image', label:'URL da Imagem', type:'text'},
+{key:'dataInicio', label:'Data Início', type:'date'},
+{key:'dataFim', label:'Data Fim', type:'date'}
+],
+adicionais:[
+{key:'name', label:'Nome', type:'text'}
+],
+frutas:[
+{key:'name', label:'Nome', type:'text'}
+]
+};
+
+function abrirEdicao(colecao, id, dados){
+
+edicaoAtual = { colecao, id };
+
+const titulos = {
+produtos:'Editar Produto',
+combos:'Editar Combo',
+promocoes:'Editar Promoção'
+};
+
+modalTitulo.textContent = titulos[colecao] || 'Editar Item';
+
+const campos = camposPorColecao[colecao] || [];
+
+let html = '';
+
+campos.forEach(c=>{
+
+const valor = dados[c.key] !== undefined ? dados[c.key] : '';
+
+if(c.type === 'textarea'){
+
+html += `
+<label class="text-sm text-gray-400">${c.label}</label>
+<textarea data-campo="${c.key}">${valor}</textarea>
+<br>
+`;
+
+}else{
+
+html += `
+<label class="text-sm text-gray-400">${c.label}</label>
+<input data-campo="${c.key}" type="${c.type}" ${c.type==='number'?'step="0.01"':''} value="${valor}">
+<br>
+`;
+
+}
+
+});
+
+modalCampos.innerHTML = html;
+
+modalEdicao.classList.remove('hidden');
+
+}
+
+window.abrirEdicao = abrirEdicao;
+
+function abrirEdicaoSimples(colecao, id, dados){
+
+abrirEdicao(colecao, id, dados);
+
+}
+
+window.abrirEdicaoSimples = abrirEdicaoSimples;
+
+function fecharModal(){
+
+modalEdicao.classList.add('hidden');
+modalCampos.innerHTML = '';
+edicaoAtual = { colecao:null, id:null };
+
+}
+
+window.fecharModal = fecharModal;
+
+async function salvarEdicao(){
+
+const { colecao, id } = edicaoAtual;
+
+if(!colecao || !id) return;
+
+const campos = camposPorColecao[colecao] || [];
+
+const dadosAtualizados = {};
+
+document.querySelectorAll('#modalCampos [data-campo]').forEach(el=>{
+
+const chave = el.getAttribute('data-campo');
+
+const campoInfo = campos.find(c=>c.key === chave);
+
+if(campoInfo && campoInfo.type === 'number'){
+dadosAtualizados[chave] = Number(el.value);
+}else{
+dadosAtualizados[chave] = el.value;
+}
+
+});
+
+await updateDoc(
+doc(db, colecao, id),
+dadosAtualizados
+);
+
+alert('Alterações salvas!');
+
+location.reload();
+
+}
+
+window.salvarEdicao = salvarEdicao;
+
 async function carregarListas(){
 
 const produtos =
@@ -1206,7 +1606,7 @@ docSnap.data();
 listaProdutos.innerHTML += `
 <tr>
 
-<td>
+<td data-label="Imagem">
 <img
 src="${d.image||''}"
 style="
@@ -1216,17 +1616,23 @@ object-fit:cover;
 border-radius:8px;">
 </td>
 
-<td>${d.name}</td>
+<td data-label="Nome">${d.name}</td>
 
-<td>
+<td data-label="Preço">
 R$ ${d.price}
 </td>
 
-<td>
+<td data-label="Status">
 ${d.ativo ? 'Ativo' : 'Oculto'}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
+
+<button
+class="btn btn-edit"
+onclick='abrirEdicao("produtos","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
+Editar
+</button>
 
 <button
 class="btn"
@@ -1236,7 +1642,7 @@ alterarStatus(
 '${docSnap.id}',
 ${d.ativo}
 )">
-Ocultar
+${d.ativo ? 'Ocultar' : 'Mostrar'}
 </button>
 
 <button
@@ -1269,13 +1675,19 @@ docSnap.data();
 listaAdicionais.innerHTML += `
 <tr>
 
-<td>${d.name}</td>
+<td data-label="Nome">${d.name}</td>
 
-<td>
+<td data-label="Disponível">
 ${d.available ? 'Sim':'Não'}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
+
+<button
+class="btn btn-edit"
+onclick='abrirEdicaoSimples("adicionais","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
+Editar
+</button>
 
 <button
 class="btn"
@@ -1318,13 +1730,19 @@ docSnap.data();
 listaFrutas.innerHTML += `
 <tr>
 
-<td>${d.name}</td>
+<td data-label="Nome">${d.name}</td>
 
-<td>
+<td data-label="Disponível">
 ${d.available ? 'Sim':'Não'}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
+
+<button
+class="btn btn-edit"
+onclick='abrirEdicaoSimples("frutas","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
+Editar
+</button>
 
 <button
 class="btn"
@@ -1369,7 +1787,7 @@ docSnap.data();
 listaCombos.innerHTML += `
 <tr>
 
-<td>
+<td data-label="Imagem">
 <img
 src="${d.image||''}"
 style="
@@ -1379,17 +1797,23 @@ object-fit:cover;
 border-radius:8px;">
 </td>
 
-<td>${d.name}</td>
+<td data-label="Nome">${d.name}</td>
 
-<td>
+<td data-label="Preço">
 R$ ${d.price}
 </td>
 
-<td>
+<td data-label="Status">
 ${d.ativo ? 'Ativo' : 'Oculto'}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
+
+<button
+class="btn btn-edit"
+onclick='abrirEdicao("combos","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
+Editar
+</button>
 
 <button
 class="btn"
@@ -1432,7 +1856,7 @@ docSnap.data();
 listaPromocoes.innerHTML += `
 <tr>
 
-<td>
+<td data-label="Imagem">
 <img
 src="${d.image||''}"
 style="
@@ -1442,17 +1866,23 @@ object-fit:cover;
 border-radius:8px;">
 </td>
 
-<td>${d.name}</td>
+<td data-label="Nome">${d.name}</td>
 
-<td>
+<td data-label="Preço">
 R$ ${d.price}
 </td>
 
-<td>
+<td data-label="Status">
 ${d.ativo ? 'Ativo' : 'Oculto'}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
+
+<button
+class="btn btn-edit"
+onclick='abrirEdicao("promocoes","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
+Editar
+</button>
 
 <button
 class="btn"
@@ -1495,16 +1925,16 @@ docSnap.data();
 listaBairros.innerHTML += `
 <tr>
 
-<td>${d.nome}</td>
+<td data-label="Bairro">${d.nome}</td>
 
-<td>
+<td data-label="Taxa">
 R$ ${d.taxa}
 </td>
 
-<td>
+<td data-label="Ações" class="acoes-cell">
 
 <button
-class="btn-danger btn"
+class="btn btn-danger"
 onclick="
 excluirDocumento(
 'bairros',
