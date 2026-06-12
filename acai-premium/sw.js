@@ -1,6 +1,6 @@
 const CACHE_NAME = 'acai-premium-cardapio-v1';
 const ASSETS = [
-  './index.html',
+  'https://mayconbrown.com.br/acai-premium/',
   './manifest.json'
 ];
 
