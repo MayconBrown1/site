@@ -493,6 +493,59 @@ Salvar Promoção
 
 </div>
 
+<!-- BANNER -->
+
+<div class="card mt-6">
+
+<h3 class="text-xl font-bold mb-4">
+Banner Promocional
+</h3>
+
+<input
+id="bannerTitulo"
+placeholder="Título">
+
+<br><br>
+
+<textarea
+id="bannerTexto"
+placeholder="Texto">
+</textarea>
+
+<br><br>
+
+<input
+id="bannerImagem"
+placeholder="URL da imagem">
+
+<br><br>
+
+<label>
+
+<input
+type="checkbox"
+id="bannerAtivo">
+
+Banner ativo
+
+</label>
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarConfiguracoes()">
+
+Salvar Banner
+
+</button>
+
+<p class="text-xs text-gray-500 mt-2">
+O banner agora é salvo junto com as Configurações da Loja
+e aparece automaticamente no cardápio.
+</p>
+
+</div>
 
 <!-- FIREBASE -->
 
@@ -1024,9 +1077,22 @@ slogan:
 sloganLoja.value,
 
 whatsapp:
-whatsappLoja.value
+whatsappLoja.value,
 
-}
+bannerTitulo:
+bannerTitulo.value,
+
+bannerTexto:
+bannerTexto.value,
+
+bannerImagem:
+bannerImagem.value,
+
+bannerAtivo:
+bannerAtivo.checked
+
+},
+{ merge: true }
 );
 
 alert(
@@ -1061,6 +1127,18 @@ dados.slogan || '';
 
 whatsappLoja.value =
 dados.whatsapp || '';
+
+bannerTitulo.value =
+dados.bannerTitulo || '';
+
+bannerTexto.value =
+dados.bannerTexto || '';
+
+bannerImagem.value =
+dados.bannerImagem || '';
+
+bannerAtivo.checked =
+dados.bannerAtivo || false;
 
 }
 

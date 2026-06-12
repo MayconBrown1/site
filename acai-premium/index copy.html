@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Açaí Premium 24 Horas</title>
   <link rel="shortcut icon" href="https://res.cloudinary.com/drpd9kv7g/image/upload/v1780523423/acai-e-lanches-premium_sljg56.png" type="image/x-icon">
+  <link rel="preconnect" href="https://firestore.googleapis.com">
+  <link rel="preconnect" href="https://www.gstatic.com">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Dancing+Script:wght@700&amp;display=swap" rel="stylesheet">
   <style>
 html, body { height: 100%; margin: 0; font-family: 'Outfit', sans-serif; }
@@ -237,7 +238,6 @@ select.input-field option {
 }
 </style>
   <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
   <div class="app-wrapper" id="app">
@@ -251,24 +251,13 @@ select.input-field option {
     style="width:120px; height:auto;"
   >
 </div>
-    <h1 id="store-name" class="text-3xl font-black text-purple-800 mt-3">Açaí Premium 24 Horas</h1>
-    <p id="slogan" class="bg-purple-50 mt-2 text-sm font-light">Mais que açaí, uma experiência Premium!</p>
-   </header><!-- Banner -->
-   <div class="mx-4 mb-6 rounded-2xl overflow-hidden promo-glow p-4 text-center">
-    <p class="text-gold-light font-bold text-lg glow-gold">
-        ⚽ PROMOÇÃO ESPECIAL COPA DO MUNDO
-        
-    </p>
-
-    <p class="text-gray-900 text-sm mt-1">
-        2 açaís 500ml por
-        <span class="text-green-700 font-bold">R$ 23,50</span>
-    </p>
-
-    <p class="text-purple-700 text-xs mt-1">
-        Válida até 30/06/2026
-    </p>
-    
+    <h1 id="store-name" class="text-3xl font-black text-purple-800 mt-3"></h1>
+    <p id="slogan" class="bg-purple-50 mt-2 text-sm font-light"></p>
+   </header><!-- Banner (controlado pelo administrador via Firebase) -->
+   <div class="mx-4 mb-6 rounded-2xl overflow-hidden promo-glow p-4 text-center" id="promo-banner" style="display:none;">
+    <p class="text-gold-light font-bold text-lg glow-gold" id="banner-titulo"></p>
+    <p class="text-gray-900 text-sm mt-1" id="banner-texto"></p>
+    <img id="banner-imagem" style="display:none; max-width:100%; border-radius:12px; margin-top:8px;">
 </div>
 
 <!-- Cardápio Tradicional -->
@@ -1086,6 +1075,32 @@ function changeQty(index, delta) {
   renderCartModal();
 }
 
+// CORREÇÃO: o banner promocional agora é controlado pelo
+// administrador (salvo em configuracoes/loja) em vez de ficar
+// fixo no HTML. Só aparece se "Banner ativo" estiver marcado.
+function renderBanner(loja) {
+  const banner = document.getElementById('promo-banner');
+  if (!banner) return;
+
+  if (!loja || !loja.bannerAtivo) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  document.getElementById('banner-titulo').textContent = loja.bannerTitulo || '';
+  document.getElementById('banner-texto').textContent = loja.bannerTexto || '';
+
+  const img = document.getElementById('banner-imagem');
+  if (loja.bannerImagem) {
+    img.src = loja.bannerImagem;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+
+  banner.style.display = 'block';
+}
+
 // CORREÇÃO: preenche o <select> de bairros dinamicamente com os
 // bairros cadastrados no painel admin (collection "bairros"),
 // mostrando o nome e a taxa de entrega de cada um.
@@ -1206,7 +1221,7 @@ Base: ${baseName}
     }).join('');
   }
   document.getElementById('modal-total').textContent = 'R$ ' + getTotal().toFixed(2).replace('.',',');
-  lucide.createIcons();
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
 }
 
 // Delivery
@@ -1300,209 +1315,180 @@ async function carregarFirestore() {
 
   async function carregarBanco() {
 
-const produtos =
-await getDocs(
-collection(db,'produtos')
-);
+  // CORREÇÃO DE VELOCIDADE: antes, cada coleção era buscada uma
+  // por vez (await sequencial) — produtos, depois combos, depois
+  // promoções, depois adicionais, depois frutas, depois bairros,
+  // depois configurações. Cada uma dessas buscas espera a anterior
+  // terminar, somando todos os tempos de rede. Agora todas são
+  // buscadas em paralelo com Promise.all, então o tempo total é
+  // igual ao da busca mais lenta, não a soma de todas.
+  const [
+    produtosSnap,
+    combosSnap,
+    promoSnap,
+    addSnap,
+    frutasSnap,
+    bairrosSnap,
+    configSnap
+  ] = await Promise.all([
+    getDocs(collection(db,'produtos')),
+    getDocs(collection(db,'combos')),
+    getDocs(collection(db,'promocoes')),
+    getDocs(collection(db,'adicionais')),
+    getDocs(collection(db,'frutas')),
+    getDocs(collection(db,'bairros')),
+    getDoc(doc(db,'configuracoes','loja'))
+  ]);
 
-menuItems = [];
+  // PRODUTOS
+  menuItems = [];
 
-produtos.forEach(doc=>{
+  produtosSnap.forEach(docSnap=>{
 
-const d = doc.data();
+  const d = docSnap.data();
 
-// CORREÇÃO: produtos criados pelo admin salvam o campo "available",
-// mas aqui só era checado "ativo". Agora aceita os dois para não
-// esconder produtos novos do cardápio.
-if(d.ativo || d.available){
+  // CORREÇÃO: produtos criados pelo admin salvam o campo "available",
+  // mas aqui só era checado "ativo". Agora aceita os dois para não
+  // esconder produtos novos do cardápio.
+  if(d.ativo || d.available){
 
-menuItems.push({
-id:doc.id,
-...d
-});
+  menuItems.push({
+  id:docSnap.id,
+  ...d
+  });
 
-}
+  }
 
-});
+  });
 
-const combosSnap =
-await getDocs(
-collection(db,'combos')
-);
+  // COMBOS
+  combos = [];
 
-combos = [];
+  combosSnap.forEach(docSnap=>{
 
-combosSnap.forEach(doc=>{
+  const d = docSnap.data();
 
-const d = doc.data();
+  if(d.ativo){
 
-if(d.ativo){
+  combos.push({
+  id:docSnap.id,
+  ...d
+  });
 
-combos.push({
-id:doc.id,
-...d
-});
+  }
 
-}
+  });
 
-});
+  // PROMOÇÕES
+  promos = [];
 
-const promoSnap =
-await getDocs(
-collection(db,'promocoes')
-);
+  const hoje = new Date();
+  const diaSemana = hoje.getDay();
 
-promos = [];
+  promoSnap.forEach(docSnap=>{
 
-const hoje =
-new Date();
+  const p = docSnap.data();
 
-const diaSemana =
-hoje.getDay();
+  if(!p.ativo)
+  return;
 
-promoSnap.forEach(doc=>{
+  // CORREÇÃO: quando nenhum dia da semana é marcado no admin,
+  // "diasSemana" é salvo como array vazio []. Um array vazio é
+  // "truthy" em JS, então a condição antiga sempre escondia a
+  // promoção (mesmo sem nenhum dia selecionado, que deveria
+  // significar "válida todos os dias"). Agora só filtra por dia
+  // se houver pelo menos um dia configurado.
+  if(
+  p.diasSemana &&
+  p.diasSemana.length > 0 &&
+  !p.diasSemana.includes(diaSemana)
+  )
+  return;
 
-const p =
-doc.data();
+  if(
+  p.dataInicio &&
+  hoje < new Date(p.dataInicio)
+  )
+  return;
 
-if(!p.ativo)
-return;
+  if(
+  p.dataFim &&
+  hoje > new Date(p.dataFim + 'T23:59:59')
+  )
+  return;
 
-// CORREÇÃO: quando nenhum dia da semana é marcado no admin,
-// "diasSemana" é salvo como array vazio []. Um array vazio é
-// "truthy" em JS, então a condição antiga sempre escondia a
-// promoção (mesmo sem nenhum dia selecionado, que deveria
-// significar "válida todos os dias"). Agora só filtra por dia
-// se houver pelo menos um dia configurado.
-if(
-p.diasSemana &&
-p.diasSemana.length > 0 &&
-!p.diasSemana.includes(
-diaSemana
-)
-)
-return;
+  promos.push({
+  id:docSnap.id,
+  ...p
+  });
 
-if(
-p.dataInicio &&
-hoje <
-new Date(
-p.dataInicio
-)
-)
-return;
+  });
 
-if(
-p.dataFim &&
-hoje >
-new Date(
-p.dataFim +
-'T23:59:59'
-)
-)
-return;
+  // ADICIONAIS
+  addons = [];
 
-promos.push({
-id:doc.id,
-...p
-});
+  addSnap.forEach(docSnap=>{
+  addons.push(docSnap.data());
+  });
 
-});
+  // FRUTAS
+  fruits = [];
 
-const addSnap =
-await getDocs(
-collection(db,'adicionais')
-);
+  frutasSnap.forEach(docSnap=>{
+  fruits.push(docSnap.data());
+  });
 
-addons = [];
+  // BAIRROS
+  neighborhoodFees = {};
 
-addSnap.forEach(doc=>{
+  bairrosSnap.forEach(docSnap=>{
 
-addons.push(
-doc.data()
-);
+  const b = docSnap.data();
 
-});
+  neighborhoodFees[b.nome] = b.taxa;
 
-const frutasSnap =
-await getDocs(
-collection(db,'frutas')
-);
+  });
 
-fruits = [];
+  // CORREÇÃO: o <select> de bairros era fixo no HTML e não tinha
+  // relação com os bairros cadastrados no admin. Agora é preenchido
+  // dinamicamente com os bairros vindos do Firestore.
+  renderBairros();
 
-frutasSnap.forEach(doc=>{
+  // CONFIGURAÇÕES DA LOJA (nome, slogan, banner)
+  // CORREÇÃO: nome/slogan/banner agora vêm SOMENTE do Firestore
+  // (configuracoes/loja), controlados pelo administrador. O bloco
+  // do elementSdk que sobrescrevia esses valores foi removido do
+  // fluxo principal.
+  if(configSnap.exists()){
 
-fruits.push(
-doc.data()
-);
+  const loja = configSnap.data();
 
-});
+  document.getElementById('store-name').textContent =
+    loja.nome || 'Açaí Premium 24 Horas';
 
-const bairrosSnap =
-await getDocs(
-collection(db,'bairros')
-);
+  document.getElementById('slogan').textContent =
+    loja.slogan || '';
 
-neighborhoodFees = {};
+  renderBanner(loja);
 
-bairrosSnap.forEach(doc=>{
+  } else {
 
-const b =
-doc.data();
+  document.getElementById('store-name').textContent = 'Açaí Premium 24 Horas';
+  document.getElementById('slogan').textContent = '';
 
-neighborhoodFees[
-b.nome
-] = b.taxa;
+  }
 
-});
+  renderMenu();
 
-// CORREÇÃO: o <select> de bairros era fixo no HTML e não tinha
-// relação com os bairros cadastrados no admin. Agora é preenchido
-// dinamicamente com os bairros vindos do Firestore.
-renderBairros();
+  renderCombos();
 
-const config =
-await getDoc(
-doc(
-db,
-'configuracoes',
-'loja'
-)
-);
+  renderPromos();
 
-if(config.exists()){
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
 
-const loja =
-config.data();
+  }
 
-document
-.getElementById(
-'store-name'
-)
-.textContent =
-loja.nome || '';
-
-document
-.getElementById(
-'slogan'
-)
-.textContent =
-loja.slogan || '';
-
-}
-
-renderMenu();
-
-renderCombos();
-
-renderPromos();
-
-lucide.createIcons();
-
-}
-
-await carregarBanco();
+  await carregarBanco();
 
 }
 // CORREÇÃO: as funções usadas nos onclick do HTML (abrir carrinho,
@@ -1566,13 +1552,14 @@ const defaultConfig = {
 // etc.), esse script não existe e "window.elementSdk.init" daria
 // erro e travaria TODO o restante do código — incluindo a exposição
 // das funções dos botões. Por isso agora isso só roda se existir.
+//
+// CORREÇÃO 2: nome da loja e slogan agora são controlados SOMENTE
+// pelo administrador via Firebase (configuracoes/loja). Por isso
+// o onConfigChange não sobrescreve mais "store-name" e "slogan".
 if (window.elementSdk && typeof window.elementSdk.init === 'function') {
   window.elementSdk.init({
     defaultConfig,
     onConfigChange: async (config) => {
-      document.getElementById('store-name').textContent = config.store_name || defaultConfig.store_name;
-      document.getElementById('slogan').textContent = config.slogan || defaultConfig.slogan;
-
       const font = config.font_family || defaultConfig.font_family;
       document.body.style.fontFamily = `${font}, sans-serif`;
 
