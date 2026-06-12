@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Painel Admin - Açaí Premium</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background:#0f172a;
+color:white;
+font-family:Arial,sans-serif;
+}
+
+.sidebar{
+width:260px;
+height:100vh;
+position:fixed;
+left:0;
+top:0;
+background:#111827;
+overflow:auto;
+}
+
+.main{
+margin-left:260px;
+padding:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:16px;
+padding:20px;
+}
+
+input,select,textarea{
+width:100%;
+padding:12px;
+border-radius:10px;
+background:#0f172a;
+border:1px solid #334155;
+color:white;
+}
+
+button{
+cursor:pointer;
+}
+
+.btn{
+background:#9333ea;
+padding:10px 16px;
+border-radius:10px;
+font-weight:bold;
+}
+
+.btn-danger{
+background:#dc2626;
+}
+
+.btn-success{
+background:#16a34a;
+}
+
+.table{
+width:100%;
+border-collapse:collapse;
+}
+
+.table th,
+.table td{
+padding:12px;
+border-bottom:1px solid #334155;
+text-align:left;
+}
+
+.hidden{
+display:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="p-5">
+
+<h1 class="text-2xl font-bold">
+🍇 Painel Admin
+</h1>
+
+<p class="text-sm text-gray-400">
+Açaí Premium
+</p>
+
+</div>
+
+<div class="p-3 space-y-2">
+
+<button class="btn w-full"
+onclick="showTab('dashboard')">
+Dashboard
+</button>
+
+<button class="btn w-full"
+onclick="showTab('produtos')">
+Produtos
+</button>
+
+<button class="btn w-full"
+onclick="showTab('combos')">
+Combos
+</button>
+
+<button class="btn w-full"
+onclick="showTab('promocoes')">
+Promoções
+</button>
+
+<button class="btn w-full"
+onclick="showTab('adicionais')">
+Adicionais
+</button>
+
+<button class="btn w-full"
+onclick="showTab('frutas')">
+Frutas
+</button>
+
+<button class="btn w-full"
+onclick="showTab('bairros')">
+Bairros
+</button>
+
+<button class="btn w-full"
+onclick="showTab('config')">
+Configurações
+</button>
+
+</div>
+
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+
+<div id="dashboard-tab">
+
+<h2 class="text-3xl font-bold mb-5">
+Dashboard
+</h2>
+
+<div class="grid grid-cols-4 gap-4">
+
+<div class="card">
+<h3>Total Produtos</h3>
+<p id="totalProdutos"
+class="text-4xl font-bold">
+0
+</p>
+</div>
+
+<div class="card">
+<h3>Total Combos</h3>
+<p id="totalCombos"
+class="text-4xl font-bold">
+0
+</p>
+</div>
+
+<div class="card">
+<h3>Total Promoções</h3>
+<p id="totalPromos"
+class="text-4xl font-bold">
+0
+</p>
+</div>
+
+<div class="card">
+<h3>Total Adicionais</h3>
+<p id="totalAddons"
+class="text-4xl font-bold">
+0
+</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- PRODUTOS -->
+
+<div id="produtos-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Produtos
+</h2>
+
+<div class="card mb-6">
+
+<h3 class="text-xl font-bold mb-4">
+Novo Produto
+</h3>
+
+<input id="produtoNome"
+placeholder="Nome">
+
+<br><br>
+
+<input id="produtoTamanho"
+placeholder="Tamanho">
+
+<br><br>
+
+<input id="produtoPreco"
+type="number"
+step="0.01"
+placeholder="Preço">
+
+<br><br>
+
+<input id="produtoEmoji"
+placeholder="Emoji">
+
+<br><br>
+
+<input id="produtoImagem"
+placeholder="URL da imagem">
+
+<br><br>
+
+<button class="btn"
+onclick="abrirCloudinary()">
+Abrir Cloudinary
+</button>
+
+<br><br>
+
+<label>
+
+<input type="checkbox"
+id="produtoAtivo"
+checked>
+
+Produto ativo
+
+</label>
+
+<br><br>
+
+<button class="btn-success btn"
+onclick="salvarProduto()">
+Salvar Produto
+</button>
+
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+
+<tr>
+<th>Imagem</th>
+<th>Nome</th>
+<th>Preço</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="listaProdutos">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- COMBOS -->
+
+<div id="combos-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Combos
+</h2>
+
+<div class="card">
+
+<h3 class="text-xl font-bold mb-4">
+Novo Combo
+</h3>
+
+<input id="comboNome"
+placeholder="Nome">
+
+<br><br>
+
+<textarea
+id="comboDesc"
+placeholder="Descrição">
+</textarea>
+
+<br><br>
+
+<input id="comboPreco"
+type="number"
+step="0.01"
+placeholder="Preço">
+
+<br><br>
+
+<input id="comboQtd"
+type="number"
+placeholder="Quantidade de Açaís">
+
+<br><br>
+
+<input id="comboEmoji"
+placeholder="Emoji">
+
+<br><br>
+
+<input id="comboImagem"
+placeholder="URL da imagem">
+
+<br><br>
+
+<button class="btn-success btn"
+onclick="salvarCombo()">
+Salvar Combo
+</button>
+
+</div>
+
+</div>
+
+<!-- PROMOÇÕES -->
+
+<div id="promocoes-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Promoções
+</h2>
+
+<div class="card mb-6">
+
+<h3 class="text-xl font-bold mb-4">
+Nova Promoção
+</h3>
+
+<input id="promoNome" placeholder="Nome da promoção">
+
+<br><br>
+
+<textarea
+id="promoDesc"
+placeholder="Descrição">
+</textarea>
+
+<br><br>
+
+<input id="promoPreco"
+type="number"
+step="0.01"
+placeholder="Preço promocional">
+
+<br><br>
+
+<input id="promoPrecoAntigo"
+type="number"
+step="0.01"
+placeholder="Preço antigo">
+
+<br><br>
+
+<input id="promoEmoji"
+placeholder="Emoji">
+
+<br><br>
+
+<input id="promoImagem"
+placeholder="URL da imagem">
+
+<br><br>
+
+<h3 class="font-bold mb-2">
+Dias da Semana
+</h3>
+
+<div class="grid grid-cols-4 gap-2">
+
+<label><input type="checkbox" value="0" class="diaSemana"> Domingo</label>
+<label><input type="checkbox" value="1" class="diaSemana"> Segunda</label>
+<label><input type="checkbox" value="2" class="diaSemana"> Terça</label>
+<label><input type="checkbox" value="3" class="diaSemana"> Quarta</label>
+<label><input type="checkbox" value="4" class="diaSemana"> Quinta</label>
+<label><input type="checkbox" value="5" class="diaSemana"> Sexta</label>
+<label><input type="checkbox" value="6" class="diaSemana"> Sábado</label>
+
+</div>
+
+<br>
+
+<input type="date" id="promoInicio">
+
+<br><br>
+
+<input type="date" id="promoFim">
+
+<br><br>
+
+<label>
+
+<input
+type="checkbox"
+id="promoAtivo"
+checked>
+
+Promoção Ativa
+
+</label>
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarPromocao()">
+
+Salvar Promoção
+
+</button>
+
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+
+<tr>
+<th>Imagem</th>
+<th>Nome</th>
+<th>Preço</th>
+<th>Status</th>
+<th>Ações</th>
+</tr>
+
+</thead>
+
+<tbody id="listaPromocoes">
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- BANNER -->
+
+<div class="card mt-6">
+
+<h3 class="text-xl font-bold mb-4">
+Banner Promocional
+</h3>
+
+<input
+id="bannerTitulo"
+placeholder="Título">
+
+<br><br>
+
+<textarea
+id="bannerTexto"
+placeholder="Texto">
+</textarea>
+
+<br><br>
+
+<input
+id="bannerImagem"
+placeholder="URL da imagem">
+
+<br><br>
+
+<label>
+
+<input
+type="checkbox"
+id="bannerAtivo">
+
+Banner ativo
+
+</label>
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarBanner()">
+
+Salvar Banner
+
+</button>
+
+</div>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import {
+initializeApp
+}
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+
+import {
+
+getFirestore,
+
+collection,
+addDoc,
+getDocs,
+
+deleteDoc,
+doc,
+
+updateDoc,
+
+setDoc,
+getDoc
+
+}
+from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyCVBy07-wb0_aV2NDJvPu9mRxxmOgar42Y",
+
+authDomain:
+"acai-premium-5e49f.firebaseapp.com",
+
+projectId:
+"acai-premium-5e49f",
+
+storageBucket:
+"acai-premium-5e49f.firebasestorage.app",
+
+messagingSenderId:
+"195073257294",
+
+appId:
+"1:195073257294:web:4c2a1d43af712f6f60b81f"
+
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+
+window.db = db;
+
+window.addDoc = addDoc;
+window.collection = collection;
+
+window.getDocs = getDocs;
+
+window.deleteDoc = deleteDoc;
+window.doc = doc;
+
+window.updateDoc = updateDoc;
+
+window.setDoc = setDoc;
+window.getDoc = getDoc;
+
+async function carregarDashboard(){
+
+const produtos =
+await getDocs(
+collection(db,"produtos")
+);
+
+document.getElementById(
+"totalProdutos"
+).textContent =
+produtos.size;
+
+const combos =
+await getDocs(
+collection(db,"combos")
+);
+
+document.getElementById(
+"totalCombos"
+).textContent =
+combos.size;
+
+const promos =
+await getDocs(
+collection(db,"promocoes")
+);
+
+document.getElementById(
+"totalPromos"
+).textContent =
+promos.size;
+
+const adicionais =
+await getDocs(
+collection(db,"adicionais")
+);
+
+document.getElementById(
+"totalAddons"
+).textContent =
+adicionais.size;
+
+}
+
+window.carregarDashboard =
+carregarDashboard;
+
+window.salvarProduto = async function(){
+    await addDoc(
+        collection(db,"produtos"),
+        {
+            name: produtoNome.value,
+            size: produtoTamanho.value,
+            price: Number(produtoPreco.value),
+            emoji: produtoEmoji.value,
+            image: produtoImagem.value,
+            available: produtoAtivo.checked
+        }
+    );
+    alert("Produto salvo com sucesso!");
+    location.reload();
+}
+
+window.salvarCombo =
+async function(){
+
+await addDoc(
+collection(db,"combos"),
+{
+name:
+comboNome.value,
+
+desc:
+comboDesc.value,
+
+price:
+Number(comboPreco.value),
+
+quantidadeAcais:
+Number(comboQtd.value),
+
+emoji:
+comboEmoji.value,
+
+image:
+comboImagem.value,
+
+ativo:true
+}
+);
+
+alert(
+"Combo salvo!"
+);
+
+location.reload();
+
+}
+
+window.salvarPromocao =
+async function(){
+
+const dias = [];
+
+document
+.querySelectorAll(
+'.diaSemana:checked'
+)
+.forEach(el=>{
+
+dias.push(
+Number(el.value)
+);
+
+});
+
+await addDoc(
+collection(db,"promocoes"),
+{
+
+name:
+promoNome.value,
+
+desc:
+promoDesc.value,
+
+price:
+Number(
+promoPreco.value
+),
+
+oldPrice:
+Number(
+promoPrecoAntigo.value
+),
+
+emoji:
+promoEmoji.value,
+
+image:
+promoImagem.value,
+
+diasSemana:
+dias,
+
+dataInicio:
+promoInicio.value,
+
+dataFim:
+promoFim.value,
+
+ativo:
+promoAtivo.checked
+
+}
+);
+
+alert(
+"Promoção salva!"
+);
+
+location.reload();
+
+}
+
+window.abrirCloudinary =
+function(){
+
+window.open(
+"https://console.cloudinary.com/",
+"_blank"
+);
+
+}
+
+carregarDashboard();
+
+</script>
+
+<!-- ADICIONAIS -->
+
+<div id="adicionais-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Adicionais
+</h2>
+
+<div class="card mb-6">
+
+<input
+id="novoAdicional"
+placeholder="Nome do adicional">
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarAdicional()">
+
+Adicionar
+
+</button>
+
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Nome</th>
+<th>Disponível</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="listaAdicionais">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- FRUTAS -->
+
+<div id="frutas-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Frutas
+</h2>
+
+<div class="card mb-6">
+
+<input
+id="novaFruta"
+placeholder="Nome da fruta">
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarFruta()">
+
+Adicionar
+
+</button>
+
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Nome</th>
+<th>Disponível</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="listaFrutas">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- BAIRROS -->
+
+<div id="bairros-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Bairros
+</h2>
+
+<div class="card mb-6">
+
+<input
+id="bairroNome"
+placeholder="Nome do Bairro">
+
+<br><br>
+
+<input
+id="bairroTaxa"
+type="number"
+step="0.01"
+placeholder="Taxa de Entrega">
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarBairro()">
+
+Adicionar Bairro
+
+</button>
+
+</div>
+
+<div class="card">
+
+<table class="table">
+
+<thead>
+<tr>
+<th>Bairro</th>
+<th>Taxa</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="listaBairros">
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- CONFIGURAÇÕES -->
+
+<div id="config-tab" class="hidden">
+
+<h2 class="text-3xl font-bold mb-5">
+Configurações da Loja
+</h2>
+
+<div class="card">
+
+<input
+id="nomeLoja"
+placeholder="Nome da Loja">
+
+<br><br>
+
+<input
+id="sloganLoja"
+placeholder="Slogan">
+
+<br><br>
+
+<input
+id="whatsappLoja"
+placeholder="WhatsApp">
+
+<br><br>
+
+<button
+class="btn-success btn"
+onclick="salvarConfiguracoes()">
+
+Salvar Configurações
+
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+function showTab(tab){
+
+document
+.querySelectorAll('[id$="-tab"]')
+.forEach(el=>{
+
+el.classList.add('hidden');
+
+});
+
+document
+.getElementById(tab+'-tab')
+.classList.remove('hidden');
+
+}
+
+async function salvarAdicional(){
+
+await addDoc(
+collection(db,"adicionais"),
+{
+name:
+novoAdicional.value,
+available:true
+}
+);
+
+alert("Adicional salvo");
+
+location.reload();
+
+}
+
+async function salvarFruta(){
+
+await addDoc(
+collection(db,"frutas"),
+{
+name:
+novaFruta.value,
+available:true
+}
+);
+
+alert("Fruta salva");
+
+location.reload();
+
+}
+
+async function salvarBairro(){
+
+await addDoc(
+collection(db,"bairros"),
+{
+nome:
+bairroNome.value,
+taxa:
+Number(bairroTaxa.value)
+}
+);
+
+alert("Bairro salvo");
+
+location.reload();
+
+}
+
+async function salvarConfiguracoes(){
+
+await setDoc(
+doc(db,"configuracoes","loja"),
+{
+
+nome:
+nomeLoja.value,
+
+slogan:
+sloganLoja.value,
+
+whatsapp:
+whatsappLoja.value
+
+}
+);
+
+alert(
+"Configurações salvas"
+);
+
+}
+
+async function carregarConfiguracoes(){
+
+const snap =
+await getDoc(
+doc(
+db,
+"configuracoes",
+"loja"
+)
+);
+
+if(!snap.exists()) return;
+
+const dados =
+snap.data();
+
+nomeLoja.value =
+dados.nome || '';
+
+sloganLoja.value =
+dados.slogan || '';
+
+whatsappLoja.value =
+dados.whatsapp || '';
+
+}
+
+async function excluirDocumento(
+colecao,
+id
+){
+
+if(
+!confirm(
+'Deseja excluir?'
+)
+) return;
+
+await deleteDoc(
+doc(
+db,
+colecao,
+id
+)
+);
+
+location.reload();
+
+}
+
+async function alterarStatus(
+colecao,
+id,
+status
+){
+
+await updateDoc(
+doc(
+db,
+colecao,
+id
+),
+{
+ativo: !status,
+available: !status
+}
+);
+
+location.reload();
+
+}
+
+async function carregarListas(){
+
+const produtos =
+await getDocs(
+collection(db,'produtos')
+);
+
+produtos.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaProdutos.innerHTML += `
+<tr>
+
+<td>
+<img
+src="${d.image||''}"
+style="
+width:50px;
+height:50px;
+object-fit:cover;
+border-radius:8px;">
+</td>
+
+<td>${d.name}</td>
+
+<td>
+R$ ${d.price}
+</td>
+
+<td>
+${d.ativo ? 'Ativo' : 'Oculto'}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="
+alterarStatus(
+'produtos',
+'${docSnap.id}',
+${d.ativo}
+)">
+Ocultar
+</button>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'produtos',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+const adicionais =
+await getDocs(
+collection(db,'adicionais')
+);
+
+adicionais.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaAdicionais.innerHTML += `
+<tr>
+
+<td>${d.name}</td>
+
+<td>
+${d.available ? 'Sim':'Não'}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="
+alterarStatus(
+'adicionais',
+'${docSnap.id}',
+${d.available}
+)">
+Alternar
+</button>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'adicionais',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+const frutas =
+await getDocs(
+collection(db,'frutas')
+);
+
+frutas.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaFrutas.innerHTML += `
+<tr>
+
+<td>${d.name}</td>
+
+<td>
+${d.available ? 'Sim':'Não'}
+</td>
+
+<td>
+
+<button
+class="btn"
+onclick="
+alterarStatus(
+'frutas',
+'${docSnap.id}',
+${d.available}
+)">
+Alternar
+</button>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'frutas',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+const bairros =
+await getDocs(
+collection(db,'bairros')
+);
+
+bairros.forEach(docSnap=>{
+
+const d =
+docSnap.data();
+
+listaBairros.innerHTML += `
+<tr>
+
+<td>${d.nome}</td>
+
+<td>
+R$ ${d.taxa}
+</td>
+
+<td>
+
+<button
+class="btn-danger btn"
+onclick="
+excluirDocumento(
+'bairros',
+'${docSnap.id}'
+)">
+Excluir
+</button>
+
+</td>
+
+</tr>
+`;
+
+});
+
+}
+
+setTimeout(()=>{
+
+carregarConfiguracoes();
+carregarListas();
+
+},1000);
+
+showTab('dashboard');
+
+</script>
+
+</div>
+
+</body>
+</html>
