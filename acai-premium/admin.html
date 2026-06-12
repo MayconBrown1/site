@@ -338,8 +338,8 @@ Adicionais
 </button>
 
 <button class="btn w-full"
-onclick="showTab('frutas')">
-Frutas
+onclick="showTab('bases')">
+Bases de Açaí
 </button>
 
 <button class="btn w-full"
@@ -1054,45 +1054,32 @@ Adicionar
 
 </div>
 
-<!-- FRUTAS -->
+<!-- BASES DE AÇAÍ -->
 
-<div id="frutas-tab" class="hidden">
+<div id="bases-tab" class="hidden">
 
 <h2 class="text-3xl font-bold mb-5">
-Frutas
+Bases de Açaí
 </h2>
 
-<div class="card mb-6">
-
-<input
-id="novaFruta"
-placeholder="Nome da fruta">
-
-<br><br>
-
-<button
-class="btn-success btn"
-onclick="salvarFruta()">
-
-Adicionar
-
-</button>
-
-</div>
-
 <div class="card">
+
+<p class="text-sm text-gray-400 mb-4">
+Controle o que está disponível no momento. Desative quando faltar
+no estoque e ative novamente quando repuser.
+</p>
 
 <table class="table">
 
 <thead>
 <tr>
-<th>Nome</th>
+<th>Base</th>
 <th>Disponível</th>
 <th>Ações</th>
 </tr>
 </thead>
 
-<tbody id="listaFrutas">
+<tbody id="listaBases">
 </tbody>
 
 </table>
@@ -1240,6 +1227,10 @@ document
 .getElementById(tab+'-tab')
 .classList.remove('hidden');
 
+try{
+localStorage.setItem('adminAbaAtiva', tab);
+}catch(e){}
+
 const sidebar = document.getElementById('sidebar');
 const overlay = document.getElementById('sidebarOverlay');
 if(sidebar){
@@ -1283,25 +1274,6 @@ location.reload();
 }
 
 window.salvarAdicional = salvarAdicional;
-
-async function salvarFruta(){
-
-await addDoc(
-collection(db,"frutas"),
-{
-name:
-novaFruta.value,
-available:true
-}
-);
-
-alert("Fruta salva");
-
-location.reload();
-
-}
-
-window.salvarFruta = salvarFruta;
 
 async function salvarBairro(){
 
@@ -1450,6 +1422,22 @@ location.reload();
 
 window.alterarStatus = alterarStatus;
 
+async function alternarBase(chave, statusAtual){
+
+await setDoc(
+doc(db,'configuracoes','bases'),
+{
+[chave]: !statusAtual
+},
+{ merge:true }
+);
+
+location.reload();
+
+}
+
+window.alternarBase = alternarBase;
+
 // ============ MODAL DE EDIÇÃO ============
 
 let edicaoAtual = { colecao:null, id:null };
@@ -1481,9 +1469,6 @@ promocoes:[
 {key:'dataFim', label:'Data Fim', type:'date'}
 ],
 adicionais:[
-{key:'name', label:'Nome', type:'text'}
-],
-frutas:[
 {key:'name', label:'Nome', type:'text'}
 ]
 };
@@ -1717,52 +1702,42 @@ Excluir
 
 });
 
-const frutas =
-await getDocs(
-collection(db,'frutas')
+const basesSnap =
+await getDoc(
+doc(db,'configuracoes','bases')
 );
 
-frutas.forEach(docSnap=>{
+const basesData =
+basesSnap.exists() ? basesSnap.data() : {};
 
-const d =
-docSnap.data();
+const basesPadrao = [
+{ key:'acai', label:'🍇 Açaí Puro' },
+{ key:'ninho', label:'🥛 Creme de Ninho' },
+{ key:'both', label:'🍇🥛 Ambos' }
+];
 
-listaFrutas.innerHTML += `
+basesPadrao.forEach(b=>{
+
+const disponivel =
+basesData[b.key] !== undefined
+? basesData[b.key]
+: true;
+
+listaBases.innerHTML += `
 <tr>
 
-<td data-label="Nome">${d.name}</td>
+<td data-label="Base">${b.label}</td>
 
 <td data-label="Disponível">
-${d.available ? 'Sim':'Não'}
+${disponivel ? 'Sim':'Não'}
 </td>
 
 <td data-label="Ações" class="acoes-cell">
 
 <button
-class="btn btn-edit"
-onclick='abrirEdicaoSimples("frutas","${docSnap.id}",${JSON.stringify(d).replace(/'/g,"&#39;")})'>
-Editar
-</button>
-
-<button
-class="btn"
-onclick="
-alterarStatus(
-'frutas',
-'${docSnap.id}',
-${d.available}
-)">
-Alternar
-</button>
-
-<button
-class="btn-danger btn"
-onclick="
-excluirDocumento(
-'frutas',
-'${docSnap.id}'
-)">
-Excluir
+class="${disponivel ? 'btn-danger' : 'btn-success'} btn"
+onclick="alternarBase('${b.key}',${disponivel})">
+${disponivel ? 'Desativar' : 'Ativar'}
 </button>
 
 </td>
@@ -1959,7 +1934,17 @@ carregarListas();
 
 },1000);
 
-showTab('dashboard');
+let abaInicial = 'dashboard';
+
+try{
+abaInicial = localStorage.getItem('adminAbaAtiva') || 'dashboard';
+}catch(e){}
+
+if(!document.getElementById(abaInicial+'-tab')){
+abaInicial = 'dashboard';
+}
+
+showTab(abaInicial);
 
 </script>
 

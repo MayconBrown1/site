@@ -355,9 +355,7 @@ Taxa de entrega: R$ 0,00
       <p class="text-purple-200 text-xs mt-2" id="combo-addons-counter">Selecionados: 0</p>
      </div>
      <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
-     <div class="flex flex-wrap gap-2 mb-4" id="combo-addons-list"></div>
-     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍓 Frutas</p>
-     <div class="flex flex-wrap gap-2 mb-6" id="combo-fruits-list"></div><button onclick="confirmComboAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
+     <div class="flex flex-wrap gap-2 mb-4" id="combo-addons-list"></div><button onclick="confirmComboAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
     </div>
    </div><!-- Addons Modal -->
    <div class="overlay" id="addons-modal" style="display:none;" onclick="closeAddonsOutside(event)">
@@ -373,9 +371,7 @@ Taxa de entrega: R$ 0,00
       <p class="text-gray-900 text-xs mt-2" id="addons-counter">Selecionados: 0</p>
      </div><!-- Addons -->
      <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍫 Acompanhamentos</p>
-     <div class="flex flex-wrap gap-2 mb-4" id="addons-list"></div>
-     <p class="text-gold text-sm font-semibold mb-2" style="color:var(--gold)">🍓 Frutas</p>
-     <div class="flex flex-wrap gap-2 mb-6" id="fruits-list"></div><button onclick="confirmAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
+     <div class="flex flex-wrap gap-2 mb-4" id="addons-list"></div><button onclick="confirmAddons()" class="btn-primary w-full py-3 rounded-xl text-gray-900 font-bold">Confirmar</button>
     </div>
    </div>
   </div>
@@ -419,8 +415,6 @@ let promos = [];
 
 let addons = [];
 
-let fruits = [];
-
 let cart = [];
 let currentItemForAddons = null;
 let selectedAddons = [];
@@ -430,12 +424,9 @@ let paymentType = null;
 let deliveryFee = 0;
 let neighborhoodFees = {};
 
-// CORREÇÃO: array "bases" estava sendo usado em vários lugares
-// (renderAddonsModal, renderComboModal, selectBase, etc.) mas nunca
-// tinha sido declarado, o que causava "bases is not defined" e
-// travava a abertura do modal de adicionais (por isso não dava
-// para adicionar produto/adicionais/frutas ao carrinho).
-const bases = [
+// Bases de açaí (Açaí Puro / Creme de Ninho / Ambos) — disponibilidade
+// agora é controlada pelo administrador (coleção configuracoes/bases).
+let bases = [
   { value: 'acai',  name: 'Açaí Puro',     available: true },
   { value: 'ninho', name: 'Creme de Ninho', available: true },
   { value: 'both',  name: 'Ambos',          available: true }
@@ -739,15 +730,21 @@ function renderComboModal() {
     ${!b.available ? ' ❌' : ''}
   </button>
 `).join('');
+    let baseAlvo = item.base;
+    if (!bases.find(b => b.value === baseAlvo)?.available) {
+      const primeiraDisponivel = bases.find(b => b.available);
+      baseAlvo = primeiraDisponivel ? primeiraDisponivel.value : baseAlvo;
+    }
+
     const selectedButton =
   [...baseContainer.children].find(btn =>
     btn.textContent.includes(
-      bases.find(b => b.value === item.base)?.name
+      bases.find(b => b.value === baseAlvo)?.name
     )
   );
 
 if(selectedButton){
-  selectComboBase(selectedButton, idx, item.base);
+  selectComboBase(selectedButton, idx, baseAlvo);
 }
 
     const addonsContainer = document.getElementById(`addons-combo-${idx}`);
@@ -797,25 +794,6 @@ addons.map(a => `
   >
     ${a.name}
     ${!a.available ? ' ❌' : ''}
-  </button>
-`).join('');
-  document.getElementById('combo-fruits-list').innerHTML = fruits.map(f => `
-  <button 
-    onclick="${f.available ? `toggleComboAddon('${f.name}')` : ''}"
-    class="
-      neon-border 
-      rounded-full 
-      px-3 
-      py-1.5 
-      text-xs 
-      transition-all
-      ${currentComboAddons.includes(f.name) && f.available ? 'chip-selected' : ''}
-      ${!f.available ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-60' : 'text-gray-900'}
-    "
-    ${!f.available ? 'disabled' : ''}
-  >
-    ${f.name}
-    ${!f.available ? ' ❌' : ''}
   </button>
 `).join('');
   updateComboAddonsCounter();
@@ -954,25 +932,14 @@ function renderAddonsModal() {
     ${!a.available ? ' ❌' : ''}
   </button>
 `).join('');
-  document.getElementById('fruits-list').innerHTML = fruits.map(f => `
-  <button 
-    onclick="${f.available ? `toggleAddon(this,'${f.name}')` : ''}"
-    class="
-      neon-border 
-      rounded-full 
-      px-3 
-      py-1.5 
-      text-xs 
-      transition-all
-      ${f.available ? 'text-gray-900' : 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-60'}
-    "
-    ${!f.available ? 'disabled' : ''}
-  >
-    ${f.name}
-    ${!f.available ? ' ❌' : ''}
-  </button>
-`).join('');
-  selectBase(document.querySelector('#base-list button'), 'acai');
+  const primeiraBaseDisponivel = bases.find(b => b.available);
+  const baseInicial = primeiraBaseDisponivel ? primeiraBaseDisponivel.value : 'acai';
+  selectedBase = baseInicial;
+  const botoesBase = [...document.querySelectorAll('#base-list button')];
+  const botaoInicial = botoesBase.find(btn => btn.textContent.includes(
+    bases.find(b => b.value === baseInicial)?.name || ''
+  ));
+  if (botaoInicial) selectBase(botaoInicial, baseInicial);
   updateAddonsCounter();
 }
 
@@ -1317,7 +1284,7 @@ async function carregarFirestore() {
 
   // CORREÇÃO DE VELOCIDADE: antes, cada coleção era buscada uma
   // por vez (await sequencial) — produtos, depois combos, depois
-  // promoções, depois adicionais, depois frutas, depois bairros,
+  // promoções, depois adicionais, depois bairros,
   // depois configurações. Cada uma dessas buscas espera a anterior
   // terminar, somando todos os tempos de rede. Agora todas são
   // buscadas em paralelo com Promise.all, então o tempo total é
@@ -1327,17 +1294,17 @@ async function carregarFirestore() {
     combosSnap,
     promoSnap,
     addSnap,
-    frutasSnap,
     bairrosSnap,
-    configSnap
+    configSnap,
+    basesConfigSnap
   ] = await Promise.all([
     getDocs(collection(db,'produtos')),
     getDocs(collection(db,'combos')),
     getDocs(collection(db,'promocoes')),
     getDocs(collection(db,'adicionais')),
-    getDocs(collection(db,'frutas')),
     getDocs(collection(db,'bairros')),
-    getDoc(doc(db,'configuracoes','loja'))
+    getDoc(doc(db,'configuracoes','loja')),
+    getDoc(doc(db,'configuracoes','bases'))
   ]);
 
   // PRODUTOS
@@ -1431,12 +1398,14 @@ async function carregarFirestore() {
   addons.push(docSnap.data());
   });
 
-  // FRUTAS
-  fruits = [];
+  // BASES DE AÇAÍ (Açaí Puro / Creme de Ninho / Ambos)
+  // Disponibilidade controlada pelo administrador.
+  const basesData = basesConfigSnap.exists() ? basesConfigSnap.data() : {};
 
-  frutasSnap.forEach(docSnap=>{
-  fruits.push(docSnap.data());
-  });
+  bases = bases.map(b => ({
+    ...b,
+    available: basesData[b.value] !== undefined ? basesData[b.value] : true
+  }));
 
   // BAIRROS
   neighborhoodFees = {};
@@ -1588,4 +1557,3 @@ if (window.elementSdk && typeof window.elementSdk.init === 'function') {
 
 </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
