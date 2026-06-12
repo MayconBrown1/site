@@ -780,9 +780,9 @@ function openComboAddonsSelector(idx) {
 
 function renderComboAddonsSelector() {
   document.getElementById('combo-addons-list').innerHTML =
-addons.map(a => `
+addons.map((a, i) => `
   <button
-    onclick="${a.available ? `toggleComboAddon('${a.name}')` : ''}"
+    onclick="${a.available ? `toggleComboAddon(this,${i})` : ''}"
     class="
       neon-border
       rounded-full
@@ -806,18 +806,15 @@ addons.map(a => `
   updateComboAddonsCounter();
 }
 
-function toggleComboAddon(name) {
-  const idx = currentComboAddons.indexOf(name);
-  if (idx > -1) {
-    currentComboAddons.splice(idx, 1);
-    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
-      if (b.textContent.trim() === name) b.classList.remove('chip-selected');
-    });
+function toggleComboAddon(el, idx) {
+  const name = addons[idx].name;
+  const i = currentComboAddons.indexOf(name);
+  if (i > -1) {
+    currentComboAddons.splice(i, 1);
+    el.classList.remove('chip-selected');
   } else {
     currentComboAddons.push(name);
-    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
-      if (b.textContent.trim() === name) b.classList.add('chip-selected');
-    });
+    el.classList.add('chip-selected');
   }
   updateComboAddonsCounter();
 }
@@ -919,9 +916,9 @@ function renderAddonsModal() {
     ${!b.available ? ' ❌' : ''}
   </button>
 `).join('');
-  document.getElementById('addons-list').innerHTML = addons.map(a => `
+  document.getElementById('addons-list').innerHTML = addons.map((a, i) => `
   <button
-    onclick="${a.available ? `toggleAddon(this,'${a.name}')` : ''}"
+    onclick="${a.available ? `toggleAddon(this,${i})` : ''}"
     class="
       neon-border
       rounded-full
@@ -966,9 +963,10 @@ function updateAddonsCounter() {
   document.getElementById('addons-counter').textContent = text;
 }
 
-function toggleAddon(el, name) {
-  const idx = selectedAddons.indexOf(name);
-  if (idx > -1) { selectedAddons.splice(idx, 1); el.classList.remove('chip-selected'); }
+function toggleAddon(el, idx) {
+  const name = addons[idx].name;
+  const i = selectedAddons.indexOf(name);
+  if (i > -1) { selectedAddons.splice(i, 1); el.classList.remove('chip-selected'); }
   else { selectedAddons.push(name); el.classList.add('chip-selected'); }
   updateAddonsCounter();
 }
