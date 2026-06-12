@@ -1564,6 +1564,10 @@ if (window.elementSdk && typeof window.elementSdk.init === 'function') {
 
 </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<button id="btnInstalarApp" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9999;background:#1a0a2e;color:#fff;border:none;padding:14px 22px;border-radius:50px;font-size:15px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;">
+  📲 Instalar App
+</button>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -1572,6 +1576,34 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+let deferredPrompt;
+const btnInstalar = document.getElementById('btnInstalarApp');
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+if (!isStandalone()) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstalar.style.display = 'block';
+  });
+}
+
+btnInstalar.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  btnInstalar.style.display = 'none';
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  btnInstalar.style.display = 'none';
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
