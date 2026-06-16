@@ -80,6 +80,17 @@
       font-size:15px;
     }
 
+    select{
+  width:100%;
+  background:#2a2a2a;
+  border:none;
+  outline:none;
+  color:white;
+  padding:12px;
+  border-radius:8px;
+  font-size:15px;
+}
+
     textarea{
       resize:vertical;
     }
@@ -226,8 +237,30 @@
       <label>Telefone com DDD</label>
       <input type="text" id="telefone" placeholder="(84) 99999-9999" required>
 
-      <label>Cidade / Endereço</label>
-      <input type="text" id="endereco" placeholder="Onde você mora">
+      <label>Data de nascimento</label>
+<input type="date" id="nascimento">
+
+<label>Estado Civil</label>
+<select id="estadoCivil">
+  <option value="">Selecione</option>
+  <option>Solteiro(a)</option>
+  <option>Casado(a)</option>
+  <option>União Estável</option>
+  <option>Divorciado(a)</option>
+  <option>Viúvo(a)</option>
+</select>
+
+<label>Rua</label>
+<input type="text" id="rua" placeholder="Nome da rua">
+
+<label>Número</label>
+<input type="text" id="numero" placeholder="Número da casa">
+
+<label>Bairro</label>
+<input type="text" id="bairro" placeholder="Nome do bairro">
+
+<label>Cidade</label>
+<input type="text" id="cidade" placeholder="Nome da cidade">
 
       <label>Objetivo profissional</label>
       <input type="text" id="objetivo" placeholder="Ex: Atendimento, vendas, auxiliar administrativo">
@@ -333,17 +366,24 @@
 <script>
 
   const campos = [
-    "nome",
-    "email",
-    "telefone",
-    "endereco",
-    "objetivo",
-    "resumo",
-    "experiencia",
-    "formacao",
-    "habilidades",
-    "idiomas"
-  ];
+  "nome",
+  "email",
+  "telefone",
+  "nascimento",
+  "estadoCivil",
+  "rua",
+  "numero",
+  "bairro",
+  "cidade",
+  "objetivo",
+  "resumo",
+  "experiencia",
+  "formacao",
+  "habilidades",
+  "idiomas"
+];
+  document.getElementById("estadoCivil")
+.addEventListener("change", atualizarPreview);
 
   campos.forEach(id => {
     document.getElementById(id).addEventListener("input", atualizarPreview);
@@ -372,16 +412,33 @@
 
     const email = document.getElementById("email").value;
     const telefone = document.getElementById("telefone").value;
-    const endereco = document.getElementById("endereco").value;
+    const nascimentoOriginal = document.getElementById("nascimento").value;
+
+let nascimento = "";
+
+if(nascimentoOriginal){
+  const partes = nascimentoOriginal.split("-");
+  nascimento = `${partes[2]}-${partes[1]}-${partes[0]}`;
+}
+const estadoCivil = document.getElementById("estadoCivil").value;
+
+const rua = document.getElementById("rua").value;
+const numero = document.getElementById("numero").value;
+const bairro = document.getElementById("bairro").value;
+const cidade = document.getElementById("cidade").value;
+
+const endereco = `${rua}${numero ? ", " + numero : ""}${bairro ? " - " + bairro : ""}${cidade ? " - " + cidade : ""}`;
 
     document.getElementById("previewNome").innerText = nome;
 
     document.getElementById("previewContato").innerHTML = `
-      ${telefone || ""}
-      ${email ? " • " + email : ""}
-      <br>
-      ${endereco || ""}
-    `;
+  ${telefone || ""}
+  ${email ? " • " + email : ""}
+  <br>
+  ${nascimento ? "Nascimento: " + nascimento + "<br>" : ""}
+  ${estadoCivil ? "Estado Civil: " + estadoCivil + "<br>" : ""}
+  ${endereco || ""}
+`;
 
     document.getElementById("previewObjetivo").innerText =
       document.getElementById("objetivo").value || "-";
@@ -411,7 +468,22 @@
     const nome = document.getElementById("nome").value;
     const email = document.getElementById("email").value;
     const telefone = document.getElementById("telefone").value;
-    const endereco = document.getElementById("endereco").value;
+    const nascimentoOriginal = document.getElementById("nascimento").value;
+
+let nascimento = "";
+
+if(nascimentoOriginal){
+  const partes = nascimentoOriginal.split("-");
+  nascimento = `${partes[2]}-${partes[1]}-${partes[0]}`;
+}
+const estadoCivil = document.getElementById("estadoCivil").value;
+
+const rua = document.getElementById("rua").value;
+const numero = document.getElementById("numero").value;
+const bairro = document.getElementById("bairro").value;
+const cidade = document.getElementById("cidade").value;
+
+const endereco = `${rua}${numero ? ", " + numero : ""}${bairro ? " - " + bairro : ""}${cidade ? " - " + cidade : ""}`;
     const objetivo = document.getElementById("objetivo").value;
     const resumo = document.getElementById("resumo").value;
     const experiencia = document.getElementById("experiencia").value;
@@ -465,6 +537,16 @@
         doc.text(`Email: ${email}`, 10, y);
         y += 7;
       }
+
+      if(nascimento){
+  doc.text(`Nascimento: ${nascimento}`, 10, y);
+  y += 7;
+}
+
+if(estadoCivil){
+  doc.text(`Estado Civil: ${estadoCivil}`, 10, y);
+  y += 7;
+}
 
       if(endereco){
         doc.text(`Endereço: ${endereco}`, 10, y);
