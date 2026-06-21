@@ -48,12 +48,25 @@
    <section id="panel-cliente">
     <div class="text-center mb-4">
      <p data-template-id="welcome-text" class="canva-text text-lg"></p>
-    </div><!-- Google Login for client -->
-    <div id="client-login-area" class="text-center mb-4"><button id="btn-google-login" class="inline-flex items-center gap-2 bg-white border border-gray-300 rounded-xl px-4 py-2 text-sm font-medium shadow-sm hover:shadow transition">
-      <svg width="18" height="18" viewbox="0 0 48 48">
-       <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" /><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" /><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" /><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-      </svg> Entrar com Google </button>
-     <p id="client-user-info" class="text-sm text-gray-500 mt-2 hidden"></p><button id="btn-google-logout" class="text-xs text-accent mt-1 hidden">Sair</button>
+    </div><!-- Login/Cadastro do cliente (email e senha) -->
+    <div id="client-login-area" class="max-w-sm mx-auto mb-6">
+     <div id="client-auth-box" class="bg-white rounded-2xl shadow-sm p-5">
+      <div class="flex gap-2 mb-4">
+       <button id="client-tab-login" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white" data-mode="login">Entrar</button>
+       <button id="client-tab-cadastro" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark" data-mode="cadastro">Cadastrar</button>
+      </div>
+      <form id="client-auth-form" class="space-y-3">
+       <input id="client-nome" type="text" placeholder="Seu nome" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent hidden">
+       <input id="client-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+       <input id="client-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+       <button type="submit" id="btn-client-auth-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
+      </form>
+      <p id="client-auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
+     </div>
+     <div id="client-logged-info" class="text-center mt-3 hidden">
+      <p id="client-user-info" class="text-sm text-gray-500"></p>
+      <button id="btn-client-logout" class="text-xs text-accent mt-1">Sair</button>
+     </div>
     </div>
     <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     <div id="empty-products" class="text-center py-12 text-gray-400 hidden">
@@ -260,68 +273,98 @@
       renderCart();
     }
 
-    // Google Login for Client
-    const googleProvider = new firebase.auth.GoogleAuthProvider();
+    // E-mail autorizado a acessar o painel Admin
+    const ADMIN_EMAIL = 'lella-dindim@gmail.com';
 
-    document.getElementById('btn-google-login').addEventListener('click', async () => {
-      try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const result = await auth.signInWithPopup(googleProvider);
-        clientUser = result.user;
-        updateClientUI();
-      } catch (err) {
-        console.error('Erro de login Google:', err.code, err.message);
-        if (err.code === 'auth/popup-closed-by-user') return;
-        if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
-          // Fallback: navegadores que bloqueiam popup (in-app browsers, mobile)
-          try { await auth.signInWithRedirect(googleProvider); } catch (e2) { console.error(e2); }
-          return;
-        }
-        if (err.code === 'auth/unauthorized-domain') {
-          showToast('Domínio não autorizado no Firebase. Avise o suporte técnico.', 'error');
-          return;
-        }
-        showToast(`Erro ao fazer login (${err.code || 'desconhecido'})`, 'error');
+    // Login / Cadastro do cliente (email e senha)
+    let clientAuthMode = 'login'; // 'login' | 'cadastro'
+
+    const clientTabLogin = document.getElementById('client-tab-login');
+    const clientTabCadastro = document.getElementById('client-tab-cadastro');
+    const clientNomeInput = document.getElementById('client-nome');
+    const clientAuthSubmitBtn = document.getElementById('btn-client-auth-submit');
+    const clientAuthError = document.getElementById('client-auth-error');
+
+    function setClientAuthMode(mode) {
+      clientAuthMode = mode;
+      clientTabLogin.className = `flex-1 py-2 rounded-xl text-sm font-medium ${mode === 'login' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      clientTabCadastro.className = `flex-1 py-2 rounded-xl text-sm font-medium ${mode === 'cadastro' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      clientNomeInput.classList.toggle('hidden', mode !== 'cadastro');
+      clientAuthSubmitBtn.textContent = mode === 'cadastro' ? 'Cadastrar' : 'Entrar';
+      clientAuthError.classList.add('hidden');
+    }
+    clientTabLogin.addEventListener('click', () => setClientAuthMode('login'));
+    clientTabCadastro.addEventListener('click', () => setClientAuthMode('cadastro'));
+
+    document.getElementById('client-auth-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const email = document.getElementById('client-email').value.trim();
+      const senha = document.getElementById('client-senha').value;
+      const nome = clientNomeInput.value.trim();
+      clientAuthError.classList.add('hidden');
+      if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        clientAuthError.textContent = 'Use a área Admin para esse e-mail.';
+        clientAuthError.classList.remove('hidden');
+        return;
       }
+      clientAuthSubmitBtn.disabled = true;
+      try {
+        if (clientAuthMode === 'cadastro') {
+          if (!nome) { clientAuthError.textContent = 'Informe seu nome.'; clientAuthError.classList.remove('hidden'); clientAuthSubmitBtn.disabled = false; return; }
+          const result = await auth.createUserWithEmailAndPassword(email, senha);
+          await result.user.updateProfile({ displayName: nome });
+          clientUser = result.user;
+          updateClientUI();
+          showToast('Conta criada com sucesso!');
+        } else {
+          const result = await auth.signInWithEmailAndPassword(email, senha);
+          clientUser = result.user;
+          updateClientUI();
+        }
+        document.getElementById('client-auth-form').reset();
+      } catch (err) {
+        const messages = {
+          'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Tente entrar.',
+          'auth/weak-password': 'Senha muito fraca (mínimo 6 caracteres).',
+          'auth/invalid-email': 'E-mail inválido.',
+          'auth/user-not-found': 'E-mail ou senha incorretos.',
+          'auth/wrong-password': 'E-mail ou senha incorretos.',
+          'auth/invalid-credential': 'E-mail ou senha incorretos.'
+        };
+        clientAuthError.textContent = messages[err.code] || `Erro: ${err.code || err.message}`;
+        clientAuthError.classList.remove('hidden');
+      }
+      clientAuthSubmitBtn.disabled = false;
     });
 
-    // Captura o resultado quando o login foi feito via redirect (fallback do popup)
-    auth.getRedirectResult().then(result => {
-      if (result && result.user) {
-        clientUser = result.user;
-        updateClientUI();
-      }
-    }).catch(err => console.error('Erro no redirect result:', err.code, err.message));
-
-    document.getElementById('btn-google-logout').addEventListener('click', async () => {
+    document.getElementById('btn-client-logout').addEventListener('click', async () => {
       await auth.signOut();
       clientUser = null;
       updateClientUI();
     });
 
     function updateClientUI() {
+      const authBox = document.getElementById('client-auth-box');
+      const loggedInfo = document.getElementById('client-logged-info');
       const info = document.getElementById('client-user-info');
-      const logoutBtn = document.getElementById('btn-google-logout');
-      const loginBtn = document.getElementById('btn-google-login');
       const meusPedidosBtn = document.getElementById('btn-meus-pedidos');
       if (clientUser) {
         info.textContent = `Olá, ${clientUser.displayName || clientUser.email}`;
-        info.classList.remove('hidden');
-        logoutBtn.classList.remove('hidden');
-        loginBtn.classList.add('hidden');
+        authBox.classList.add('hidden');
+        loggedInfo.classList.remove('hidden');
         meusPedidosBtn.classList.remove('hidden');
       } else {
-        info.classList.add('hidden');
-        logoutBtn.classList.add('hidden');
-        loginBtn.classList.remove('hidden');
+        authBox.classList.remove('hidden');
+        loggedInfo.classList.add('hidden');
         meusPedidosBtn.classList.add('hidden');
       }
     }
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        // Check if admin email
-        if (user.providerData[0]?.providerId === 'password') {
+        // Apenas o e-mail definido em ADMIN_EMAIL tem acesso ao painel Admin
+        if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
           currentUser = user;
           isAdminLoggedIn = true;
           adminLogin.classList.add('hidden');
@@ -479,10 +522,16 @@
     // Admin Auth
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('login-email').value;
+      const email = document.getElementById('login-email').value.trim();
       const senha = document.getElementById('login-senha').value;
+      if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+        document.getElementById('login-error').textContent = 'Acesso restrito ao administrador.';
+        document.getElementById('login-error').classList.remove('hidden');
+        return;
+      }
       try {
         await auth.signInWithEmailAndPassword(email, senha);
+        document.getElementById('login-error').classList.add('hidden');
       } catch (err) {
         document.getElementById('login-error').textContent = 'Credenciais inválidas';
         document.getElementById('login-error').classList.remove('hidden');
