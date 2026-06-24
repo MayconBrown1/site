@@ -45,9 +45,9 @@
    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
     <h1 data-template-id="app-title" class="canva-text text-xl font-bold"></h1>
     <div class="flex items-center gap-2">
-      <button id="btn-cliente" class="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white transition">Cliente</button>
-      <button id="btn-admin" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition">Admin</button>
-      <button id="btn-meus-pedidos" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition hidden">Meus Pedidos</button>
+      <button id="btn-cliente" class="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white transition" style="touch-action:manipulation;">Cliente</button>
+      <button id="btn-admin" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition" style="touch-action:manipulation;">Admin</button>
+      <div id="wrap-meus-pedidos" class="hidden"><button id="btn-meus-pedidos" class="px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-dark transition" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent;min-width:90px;">📦 Pedidos</button></div>
       <button id="btn-cart" class="relative p-2 rounded-full bg-secondary text-accent hidden">
         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
         <span id="cart-count" class="cart-badge absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
@@ -622,15 +622,15 @@
       const authBox = document.getElementById('client-auth-box');
       const loggedInfo = document.getElementById('client-logged-info');
       const info = document.getElementById('client-user-info');
-      const meusPedidosBtn = document.getElementById('btn-meus-pedidos');
+      const meusPedidosWrap = document.getElementById('wrap-meus-pedidos');
       if (clientUser) {
         info.textContent = `Olá, ${clientUser.displayName || clientUser.email}`;
         authBox.classList.add('hidden'); loggedInfo.classList.remove('hidden');
-        meusPedidosBtn.classList.remove('hidden');
+        if (meusPedidosWrap) meusPedidosWrap.classList.remove('hidden');
         startClientOrderNotifications();
       } else {
         authBox.classList.remove('hidden'); loggedInfo.classList.add('hidden');
-        meusPedidosBtn.classList.add('hidden');
+        if (meusPedidosWrap) meusPedidosWrap.classList.add('hidden');
         stopClientOrderNotifications();
       }
     }
@@ -1182,7 +1182,7 @@
     // Nav buttons
     document.getElementById('btn-cliente').addEventListener('click', () => switchPanel('cliente'));
     document.getElementById('btn-admin').addEventListener('click', () => switchPanel('admin'));
-    document.getElementById('btn-meus-pedidos').addEventListener('click', () => switchPanel('meus-pedidos'));
+    document.getElementById('btn-meus-pedidos').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); switchPanel('meus-pedidos'); });
     document.getElementById('btn-cart').addEventListener('click', showCart);
     document.getElementById('btn-back-shop').addEventListener('click', () => switchPanel('cliente'));
 
