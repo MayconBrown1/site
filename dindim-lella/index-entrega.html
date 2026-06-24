@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dindim da Lella — Entregador</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#F8BBD0',
+            secondary: '#FCE4EC',
+            accent: '#E91E63',
+            dark: '#333333'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    .toast { animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; }
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; } }
+    .new-order-card { animation: slideInCard 0.4s ease; }
+    @keyframes slideInCard { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white shadow-sm">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🛵</span>
+        <div>
+          <h1 class="text-base font-bold text-dark">Dindim da Lella</h1>
+          <p class="text-xs text-gray-400">Painel do Entregador</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="entregador-nome" class="text-sm text-gray-500 hidden"></span>
+        <button id="btn-logout" class="text-xs text-accent font-medium hidden">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-6">
+
+    <!-- ===== LOGIN / CADASTRO ===== -->
+    <section id="panel-login">
+      <div class="max-w-sm mx-auto">
+        <div class="text-center mb-6">
+          <span class="text-5xl">🛵</span>
+          <h2 class="text-xl font-bold text-dark mt-2">Área do Entregador</h2>
+          <p class="text-sm text-gray-400 mt-1">Entre ou crie sua conta para acessar as entregas</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md p-6">
+          <!-- Tabs -->
+          <div class="flex gap-2 mb-5">
+            <button id="tab-btn-entrar" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white transition">Entrar</button>
+            <button id="tab-btn-cadastrar" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark transition">Cadastrar</button>
+          </div>
+
+          <!-- Form Entrar -->
+          <form id="form-login" class="space-y-3">
+            <input id="login-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <input id="login-senha" type="password" required placeholder="Senha" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <button type="submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
+          </form>
+
+          <!-- Form Cadastrar -->
+          <form id="form-cadastro" class="space-y-3 hidden">
+            <input id="cad-nome" type="text" required placeholder="Seu nome completo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <input id="cad-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <input id="cad-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <button type="submit" id="btn-cadastrar-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Criar Conta</button>
+          </form>
+
+          <p id="auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
+        </div>
+        <p class="text-xs text-center text-gray-400 mt-4">Após o cadastro, aguarde a aprovação da loja para acessar.</p>
+      </div>
+    </section>
+
+    <!-- ===== AGUARDANDO APROVAÇÃO ===== -->
+    <section id="panel-pendente" class="hidden">
+      <div class="max-w-sm mx-auto text-center py-12">
+        <span class="text-6xl block mb-4">⏳</span>
+        <h2 class="text-xl font-bold text-dark mb-2">Cadastro enviado!</h2>
+        <p class="text-sm text-gray-500 mb-6">Seu cadastro foi recebido e está aguardando aprovação da loja. Assim que for aprovado, você poderá acessar as entregas.</p>
+        <div class="bg-white rounded-xl p-4 shadow-sm text-left mb-4">
+          <p class="text-xs text-gray-400 mb-1">Cadastrado como:</p>
+          <p class="font-medium text-dark" id="pendente-nome"></p>
+          <p class="text-sm text-gray-500" id="pendente-email"></p>
+        </div>
+        <button id="btn-logout-pendente" class="text-sm text-accent font-medium">Sair da conta</button>
+      </div>
+    </section>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section id="panel-dashboard" class="hidden">
+
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="bg-white rounded-xl p-3 shadow-sm text-center">
+          <p class="text-xl font-bold text-yellow-500" id="stat-pendentes">0</p>
+          <p class="text-xs text-gray-500">Pendentes</p>
+        </div>
+        <div class="bg-white rounded-xl p-3 shadow-sm text-center">
+          <p class="text-xl font-bold text-accent" id="stat-aguardando">0</p>
+          <p class="text-xs text-gray-500">Para entregar</p>
+        </div>
+        <div class="bg-white rounded-xl p-3 shadow-sm text-center">
+          <p class="text-xl font-bold text-green-500" id="stat-entregues">0</p>
+          <p class="text-xs text-gray-500">Entregues hoje</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mb-4 overflow-x-auto">
+        <button class="delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-accent text-white" data-tab="saiu">🚀 Para Entregar</button>
+        <button class="delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="acompanhar">👀 Acompanhar</button>
+        <button class="delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="entregues">📦 Entregues</button>
+      </div>
+
+      <div id="tab-saiu">
+        <div id="orders-saiu" class="space-y-3"></div>
+        <div id="orders-saiu-empty" class="hidden text-center py-10 text-gray-400">
+          <p class="text-3xl mb-2">🛵</p>
+          <p class="text-sm">Nenhum pedido saiu para entrega ainda</p>
+        </div>
+      </div>
+
+      <div id="tab-acompanhar" class="hidden">
+        <p class="text-xs text-gray-400 mb-3">Visão geral de todos os pedidos em andamento</p>
+        <div id="orders-acompanhar" class="space-y-3"></div>
+        <div id="orders-acompanhar-empty" class="hidden text-center py-10 text-gray-400">
+          <p class="text-3xl mb-2">👀</p>
+          <p class="text-sm">Nenhum pedido em andamento</p>
+        </div>
+      </div>
+
+      <div id="tab-entregues" class="hidden">
+        <p class="text-xs text-gray-400 mb-3">Entregas concluídas hoje</p>
+        <div id="orders-entregues" class="space-y-3"></div>
+        <div id="orders-entregues-empty" class="hidden text-center py-10 text-gray-400">
+          <p class="text-3xl mb-2">📦</p>
+          <p class="text-sm">Nenhuma entrega concluída hoje</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Modal: confirmar entrega -->
+  <div id="modal-confirm" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+    <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm text-center">
+      <p class="text-3xl mb-2">📦</p>
+      <p class="text-lg font-bold mb-1">Confirmar entrega?</p>
+      <p class="text-sm text-gray-500 mb-4" id="modal-confirm-cliente"></p>
+      <div class="flex gap-2">
+        <button id="btn-confirm-yes" class="flex-1 bg-green-500 text-white py-2 rounded-xl font-medium">✅ Confirmar</button>
+        <button id="btn-confirm-no" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLm5c_SHMQMEBdipdSjBa7ITOwVNrbMLA",
+      authDomain: "vendas-do-dia.firebaseapp.com",
+      projectId: "vendas-do-dia",
+      storageBucket: "vendas-do-dia.firebasestorage.app",
+      messagingSenderId: "13884510180",
+      appId: "1:13884510180:web:4ca17867ea29bf936301f1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const ADMIN_EMAIL = 'lella-dindim@gmail.com';
+
+    let orders = [];
+    let pendingConfirmId = null;
+    let previousSaiuCount = 0;
+    let isFirstLoad = true;
+
+    // ── Audio ──────────────────────────────────────────
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playNotification() {
+      const masterGain = audioCtx.createGain();
+      masterGain.connect(audioCtx.destination);
+      masterGain.gain.value = 1;
+      [0, 0.65, 1.3, 1.95, 2.6].forEach(startOffset => {
+        const t0 = audioCtx.currentTime + startOffset;
+        [0, 0.15].forEach(noteOffset => {
+          const t = t0 + noteOffset;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain); gain.connect(masterGain);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(noteOffset === 0 ? 1046 : 1318, t);
+          gain.gain.setValueAtTime(0, t);
+          gain.gain.linearRampToValueAtTime(0.9, t + 0.02);
+          gain.gain.setValueAtTime(0.9, t + 0.18);
+          gain.gain.linearRampToValueAtTime(0, t + 0.22);
+          osc.start(t); osc.stop(t + 0.25);
+        });
+      });
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div');
+      t.className = `toast px-4 py-2 rounded-xl shadow-lg text-sm font-medium text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`;
+      t.textContent = msg;
+      document.getElementById('toast-container').appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    // ── Auth tabs ──────────────────────────────────────
+    let authMode = 'login';
+    document.getElementById('tab-btn-entrar').addEventListener('click', () => setAuthMode('login'));
+    document.getElementById('tab-btn-cadastrar').addEventListener('click', () => setAuthMode('cadastro'));
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      document.getElementById('tab-btn-entrar').className = `flex-1 py-2 rounded-xl text-sm font-medium transition ${mode === 'login' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      document.getElementById('tab-btn-cadastrar').className = `flex-1 py-2 rounded-xl text-sm font-medium transition ${mode === 'cadastro' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      document.getElementById('form-login').classList.toggle('hidden', mode !== 'login');
+      document.getElementById('form-cadastro').classList.toggle('hidden', mode !== 'cadastro');
+      document.getElementById('auth-error').classList.add('hidden');
+    }
+
+    // ── Login ──────────────────────────────────────────
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      const errEl = document.getElementById('auth-error');
+      errEl.classList.add('hidden');
+      try {
+        await auth.signInWithEmailAndPassword(email, senha);
+      } catch (err) {
+        const msgs = {
+          'auth/user-not-found': 'E-mail não cadastrado.',
+          'auth/wrong-password': 'Senha incorreta.',
+          'auth/invalid-credential': 'E-mail ou senha incorretos.',
+          'auth/invalid-email': 'E-mail inválido.'
+        };
+        errEl.textContent = msgs[err.code] || 'Erro ao entrar.';
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    // ── Cadastro ───────────────────────────────────────
+    document.getElementById('form-cadastro').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const nome = document.getElementById('cad-nome').value.trim();
+      const email = document.getElementById('cad-email').value.trim();
+      const senha = document.getElementById('cad-senha').value;
+      const errEl = document.getElementById('auth-error');
+      const btn = document.getElementById('btn-cadastrar-submit');
+      errEl.classList.add('hidden');
+
+      if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        errEl.textContent = 'Esse e-mail não pode ser usado aqui.';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      btn.disabled = true; btn.textContent = 'Criando conta...';
+      try {
+        const result = await auth.createUserWithEmailAndPassword(email, senha);
+        await result.user.updateProfile({ displayName: nome });
+        // Salva no Firestore com status pendente
+        await db.collection('entregadores').doc(result.user.uid).set({
+          nome,
+          email,
+          uid: result.user.uid,
+          status: 'pendente',
+          cadastradoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Conta criada! Aguarde aprovação da loja.', 'warning');
+      } catch (err) {
+        const msgs = {
+          'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Tente entrar.',
+          'auth/weak-password': 'Senha fraca (mínimo 6 caracteres).',
+          'auth/invalid-email': 'E-mail inválido.'
+        };
+        errEl.textContent = msgs[err.code] || 'Erro ao criar conta.';
+        errEl.classList.remove('hidden');
+      }
+      btn.disabled = false; btn.textContent = 'Criar Conta';
+    });
+
+    // ── Logout ─────────────────────────────────────────
+    document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
+    document.getElementById('btn-logout-pendente').addEventListener('click', () => auth.signOut());
+
+    // ── Auth State ─────────────────────────────────────
+    auth.onAuthStateChanged(async (user) => {
+      showPanel('login');
+      document.getElementById('entregador-nome').classList.add('hidden');
+      document.getElementById('btn-logout').classList.add('hidden');
+
+      if (!user) return;
+
+      // Admin: acesso direto
+      if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        document.getElementById('entregador-nome').textContent = 'Admin';
+        document.getElementById('entregador-nome').classList.remove('hidden');
+        document.getElementById('btn-logout').classList.remove('hidden');
+        showPanel('dashboard');
+        loadOrders();
+        return;
+      }
+
+      // Verifica status no Firestore
+      try {
+        const doc = await db.collection('entregadores').doc(user.uid).get();
+        if (!doc.exists) {
+          // Conta Firebase existe mas não tem registro de entregador: cria como pendente
+          await db.collection('entregadores').doc(user.uid).set({
+            nome: user.displayName || '',
+            email: user.email,
+            uid: user.uid,
+            status: 'pendente',
+            cadastradoEm: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showPendente(user);
+          return;
+        }
+        const data = doc.data();
+        if (data.status === 'aprovado') {
+          document.getElementById('entregador-nome').textContent = data.nome || user.email;
+          document.getElementById('entregador-nome').classList.remove('hidden');
+          document.getElementById('btn-logout').classList.remove('hidden');
+          showPanel('dashboard');
+          loadOrders();
+        } else {
+          // pendente ou bloqueado
+          showPendente(user, data);
+        }
+      } catch (err) {
+        showToast('Erro ao verificar acesso.', 'error');
+        auth.signOut();
+      }
+    });
+
+    function showPanel(name) {
+      ['login','pendente','dashboard'].forEach(p => {
+        document.getElementById(`panel-${p}`).classList.toggle('hidden', p !== name);
+      });
+    }
+
+    function showPendente(user, data) {
+      showPanel('pendente');
+      document.getElementById('pendente-nome').textContent = data?.nome || user.displayName || '';
+      document.getElementById('pendente-email').textContent = user.email;
+    }
+
+    // ── Delivery tabs ──────────────────────────────────
+    document.querySelectorAll('.delivery-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.delivery-tab').forEach(b => b.className = 'delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark');
+        btn.className = 'delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-accent text-white';
+        ['saiu','acompanhar','entregues'].forEach(tab => {
+          document.getElementById(`tab-${tab}`).classList.toggle('hidden', btn.dataset.tab !== tab);
+        });
+      });
+    });
+
+    // ── Orders ─────────────────────────────────────────
+    let previousPendingCount = 0; // para notificar novos pedidos ao entregador
+
+    function loadOrders() {
+      db.collection('pedidos').orderBy('dataPedido', 'desc').onSnapshot(snap => {
+        orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        const saiuOrders = orders.filter(o => o.status === 'Saiu para Entrega');
+        const pendingOrders = orders.filter(o => o.status === 'Pendente' || o.status === 'Confirmado');
+
+        if (!isFirstLoad) {
+          // Novo pedido chegou (qualquer status novo que entrou)
+          if (pendingOrders.length > previousPendingCount) {
+            playNotification();
+            showToast('🔔 Novo pedido recebido na loja!', 'warning');
+          }
+          // Pedido saiu para entrega
+          if (saiuOrders.length > previousSaiuCount) {
+            playNotification();
+            showToast('🚀 Pedido saiu para entrega!', 'warning');
+          }
+        }
+
+        previousSaiuCount = saiuOrders.length;
+        previousPendingCount = pendingOrders.length;
+        isFirstLoad = false;
+        renderOrders();
+        updateStats();
+      });
+    }
+
+    function updateStats() {
+      const today = new Date(); today.setHours(0,0,0,0);
+      document.getElementById('stat-pendentes').textContent = orders.filter(o => ['Pendente','Confirmado'].includes(o.status)).length;
+      document.getElementById('stat-aguardando').textContent = orders.filter(o => o.status === 'Saiu para Entrega').length;
+      document.getElementById('stat-entregues').textContent = orders.filter(o => {
+        const d = o.dataPedido?.toDate?.(); return o.status === 'Entregue' && d && d >= today;
+      }).length;
+    }
+
+    function renderOrders() {
+      // Aba 1: só pedidos que saíram para entrega (entregador pode confirmar entrega)
+      renderSaiu(orders.filter(o => o.status === 'Saiu para Entrega'));
+      // Aba 2: acompanhamento geral (só visualização, sem ação)
+      renderAcompanhar(orders.filter(o => ['Pendente','Confirmado','Cancelado'].includes(o.status)));
+      // Aba 3: entregues hoje
+      const today = new Date(); today.setHours(0,0,0,0);
+      renderEntregues(orders.filter(o => { const d = o.dataPedido?.toDate?.(); return o.status === 'Entregue' && d && d >= today; }));
+    }
+
+    function orderCard(o, badgeHtml, actionBtn) {
+      const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
+      const itensStr = (o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ');
+      return `<div class="bg-white rounded-xl p-4 shadow-sm new-order-card">
+        <div class="flex justify-between items-start mb-2">
+          <div><p class="font-bold text-dark">${o.cliente}</p><p class="text-xs text-gray-400">${date}</p></div>
+          ${badgeHtml}
+        </div>
+        <p class="text-sm text-gray-600 mb-1">${itensStr}</p>
+        <p class="font-bold text-accent text-sm mb-1">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</p>
+        ${o.whatsapp ? `<p class="text-xs text-gray-400">📱 ${o.whatsapp}</p>` : ''}
+        ${actionBtn}
+      </div>`;
+    }
+
+    function renderSaiu(list) {
+      const container = document.getElementById('orders-saiu');
+      const empty = document.getElementById('orders-saiu-empty');
+      if (!list.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      container.innerHTML = list.map(o => {
+        const badge = '<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">🚀 A caminho</span>';
+        const btn = `<button onclick="openConfirmModal('${o.id}','${esc(o.cliente)}')" class="w-full bg-green-500 text-white font-bold py-2.5 rounded-xl text-sm hover:bg-green-600 transition mt-3">📦 Confirmar que foi entregue</button>`;
+        return orderCard(o, badge, btn);
+      }).join('');
+    }
+
+    function renderAcompanhar(list) {
+      const container = document.getElementById('orders-acompanhar');
+      const empty = document.getElementById('orders-acompanhar-empty');
+      if (!list.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      const badges = {
+        'Pendente': '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">⏳ Aguardando loja</span>',
+        'Confirmado': '<span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">✅ Aceito pela loja</span>',
+        'Cancelado': '<span class="text-xs bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-medium">❌ Cancelado</span>',
+      };
+      container.innerHTML = list.map(o => orderCard(o, badges[o.status] || '', '')).join('');
+    }
+
+    function renderEntregues(list) {
+      const container = document.getElementById('orders-entregues');
+      const empty = document.getElementById('orders-entregues-empty');
+      if (!list.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      const badge = '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">📦 Entregue</span>';
+      container.innerHTML = list.map(o => orderCard(o, badge, '')).join('');
+    }
+
+    function esc(str) { return (str || '').replace(/'/g, "\\'"); }
+
+    // ── Modais ─────────────────────────────────────────
+    window.openConfirmModal = (id, cliente) => {
+      pendingConfirmId = id;
+      document.getElementById('modal-confirm-cliente').textContent = `Confirmar entrega para ${cliente}?`;
+      document.getElementById('modal-confirm').classList.remove('hidden');
+    };
+    document.getElementById('btn-confirm-no').addEventListener('click', () => { document.getElementById('modal-confirm').classList.add('hidden'); pendingConfirmId = null; });
+    document.getElementById('btn-confirm-yes').addEventListener('click', async () => {
+      if (!pendingConfirmId) return;
+      try { await db.collection('pedidos').doc(pendingConfirmId).update({ status: 'Entregue' }); showToast('✅ Entrega confirmada!'); }
+      catch { showToast('Erro ao confirmar', 'error'); }
+      document.getElementById('modal-confirm').classList.add('hidden'); pendingConfirmId = null;
+    });
+
+
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>
