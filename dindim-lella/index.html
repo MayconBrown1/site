@@ -31,9 +31,6 @@
     @keyframes fadeOut { to { opacity: 0; } }
     .cart-badge { animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-    .bairro-option { transition: all 0.2s; cursor: pointer; }
-    .bairro-option:hover { background: #FCE4EC; border-color: #E91E63; }
-    .bairro-option.selected { background: #FCE4EC; border-color: #E91E63; color: #E91E63; font-weight: 600; }
     .payment-option { transition: all 0.2s; cursor: pointer; }
     .payment-option:hover { border-color: #E91E63; }
     .payment-option.selected { background: #FCE4EC; border-color: #E91E63; }
@@ -132,10 +129,10 @@
 
         <!-- Bairro -->
         <div>
-          <label class="block text-sm font-medium text-dark mb-2">📍 Selecione seu bairro *</label>
-          <div id="bairros-lista" class="grid grid-cols-2 gap-2">
-            <p class="text-xs text-gray-400 col-span-2">Carregando bairros...</p>
-          </div>
+          <label class="block text-sm font-medium text-dark mb-1">📍 Selecione seu bairro *</label>
+          <select id="bairros-lista" onchange="selecionarBairro(this)" class="w-full border-2 border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent bg-white text-dark">
+            <option value="">Escolha seu bairro...</option>
+          </select>
           <input type="hidden" id="selected-bairro-nome" value="">
           <input type="hidden" id="selected-bairro-taxa" value="0">
         </div>
@@ -383,7 +380,8 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    let cart = [];
+    let cart = JSON.parse(localStorage.getItem('dindim_cart') || '[]');
+    function saveCart() { localStorage.setItem('dindim_cart', JSON.stringify(cart)); }
     let products = [];
     let bairros = [];
     let orders = [];
@@ -500,31 +498,30 @@
 
     // Bairros cliente
     function renderBairrosCliente() {
-      const container = document.getElementById('bairros-lista');
-      if (!bairros.length) {
-        container.innerHTML = '<p class="text-xs text-gray-400 col-span-2">Nenhum bairro cadastrado ainda.</p>';
-        return;
-      }
-      container.innerHTML = bairros.map(b => `
-        <button type="button" onclick="selecionarBairro('${b.id}','${esc(b.nome)}','${b.taxa}')"
-          id="bairro-btn-${b.id}"
-          class="bairro-option border-2 border-gray-200 rounded-xl p-3 text-left text-sm transition">
-          <p class="font-medium text-dark">${b.nome}</p>
-          <p class="text-xs text-accent font-bold mt-0.5">Taxa: R$ ${Number(b.taxa).toFixed(2).replace('.', ',')}</p>
-        </button>
-      `).join('');
-
-      // Re-select if already selected
-      const selId = document.querySelector('[data-sel-bairro]')?.dataset?.selBairro;
+      const select = document.getElementById('bairros-lista');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">Escolha seu bairro...</option>';
+      bairros.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        opt.dataset.nome = b.nome;
+        opt.dataset.taxa = b.taxa;
+        opt.textContent = `${b.nome} — Taxa: R$ ${Number(b.taxa).toFixed(2).replace('.', ',')}`;
+        select.appendChild(opt);
+      });
+      // Restore selection if previously chosen
+      if (currentVal) select.value = currentVal;
     }
 
-    window.selecionarBairro = function(id, nome, taxa) {
-      document.querySelectorAll('.bairro-option').forEach(el => el.classList.remove('selected'));
-      const btn = document.getElementById('bairro-btn-' + id);
-      if (btn) btn.classList.add('selected');
-      document.getElementById('selected-bairro-nome').value = nome;
-      document.getElementById('selected-bairro-taxa').value = taxa;
-      // Update totals
+    window.selecionarBairro = function(sel) {
+      const opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) {
+        document.getElementById('selected-bairro-nome').value = '';
+        document.getElementById('selected-bairro-taxa').value = '0';
+      } else {
+        document.getElementById('selected-bairro-nome').value = opt.dataset.nome;
+        document.getElementById('selected-bairro-taxa').value = opt.dataset.taxa;
+      }
       renderCartTotals();
     };
 
@@ -658,6 +655,8 @@
     db.collection('produtos').where('ativo', '==', true).onSnapshot(snap => {
       products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderProducts();
+      // Restore cart badge after products load (needed for localStorage cart)
+      if (cart.length) updateCartBadge();
     });
 
     // Bairros (realtime)
@@ -691,6 +690,7 @@
       const item = cart.find(x => x.id === id);
       if (item) { if (item.qty < p.estoque) item.qty++; else { showToast('Estoque insuficiente', 'error'); return; } }
       else cart.push({ id, qty: 1 });
+      saveCart();
       updateCartBadge();
       showToast(`${p.emoji} ${p.nome} adicionado!`);
     }
@@ -731,6 +731,7 @@
       item.qty += delta;
       if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
       else if (p && item.qty > p.estoque) { item.qty = p.estoque; showToast('Estoque máximo', 'error'); }
+      saveCart();
       updateCartBadge();
       renderCart();
     }
@@ -792,14 +793,15 @@
         const waLink = `https://wa.me/5584921695039?text=${encodeURIComponent(msg)}`;
 
         // Reset após montar a mensagem
-        cart = []; updateCartBadge();
+        cart = []; saveCart(); updateCartBadge();
         document.getElementById('cliente-nome').value = '';
         document.getElementById('cliente-whatsapp').value = '';
         document.getElementById('cliente-endereco').value = '';
         document.getElementById('cliente-referencia').value = '';
         document.getElementById('selected-bairro-nome').value = '';
         document.getElementById('selected-bairro-taxa').value = '0';
-        document.querySelectorAll('.bairro-option').forEach(el => el.classList.remove('selected'));
+        const bairroSel = document.getElementById('bairros-lista');
+        if (bairroSel) bairroSel.value = '';
         document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
         document.getElementById('troco-section').classList.add('hidden');
         selectedPayment = '';
