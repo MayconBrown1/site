@@ -31,6 +31,9 @@
     @keyframes fadeOut { to { opacity: 0; } }
     .new-order-card { animation: slideInCard 0.4s ease; }
     @keyframes slideInCard { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .info-row { display: flex; gap: 6px; align-items: flex-start; }
+    .info-label { font-weight: 600; font-size: 11px; color: #555; white-space: nowrap; }
+    .info-val { font-size: 12px; color: #333; }
   </style>
 </head>
 <body class="min-h-screen bg-gray-50">
@@ -56,7 +59,7 @@
 
   <main class="max-w-2xl mx-auto px-4 py-6">
 
-    <!-- ===== LOGIN / CADASTRO ===== -->
+    <!-- LOGIN / CADASTRO -->
     <section id="panel-login">
       <div class="max-w-sm mx-auto">
         <div class="text-center mb-6">
@@ -64,41 +67,34 @@
           <h2 class="text-xl font-bold text-dark mt-2">Área do Entregador</h2>
           <p class="text-sm text-gray-400 mt-1">Entre ou crie sua conta para acessar as entregas</p>
         </div>
-
         <div class="bg-white rounded-2xl shadow-md p-6">
-          <!-- Tabs -->
           <div class="flex gap-2 mb-5">
             <button id="tab-btn-entrar" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white transition">Entrar</button>
             <button id="tab-btn-cadastrar" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark transition">Cadastrar</button>
           </div>
-
-          <!-- Form Entrar -->
           <form id="form-login" class="space-y-3">
             <input id="login-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
             <input id="login-senha" type="password" required placeholder="Senha" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
             <button type="submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
           </form>
-
-          <!-- Form Cadastrar -->
           <form id="form-cadastro" class="space-y-3 hidden">
             <input id="cad-nome" type="text" required placeholder="Seu nome completo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
             <input id="cad-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
             <input id="cad-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
             <button type="submit" id="btn-cadastrar-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Criar Conta</button>
           </form>
-
           <p id="auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
         </div>
         <p class="text-xs text-center text-gray-400 mt-4">Após o cadastro, aguarde a aprovação da loja para acessar.</p>
       </div>
     </section>
 
-    <!-- ===== AGUARDANDO APROVAÇÃO ===== -->
+    <!-- AGUARDANDO APROVAÇÃO -->
     <section id="panel-pendente" class="hidden">
       <div class="max-w-sm mx-auto text-center py-12">
         <span class="text-6xl block mb-4">⏳</span>
         <h2 class="text-xl font-bold text-dark mb-2">Cadastro enviado!</h2>
-        <p class="text-sm text-gray-500 mb-6">Seu cadastro foi recebido e está aguardando aprovação da loja. Assim que for aprovado, você poderá acessar as entregas.</p>
+        <p class="text-sm text-gray-500 mb-6">Seu cadastro foi recebido e está aguardando aprovação da loja.</p>
         <div class="bg-white rounded-xl p-4 shadow-sm text-left mb-4">
           <p class="text-xs text-gray-400 mb-1">Cadastrado como:</p>
           <p class="font-medium text-dark" id="pendente-nome"></p>
@@ -108,9 +104,8 @@
       </div>
     </section>
 
-    <!-- ===== DASHBOARD ===== -->
+    <!-- DASHBOARD -->
     <section id="panel-dashboard" class="hidden">
-
       <div class="grid grid-cols-3 gap-3 mb-6">
         <div class="bg-white rounded-xl p-3 shadow-sm text-center">
           <p class="text-xl font-bold text-yellow-500" id="stat-pendentes">0</p>
@@ -157,7 +152,6 @@
           <p class="text-sm">Nenhuma entrega concluída hoje</p>
         </div>
       </div>
-
     </section>
   </main>
 
@@ -174,8 +168,6 @@
     </div>
   </div>
 
-
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCLm5c_SHMQMEBdipdSjBa7ITOwVNrbMLA",
@@ -190,13 +182,12 @@
     const auth = firebase.auth();
 
     const ADMIN_EMAIL = 'lella-dindim@gmail.com';
-
     let orders = [];
     let pendingConfirmId = null;
     let previousSaiuCount = 0;
     let isFirstLoad = true;
 
-    // ── Audio ──────────────────────────────────────────
+    // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNotification() {
       const masterGain = audioCtx.createGain();
@@ -228,11 +219,10 @@
       setTimeout(() => t.remove(), 3000);
     }
 
-    // ── Auth tabs ──────────────────────────────────────
+    // Auth tabs
     let authMode = 'login';
     document.getElementById('tab-btn-entrar').addEventListener('click', () => setAuthMode('login'));
     document.getElementById('tab-btn-cadastrar').addEventListener('click', () => setAuthMode('cadastro'));
-
     function setAuthMode(mode) {
       authMode = mode;
       document.getElementById('tab-btn-entrar').className = `flex-1 py-2 rounded-xl text-sm font-medium transition ${mode === 'login' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
@@ -242,7 +232,7 @@
       document.getElementById('auth-error').classList.add('hidden');
     }
 
-    // ── Login ──────────────────────────────────────────
+    // Login
     document.getElementById('form-login').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -253,18 +243,13 @@
       try {
         await auth.signInWithEmailAndPassword(email, senha);
       } catch (err) {
-        const msgs = {
-          'auth/user-not-found': 'E-mail não cadastrado.',
-          'auth/wrong-password': 'Senha incorreta.',
-          'auth/invalid-credential': 'E-mail ou senha incorretos.',
-          'auth/invalid-email': 'E-mail inválido.'
-        };
+        const msgs = { 'auth/user-not-found': 'E-mail não cadastrado.', 'auth/wrong-password': 'Senha incorreta.', 'auth/invalid-credential': 'E-mail ou senha incorretos.', 'auth/invalid-email': 'E-mail inválido.' };
         errEl.textContent = msgs[err.code] || 'Erro ao entrar.';
         errEl.classList.remove('hidden');
       }
     });
 
-    // ── Cadastro ───────────────────────────────────────
+    // Cadastro
     document.getElementById('form-cadastro').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -274,89 +259,60 @@
       const errEl = document.getElementById('auth-error');
       const btn = document.getElementById('btn-cadastrar-submit');
       errEl.classList.add('hidden');
-
       if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-        errEl.textContent = 'Esse e-mail não pode ser usado aqui.';
-        errEl.classList.remove('hidden');
-        return;
+        errEl.textContent = 'Esse e-mail não pode ser usado aqui.'; errEl.classList.remove('hidden'); return;
       }
-
       btn.disabled = true; btn.textContent = 'Criando conta...';
       try {
         const result = await auth.createUserWithEmailAndPassword(email, senha);
         await result.user.updateProfile({ displayName: nome });
-        // Salva no Firestore com status pendente
         await db.collection('entregadores').doc(result.user.uid).set({
-          nome,
-          email,
-          uid: result.user.uid,
-          status: 'pendente',
+          nome, email, uid: result.user.uid, status: 'pendente',
           cadastradoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
         showToast('Conta criada! Aguarde aprovação da loja.', 'warning');
       } catch (err) {
-        const msgs = {
-          'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Tente entrar.',
-          'auth/weak-password': 'Senha fraca (mínimo 6 caracteres).',
-          'auth/invalid-email': 'E-mail inválido.'
-        };
-        errEl.textContent = msgs[err.code] || 'Erro ao criar conta.';
-        errEl.classList.remove('hidden');
+        const msgs = { 'auth/email-already-in-use': 'Esse e-mail já está cadastrado.', 'auth/weak-password': 'Senha fraca (mínimo 6 caracteres).', 'auth/invalid-email': 'E-mail inválido.' };
+        errEl.textContent = msgs[err.code] || 'Erro ao criar conta.'; errEl.classList.remove('hidden');
       }
       btn.disabled = false; btn.textContent = 'Criar Conta';
     });
 
-    // ── Logout ─────────────────────────────────────────
     document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
     document.getElementById('btn-logout-pendente').addEventListener('click', () => auth.signOut());
 
-    // ── Auth State ─────────────────────────────────────
+    // Auth State
     auth.onAuthStateChanged(async (user) => {
       showPanel('login');
       document.getElementById('entregador-nome').classList.add('hidden');
       document.getElementById('btn-logout').classList.add('hidden');
-
       if (!user) return;
-
-      // Admin: acesso direto
       if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         document.getElementById('entregador-nome').textContent = 'Admin';
         document.getElementById('entregador-nome').classList.remove('hidden');
         document.getElementById('btn-logout').classList.remove('hidden');
-        showPanel('dashboard');
-        loadOrders();
-        return;
+        showPanel('dashboard'); loadOrders(); return;
       }
-
-      // Verifica status no Firestore
       try {
         const doc = await db.collection('entregadores').doc(user.uid).get();
         if (!doc.exists) {
-          // Conta Firebase existe mas não tem registro de entregador: cria como pendente
           await db.collection('entregadores').doc(user.uid).set({
-            nome: user.displayName || '',
-            email: user.email,
-            uid: user.uid,
-            status: 'pendente',
-            cadastradoEm: firebase.firestore.FieldValue.serverTimestamp()
+            nome: user.displayName || '', email: user.email, uid: user.uid,
+            status: 'pendente', cadastradoEm: firebase.firestore.FieldValue.serverTimestamp()
           });
-          showPendente(user);
-          return;
+          showPendente(user); return;
         }
         const data = doc.data();
         if (data.status === 'aprovado') {
           document.getElementById('entregador-nome').textContent = data.nome || user.email;
           document.getElementById('entregador-nome').classList.remove('hidden');
           document.getElementById('btn-logout').classList.remove('hidden');
-          showPanel('dashboard');
-          loadOrders();
+          showPanel('dashboard'); loadOrders();
         } else {
-          // pendente ou bloqueado
           showPendente(user, data);
         }
       } catch (err) {
-        showToast('Erro ao verificar acesso.', 'error');
-        auth.signOut();
+        showToast('Erro ao verificar acesso.', 'error'); auth.signOut();
       }
     });
 
@@ -372,7 +328,7 @@
       document.getElementById('pendente-email').textContent = user.email;
     }
 
-    // ── Delivery tabs ──────────────────────────────────
+    // Tabs
     document.querySelectorAll('.delivery-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.delivery-tab').forEach(b => b.className = 'delivery-tab px-4 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark');
@@ -383,34 +339,20 @@
       });
     });
 
-    // ── Orders ─────────────────────────────────────────
-    let previousPendingCount = 0; // para notificar novos pedidos ao entregador
-
+    let previousPendingCount = 0;
     function loadOrders() {
       db.collection('pedidos').orderBy('dataPedido', 'desc').onSnapshot(snap => {
         orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-
         const saiuOrders = orders.filter(o => o.status === 'Saiu para Entrega');
         const pendingOrders = orders.filter(o => o.status === 'Pendente' || o.status === 'Confirmado');
-
         if (!isFirstLoad) {
-          // Novo pedido chegou (qualquer status novo que entrou)
-          if (pendingOrders.length > previousPendingCount) {
-            playNotification();
-            showToast('🔔 Novo pedido recebido na loja!', 'warning');
-          }
-          // Pedido saiu para entrega
-          if (saiuOrders.length > previousSaiuCount) {
-            playNotification();
-            showToast('🚀 Pedido saiu para entrega!', 'warning');
-          }
+          if (pendingOrders.length > previousPendingCount) { playNotification(); showToast('🔔 Novo pedido recebido na loja!', 'warning'); }
+          if (saiuOrders.length > previousSaiuCount) { playNotification(); showToast('🚀 Pedido saiu para entrega!', 'warning'); }
         }
-
         previousSaiuCount = saiuOrders.length;
         previousPendingCount = pendingOrders.length;
         isFirstLoad = false;
-        renderOrders();
-        updateStats();
+        renderOrders(); updateStats();
       });
     }
 
@@ -418,32 +360,58 @@
       const today = new Date(); today.setHours(0,0,0,0);
       document.getElementById('stat-pendentes').textContent = orders.filter(o => ['Pendente','Confirmado'].includes(o.status)).length;
       document.getElementById('stat-aguardando').textContent = orders.filter(o => o.status === 'Saiu para Entrega').length;
-      document.getElementById('stat-entregues').textContent = orders.filter(o => {
-        const d = o.dataPedido?.toDate?.(); return o.status === 'Entregue' && d && d >= today;
-      }).length;
+      document.getElementById('stat-entregues').textContent = orders.filter(o => { const d = o.dataPedido?.toDate?.(); return o.status === 'Entregue' && d && d >= today; }).length;
     }
 
     function renderOrders() {
-      // Aba 1: só pedidos que saíram para entrega (entregador pode confirmar entrega)
       renderSaiu(orders.filter(o => o.status === 'Saiu para Entrega'));
-      // Aba 2: acompanhamento geral (só visualização, sem ação)
       renderAcompanhar(orders.filter(o => ['Pendente','Confirmado','Cancelado'].includes(o.status)));
-      // Aba 3: entregues hoje
       const today = new Date(); today.setHours(0,0,0,0);
       renderEntregues(orders.filter(o => { const d = o.dataPedido?.toDate?.(); return o.status === 'Entregue' && d && d >= today; }));
     }
 
+    const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
+
     function orderCard(o, badgeHtml, actionBtn) {
       const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
       const itensStr = (o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ');
-      return `<div class="bg-white rounded-xl p-4 shadow-sm new-order-card">
-        <div class="flex justify-between items-start mb-2">
-          <div><p class="font-bold text-dark">${o.cliente}</p><p class="text-xs text-gray-400">${date}</p></div>
+      const sub = Number(o.subtotal || 0).toFixed(2).replace('.', ',');
+      const taxa = Number(o.taxaEntrega || 0).toFixed(2).replace('.', ',');
+      const total = Number(o.total || 0).toFixed(2).replace('.', ',');
+      const pagamento = payLabels[o.pagamento] || o.pagamento || '—';
+      const trocoInfo = o.troco ? `<span class="text-yellow-700"> • Troco p/ R$ ${Number(o.troco.pagaCom).toFixed(2).replace('.', ',')} (devolve R$ ${Number(o.troco.troco).toFixed(2).replace('.', ',')})</span>` : '';
+
+      return `<div class="bg-white rounded-xl p-4 shadow-sm new-order-card border border-gray-100">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <p class="font-bold text-dark text-base">👤 ${o.cliente || '—'}</p>
+            <p class="text-xs text-gray-400">${date}</p>
+          </div>
           ${badgeHtml}
         </div>
-        <p class="text-sm text-gray-600 mb-1">${itensStr}</p>
-        <p class="font-bold text-accent text-sm mb-1">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</p>
-        ${o.whatsapp ? `<p class="text-xs text-gray-400">📱 ${o.whatsapp}</p>` : ''}
+
+        <!-- Itens do pedido -->
+        <div class="bg-gray-50 rounded-lg px-3 py-2 mb-3">
+          <p class="text-xs font-semibold text-gray-500 mb-1">🛍️ Itens</p>
+          <p class="text-sm text-gray-700">${itensStr}</p>
+        </div>
+
+        <!-- Informações de entrega -->
+        <div class="space-y-1.5 mb-3">
+          ${o.whatsapp ? `<div class="info-row"><span class="info-label">📱 Tel:</span><a href="tel:${o.whatsapp}" class="info-val text-accent font-medium underline">${o.whatsapp}</a></div>` : ''}
+          ${o.bairro ? `<div class="info-row"><span class="info-label">📍 Bairro:</span><span class="info-val font-semibold">${o.bairro}</span></div>` : ''}
+          ${o.endereco ? `<div class="info-row"><span class="info-label">🏠 Endereço:</span><span class="info-val">${o.endereco}</span></div>` : ''}
+          ${o.referencia ? `<div class="info-row"><span class="info-label">📌 Ref.:</span><span class="info-val text-gray-500">${o.referencia}</span></div>` : ''}
+        </div>
+
+        <!-- Valores -->
+        <div class="border-t border-gray-100 pt-2 space-y-1">
+          ${o.subtotal != null ? `<div class="flex justify-between text-xs text-gray-400"><span>Subtotal:</span><span>R$ ${sub}</span></div>` : ''}
+          ${o.taxaEntrega != null ? `<div class="flex justify-between text-xs text-gray-400"><span>Taxa de entrega (${o.bairro || ''}):</span><span class="text-accent font-medium">R$ ${taxa}</span></div>` : ''}
+          <div class="flex justify-between text-sm font-bold"><span>Total:</span><span class="text-accent">R$ ${total}</span></div>
+          <p class="text-xs text-gray-500">${pagamento}${trocoInfo}</p>
+        </div>
+
         ${actionBtn}
       </div>`;
     }
@@ -484,7 +452,6 @@
 
     function esc(str) { return (str || '').replace(/'/g, "\\'"); }
 
-    // ── Modais ─────────────────────────────────────────
     window.openConfirmModal = (id, cliente) => {
       pendingConfirmId = id;
       document.getElementById('modal-confirm-cliente').textContent = `Confirmar entrega para ${cliente}?`;
@@ -497,8 +464,6 @@
       catch { showToast('Erro ao confirmar', 'error'); }
       document.getElementById('modal-confirm').classList.add('hidden'); pendingConfirmId = null;
     });
-
-
 
     lucide.createIcons();
   </script>

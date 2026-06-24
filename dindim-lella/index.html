@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dindim da Lella</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -31,162 +31,344 @@
     @keyframes fadeOut { to { opacity: 0; } }
     .cart-badge { animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+    .bairro-option { transition: all 0.2s; cursor: pointer; }
+    .bairro-option:hover { background: #FCE4EC; border-color: #E91E63; }
+    .bairro-option.selected { background: #FCE4EC; border-color: #E91E63; color: #E91E63; font-weight: 600; }
+    .payment-option { transition: all 0.2s; cursor: pointer; }
+    .payment-option:hover { border-color: #E91E63; }
+    .payment-option.selected { background: #FCE4EC; border-color: #E91E63; }
   </style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
  </head>
  <body data-template-id="__page-root" class="min-h-screen">
-  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div><!-- Header -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+  <!-- Header -->
   <header data-template-id="header-bg" class="canva-header sticky top-0 z-40 bg-white shadow-sm">
    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
     <h1 data-template-id="app-title" class="canva-text text-xl font-bold"></h1>
-    <div class="flex items-center gap-2"><button id="btn-cliente" class="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white transition">Cliente</button> <button id="btn-admin" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition">Admin</button> <button id="btn-meus-pedidos" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition hidden">Meus Pedidos</button> <button id="btn-cart" class="relative p-2 rounded-full bg-secondary text-accent hidden"> <i data-lucide="shopping-bag" class="w-5 h-5"></i> <span id="cart-count" class="cart-badge absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span> </button>
+    <div class="flex items-center gap-2">
+      <button id="btn-cliente" class="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white transition">Cliente</button>
+      <button id="btn-admin" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition">Admin</button>
+      <button id="btn-meus-pedidos" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition hidden">Meus Pedidos</button>
+      <button id="btn-cart" class="relative p-2 rounded-full bg-secondary text-accent hidden">
+        <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+        <span id="cart-count" class="cart-badge absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
+      </button>
     </div>
    </div>
   </header>
-  <main class="max-w-6xl mx-auto px-4 py-6"><!-- CUSTOMER PANEL -->
-   <section id="panel-cliente">
-    <div class="text-center mb-4">
-     <p data-template-id="welcome-text" class="canva-text text-lg"></p>
-    </div><!-- Login/Cadastro do cliente (email e senha) -->
-    <div id="client-login-area" class="max-w-sm mx-auto mb-6">
-     <div id="client-auth-box" class="bg-white rounded-2xl shadow-sm p-5">
-      <div class="flex gap-2 mb-4">
-       <button id="client-tab-login" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white" data-mode="login">Entrar</button>
-       <button id="client-tab-cadastro" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark" data-mode="cadastro">Cadastrar</button>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- CUSTOMER PANEL -->
+    <section id="panel-cliente">
+      <div class="text-center mb-4">
+        <p data-template-id="welcome-text" class="canva-text text-lg"></p>
       </div>
-      <form id="client-auth-form" class="space-y-3">
-       <input id="client-nome" type="text" placeholder="Seu nome" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent hidden">
-       <input id="client-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
-       <input id="client-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
-       <button type="submit" id="btn-client-auth-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
-      </form>
-      <p id="client-auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
-     </div>
-     <div id="client-logged-info" class="text-center mt-3 hidden">
-      <p id="client-user-info" class="text-sm text-gray-500"></p>
-      <button id="btn-client-logout" class="text-xs text-accent mt-1">Sair</button>
-     </div>
-    </div>
-    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    <div id="empty-products" class="text-center py-12 text-gray-400 hidden">
-     <p>Carregando produtos...</p>
-    </div>
-   </section><!-- CART PANEL -->
-   <section id="panel-cart" class="hidden"><button id="btn-back-shop" class="flex items-center gap-1 text-accent mb-4 font-medium"> <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar às compras </button>
-    <h2 data-template-id="cart-title" class="canva-text text-xl font-bold mb-4"></h2>
-    <div id="cart-items" class="space-y-3 mb-6"></div>
-    <div id="cart-empty" class="text-center py-8 text-gray-400">
-     Seu carrinho está vazio
-    </div>
-    <div data-template-id="delivery-notice" class="canva-card border-2 border-accent rounded-xl p-4 mb-6" style="display:block!important;visibility:visible!important;border:2px solid #E91E63;border-radius:12px;padding:16px;margin-bottom:24px;background:#FCE4EC;">
-     <p data-template-id="delivery-title" class="canva-text font-bold text-center mb-2" style="display:block!important;font-weight:700;text-align:center;margin-bottom:8px;color:#333;"></p>
-     <p data-template-id="delivery-text" class="canva-text text-sm text-center leading-relaxed" style="display:block!important;font-size:0.875rem;text-align:center;line-height:1.6;color:#333;"></p>
-     <!-- Fallback: shown if canva-text fields are empty -->
-     <div id="delivery-notice-fallback" class="hidden">
-       <p class="font-bold text-center mb-2" style="color:#E91E63;">🛵 Atenção sobre a entrega</p>
-       <p class="text-sm text-center leading-relaxed">O cliente é responsável pela retirada ou pelo combinado da entrega diretamente com a vendedora.</p>
-     </div>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
-     <div class="flex justify-between items-center text-lg font-bold">
-      <span>Total:</span><span id="cart-total" class="text-accent">R$ 0,00</span>
-     </div>
-    </div>
-    <form id="order-form" class="bg-white rounded-xl p-4 shadow-sm space-y-3"><label for="cliente-nome" class="block text-sm font-medium text-dark">Seu nome</label> <input id="cliente-nome" type="text" required placeholder="Nome completo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <label for="cliente-whatsapp" class="block text-sm font-medium text-dark">WhatsApp</label> <input id="cliente-whatsapp" type="tel" required placeholder="(84) 99999-9999" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <button type="submit" id="btn-finalizar" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition disabled:opacity-50">Finalizar Pedido</button>
-    </form>
-   </section><!-- PIX PANEL -->
-   <section id="panel-pix" class="hidden">
-    <div class="max-w-sm mx-auto bg-white rounded-2xl shadow-md p-6 text-center">
-     <h2 class="text-xl font-bold text-dark mb-2">💰 Pagamento via Pix</h2>
-     <p class="text-sm text-gray-500 mb-4">Faça o pagamento para confirmar seu pedido</p>
-     <div class="bg-gray-50 rounded-xl p-4 mb-4">
-      <p class="text-xs text-gray-500 mb-1">Chave Pix (Celular):</p>
-      <p class="text-lg font-bold text-dark select-all" id="pix-key">84921695039</p><button onclick="copyPix()" class="mt-2 text-xs bg-accent text-white px-3 py-1 rounded-lg">Copiar chave</button>
-     </div>
-     <p class="text-sm font-bold text-dark mb-1">Total: <span id="pix-total" class="text-accent"></span></p>
-     <p class="text-xs text-gray-400 mb-4">Após pagar, envie o comprovante pelo WhatsApp</p><a id="btn-whatsapp-pix" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-600 transition">
-      <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
-       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.143 1.534 5.883L0 24l6.293-1.501A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-1.875 0-3.622-.508-5.127-1.392l-.368-.218-3.81.909.957-3.693-.24-.379A9.709 9.709 0 012.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75z" />
-      </svg> Enviar comprovante no WhatsApp </a> <button onclick="switchPanel('cliente')" class="mt-4 text-sm text-accent font-medium block mx-auto">Voltar à loja</button>
-    </div>
-   </section><!-- MEUS PEDIDOS (Client) -->
-   <section id="panel-meus-pedidos" class="hidden"><button onclick="switchPanel('cliente')" class="flex items-center gap-1 text-accent mb-4 font-medium"> <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar </button>
-    <h2 class="text-xl font-bold text-dark mb-4">📦 Meus Pedidos</h2>
-    <div id="my-orders-list" class="space-y-3"></div>
-    <div id="my-orders-empty" class="text-center py-8 text-gray-400">
-     Nenhum pedido encontrado. Faça login com Google para acompanhar.
-    </div>
-   </section><!-- ADMIN PANEL -->
-   <section id="panel-admin" class="hidden">
-    <div id="admin-login" class="max-w-sm mx-auto">
-     <div class="bg-white rounded-2xl shadow-md p-6">
-      <h2 data-template-id="admin-login-title" class="canva-text text-xl font-bold text-center mb-4"></h2>
-      <form id="login-form" class="space-y-3"><input id="login-email" type="email" required placeholder="Email" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <input id="login-senha" type="password" required placeholder="Senha" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <button type="submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
-      </form>
-      <p id="login-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
-     </div>
-    </div>
-    <div id="admin-dashboard" class="hidden">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-dark">Painel Admin</h2><button id="btn-logout" class="text-sm text-accent font-medium">Sair</button>
-     </div>
-     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-accent" id="stat-total">0</p>
-       <p class="text-xs text-gray-500">Total Pedidos</p>
+      <!-- Login/Cadastro do cliente -->
+      <div id="client-login-area" class="max-w-sm mx-auto mb-6">
+        <div id="client-auth-box" class="bg-white rounded-2xl shadow-sm p-5">
+          <div class="flex gap-2 mb-4">
+            <button id="client-tab-login" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white" data-mode="login">Entrar</button>
+            <button id="client-tab-cadastro" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark" data-mode="cadastro">Cadastrar</button>
+          </div>
+          <form id="client-auth-form" class="space-y-3">
+            <input id="client-nome" type="text" placeholder="Seu nome" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent hidden">
+            <input id="client-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <input id="client-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <button type="submit" id="btn-client-auth-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
+          </form>
+          <p id="client-auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
+        </div>
+        <div id="client-logged-info" class="text-center mt-3 hidden">
+          <p id="client-user-info" class="text-sm text-gray-500"></p>
+          <button id="btn-client-logout" class="text-xs text-accent mt-1">Sair</button>
+        </div>
       </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-yellow-500" id="stat-pendentes">0</p>
-       <p class="text-xs text-gray-500">Pendentes</p>
+      <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      <div id="empty-products" class="text-center py-12 text-gray-400 hidden">
+        <p>Carregando produtos...</p>
       </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-green-500" id="stat-concluidos">0</p>
-       <p class="text-xs text-gray-500">Concluídos</p>
+    </section>
+
+    <!-- CART PANEL -->
+    <section id="panel-cart" class="hidden">
+      <button id="btn-back-shop" class="flex items-center gap-1 text-accent mb-4 font-medium">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar às compras
+      </button>
+      <h2 data-template-id="cart-title" class="canva-text text-xl font-bold mb-4"></h2>
+      <div id="cart-items" class="space-y-3 mb-4"></div>
+      <div id="cart-empty" class="text-center py-8 text-gray-400">Seu carrinho está vazio</div>
+
+      <!-- Resumo de valores -->
+      <div class="bg-white rounded-xl p-4 shadow-sm mb-4 space-y-2">
+        <div class="flex justify-between text-sm text-gray-600">
+          <span>Subtotal:</span><span id="cart-subtotal">R$ 0,00</span>
+        </div>
+        <div class="flex justify-between text-sm text-gray-600" id="taxa-linha" style="display:none!important">
+          <span>Taxa de entrega (<span id="taxa-bairro-nome"></span>):</span>
+          <span id="cart-taxa" class="text-accent font-medium">R$ 0,00</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold border-t pt-2">
+          <span>Total:</span><span id="cart-total" class="text-accent">R$ 0,00</span>
+        </div>
       </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-accent" id="stat-faturamento">R$ 0</p>
-       <p class="text-xs text-gray-500">Faturamento</p>
+
+      <!-- Formulário de pedido -->
+      <div class="bg-white rounded-xl p-4 shadow-sm space-y-4">
+        <h3 class="font-bold text-dark text-base">📋 Dados para entrega</h3>
+
+        <!-- Nome -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">Seu nome *</label>
+          <input id="cliente-nome" type="text" required placeholder="Nome completo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+
+        <!-- WhatsApp -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">WhatsApp *</label>
+          <input id="cliente-whatsapp" type="tel" required placeholder="(84) 99999-9999" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+
+        <!-- Bairro -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-2">📍 Selecione seu bairro *</label>
+          <div id="bairros-lista" class="grid grid-cols-2 gap-2">
+            <p class="text-xs text-gray-400 col-span-2">Carregando bairros...</p>
+          </div>
+          <input type="hidden" id="selected-bairro-nome" value="">
+          <input type="hidden" id="selected-bairro-taxa" value="0">
+        </div>
+
+        <!-- Endereço -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">🏠 Endereço completo *</label>
+          <input id="cliente-endereco" type="text" required placeholder="Rua, número, complemento" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+
+        <!-- Referência -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">📌 Ponto de referência</label>
+          <input id="cliente-referencia" type="text" placeholder="Ex: Próximo ao mercado, casa azul..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+
+        <!-- Forma de Pagamento -->
+        <div>
+          <label class="block text-sm font-medium text-dark mb-2">💳 Forma de pagamento *</label>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" onclick="selectPayment('pix')" id="pay-pix" class="payment-option border-2 border-gray-200 rounded-xl p-3 text-center text-sm font-medium transition">
+              <div class="text-xl mb-1">💰</div>Pix
+            </button>
+            <button type="button" onclick="selectPayment('cartao')" id="pay-cartao" class="payment-option border-2 border-gray-200 rounded-xl p-3 text-center text-sm font-medium transition">
+              <div class="text-xl mb-1">💳</div>Cartão
+            </button>
+            <button type="button" onclick="selectPayment('especie')" id="pay-especie" class="payment-option border-2 border-gray-200 rounded-xl p-3 text-center text-sm font-medium transition">
+              <div class="text-xl mb-1">💵</div>Dinheiro
+            </button>
+          </div>
+        </div>
+
+        <!-- Troco (só para espécie) -->
+        <div id="troco-section" class="hidden bg-yellow-50 border border-yellow-200 rounded-xl p-3 space-y-2">
+          <p class="text-sm font-medium text-dark">Precisa de troco?</p>
+          <div class="flex gap-2">
+            <button type="button" onclick="setTroco(true)" id="troco-sim" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark transition">Sim</button>
+            <button type="button" onclick="setTroco(false)" id="troco-nao" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark transition">Não</button>
+          </div>
+          <div id="troco-valor-area" class="hidden">
+            <label class="text-xs text-gray-500 mb-1 block">Vai pagar com quanto?</label>
+            <input id="troco-valor" type="number" step="0.01" min="0" placeholder="Ex: 50,00" oninput="calcTroco()" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <p id="troco-resultado" class="text-sm font-bold text-green-600 mt-2 hidden"></p>
+          </div>
+        </div>
+
+        <button type="button" id="btn-finalizar" onclick="finalizarPedido()" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition disabled:opacity-50">Finalizar Pedido</button>
       </div>
-     </div>
-     <div class="flex gap-2 mb-4 overflow-x-auto"><button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white" data-tab="produtos">Produtos</button> <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="pedidos">Pedidos</button> <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="entregadores">🛵 Entregadores</button>
-     </div>
-     <div id="tab-produtos"><button id="btn-add-product" class="mb-4 flex items-center gap-1 bg-accent text-white px-4 py-2 rounded-xl font-medium text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Novo Produto</button>
-      <div id="admin-products" class="space-y-3"></div>
-     </div>
-     <div id="tab-pedidos" class="hidden">
-      <div id="admin-orders" class="space-y-3"></div>
-      <div id="orders-empty" class="text-center py-8 text-gray-400">
-       Nenhum pedido ainda
+    </section>
+
+    <!-- PIX PANEL -->
+    <section id="panel-pix" class="hidden">
+      <div class="max-w-sm mx-auto bg-white rounded-2xl shadow-md p-6 text-center">
+        <h2 class="text-xl font-bold text-dark mb-2">💰 Pagamento via Pix</h2>
+        <p class="text-sm text-gray-500 mb-4">Faça o pagamento para confirmar seu pedido</p>
+        <div class="bg-gray-50 rounded-xl p-4 mb-4">
+          <p class="text-xs text-gray-500 mb-1">Chave Pix (Celular):</p>
+          <p class="text-lg font-bold text-dark select-all" id="pix-key">84921695039</p>
+          <button onclick="copyPix()" class="mt-2 text-xs bg-accent text-white px-3 py-1 rounded-lg">Copiar chave</button>
+        </div>
+        <p class="text-sm font-bold text-dark mb-1">Total: <span id="pix-total" class="text-accent"></span></p>
+        <p class="text-xs text-gray-400 mb-4">Após pagar, envie o comprovante pelo WhatsApp</p>
+        <a id="btn-whatsapp-pix" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-600 transition">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.143 1.534 5.883L0 24l6.293-1.501A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-1.875 0-3.622-.508-5.127-1.392l-.368-.218-3.81.909.957-3.693-.24-.379A9.709 9.709 0 012.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75z"/>
+          </svg>
+          Enviar comprovante no WhatsApp
+        </a>
+        <button onclick="switchPanel('cliente')" class="mt-4 text-sm text-accent font-medium block mx-auto">Voltar à loja</button>
       </div>
-     </div>
-     <div id="tab-entregadores" class="hidden">
-      <p class="text-xs text-gray-400 mb-3">Entregadores cadastrados — aprove ou bloqueie o acesso</p>
-      <div id="admin-entregadores" class="space-y-3"></div>
-      <div id="entregadores-empty" class="text-center py-8 text-gray-400">
-       Nenhum entregador cadastrado ainda
+    </section>
+
+    <!-- WHATSAPP DIRETO (cartão / dinheiro) -->
+    <section id="panel-whatsapp" class="hidden">
+      <div class="max-w-sm mx-auto bg-white rounded-2xl shadow-md p-6 text-center">
+        <div class="text-4xl mb-3" id="ws-icon">💳</div>
+        <h2 class="text-xl font-bold text-dark mb-2" id="ws-title">Pedido recebido!</h2>
+        <p class="text-sm text-gray-500 mb-4" id="ws-desc">Clique abaixo para confirmar seu pedido pelo WhatsApp</p>
+        <div class="bg-gray-50 rounded-xl p-3 text-left mb-4 text-xs text-gray-600 space-y-1" id="ws-resumo"></div>
+        <a id="btn-whatsapp-direto" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-600 transition">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+            <path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.143 1.534 5.883L0 24l6.293-1.501A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-1.875 0-3.622-.508-5.127-1.392l-.368-.218-3.81.909.957-3.693-.24-.379A9.709 9.709 0 012.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75z"/>
+          </svg>
+          Enviar pedido pelo WhatsApp
+        </a>
+        <button onclick="switchPanel('cliente')" class="mt-4 text-sm text-accent font-medium block mx-auto">Voltar à loja</button>
       </div>
-     </div>
-    </div>
-   </section>
-  </main><!-- Product Modal -->
+    </section>
+
+    <!-- MEUS PEDIDOS (Client) -->
+    <section id="panel-meus-pedidos" class="hidden">
+      <button onclick="switchPanel('cliente')" class="flex items-center gap-1 text-accent mb-4 font-medium">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar
+      </button>
+      <h2 class="text-xl font-bold text-dark mb-4">📦 Meus Pedidos</h2>
+      <div id="my-orders-list" class="space-y-3"></div>
+      <div id="my-orders-empty" class="text-center py-8 text-gray-400">
+        Nenhum pedido encontrado. Faça login para acompanhar.
+      </div>
+    </section>
+
+    <!-- ADMIN PANEL -->
+    <section id="panel-admin" class="hidden">
+      <div id="admin-login" class="max-w-sm mx-auto">
+        <div class="bg-white rounded-2xl shadow-md p-6">
+          <h2 data-template-id="admin-login-title" class="canva-text text-xl font-bold text-center mb-4"></h2>
+          <form id="login-form" class="space-y-3">
+            <input id="login-email" type="email" required placeholder="Email" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <input id="login-senha" type="password" required placeholder="Senha" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+            <button type="submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
+          </form>
+          <p id="login-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
+        </div>
+      </div>
+      <div id="admin-dashboard" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-dark">Painel Admin</h2>
+          <button id="btn-logout" class="text-sm text-accent font-medium">Sair</button>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+            <p class="text-2xl font-bold text-accent" id="stat-total">0</p>
+            <p class="text-xs text-gray-500">Total Pedidos</p>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+            <p class="text-2xl font-bold text-yellow-500" id="stat-pendentes">0</p>
+            <p class="text-xs text-gray-500">Pendentes</p>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+            <p class="text-2xl font-bold text-green-500" id="stat-concluidos">0</p>
+            <p class="text-xs text-gray-500">Concluídos</p>
+          </div>
+          <div class="bg-white rounded-xl p-4 shadow-sm text-center">
+            <p class="text-2xl font-bold text-accent" id="stat-faturamento">R$ 0</p>
+            <p class="text-xs text-gray-500">Faturamento</p>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-4 overflow-x-auto">
+          <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white" data-tab="produtos">Produtos</button>
+          <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="pedidos">Pedidos</button>
+          <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="bairros">📍 Bairros</button>
+          <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="entregadores">🛵 Entregadores</button>
+        </div>
+
+        <!-- TAB PRODUTOS -->
+        <div id="tab-produtos">
+          <button id="btn-add-product" class="mb-4 flex items-center gap-1 bg-accent text-white px-4 py-2 rounded-xl font-medium text-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Novo Produto
+          </button>
+          <div id="admin-products" class="space-y-3"></div>
+        </div>
+
+        <!-- TAB PEDIDOS -->
+        <div id="tab-pedidos" class="hidden">
+          <div id="admin-orders" class="space-y-3"></div>
+          <div id="orders-empty" class="text-center py-8 text-gray-400">Nenhum pedido ainda</div>
+        </div>
+
+        <!-- TAB BAIRROS -->
+        <div id="tab-bairros" class="hidden">
+          <p class="text-xs text-gray-400 mb-3">Cadastre os bairros atendidos e a taxa de entrega de cada um</p>
+          <button id="btn-add-bairro" class="mb-4 flex items-center gap-1 bg-accent text-white px-4 py-2 rounded-xl font-medium text-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Bairro
+          </button>
+          <div id="admin-bairros" class="space-y-3"></div>
+          <div id="bairros-empty" class="text-center py-8 text-gray-400">Nenhum bairro cadastrado ainda</div>
+        </div>
+
+        <!-- TAB ENTREGADORES -->
+        <div id="tab-entregadores" class="hidden">
+          <p class="text-xs text-gray-400 mb-3">Entregadores cadastrados — aprove ou bloqueie o acesso</p>
+          <div id="admin-entregadores" class="space-y-3"></div>
+          <div id="entregadores-empty" class="text-center py-8 text-gray-400">Nenhum entregador cadastrado ainda</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Product Modal -->
   <div id="modal-product" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
-   <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
-    <h3 id="modal-product-title" class="text-lg font-bold mb-4">Novo Produto</h3>
-    <form id="product-form" class="space-y-3"><input id="pf-emoji" type="text" placeholder="Emoji (ex: 🍓)" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-nome" type="text" required placeholder="Nome" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-descricao" type="text" placeholder="Descrição" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-preco" type="number" step="0.01" required placeholder="Preço" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-estoque" type="number" required placeholder="Estoque" class="w-full border rounded-lg px-3 py-2 text-sm"> <input type="hidden" id="pf-id">
-     <div class="flex gap-2"><button type="submit" class="flex-1 bg-accent text-white py-2 rounded-xl font-medium">Salvar</button> <button type="button" id="btn-cancel-product" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
-     </div>
-    </form>
-   </div>
-  </div><!-- Delete Confirmation Modal -->
-  <div id="modal-delete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
-   <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm text-center">
-    <p class="text-lg font-bold mb-2">Excluir pedido?</p>
-    <p class="text-sm text-gray-500 mb-4">Esta ação não pode ser desfeita.</p>
-    <div class="flex gap-2"><button id="btn-confirm-delete" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-medium">Excluir</button> <button id="btn-cancel-delete" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
+    <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
+      <h3 id="modal-product-title" class="text-lg font-bold mb-4">Novo Produto</h3>
+      <form id="product-form" class="space-y-3">
+        <input id="pf-emoji" type="text" placeholder="Emoji (ex: 🍓)" class="w-full border rounded-lg px-3 py-2 text-sm">
+        <input id="pf-nome" type="text" required placeholder="Nome" class="w-full border rounded-lg px-3 py-2 text-sm">
+        <input id="pf-descricao" type="text" placeholder="Descrição" class="w-full border rounded-lg px-3 py-2 text-sm">
+        <input id="pf-preco" type="number" step="0.01" required placeholder="Preço" class="w-full border rounded-lg px-3 py-2 text-sm">
+        <input id="pf-estoque" type="number" required placeholder="Estoque" class="w-full border rounded-lg px-3 py-2 text-sm">
+        <input type="hidden" id="pf-id">
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 bg-accent text-white py-2 rounded-xl font-medium">Salvar</button>
+          <button type="button" id="btn-cancel-product" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
+        </div>
+      </form>
     </div>
-   </div>
   </div>
+
+  <!-- Bairro Modal -->
+  <div id="modal-bairro" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+    <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm">
+      <h3 id="modal-bairro-title" class="text-lg font-bold mb-4">Novo Bairro</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">Nome do bairro *</label>
+          <input id="bf-nome" type="text" placeholder="Ex: Centro" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-dark mb-1">Taxa de entrega (R$) *</label>
+          <input id="bf-taxa" type="number" step="0.01" min="0" placeholder="Ex: 5,00" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
+        </div>
+        <input type="hidden" id="bf-id">
+        <div class="flex gap-2 mt-4">
+          <button id="btn-save-bairro" class="flex-1 bg-accent text-white py-2 rounded-xl font-medium">Salvar</button>
+          <button id="btn-cancel-bairro" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="modal-delete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
+    <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm text-center">
+      <p class="text-lg font-bold mb-2">Excluir pedido?</p>
+      <p class="text-sm text-gray-500 mb-4">Esta ação não pode ser desfeita.</p>
+      <div class="flex gap-2">
+        <button id="btn-confirm-delete" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-medium">Excluir</button>
+        <button id="btn-cancel-delete" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/_sdk/editing_sdk.js"></script>
   <script>
     const firebaseConfig = {
@@ -203,31 +385,34 @@
 
     let cart = [];
     let products = [];
+    let bairros = [];
     let orders = [];
     let currentUser = null;
     let clientUser = null;
     let editingProductId = null;
+    let editingBairroId = null;
     let deleteOrderId = null;
     let previousOrderCount = 0;
     let isAdminLoggedIn = false;
+    let selectedPayment = '';
+    let needsTroco = null;
 
     const panelCliente = document.getElementById('panel-cliente');
     const panelCart = document.getElementById('panel-cart');
     const panelAdmin = document.getElementById('panel-admin');
     const panelPix = document.getElementById('panel-pix');
+    const panelWhatsapp = document.getElementById('panel-whatsapp');
     const panelMeusPedidos = document.getElementById('panel-meus-pedidos');
     const adminLogin = document.getElementById('admin-login');
     const adminDashboard = document.getElementById('admin-dashboard');
     const btnCart = document.getElementById('btn-cart');
 
-    // Audio notification (alta e com pelo menos 3 segundos de duração)
+    // Audio
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playNotification() {
       const masterGain = audioCtx.createGain();
       masterGain.connect(audioCtx.destination);
-      masterGain.gain.value = 1; // volume máximo
-
-      // Toca 5 "bips" duplos (alto/agudo) espaçados ao longo de ~3.2s
+      masterGain.gain.value = 1;
       const beepStarts = [0, 0.65, 1.3, 1.95, 2.6];
       beepStarts.forEach(startOffset => {
         const t0 = audioCtx.currentTime + startOffset;
@@ -235,16 +420,14 @@
           const t = t0 + noteOffset;
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.type = 'square'; // som mais alto e penetrante que sine
-          osc.frequency.setValueAtTime(noteOffset === 0 ? 1046 : 1318, t); // dó/mi agudos
+          osc.connect(gain); gain.connect(masterGain);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(noteOffset === 0 ? 1046 : 1318, t);
           gain.gain.setValueAtTime(0, t);
           gain.gain.linearRampToValueAtTime(0.9, t + 0.02);
           gain.gain.setValueAtTime(0.9, t + 0.18);
           gain.gain.linearRampToValueAtTime(0, t + 0.22);
-          osc.start(t);
-          osc.stop(t + 0.25);
+          osc.start(t); osc.stop(t + 0.25);
         });
       });
     }
@@ -257,17 +440,11 @@
       setTimeout(() => t.remove(), 3000);
     }
 
-    // Navigation
-    document.getElementById('btn-cliente').addEventListener('click', () => switchPanel('cliente'));
-    document.getElementById('btn-admin').addEventListener('click', () => switchPanel('admin'));
-    document.getElementById('btn-cart').addEventListener('click', () => showCart());
-    document.getElementById('btn-back-shop').addEventListener('click', () => switchPanel('cliente'));
-    document.getElementById('btn-meus-pedidos').addEventListener('click', () => switchPanel('meus-pedidos'));
-
     function switchPanel(panel) {
       panelCliente.classList.toggle('hidden', panel !== 'cliente');
       panelCart.classList.add('hidden');
       panelPix.classList.toggle('hidden', panel !== 'pix');
+      panelWhatsapp.classList.toggle('hidden', panel !== 'whatsapp');
       panelAdmin.classList.toggle('hidden', panel !== 'admin');
       panelMeusPedidos.classList.toggle('hidden', panel !== 'meus-pedidos');
       btnCart.classList.toggle('hidden', panel !== 'cliente');
@@ -280,18 +457,111 @@
       panelCliente.classList.add('hidden');
       panelCart.classList.remove('hidden');
       panelPix.classList.add('hidden');
+      panelWhatsapp.classList.add('hidden');
       panelMeusPedidos.classList.add('hidden');
       btnCart.classList.add('hidden');
       renderCart();
-      checkDeliveryNoticeFallback();
+      renderBairrosCliente();
     }
 
-    // E-mail autorizado a acessar o painel Admin
+    // Payment selection
+    window.selectPayment = function(type) {
+      selectedPayment = type;
+      ['pix','cartao','especie'].forEach(t => {
+        document.getElementById('pay-' + t).classList.toggle('selected', t === type);
+      });
+      document.getElementById('troco-section').classList.toggle('hidden', type !== 'especie');
+      if (type !== 'especie') { needsTroco = null; }
+    };
+
+    window.setTroco = function(sim) {
+      needsTroco = sim;
+      document.getElementById('troco-sim').className = `flex-1 py-2 rounded-xl text-sm font-medium transition ${sim ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      document.getElementById('troco-nao').className = `flex-1 py-2 rounded-xl text-sm font-medium transition ${!sim ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
+      document.getElementById('troco-valor-area').classList.toggle('hidden', !sim);
+      if (!sim) { document.getElementById('troco-resultado').classList.add('hidden'); }
+    };
+
+    window.calcTroco = function() {
+      const total = calcTotal();
+      const pago = parseFloat(document.getElementById('troco-valor').value) || 0;
+      const res = document.getElementById('troco-resultado');
+      if (pago > 0 && pago >= total) {
+        res.textContent = `Troco: R$ ${(pago - total).toFixed(2).replace('.', ',')}`;
+        res.classList.remove('hidden');
+      } else if (pago > 0 && pago < total) {
+        res.textContent = `Valor insuficiente! Falta R$ ${(total - pago).toFixed(2).replace('.', ',')}`;
+        res.className = 'text-sm font-bold text-red-500 mt-2';
+        res.classList.remove('hidden');
+      } else {
+        res.classList.add('hidden');
+      }
+    };
+
+    // Bairros cliente
+    function renderBairrosCliente() {
+      const container = document.getElementById('bairros-lista');
+      if (!bairros.length) {
+        container.innerHTML = '<p class="text-xs text-gray-400 col-span-2">Nenhum bairro cadastrado ainda.</p>';
+        return;
+      }
+      container.innerHTML = bairros.map(b => `
+        <button type="button" onclick="selecionarBairro('${b.id}','${esc(b.nome)}','${b.taxa}')"
+          id="bairro-btn-${b.id}"
+          class="bairro-option border-2 border-gray-200 rounded-xl p-3 text-left text-sm transition">
+          <p class="font-medium text-dark">${b.nome}</p>
+          <p class="text-xs text-accent font-bold mt-0.5">Taxa: R$ ${Number(b.taxa).toFixed(2).replace('.', ',')}</p>
+        </button>
+      `).join('');
+
+      // Re-select if already selected
+      const selId = document.querySelector('[data-sel-bairro]')?.dataset?.selBairro;
+    }
+
+    window.selecionarBairro = function(id, nome, taxa) {
+      document.querySelectorAll('.bairro-option').forEach(el => el.classList.remove('selected'));
+      const btn = document.getElementById('bairro-btn-' + id);
+      if (btn) btn.classList.add('selected');
+      document.getElementById('selected-bairro-nome').value = nome;
+      document.getElementById('selected-bairro-taxa').value = taxa;
+      // Update totals
+      renderCartTotals();
+    };
+
+    function calcTotal() {
+      const sub = cart.reduce((s, i) => {
+        const p = products.find(x => x.id === i.id);
+        return s + (p ? p.preco * i.qty : 0);
+      }, 0);
+      const taxa = parseFloat(document.getElementById('selected-bairro-taxa').value) || 0;
+      return sub + taxa;
+    }
+
+    function renderCartTotals() {
+      const sub = cart.reduce((s, i) => {
+        const p = products.find(x => x.id === i.id);
+        return s + (p ? p.preco * i.qty : 0);
+      }, 0);
+      const taxa = parseFloat(document.getElementById('selected-bairro-taxa').value) || 0;
+      const bairroNome = document.getElementById('selected-bairro-nome').value;
+      const total = sub + taxa;
+      document.getElementById('cart-subtotal').textContent = `R$ ${sub.toFixed(2).replace('.', ',')}`;
+      document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      const taxaLinha = document.getElementById('taxa-linha');
+      if (taxa > 0 && bairroNome) {
+        taxaLinha.style.display = 'flex';
+        document.getElementById('taxa-bairro-nome').textContent = bairroNome;
+        document.getElementById('cart-taxa').textContent = `R$ ${taxa.toFixed(2).replace('.', ',')}`;
+      } else {
+        taxaLinha.style.display = 'none';
+      }
+    }
+
+    // E-mail autorizado
     const ADMIN_EMAIL = 'lella-dindim@gmail.com';
 
-    // Login / Cadastro do cliente (email e senha)
-    let clientAuthMode = 'login'; // 'login' | 'cadastro'
-
+    // Auth cliente
+    let clientAuthMode = 'login';
     const clientTabLogin = document.getElementById('client-tab-login');
     const clientTabCadastro = document.getElementById('client-tab-cadastro');
     const clientNomeInput = document.getElementById('client-nome');
@@ -318,8 +588,7 @@
       clientAuthError.classList.add('hidden');
       if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
         clientAuthError.textContent = 'Use a área Admin para esse e-mail.';
-        clientAuthError.classList.remove('hidden');
-        return;
+        clientAuthError.classList.remove('hidden'); return;
       }
       clientAuthSubmitBtn.disabled = true;
       try {
@@ -327,13 +596,10 @@
           if (!nome) { clientAuthError.textContent = 'Informe seu nome.'; clientAuthError.classList.remove('hidden'); clientAuthSubmitBtn.disabled = false; return; }
           const result = await auth.createUserWithEmailAndPassword(email, senha);
           await result.user.updateProfile({ displayName: nome });
-          clientUser = result.user;
-          updateClientUI();
-          showToast('Conta criada com sucesso!');
+          clientUser = result.user; updateClientUI(); showToast('Conta criada com sucesso!');
         } else {
           const result = await auth.signInWithEmailAndPassword(email, senha);
-          clientUser = result.user;
-          updateClientUI();
+          clientUser = result.user; updateClientUI();
         }
         document.getElementById('client-auth-form').reset();
       } catch (err) {
@@ -352,9 +618,7 @@
     });
 
     document.getElementById('btn-client-logout').addEventListener('click', async () => {
-      await auth.signOut();
-      clientUser = null;
-      updateClientUI();
+      await auth.signOut(); clientUser = null; updateClientUI();
     });
 
     function updateClientUI() {
@@ -364,13 +628,11 @@
       const meusPedidosBtn = document.getElementById('btn-meus-pedidos');
       if (clientUser) {
         info.textContent = `Olá, ${clientUser.displayName || clientUser.email}`;
-        authBox.classList.add('hidden');
-        loggedInfo.classList.remove('hidden');
+        authBox.classList.add('hidden'); loggedInfo.classList.remove('hidden');
         meusPedidosBtn.classList.remove('hidden');
         startClientOrderNotifications();
       } else {
-        authBox.classList.remove('hidden');
-        loggedInfo.classList.add('hidden');
+        authBox.classList.remove('hidden'); loggedInfo.classList.add('hidden');
         meusPedidosBtn.classList.add('hidden');
         stopClientOrderNotifications();
       }
@@ -378,23 +640,16 @@
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        // Apenas o e-mail definido em ADMIN_EMAIL tem acesso ao painel Admin
         if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          currentUser = user;
-          isAdminLoggedIn = true;
-          adminLogin.classList.add('hidden');
-          adminDashboard.classList.remove('hidden');
+          currentUser = user; isAdminLoggedIn = true;
+          adminLogin.classList.add('hidden'); adminDashboard.classList.remove('hidden');
           loadAdminData();
         } else {
-          clientUser = user;
-          updateClientUI();
+          clientUser = user; updateClientUI();
         }
       } else {
-        currentUser = null;
-        clientUser = null;
-        isAdminLoggedIn = false;
-        adminLogin.classList.remove('hidden');
-        adminDashboard.classList.add('hidden');
+        currentUser = null; clientUser = null; isAdminLoggedIn = false;
+        adminLogin.classList.remove('hidden'); adminDashboard.classList.add('hidden');
         updateClientUI();
       }
     });
@@ -403,6 +658,12 @@
     db.collection('produtos').where('ativo', '==', true).onSnapshot(snap => {
       products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       renderProducts();
+    });
+
+    // Bairros (realtime)
+    db.collection('bairros').orderBy('nome').onSnapshot(snap => {
+      bairros = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderAdminBairros();
     });
 
     function renderProducts() {
@@ -442,29 +703,14 @@
       btnCart.classList.remove('hidden');
     }
 
-    // Show delivery notice fallback if canva-text fields are empty
-    function checkDeliveryNoticeFallback() {
-      const title = document.querySelector('[data-template-id="delivery-title"]');
-      const text = document.querySelector('[data-template-id="delivery-text"]');
-      const fallback = document.getElementById('delivery-notice-fallback');
-      if (fallback && (!title || !title.textContent.trim()) && (!text || !text.textContent.trim())) {
-        fallback.classList.remove('hidden');
-      } else if (fallback) {
-        fallback.classList.add('hidden');
-      }
-    }
-
     function renderCart() {
       const container = document.getElementById('cart-items');
       const empty = document.getElementById('cart-empty');
-      if (!cart.length) { container.innerHTML = ''; empty.classList.remove('hidden'); document.getElementById('cart-total').textContent = 'R$ 0,00'; return; }
+      if (!cart.length) { container.innerHTML = ''; empty.classList.remove('hidden'); renderCartTotals(); return; }
       empty.classList.add('hidden');
-      let total = 0;
       container.innerHTML = cart.map(item => {
         const p = products.find(x => x.id === item.id);
         if (!p) return '';
-        const sub = p.preco * item.qty;
-        total += sub;
         return `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
           <span class="text-2xl">${p.emoji || '🍧'}</span>
           <div class="flex-1"><p class="font-medium text-sm">${p.nome}</p><p class="text-xs text-gray-400">R$ ${Number(p.preco).toFixed(2).replace('.', ',')} × ${item.qty}</p></div>
@@ -475,7 +721,7 @@
           </div>
         </div>`;
       }).join('');
-      document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+      renderCartTotals();
     }
 
     function changeQty(id, delta) {
@@ -489,33 +735,96 @@
       renderCart();
     }
 
+    function esc(str) { return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
     // Order Submit
-    document.getElementById('order-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    window.finalizarPedido = async function() {
       if (!cart.length) { showToast('Carrinho vazio!', 'error'); return; }
       const nome = document.getElementById('cliente-nome').value.trim();
       const whatsapp = document.getElementById('cliente-whatsapp').value.trim();
-      if (!nome || !whatsapp) { showToast('Preencha seus dados', 'error'); return; }
+      const endereco = document.getElementById('cliente-endereco').value.trim();
+      const referencia = document.getElementById('cliente-referencia').value.trim();
+      const bairroNome = document.getElementById('selected-bairro-nome').value;
+      const bairroTaxa = parseFloat(document.getElementById('selected-bairro-taxa').value) || 0;
+      if (!nome || !whatsapp) { showToast('Preencha nome e WhatsApp', 'error'); return; }
+      if (!bairroNome) { showToast('Selecione um bairro', 'error'); return; }
+      if (!endereco) { showToast('Informe o endereço', 'error'); return; }
+      if (!selectedPayment) { showToast('Selecione a forma de pagamento', 'error'); return; }
+      if (selectedPayment === 'especie' && needsTroco === null) { showToast('Informe se precisa de troco', 'error'); return; }
+
       const btn = document.getElementById('btn-finalizar');
       btn.disabled = true; btn.textContent = 'Enviando...';
       try {
-        const itens = cart.map(i => { const p = products.find(x => x.id === i.id); return { produtoId: i.id, nome: p?.nome, emoji: p?.emoji, qty: i.qty, preco: p?.preco }; });
-        const total = itens.reduce((s, i) => s + i.preco * i.qty, 0);
-        const orderData = { cliente: nome, whatsapp, itens, total, status: 'Pendente', dataPedido: firebase.firestore.FieldValue.serverTimestamp() };
+        const itens = cart.map(i => {
+          const p = products.find(x => x.id === i.id);
+          return { produtoId: i.id, nome: p?.nome, emoji: p?.emoji, qty: i.qty, preco: p?.preco };
+        });
+        const sub = itens.reduce((s, i) => s + i.preco * i.qty, 0);
+        const total = sub + bairroTaxa;
+
+        let trocoInfo = null;
+        if (selectedPayment === 'especie' && needsTroco) {
+          const valPago = parseFloat(document.getElementById('troco-valor').value) || 0;
+          trocoInfo = { pagaCom: valPago, troco: valPago - total };
+        }
+
+        const orderData = {
+          cliente: nome, whatsapp, endereco, referencia,
+          bairro: bairroNome, taxaEntrega: bairroTaxa,
+          itens, subtotal: sub, total, pagamento: selectedPayment,
+          troco: trocoInfo,
+          status: 'Pendente',
+          dataPedido: firebase.firestore.FieldValue.serverTimestamp()
+        };
         if (clientUser) orderData.uid = clientUser.uid;
         await db.collection('pedidos').add(orderData);
-        // Show Pix screen
-        document.getElementById('pix-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        const msg = encodeURIComponent(`Olá! Fiz um pedido no Dindim da Lella no valor de R$ ${total.toFixed(2).replace('.', ',')}. Segue o comprovante do Pix.`);
-        document.getElementById('btn-whatsapp-pix').href = `https://wa.me/5584921695039?text=${msg}`;
-        cart = [];
-        updateCartBadge();
-        document.getElementById('order-form').reset();
-        switchPanel('pix');
-        showToast('Pedido enviado! Faça o Pix 🎉');
-      } catch (err) { showToast('Erro ao enviar pedido', 'error'); }
+
+        // Reset cart
+        cart = []; updateCartBadge();
+        document.getElementById('cliente-nome').value = '';
+        document.getElementById('cliente-whatsapp').value = '';
+        document.getElementById('cliente-endereco').value = '';
+        document.getElementById('cliente-referencia').value = '';
+        document.getElementById('selected-bairro-nome').value = '';
+        document.getElementById('selected-bairro-taxa').value = '0';
+        selectedPayment = '';
+        needsTroco = null;
+
+        // Build WhatsApp message
+        const itensTxt = itens.map(i => `  ${i.emoji || ''} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}`).join('\n');
+        let msg = `🛍️ *Novo Pedido — Dindim da Lella*\n\n👤 *Cliente:* ${nome}\n📱 *WhatsApp:* ${whatsapp}\n📍 *Bairro:* ${bairroNome}\n🏠 *Endereço:* ${endereco}${referencia ? '\n📌 *Referência:* ' + referencia : ''}\n\n*Itens:*\n${itensTxt}\n\n💰 *Subtotal:* R$ ${sub.toFixed(2).replace('.', ',')}\n🛵 *Taxa de entrega:* R$ ${bairroTaxa.toFixed(2).replace('.', ',')}\n💵 *Total:* R$ ${total.toFixed(2).replace('.', ',')}`;
+        const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
+        msg += `\n💳 *Pagamento:* ${payLabels[selectedPayment] || selectedPayment}`;
+        if (trocoInfo) msg += `\n🪙 *Troco para:* R$ ${trocoInfo.pagaCom.toFixed(2).replace('.', ',')} → Troco: R$ ${trocoInfo.troco.toFixed(2).replace('.', ',')}`;
+
+        const waLink = `https://wa.me/5584921695039?text=${encodeURIComponent(msg)}`;
+
+        if (selectedPayment === 'pix') {
+          document.getElementById('pix-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+          document.getElementById('btn-whatsapp-pix').href = waLink;
+          switchPanel('pix');
+        } else {
+          // cartão ou espécie — vai direto pro WhatsApp
+          const icon = selectedPayment === 'cartao' ? '💳' : '💵';
+          const title = selectedPayment === 'cartao' ? 'Pagamento no cartão' : 'Pagamento em dinheiro';
+          document.getElementById('ws-icon').textContent = icon;
+          document.getElementById('ws-title').textContent = title;
+          document.getElementById('ws-desc').textContent = 'Clique abaixo para enviar seu pedido pelo WhatsApp';
+          document.getElementById('ws-resumo').innerHTML = `
+            <p><strong>Cliente:</strong> ${nome}</p>
+            <p><strong>Bairro:</strong> ${bairroNome}</p>
+            <p><strong>Endereço:</strong> ${endereco}</p>
+            ${referencia ? `<p><strong>Referência:</strong> ${referencia}</p>` : ''}
+            <p><strong>Total:</strong> R$ ${total.toFixed(2).replace('.', ',')}</p>
+            ${trocoInfo ? `<p><strong>Troco para:</strong> R$ ${trocoInfo.pagaCom.toFixed(2).replace('.', ',')} → R$ ${trocoInfo.troco.toFixed(2).replace('.', ',')}</p>` : ''}
+          `;
+          document.getElementById('btn-whatsapp-direto').href = waLink;
+          switchPanel('whatsapp');
+        }
+        showToast('Pedido enviado! 🎉');
+      } catch (err) { showToast('Erro ao enviar pedido', 'error'); console.error(err); }
       btn.disabled = false; btn.textContent = 'Finalizar Pedido';
-    });
+    };
 
     function copyPix() {
       navigator.clipboard.writeText('84921695039').then(() => showToast('Chave copiada!')).catch(() => showToast('Erro ao copiar', 'error'));
@@ -523,10 +832,8 @@
 
     // My Orders (Client)
     let unsubscribeMyOrders = null;
-    let knownOrderStatuses = {}; // track status per order id to detect changes
-    let clientOrdersLoaded = false; // avoid notifying on first load
-
-    // Always listen to client's orders in background (for notifications even outside "Meus Pedidos" panel)
+    let knownOrderStatuses = {};
+    let clientOrdersLoaded = false;
     let unsubscribeClientOrdersBackground = null;
 
     function startClientOrderNotifications() {
@@ -537,78 +844,60 @@
         'Entregue': '📦 Seu pedido foi entregue!'
       };
       unsubscribeClientOrdersBackground = db.collection('pedidos').where('uid', '==', clientUser.uid).onSnapshot(snap => {
-        if (!clientOrdersLoaded) {
-          // First load: just record statuses
-          snap.docs.forEach(d => { knownOrderStatuses[d.id] = d.data().status; });
-          clientOrdersLoaded = true;
-          return;
-        }
-        snap.docChanges().forEach(change => {
-          if (change.type === 'modified') {
-            const newStatus = change.doc.data().status;
-            const oldStatus = knownOrderStatuses[change.doc.id];
-            if (newStatus !== oldStatus && statusMessages[newStatus]) {
-              showToast(statusMessages[newStatus], 'success');
-              try { playNotification(); } catch(e) {}
-            }
+        if (!clientOrdersLoaded) { clientOrdersLoaded = true; snap.docs.forEach(d => { knownOrderStatuses[d.id] = d.data().status; }); return; }
+        snap.docs.forEach(d => {
+          const newStatus = d.data().status;
+          if (knownOrderStatuses[d.id] !== newStatus && statusMessages[newStatus]) {
+            showToast(statusMessages[newStatus], 'success');
           }
-          knownOrderStatuses[change.doc.id] = change.doc.data().status;
+          knownOrderStatuses[d.id] = newStatus;
         });
       });
     }
 
     function stopClientOrderNotifications() {
-      if (unsubscribeClientOrdersBackground) {
-        unsubscribeClientOrdersBackground();
-        unsubscribeClientOrdersBackground = null;
-      }
-      knownOrderStatuses = {};
-      clientOrdersLoaded = false;
+      if (unsubscribeClientOrdersBackground) { unsubscribeClientOrdersBackground(); unsubscribeClientOrdersBackground = null; }
+      clientOrdersLoaded = false; knownOrderStatuses = {};
     }
 
     function loadMyOrders() {
+      if (!clientUser) { document.getElementById('my-orders-empty').classList.remove('hidden'); return; }
+      if (unsubscribeMyOrders) unsubscribeMyOrders();
       const list = document.getElementById('my-orders-list');
       const empty = document.getElementById('my-orders-empty');
-      if (unsubscribeMyOrders) { unsubscribeMyOrders(); unsubscribeMyOrders = null; }
-      if (!clientUser) { list.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = 'Faça login para ver seus pedidos.'; return; }
-      list.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Carregando pedidos...</p>';
-      empty.classList.add('hidden');
-      // Sem orderBy na consulta para não depender de índice composto no Firestore; ordenamos no código.
-      unsubscribeMyOrders = db.collection('pedidos').where('uid', '==', clientUser.uid).onSnapshot(snap => {
-        let myOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        myOrders.sort((a, b) => (b.dataPedido?.toMillis?.() || 0) - (a.dataPedido?.toMillis?.() || 0));
-        if (!myOrders.length) { list.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = 'Você ainda não fez nenhum pedido.'; return; }
+      const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
+      const statusIcons = { Pendente: '⏳', Confirmado: '✅', 'Saiu para Entrega': '🚀', Entregue: '📦', Cancelado: '❌' };
+      const statusSteps = ['Pendente', 'Confirmado', 'Saiu para Entrega', 'Entregue'];
+      unsubscribeMyOrders = db.collection('pedidos').where('uid', '==', clientUser.uid).orderBy('dataPedido', 'desc').onSnapshot(snap => {
+        const myOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (!myOrders.length) { list.innerHTML = ''; empty.classList.remove('hidden'); return; }
         empty.classList.add('hidden');
-        const statusIcons = { Pendente: '⏳', Confirmado: '✅', 'Saiu para Entrega': '🚀', Entregue: '📦', Cancelado: '❌' };
-        const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
-        const statusSteps = ['Pendente', 'Confirmado', 'Saiu para Entrega', 'Entregue'];
         list.innerHTML = myOrders.map(o => {
           const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
           const stepIndex = statusSteps.indexOf(o.status);
           const isCancelado = o.status === 'Cancelado';
           const progressBar = !isCancelado ? `
             <div class="flex items-center gap-1 my-3">
-              ${statusSteps.map((s, i) => `
-                <div class="flex-1 h-1.5 rounded-full ${i <= stepIndex ? 'bg-accent' : 'bg-gray-200'}"></div>
-              `).join('')}
+              ${statusSteps.map((s, i) => `<div class="flex-1 h-1.5 rounded-full ${i <= stepIndex ? 'bg-accent' : 'bg-gray-200'}"></div>`).join('')}
             </div>
             <div class="flex justify-between text-[10px] text-gray-400 mb-1">
               <span>Pedido</span><span>Confirmado</span><span>A caminho</span><span>Entregue</span>
             </div>` : '';
+          const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
           return `<div class="bg-white rounded-xl p-4 shadow-sm">
             <div class="flex justify-between items-center mb-2">
               <span class="text-xs text-gray-400">${date}</span>
               <span class="text-[11px] px-2 py-0.5 rounded-full font-medium ${statusColors[o.status] || ''}">${statusIcons[o.status] || ''} ${o.status}</span>
             </div>
             <div class="text-sm text-gray-600 mb-1">${(o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ')}</div>
+            ${o.bairro ? `<p class="text-xs text-gray-400">📍 ${o.bairro} • 🏠 ${o.endereco || ''}</p>` : ''}
             <p class="font-bold text-accent text-sm mb-1">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</p>
+            ${o.pagamento ? `<p class="text-xs text-gray-400">${payLabels[o.pagamento] || o.pagamento}</p>` : ''}
             ${progressBar}
           </div>`;
         }).join('');
       }, err => {
-        console.error('Erro ao carregar meus pedidos:', err.code, err.message);
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
+        list.innerHTML = ''; empty.classList.remove('hidden');
         empty.textContent = 'Não foi possível carregar seus pedidos agora.';
       });
     }
@@ -620,8 +909,7 @@
       const senha = document.getElementById('login-senha').value;
       if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
         document.getElementById('login-error').textContent = 'Acesso restrito ao administrador.';
-        document.getElementById('login-error').classList.remove('hidden');
-        return;
+        document.getElementById('login-error').classList.remove('hidden'); return;
       }
       try {
         await auth.signInWithEmailAndPassword(email, senha);
@@ -643,10 +931,8 @@
       loadEntregadores();
       db.collection('pedidos').orderBy('dataPedido', 'desc').onSnapshot(snap => {
         const newOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Notification sound for new orders
         if (isAdminLoggedIn && newOrders.length > previousOrderCount && previousOrderCount > 0) {
-          playNotification();
-          showToast('🔔 Novo pedido recebido!', 'warning');
+          playNotification(); showToast('🔔 Novo pedido recebido!', 'warning');
         }
         previousOrderCount = newOrders.length;
         orders = newOrders;
@@ -683,17 +969,27 @@
       const empty = document.getElementById('orders-empty');
       if (!orders.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
+      const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
+      const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
       container.innerHTML = orders.map(o => {
         const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
-        const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
         return `<div class="bg-white rounded-xl p-4 shadow-sm">
           <div class="flex justify-between items-start mb-2">
-            <div><p class="font-bold text-sm">${o.cliente}</p><p class="text-xs text-gray-400">${o.whatsapp} • ${date}</p></div>
+            <div>
+              <p class="font-bold text-sm">${o.cliente}</p>
+              <p class="text-xs text-gray-400">${o.whatsapp} • ${date}</p>
+            </div>
             <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[o.status] || ''}">${o.status}</span>
           </div>
-          <div class="text-xs text-gray-500 mb-2">${(o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ')}</div>
+          <div class="text-xs text-gray-500 mb-1">${(o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ')}</div>
+          ${o.bairro ? `<p class="text-xs text-gray-400 mb-1">📍 <strong>${o.bairro}</strong> • Taxa: R$ ${Number(o.taxaEntrega || 0).toFixed(2).replace('.', ',')}</p>` : ''}
+          ${o.endereco ? `<p class="text-xs text-gray-400 mb-1">🏠 ${o.endereco}${o.referencia ? ' • 📌 ' + o.referencia : ''}</p>` : ''}
+          ${o.pagamento ? `<p class="text-xs text-gray-400 mb-2">${payLabels[o.pagamento] || o.pagamento}${o.troco ? ' • Troco p/ R$ ' + Number(o.troco.pagaCom).toFixed(2).replace('.',',') : ''}</p>` : ''}
           <div class="flex justify-between items-center">
-            <span class="font-bold text-accent text-sm">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</span>
+            <div>
+              <span class="text-xs text-gray-400">Sub: R$ ${Number(o.subtotal || 0).toFixed(2).replace('.', ',')}</span>
+              <span class="font-bold text-accent text-sm ml-2">Total: R$ ${Number(o.total).toFixed(2).replace('.', ',')}</span>
+            </div>
             <div class="flex gap-1 flex-wrap">
               ${o.status === 'Pendente' ? `<button onclick="updateOrder('${o.id}','Confirmado')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded-lg">Confirmar</button><button onclick="updateOrder('${o.id}','Cancelado')" class="text-[10px] bg-gray-300 text-dark px-2 py-1 rounded-lg">Cancelar</button>` : ''}
               ${o.status === 'Confirmado' ? `<button onclick="updateOrder('${o.id}','Saiu para Entrega')" class="text-[10px] bg-purple-500 text-white px-2 py-1 rounded-lg">Saiu Entrega</button>` : ''}
@@ -718,23 +1014,18 @@
       } catch (err) { showToast('Erro ao atualizar', 'error'); }
     }
 
-    // Delete order
     function confirmDeleteOrder(id) {
       deleteOrderId = id;
       document.getElementById('modal-delete').classList.remove('hidden');
     }
     document.getElementById('btn-cancel-delete').addEventListener('click', () => {
-      document.getElementById('modal-delete').classList.add('hidden');
-      deleteOrderId = null;
+      document.getElementById('modal-delete').classList.add('hidden'); deleteOrderId = null;
     });
     document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
       if (!deleteOrderId) return;
-      try {
-        await db.collection('pedidos').doc(deleteOrderId).delete();
-        showToast('Pedido excluído!');
-      } catch (err) { showToast('Erro ao excluir', 'error'); }
-      document.getElementById('modal-delete').classList.add('hidden');
-      deleteOrderId = null;
+      try { await db.collection('pedidos').doc(deleteOrderId).delete(); showToast('Pedido excluído!'); }
+      catch (err) { showToast('Erro ao excluir', 'error'); }
+      document.getElementById('modal-delete').classList.add('hidden'); deleteOrderId = null;
     });
 
     // Product CRUD
@@ -745,11 +1036,7 @@
       document.getElementById('pf-id').value = '';
       document.getElementById('modal-product').classList.remove('hidden');
     });
-
-    document.getElementById('btn-cancel-product').addEventListener('click', () => {
-      document.getElementById('modal-product').classList.add('hidden');
-    });
-
+    document.getElementById('btn-cancel-product').addEventListener('click', () => { document.getElementById('modal-product').classList.add('hidden'); });
     window.editProduct = async (id) => {
       const doc = await db.collection('produtos').doc(id).get();
       if (!doc.exists) return;
@@ -764,11 +1051,9 @@
       document.getElementById('pf-id').value = id;
       document.getElementById('modal-product').classList.remove('hidden');
     };
-
     window.deleteProduct = async (id) => {
       try { await db.collection('produtos').doc(id).update({ ativo: false }); showToast('Produto removido'); } catch (e) { showToast('Erro', 'error'); }
     };
-
     document.getElementById('product-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = { emoji: document.getElementById('pf-emoji').value, nome: document.getElementById('pf-nome').value, descricao: document.getElementById('pf-descricao').value, preco: parseFloat(document.getElementById('pf-preco').value), estoque: parseInt(document.getElementById('pf-estoque').value), ativo: true };
@@ -780,6 +1065,64 @@
       } catch (err) { showToast('Erro ao salvar', 'error'); }
     });
 
+    // Bairros CRUD (Admin)
+    document.getElementById('btn-add-bairro').addEventListener('click', () => {
+      editingBairroId = null;
+      document.getElementById('modal-bairro-title').textContent = 'Novo Bairro';
+      document.getElementById('bf-nome').value = '';
+      document.getElementById('bf-taxa').value = '';
+      document.getElementById('bf-id').value = '';
+      document.getElementById('modal-bairro').classList.remove('hidden');
+    });
+    document.getElementById('btn-cancel-bairro').addEventListener('click', () => { document.getElementById('modal-bairro').classList.add('hidden'); });
+    document.getElementById('btn-save-bairro').addEventListener('click', async () => {
+      const nome = document.getElementById('bf-nome').value.trim();
+      const taxa = parseFloat(document.getElementById('bf-taxa').value);
+      if (!nome || isNaN(taxa) || taxa < 0) { showToast('Preencha nome e taxa válida', 'error'); return; }
+      try {
+        if (editingBairroId) {
+          await db.collection('bairros').doc(editingBairroId).update({ nome, taxa });
+        } else {
+          await db.collection('bairros').add({ nome, taxa, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+        document.getElementById('modal-bairro').classList.add('hidden');
+        showToast('Bairro salvo!');
+      } catch (err) { showToast('Erro ao salvar bairro', 'error'); }
+    });
+    window.editBairro = async (id) => {
+      const doc = await db.collection('bairros').doc(id).get();
+      if (!doc.exists) return;
+      const b = doc.data();
+      editingBairroId = id;
+      document.getElementById('modal-bairro-title').textContent = 'Editar Bairro';
+      document.getElementById('bf-nome').value = b.nome || '';
+      document.getElementById('bf-taxa').value = b.taxa || 0;
+      document.getElementById('bf-id').value = id;
+      document.getElementById('modal-bairro').classList.remove('hidden');
+    };
+    window.deleteBairro = async (id) => {
+      if (!confirm('Excluir este bairro?')) return;
+      try { await db.collection('bairros').doc(id).delete(); showToast('Bairro removido'); } catch (e) { showToast('Erro', 'error'); }
+    };
+
+    function renderAdminBairros() {
+      const container = document.getElementById('admin-bairros');
+      const empty = document.getElementById('bairros-empty');
+      if (!bairros.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      container.innerHTML = bairros.map(b => `
+        <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
+          <span class="text-xl">📍</span>
+          <div class="flex-1">
+            <p class="font-medium text-sm">${b.nome}</p>
+            <p class="text-xs text-accent font-bold">Taxa: R$ ${Number(b.taxa).toFixed(2).replace('.', ',')}</p>
+          </div>
+          <button onclick="editBairro('${b.id}')" class="text-accent text-xs font-medium">Editar</button>
+          <button onclick="deleteBairro('${b.id}')" class="text-red-400 text-xs font-medium">Excluir</button>
+        </div>
+      `).join('');
+    }
+
     // Admin tabs
     document.querySelectorAll('.admin-tab').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -787,6 +1130,7 @@
         btn.className = 'admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white';
         document.getElementById('tab-produtos').classList.toggle('hidden', btn.dataset.tab !== 'produtos');
         document.getElementById('tab-pedidos').classList.toggle('hidden', btn.dataset.tab !== 'pedidos');
+        document.getElementById('tab-bairros').classList.toggle('hidden', btn.dataset.tab !== 'bairros');
         document.getElementById('tab-entregadores').classList.toggle('hidden', btn.dataset.tab !== 'entregadores');
       });
     });
@@ -826,7 +1170,14 @@
       } catch (err) { showToast('Erro ao atualizar', 'error'); }
     };
 
+    // Nav buttons
+    document.getElementById('btn-cliente').addEventListener('click', () => switchPanel('cliente'));
+    document.getElementById('btn-admin').addEventListener('click', () => switchPanel('admin'));
+    document.getElementById('btn-meus-pedidos').addEventListener('click', () => switchPanel('meus-pedidos'));
+    document.getElementById('btn-cart').addEventListener('click', showCart);
+    document.getElementById('btn-back-shop').addEventListener('click', () => switchPanel('cliente'));
+
     lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0f0679b11c5ef81',t:'MTc4MjAxNzU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
