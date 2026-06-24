@@ -772,14 +772,26 @@
           cliente: nome, whatsapp, endereco, referencia,
           bairro: bairroNome, taxaEntrega: bairroTaxa,
           itens, subtotal: sub, total, pagamento: selectedPayment,
-          troco: trocoInfo,
           status: 'Pendente',
           dataPedido: firebase.firestore.FieldValue.serverTimestamp()
         };
+        if (trocoInfo) orderData.troco = trocoInfo;
         if (clientUser) orderData.uid = clientUser.uid;
         await db.collection('pedidos').add(orderData);
 
-        // Reset cart
+        // Captura pagamento antes de resetar
+        const pagamentoFinal = selectedPayment;
+
+        // Build WhatsApp message
+        const itensTxt = itens.map(i => `  ${i.emoji || ''} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}`).join('\n');
+        const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
+        let msg = `🛍️ *Novo Pedido — Dindim da Lella*\n\n👤 *Cliente:* ${nome}\n📱 *WhatsApp:* ${whatsapp}\n📍 *Bairro:* ${bairroNome}\n🏠 *Endereço:* ${endereco}${referencia ? '\n📌 *Referência:* ' + referencia : ''}\n\n*Itens:*\n${itensTxt}\n\n💰 *Subtotal:* R$ ${sub.toFixed(2).replace('.', ',')}\n🛵 *Taxa de entrega:* R$ ${bairroTaxa.toFixed(2).replace('.', ',')}\n💵 *Total:* R$ ${total.toFixed(2).replace('.', ',')}`;
+        msg += `\n💳 *Pagamento:* ${payLabels[pagamentoFinal] || pagamentoFinal}`;
+        if (trocoInfo) msg += `\n🪙 *Troco para:* R$ ${trocoInfo.pagaCom.toFixed(2).replace('.', ',')} → Troco: R$ ${trocoInfo.troco.toFixed(2).replace('.', ',')}`;
+
+        const waLink = `https://wa.me/5584921695039?text=${encodeURIComponent(msg)}`;
+
+        // Reset após montar a mensagem
         cart = []; updateCartBadge();
         document.getElementById('cliente-nome').value = '';
         document.getElementById('cliente-whatsapp').value = '';
@@ -787,26 +799,21 @@
         document.getElementById('cliente-referencia').value = '';
         document.getElementById('selected-bairro-nome').value = '';
         document.getElementById('selected-bairro-taxa').value = '0';
+        document.querySelectorAll('.bairro-option').forEach(el => el.classList.remove('selected'));
+        document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById('troco-section').classList.add('hidden');
         selectedPayment = '';
         needsTroco = null;
+        renderCartTotals();
 
-        // Build WhatsApp message
-        const itensTxt = itens.map(i => `  ${i.emoji || ''} ${i.nome} ×${i.qty} — R$ ${(i.preco * i.qty).toFixed(2).replace('.', ',')}`).join('\n');
-        let msg = `🛍️ *Novo Pedido — Dindim da Lella*\n\n👤 *Cliente:* ${nome}\n📱 *WhatsApp:* ${whatsapp}\n📍 *Bairro:* ${bairroNome}\n🏠 *Endereço:* ${endereco}${referencia ? '\n📌 *Referência:* ' + referencia : ''}\n\n*Itens:*\n${itensTxt}\n\n💰 *Subtotal:* R$ ${sub.toFixed(2).replace('.', ',')}\n🛵 *Taxa de entrega:* R$ ${bairroTaxa.toFixed(2).replace('.', ',')}\n💵 *Total:* R$ ${total.toFixed(2).replace('.', ',')}`;
-        const payLabels = { pix: '💰 Pix', cartao: '💳 Cartão', especie: '💵 Dinheiro' };
-        msg += `\n💳 *Pagamento:* ${payLabels[selectedPayment] || selectedPayment}`;
-        if (trocoInfo) msg += `\n🪙 *Troco para:* R$ ${trocoInfo.pagaCom.toFixed(2).replace('.', ',')} → Troco: R$ ${trocoInfo.troco.toFixed(2).replace('.', ',')}`;
-
-        const waLink = `https://wa.me/5584921695039?text=${encodeURIComponent(msg)}`;
-
-        if (selectedPayment === 'pix') {
+        if (pagamentoFinal === 'pix') {
           document.getElementById('pix-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
           document.getElementById('btn-whatsapp-pix').href = waLink;
           switchPanel('pix');
         } else {
           // cartão ou espécie — vai direto pro WhatsApp
-          const icon = selectedPayment === 'cartao' ? '💳' : '💵';
-          const title = selectedPayment === 'cartao' ? 'Pagamento no cartão' : 'Pagamento em dinheiro';
+          const icon = pagamentoFinal === 'cartao' ? '💳' : '💵';
+          const title = pagamentoFinal === 'cartao' ? 'Pagamento no cartão' : 'Pagamento em dinheiro';
           document.getElementById('ws-icon').textContent = icon;
           document.getElementById('ws-title').textContent = title;
           document.getElementById('ws-desc').textContent = 'Clique abaixo para enviar seu pedido pelo WhatsApp';
