@@ -6,8 +6,36 @@
     <title>Matrizes de Bordado Admin</title>
     <link rel="shortcut icon" href="img/icone.png" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .badge-notif {
+        position: absolute;
+        top: -8px;
+        right: -10px;
+        background: #dc2626;
+        color: white;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        line-height: 1;
+        animation: pulse-badge 1.5s infinite;
+        pointer-events: none;
+      }
+      @keyframes pulse-badge {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.18); }
+      }
+      .nav-contato-wrapper {
+        position: relative;
+        display: inline-block;
+      }
+    </style>
     <script>
-        // Script simples para alternar menu mobile
         function toggleMenu() {
           const menu = document.getElementById('mobile-menu');
           if (menu.classList.contains('hidden')) {
@@ -45,13 +73,14 @@
       </button>
       
       <!-- Menu normal -->
-          <nav class="hidden md:flex space-x-4">
+          <nav class="hidden md:flex space-x-4 items-center">
             <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
             <a href="../softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
             <a href="../matrizes-admin.html" class="text-indigo-600 font-semibold">Matrizes</a>
-            <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
-            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
-            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+            <span class="nav-contato-wrapper">
+              <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+              <span id="badge-desktop" class="badge-notif hidden">0</span>
+            </span>
           </nav>
         </div>
   
@@ -61,9 +90,10 @@
             <a href="../admin/index.html" class="hover:text-indigo-600">Início</a>
             <a href="../softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
             <a href="../matrizes-admin.html" class="text-indigo-600 font-semibold">Matrizes</a>
-          <!--  <a href="../formatacao-admin.html" class="hover:text-indigo-600">Formatação</a>
-            <a href="../cardapios-admin.html" class="hover:text-indigo-600">Cardápios</a> -->
-            <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+            <span class="nav-contato-wrapper" style="width:fit-content">
+              <a href="../painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+              <span id="badge-mobile" class="badge-notif hidden">0</span>
+            </span>
           </nav>
         </div>
       </header>
@@ -89,84 +119,72 @@
           <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">💼 Profissões - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes voltadas para representar diferentes áreas de trabalho, ideais para personalização de uniformes e brindes profissionais.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/profissoes-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🏅 Esportes - Admin</h3>
   <p class="text-gray-400 mb-4">Modelos inspirados em diversas modalidades esportivas, perfeitos para camisetas, toalhas e artigos de times ou atletas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/esportes-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🍼 Infantil - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes delicadas e divertidas para crianças e bebês, ideais para enxovais, roupinhas e lembrancinhas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/infantil-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">✝️ Religiosos - Admin</h3>
   <p class="text-gray-400 mb-4">Desenhos com símbolos de fé e espiritualidade, para personalizações com significado religioso e devocional.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/religiosos-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">❤️ Amor e Datas Especiais - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes temáticas para momentos especiais como Dia das Mães, casamentos e outras datas comemorativas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/datas-especiais-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">✍️ Frases e Palavras - Admin</h3>
   <p class="text-gray-400 mb-4">Frases inspiradoras, engraçadas ou emocionantes para dar um toque personalizado em qualquer peça bordada.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/frases-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🐶 Animais - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes com animais domésticos, selvagens ou de fazenda, ótimas para artigos infantis, decoração ou peças temáticas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/animais-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🧑‍🍳 Culinária - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes voltadas para o mundo da cozinha, ideais para aventais, panos de prato, toucas de chef e lembrancinhas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/culinaria-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🌺 Flores e Natureza - Admin</h3>
   <p class="text-gray-400 mb-4">Matrizes florais e naturais que trazem beleza e leveza para qualquer tipo de bordado decorativo.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/natureza-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">👕 Moda e Estilo - Admin</h3>
   <p class="text-gray-400 mb-4">Desenhos modernos, clássicos e cheios de estilo para quem gosta de exclusividade e identidade visual nas roupas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/moda-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">®️ Marcas</h3>
   <p class="text-gray-400 mb-4">Matrizes inspiradas em marcas famosas que todo mundo reconhece. Ideal para quem quer destacar estilo, exclusividade e personalidade nas roupas.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/marcas-admin.html" class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
 
 <div class="bg-black shadow-lg rounded-xl p-6">
   <h3 class="text-white font-semibold mb-2">🎉 Temas Diversos - Admin</h3>
   <p class="text-gray-400 mb-4">Categoria para matrizes variadas, como emojis, cultura nordestina, bandeiras e muito mais para todos os gostos.</p>
-  <!-- <p class="font-bold text-indigo-600 mb-4">R$ 00,00</p> -->
   <a href="matriz/diversos-admin.html"   class="block bg-indigo-600 text-white text-center py-2 rounded-full hover:bg-indigo-700">Ver Produtos</a>
 </div>
         </div>
@@ -178,10 +196,11 @@
     Sair
   </button>
 
-  <!-- Firebase Auth: Proteção e Logout -->
+  <!-- Firebase Auth: Proteção, Logout e Badge de mensagens -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
@@ -195,15 +214,38 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Verifica se o usuário está logado
+    const badgeDesktop = document.getElementById("badge-desktop");
+    const badgeMobile = document.getElementById("badge-mobile");
+
+    function atualizarBadge(count) {
+      [badgeDesktop, badgeMobile].forEach(b => {
+        if (count > 0) {
+          b.textContent = count > 99 ? "99+" : count;
+          b.classList.remove("hidden");
+        } else {
+          b.classList.add("hidden");
+        }
+      });
+    }
+
     onAuthStateChanged(auth, (user) => {
       if (!user) {
-        window.location.href = "/admin/login.html"; // redireciona se não estiver logado
+        window.location.href = "/admin/login.html";
+      } else {
+        // Só escuta as mensagens após confirmar autenticação
+        const contatosRef = collection(db, "contatos");
+        onSnapshot(query(contatosRef), (snapshot) => {
+          let naoLidas = 0;
+          snapshot.forEach((doc) => {
+            if (doc.data().lida !== true) naoLidas++;
+          });
+          atualizarBadge(naoLidas);
+        });
       }
     });
 
-    // Função de logout
     document.getElementById("logout").addEventListener("click", () => {
       signOut(auth).then(() => {
         window.location.href = "/admin/login.html";

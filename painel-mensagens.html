@@ -9,7 +9,6 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'AW-17422199106');
 </script>
 
@@ -17,6 +16,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lista de Contatos | Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .badge-notif {
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      background: #dc2626;
+      color: white;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      min-width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      line-height: 1;
+      animation: pulse-badge 1.5s infinite;
+      pointer-events: none;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .nav-contato-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    tr.nao-lida td {
+      background-color: #eef2ff;
+      font-weight: 600;
+    }
+  </style>
   <script>
     function toggleMenu() {
       const menu = document.getElementById('mobile-menu');
@@ -37,11 +69,14 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
-      <nav class="hidden md:flex space-x-4">
+      <nav class="hidden md:flex space-x-4 items-center">
         <a href="/admin/index.html" class="hover:text-indigo-600">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="text-indigo-600 font-semibold">Contato</a>
+        <span class="nav-contato-wrapper">
+          <a href="/painel-mensagens.html" class="text-indigo-600 font-semibold">Contato</a>
+          <span id="badge-desktop" class="badge-notif hidden">0</span>
+        </span>
       </nav>
     </div>
     <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
@@ -49,7 +84,10 @@
         <a href="/admin/index.html" class="hover:text-indigo-600">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="text-indigo-600 font-semibold">Contato</a>
+        <span class="nav-contato-wrapper" style="width:fit-content">
+          <a href="/painel-mensagens.html" class="text-indigo-600 font-semibold">Contato</a>
+          <span id="badge-mobile" class="badge-notif hidden">0</span>
+        </span>
       </nav>
     </div>
   </header>
@@ -76,7 +114,8 @@
   <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
     <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md relative">
       <h2 class="text-xl font-semibold mb-4">Mensagem do Contato</h2>
-      <p id="modalMensagem" class="whitespace-pre-wrap text-gray-700 max-h-96 overflow-y-auto"></p>      <button onclick="fecharModal()" class="mt-6 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Fechar</button>
+      <p id="modalMensagem" class="whitespace-pre-wrap text-gray-700 max-h-96 overflow-y-auto"></p>
+      <button onclick="fecharModal()" class="mt-6 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Fechar</button>
     </div>
   </div>
 
@@ -88,7 +127,10 @@
   <!-- Firebase v11 Módulo -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getFirestore, collection, orderBy, onSnapshot, query, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+    import {
+      getFirestore, collection, orderBy, onSnapshot,
+      query, doc, deleteDoc, updateDoc, getDoc, setDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -108,85 +150,141 @@
     const tbody = document.getElementById("contatoList");
     const modal = document.getElementById("modal");
     const modalMensagem = document.getElementById("modalMensagem");
+    const badgeDesktop = document.getElementById("badge-desktop");
+    const badgeMobile = document.getElementById("badge-mobile");
 
-    function abrirModal(mensagem) {
+    // ── Som de notificação gerado por Web Audio API ──────────────────────
+    function tocarNotificacao() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch (e) {
+        // silencioso se o navegador bloquear
+      }
+    }
+
+    // ── Atualiza os badges na navbar ─────────────────────────────────────
+    function atualizarBadge(count) {
+      [badgeDesktop, badgeMobile].forEach(b => {
+        if (count > 0) {
+          b.textContent = count > 99 ? "99+" : count;
+          b.classList.remove("hidden");
+        } else {
+          b.classList.add("hidden");
+        }
+      });
+      // Título da aba
+      if (count > 0) {
+        document.title = `(${count}) Lista de Contatos | Admin`;
+      } else {
+        document.title = "Lista de Contatos | Admin";
+      }
+    }
+
+    // ── Abre o modal e marca a mensagem como lida ─────────────────────────
+    function abrirModal(mensagem, docId, rowEl) {
       modalMensagem.textContent = mensagem;
       modal.classList.remove("hidden");
+      // Marca como lida no Firestore
+      if (docId) {
+        updateDoc(doc(db, "contatos", docId), { lida: true }).catch(() => {});
+      }
+      // Remove destaque visual da linha imediatamente
+      if (rowEl) rowEl.classList.remove("nao-lida");
     }
 
     function fecharModal() {
       modal.classList.add("hidden");
     }
 
-    // Autenticação
+    // ── Autenticação ─────────────────────────────────────────────────────
     onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "/admin/login.html";
-      }
+      if (!user) window.location.href = "/admin/login.html";
     });
 
-    // Botão de sair
     document.getElementById("logout").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        window.location.href = "/admin/login.html";
-      });
+      signOut(auth).then(() => { window.location.href = "/admin/login.html"; });
     });
 
-    // Carregar mensagens
+    // ── Listener de mensagens ─────────────────────────────────────────────
+    let primeiraRenderizacao = true;
+    let idsConhecidos = new Set();
+
     const contatosRef = collection(db, "contatos");
     const q = query(contatosRef, orderBy("data", "desc"));
 
     onSnapshot(q, (snapshot) => {
-  tbody.innerHTML = "";
+      tbody.innerHTML = "";
+      let naoLidas = 0;
 
-  snapshot.forEach((docSnap) => {
-    const contato = docSnap.data();
-    const data = contato.data ? new Date(contato.data).toLocaleString() : "";
-    const mensagem = contato.mensagem || 'Mensagem não encontrada.';
+      snapshot.forEach((docSnap) => {
+        const contato = docSnap.data();
+        const data = contato.data ? new Date(contato.data).toLocaleString("pt-BR") : "";
+        const mensagem = contato.mensagem || "Mensagem não encontrada.";
+        const lida = contato.lida === true;
 
-    const row = document.createElement("tr");
-    row.classList.add("hover:bg-gray-100");
+        if (!lida) naoLidas++;
 
-    // Colunas com evento de clique
-    const nomeTd = document.createElement("td");
-    nomeTd.className = "px-4 py-2 cursor-pointer";
-    nomeTd.textContent = contato.nome || '';
-    nomeTd.addEventListener("click", () => abrirModal(mensagem));
+        // Detecta mensagem nova (chegou após a primeira carga)
+        const ehNova = !primeiraRenderizacao && !idsConhecidos.has(docSnap.id) && !lida;
+        if (ehNova) tocarNotificacao();
+        idsConhecidos.add(docSnap.id);
 
-    const emailTd = document.createElement("td");
-    emailTd.className = "px-4 py-2 cursor-pointer";
-    emailTd.textContent = contato.email || '';
-    emailTd.addEventListener("click", () => abrirModal(mensagem));
+        const row = document.createElement("tr");
+        row.classList.add("hover:bg-gray-100");
+        if (!lida) row.classList.add("nao-lida");
 
-    const whatsappTd = document.createElement("td");
-    whatsappTd.className = "px-4 py-2 cursor-pointer";
-    whatsappTd.textContent = contato.whatsapp || '';
-    whatsappTd.addEventListener("click", () => abrirModal(mensagem));
+        const nomeTd = document.createElement("td");
+        nomeTd.className = "px-4 py-2 cursor-pointer";
+        nomeTd.textContent = contato.nome || "";
+        nomeTd.addEventListener("click", () => abrirModal(mensagem, docSnap.id, row));
 
-    const dataTd = document.createElement("td");
-    dataTd.className = "px-4 py-2 cursor-pointer text-sm text-gray-500";
-    dataTd.textContent = data;
-    dataTd.addEventListener("click", () => abrirModal(mensagem));
+        const emailTd = document.createElement("td");
+        emailTd.className = "px-4 py-2 cursor-pointer";
+        emailTd.textContent = contato.email || "";
+        emailTd.addEventListener("click", () => abrirModal(mensagem, docSnap.id, row));
 
-    const acoesTd = document.createElement("td");
-    acoesTd.className = "px-4 py-2";
-    const btn = document.createElement("button");
-    btn.className = "text-red-600 hover:underline";
-    btn.textContent = "Apagar";
-    btn.addEventListener("click", () => apagarMensagem(docSnap.id));
-    acoesTd.appendChild(btn);
+        const whatsappTd = document.createElement("td");
+        whatsappTd.className = "px-4 py-2 cursor-pointer";
+        whatsappTd.textContent = contato.whatsapp || "";
+        whatsappTd.addEventListener("click", () => abrirModal(mensagem, docSnap.id, row));
 
-    row.appendChild(nomeTd);
-    row.appendChild(emailTd);
-    row.appendChild(whatsappTd);
-    row.appendChild(dataTd);
-    row.appendChild(acoesTd);
+        const dataTd = document.createElement("td");
+        dataTd.className = "px-4 py-2 cursor-pointer text-sm text-gray-500";
+        dataTd.textContent = data;
+        dataTd.addEventListener("click", () => abrirModal(mensagem, docSnap.id, row));
 
-    tbody.appendChild(row);
-  });
-});
+        const acoesTd = document.createElement("td");
+        acoesTd.className = "px-4 py-2";
+        const btn = document.createElement("button");
+        btn.className = "text-red-600 hover:underline";
+        btn.textContent = "Apagar";
+        btn.addEventListener("click", () => apagarMensagem(docSnap.id));
+        acoesTd.appendChild(btn);
 
-    // Apagar mensagem
+        row.appendChild(nomeTd);
+        row.appendChild(emailTd);
+        row.appendChild(whatsappTd);
+        row.appendChild(dataTd);
+        row.appendChild(acoesTd);
+        tbody.appendChild(row);
+      });
+
+      atualizarBadge(naoLidas);
+      primeiraRenderizacao = false;
+    });
+
+    // ── Apagar mensagem ───────────────────────────────────────────────────
     window.apagarMensagem = function(id) {
       if (confirm("Tem certeza que deseja apagar essa mensagem?")) {
         deleteDoc(doc(db, "contatos", id))
@@ -199,13 +297,11 @@
     };
 
     // Fecha modal ao clicar fora
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) fecharModal();
-});
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) fecharModal();
+    });
 
-// Expor para o botão conseguir usar
-window.fecharModal = fecharModal;
-
+    window.fecharModal = fecharModal;
   </script>
 
   <!-- Rodapé -->

@@ -19,6 +19,39 @@
       });
     }
   </script>
+
+  <style>
+  .badge-notif {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #dc2626;
+    color: white;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
+    animation: pulse-badge 1.5s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+
+  .nav-contato-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+</style>
+
 </head>
 <body class="bg-gray-50 text-gray-800">
 
@@ -38,7 +71,10 @@
         <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+        <span class="nav-contato-wrapper">
+  <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+  <span id="badge-desktop" class="badge-notif hidden">0</span>
+</span>
       </nav>
     </div>
     <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
@@ -46,7 +82,10 @@
         <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+        <span class="nav-contato-wrapper" style="width:fit-content">
+  <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+  <span id="badge-mobile" class="badge-notif hidden">0</span>
+</span>
       </nav>
     </div>
   </header>
@@ -635,36 +674,103 @@
 
   <!-- Firebase Auth: Proteção e Logout -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
-      authDomain: "mayconbrown-bda8c.firebaseapp.com",
-      projectId: "mayconbrown-bda8c",
-      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
-      messagingSenderId: "226624962636",
-      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
-      measurementId: "G-Y1BTTK576V"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+    authDomain: "mayconbrown-bda8c.firebaseapp.com",
+    projectId: "mayconbrown-bda8c",
+    storageBucket: "mayconbrown-bda8c.firebasestorage.app",
+    messagingSenderId: "226624962636",
+    appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+    measurementId: "G-Y1BTTK576V"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    // Verifica se o usuário está logado
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "/admin/login.html"; // redireciona se não estiver logado
+  const badgeDesktop = document.getElementById("badge-desktop");
+  const badgeMobile = document.getElementById("badge-mobile");
+
+  function atualizarBadge(count) {
+    [badgeDesktop, badgeMobile].forEach(b => {
+      if (count > 0) {
+        b.textContent = count > 99 ? "99+" : count;
+        b.classList.remove("hidden");
+      } else {
+        b.classList.add("hidden");
       }
     });
+  }
 
-    // Função de logout
-    document.getElementById("logout").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        window.location.href = "/admin/login.html";
+  let primeiraRenderizacao = true;
+let idsConhecidos = new Set();
+
+function tocarNotificacao() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
+}
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "/admin/login.html";
+    } else {
+
+      const contatosRef = collection(db, "contatos");
+
+      onSnapshot(query(contatosRef), (snapshot) => {
+        let naoLidas = 0;
+
+        snapshot.forEach((doc) => {
+  const dados = doc.data();
+
+  if (dados.lida !== true) {
+    naoLidas++;
+  }
+
+  const ehNova =
+    !primeiraRenderizacao &&
+    !idsConhecidos.has(doc.id) &&
+    dados.lida !== true;
+
+  if (ehNova) {
+    tocarNotificacao();
+  }
+
+  idsConhecidos.add(doc.id);
+});
+
+        atualizarBadge(naoLidas);
+        primeiraRenderizacao = false;
       });
+    }
+  });
+
+  document.getElementById("logout").addEventListener("click", () => {
+    signOut(auth).then(() => {
+      window.location.href = "/admin/login.html";
     });
-  </script>
+  });
+</script>
 
   <script>
   // Cria e adiciona a animação no <head> via JS
