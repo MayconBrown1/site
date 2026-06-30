@@ -112,7 +112,8 @@
               id="preco"
               required
               class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
-              placeholder="R$ 00,00"
+              placeholder="Ex: 10 ou 10,50"
+              inputmode="decimal"
             />
           </div>
 
@@ -126,7 +127,8 @@
     type="text"
     id="precoRevenda"
     class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200"
-    placeholder="R$ 00,00"
+    placeholder="Ex: 8 ou 8,50"
+    inputmode="decimal"
   />
 </div>
 
@@ -298,6 +300,55 @@
     let editandoId = null;
 
     // =========================================
+    // FORMATAR PREÇO (R$ 00,00)
+    // =========================================
+
+    function formatarMoeda(valor){
+
+      if(!valor) return "";
+
+      let limpo = valor
+        .toString()
+        .replace("R$", "")
+        .trim()
+        .replace(/[^\d,.-]/g, "");
+
+      // se tiver vírgula, ela é o separador decimal
+      if(limpo.includes(",")){
+
+        limpo = limpo.replace(/\./g, "").replace(",", ".");
+
+      }
+
+      const numero = parseFloat(limpo);
+
+      if(isNaN(numero)) return "";
+
+      return "R$ " + numero.toFixed(2).replace(".", ",");
+
+    }
+
+    const inputPreco = document.getElementById("preco");
+
+    const inputPrecoRevenda = document.getElementById("precoRevenda");
+
+    inputPreco.addEventListener("blur", () => {
+
+      const formatado = formatarMoeda(inputPreco.value);
+
+      if(formatado) inputPreco.value = formatado;
+
+    });
+
+    inputPrecoRevenda.addEventListener("blur", () => {
+
+      const formatado = formatarMoeda(inputPrecoRevenda.value);
+
+      if(formatado) inputPrecoRevenda.value = formatado;
+
+    });
+
+    // =========================================
     // SALVAR PRODUTO
     // =========================================
 
@@ -314,9 +365,9 @@
 
         const categoria = document.getElementById("categoria").value;
 
-        const preco = document.getElementById("preco").value;
+        const preco = formatarMoeda(document.getElementById("preco").value);
 
-        const precoRevenda = document.getElementById("precoRevenda").value;
+        const precoRevenda = formatarMoeda(document.getElementById("precoRevenda").value);
 
 const minimoRevenda = document.getElementById("minimoRevenda").value;
 
