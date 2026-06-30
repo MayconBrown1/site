@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Dívidas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1521;
+    --bg-soft:#121A28;
+    --card:#161E2E;
+    --card-border:#232E42;
+    --text:#E8ECF1;
+    --muted:#8B95A7;
+    --accent:#34D399;
+    --accent-soft:rgba(52,211,153,.12);
+    --warn:#F59E0B;
+    --warn-soft:rgba(245,158,11,.12);
+    --danger:#F87171;
+    --danger-soft:rgba(248,113,113,.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(52,211,153,.07), transparent 45%),
+      radial-gradient(circle at 90% 10%, rgba(245,158,11,.05), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+  input{font-family:inherit;}
+
+  /* ---------- Auth screen ---------- */
+  #authScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .auth-box{
+    width:100%;
+    max-width:380px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius);
+    padding:32px;
+  }
+  .auth-brand{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    margin-bottom:4px;
+  }
+  .auth-brand .dot{color:var(--accent);}
+  .auth-sub{color:var(--muted);font-size:13px;margin:6px 0 24px;}
+  .tabs{display:flex;background:var(--bg-soft);border-radius:10px;padding:4px;margin-bottom:22px;}
+  .tab-btn{
+    flex:1;padding:9px 0;border-radius:8px;background:transparent;color:var(--muted);
+    font-weight:600;font-size:13.5px;transition:.15s;
+  }
+  .tab-btn.active{background:var(--accent);color:#06281c;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .field input{
+    width:100%;background:var(--bg-soft);border:1px solid var(--card-border);
+    border-radius:9px;padding:11px 12px;color:var(--text);font-size:14px;outline:none;
+  }
+  .field input:focus{border-color:var(--accent);}
+  .primary-btn{
+    width:100%;background:var(--accent);color:#06281c;font-weight:700;
+    padding:12px 0;border-radius:9px;font-size:14.5px;margin-top:6px;transition:.15s;
+  }
+  .primary-btn:hover{filter:brightness(1.08);}
+  .primary-btn:disabled{opacity:.5;cursor:default;}
+  .auth-msg{font-size:13px;margin-top:14px;text-align:center;min-height:18px;}
+  .auth-msg.err{color:var(--danger);}
+  .auth-msg.ok{color:var(--accent);}
+  .pane{display:none;}
+  .pane.active{display:block;}
+
+  /* ---------- Status (pending/denied) screen ---------- */
+  #statusScreen{
+    min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;
+  }
+  .status-box{max-width:420px;}
+  .status-icon{font-size:42px;margin-bottom:14px;}
+  .status-box h2{font-size:21px;margin-bottom:10px;}
+  .status-box p{color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:22px;}
+  .ghost-btn{
+    background:transparent;border:1px solid var(--card-border);color:var(--muted);
+    padding:10px 20px;border-radius:9px;font-size:13.5px;
+  }
+  .ghost-btn:hover{border-color:var(--accent);color:var(--text);}
+
+  /* ---------- Dashboard ---------- */
+  #dashboard{display:none;}
+  header.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;border-bottom:1px solid var(--card-border);
+    background:rgba(18,26,40,.6);position:sticky;top:0;backdrop-filter:blur(6px);z-index:5;
+  }
+  .topbar-brand{display:flex;align-items:center;gap:10px;}
+  .topbar-brand .dot{color:var(--accent);font-size:20px;}
+  .user-email{color:var(--muted);font-size:13px;}
+  .logout-btn{background:var(--bg-soft);color:var(--muted);padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid var(--card-border);}
+  .logout-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+  main{max-width:920px;margin:0 auto;padding:28px 20px 80px;}
+
+  .overview{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;}
+  .stat-card{
+    background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:18px 18px;
+  }
+  .stat-card .label{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+  .stat-card .value{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;}
+  .stat-card.paid .value{color:var(--accent);}
+  .stat-card.due .value{color:var(--warn);}
+  .stat-card.late .value{color:var(--danger);}
+
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .section-head h2{font-size:17px;}
+  .add-btn{
+    background:var(--accent-soft);color:var(--accent);border:1px solid rgba(52,211,153,.3);
+    padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:600;
+  }
+  .add-btn:hover{background:rgba(52,211,153,.2);}
+
+  #debtsList{display:flex;flex-direction:column;gap:16px;}
+  .empty-state{
+    border:1px dashed var(--card-border);border-radius:var(--radius);
+    padding:36px 20px;text-align:center;color:var(--muted);font-size:13.5px;
+  }
+
+  /* Ledger-style debt card */
+  .debt-card{
+    background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .debt-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 18px;border-bottom:1px dashed var(--card-border);
+  }
+  .debt-head h3{font-size:15.5px;}
+  .debt-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+  .debt-actions{display:flex;gap:8px;align-items:center;}
+  .icon-btn{
+    background:transparent;color:var(--muted);width:30px;height:30px;border-radius:7px;
+    display:flex;align-items:center;justify-content:center;font-size:15px;
+  }
+  .icon-btn:hover{background:var(--danger-soft);color:var(--danger);}
+
+  .installments-strip{
+    display:flex;gap:10px;padding:16px 18px;overflow-x:auto;
+  }
+  .installment{
+    flex:0 0 auto;min-width:90px;border-radius:10px;padding:10px 12px;
+    border:1px solid var(--card-border);background:var(--bg-soft);
+    display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:.12s;
+    text-align:left;
+  }
+  .installment:hover{transform:translateY(-2px);}
+  .installment .num{font-size:10.5px;color:var(--muted);letter-spacing:.04em;}
+  .installment .date{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+  .installment .tag{font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:5px;align-self:flex-start;}
+  .installment.paid{border-color:rgba(52,211,153,.4);background:var(--accent-soft);}
+  .installment.paid .tag{background:var(--accent);color:#06281c;}
+  .installment.late{border-color:rgba(248,113,113,.4);background:var(--danger-soft);}
+  .installment.late .tag{background:var(--danger);color:#2b0707;}
+  .installment.upcoming{border-color:rgba(245,158,11,.4);background:var(--warn-soft);}
+  .installment.upcoming .tag{background:var(--warn);color:#2b1d02;}
+  .installment.future .tag{background:var(--card-border);color:var(--muted);}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(5,8,14,.7);display:none;
+    align-items:center;justify-content:center;padding:20px;z-index:20;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal-box{
+    background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);
+    padding:26px;width:100%;max-width:420px;
+  }
+  .modal-box h3{font-size:17px;margin-bottom:18px;}
+  .modal-row{display:flex;gap:12px;}
+  .modal-row .field{flex:1;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions .ghost-btn{flex:1;}
+  .modal-actions .primary-btn{flex:1;margin-top:0;}
+
+  @media(max-width:600px){
+    .overview{grid-template-columns:1fr;}
+    header.topbar{padding:14px 16px;}
+    main{padding:20px 14px 70px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-brand"><h1>Controle<span class="dot">.</span></h1></div>
+    <p class="auth-sub">Organize suas dívidas sem se perder nas datas.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" id="tabLoginBtn">Entrar</button>
+      <button class="tab-btn" id="tabRegisterBtn">Criar conta</button>
+    </div>
+
+    <div class="pane active" id="paneLogin">
+      <div class="field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="voce@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="primary-btn" id="loginBtn">Entrar</button>
+    </div>
+
+    <div class="pane" id="paneRegister">
+      <div class="field"><label>E-mail</label><input type="email" id="regEmail" placeholder="voce@email.com"></div>
+      <div class="field"><label>Senha</label><input type="password" id="regPass" placeholder="mínimo 6 caracteres"></div>
+      <button class="primary-btn" id="regBtn">Criar login</button>
+    </div>
+
+    <div class="auth-msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- ============ STATUS SCREEN (pending / denied) ============ -->
+<div id="statusScreen">
+  <div class="status-box">
+    <div class="status-icon" id="statusIcon">⏳</div>
+    <h2 id="statusTitle">Cadastro em análise</h2>
+    <p id="statusText">Seu acesso foi enviado para aprovação. Assim que for liberado, você poderá entrar normalmente.</p>
+    <button class="ghost-btn" id="statusLogoutBtn">Sair</button>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dashboard">
+  <header class="topbar">
+    <div class="topbar-brand"><h1 style="font-size:18px;">Controle<span class="dot">.</span></h1></div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="user-email" id="userEmailLabel"></span>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="overview">
+      <div class="stat-card paid"><div class="label">Parcelas pagas</div><div class="value mono" id="statPaid">0</div></div>
+      <div class="stat-card due"><div class="label">Vencendo em breve</div><div class="value mono" id="statDue">0</div></div>
+      <div class="stat-card late"><div class="label">Atrasadas</div><div class="value mono" id="statLate">0</div></div>
+    </div>
+
+    <div class="section-head">
+      <h2>Suas dívidas</h2>
+      <button class="add-btn" id="openAddDebt">+ Nova dívida</button>
+    </div>
+
+    <div id="debtsList">
+      <div class="empty-state">Nenhuma dívida cadastrada ainda. Clique em "Nova dívida" para começar.</div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL: nova dívida ============ -->
+<div class="modal-overlay" id="addDebtOverlay">
+  <div class="modal-box">
+    <h3>Nova dívida</h3>
+    <div class="field"><label>Nome da dívida</label><input type="text" id="debtName" placeholder="Ex: Cartão de crédito"></div>
+    <div class="modal-row">
+      <div class="field"><label>Nº de parcelas</label><input type="number" id="debtMonths" min="1" placeholder="12"></div>
+      <div class="field"><label>Valor da parcela (opcional)</label><input type="number" id="debtValue" min="0" step="0.01" placeholder="0,00"></div>
+    </div>
+    <div class="field"><label>Data do 1º vencimento</label><input type="date" id="debtFirstDue"></div>
+    <div class="modal-actions">
+      <button class="ghost-btn" id="cancelAddDebt">Cancelar</button>
+      <button class="primary-btn" id="confirmAddDebt">Salvar dívida</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+  onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import {
+  getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where,
+  onSnapshot, updateDoc, deleteDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBzpY1K_J1ejCPzNKHOTMlcepxP7bi96ys",
+  authDomain: "controle-dividas-2a6be.firebaseapp.com",
+  projectId: "controle-dividas-2a6be",
+  storageBucket: "controle-dividas-2a6be.firebasestorage.app",
+  messagingSenderId: "200003512144",
+  appId: "1:200003512144:web:76f37d5598007e21846e55"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const SUPER_ADMIN_EMAIL = 'mayconbrown083@gmail.com';
+
+/* ---------- Elements ---------- */
+const authScreen = document.getElementById('authScreen');
+const statusScreen = document.getElementById('statusScreen');
+const dashboard = document.getElementById('dashboard');
+
+const tabLoginBtn = document.getElementById('tabLoginBtn');
+const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+const paneLogin = document.getElementById('paneLogin');
+const paneRegister = document.getElementById('paneRegister');
+const authMsg = document.getElementById('authMsg');
+
+tabLoginBtn.onclick = () => switchTab('login');
+tabRegisterBtn.onclick = () => switchTab('register');
+function switchTab(which){
+  authMsg.textContent = '';
+  authMsg.className = 'auth-msg';
+  tabLoginBtn.classList.toggle('active', which==='login');
+  tabRegisterBtn.classList.toggle('active', which==='register');
+  paneLogin.classList.toggle('active', which==='login');
+  paneRegister.classList.toggle('active', which==='register');
+}
+
+function showMsg(text, type){
+  authMsg.textContent = text;
+  authMsg.className = 'auth-msg ' + (type||'');
+}
+
+function friendlyError(code){
+  const map = {
+    'auth/invalid-email':'E-mail inválido.',
+    'auth/user-not-found':'E-mail ou senha incorretos.',
+    'auth/wrong-password':'E-mail ou senha incorretos.',
+    'auth/invalid-credential':'E-mail ou senha incorretos.',
+    'auth/email-already-in-use':'Esse e-mail já está cadastrado.',
+    'auth/weak-password':'A senha precisa ter ao menos 6 caracteres.',
+  };
+  return map[code] || 'Ocorreu um erro. Tente novamente.';
+}
+
+/* ---------- Login ---------- */
+document.getElementById('loginBtn').onclick = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if(!email || !pass){ showMsg('Preencha e-mail e senha.', 'err'); return; }
+  showMsg('Entrando...', '');
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  }catch(e){
+    showMsg(friendlyError(e.code), 'err');
+  }
+};
+
+/* ---------- Register ---------- */
+document.getElementById('regBtn').onclick = async () => {
+  const email = document.getElementById('regEmail').value.trim();
+  const pass = document.getElementById('regPass').value;
+  if(!email || !pass){ showMsg('Preencha e-mail e senha.', 'err'); return; }
+  showMsg('Criando login...', '');
+  try{
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const isSuperAdmin = (cred.user.email || '').toLowerCase() === SUPER_ADMIN_EMAIL;
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      email: cred.user.email,
+      status: isSuperAdmin ? 'approved' : 'pending',
+      isAdmin: isSuperAdmin,
+      createdAt: serverTimestamp()
+    });
+    showMsg(isSuperAdmin ? 'Conta de administrador criada!' : 'Conta criada! Aguarde a aprovação do administrador.', 'ok');
+  }catch(e){
+    showMsg(friendlyError(e.code), 'err');
+  }
+};
+
+/* ---------- Status screen logout ---------- */
+document.getElementById('statusLogoutBtn').onclick = () => signOut(auth);
+document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+/* ---------- Auth state / routing ---------- */
+let unsubscribeDebts = null;
+let currentUid = null;
+let unsubscribeUserDoc = null;
+
+onAuthStateChanged(auth, (user) => {
+  authScreen.style.display = 'none';
+  statusScreen.style.display = 'none';
+  dashboard.style.display = 'none';
+
+  if(unsubscribeDebts){ unsubscribeDebts(); unsubscribeDebts = null; }
+  if(unsubscribeUserDoc){ unsubscribeUserDoc(); unsubscribeUserDoc = null; }
+
+  if(!user){
+    authScreen.style.display = 'flex';
+    return;
+  }
+
+  // Escuta o próprio cadastro em tempo real: assim que o admin aprovar,
+  // a tela atualiza sozinha, sem precisar sair e entrar de novo.
+  unsubscribeUserDoc = onSnapshot(
+    doc(db, 'users', user.uid),
+    async (snap) => {
+      let data = snap.exists() ? snap.data() : null;
+
+      // Autocorreção: se este é o e-mail do super-admin mas o cadastro ainda
+      // não está marcado como admin/aprovado, conserta agora.
+      const isSuperAdmin = (user.email || '').toLowerCase() === SUPER_ADMIN_EMAIL;
+      if(isSuperAdmin && (!data || data.isAdmin !== true || data.status !== 'approved')){
+        try{
+          const fixed = {
+            email: user.email,
+            status: 'approved',
+            isAdmin: true,
+            createdAt: data && data.createdAt ? data.createdAt : new Date()
+          };
+          await setDoc(doc(db, 'users', user.uid), fixed, { merge: true });
+        }catch(e){ /* segue o fluxo normal abaixo se a autocorreção falhar */ }
+        return; // o próprio onSnapshot vai disparar de novo com os dados corrigidos
+      }
+
+      authScreen.style.display = 'none';
+      statusScreen.style.display = 'none';
+      dashboard.style.display = 'none';
+
+      if(!data || data.status === 'pending'){
+        statusScreen.style.display = 'flex';
+        document.getElementById('statusIcon').textContent = '⏳';
+        document.getElementById('statusTitle').textContent = 'Cadastro em análise';
+        document.getElementById('statusText').textContent = 'Seu acesso foi enviado para aprovação. Assim que for liberado, esta página atualiza sozinha.';
+        return;
+      }
+
+      if(data.status === 'denied'){
+        statusScreen.style.display = 'flex';
+        document.getElementById('statusIcon').textContent = '🚫';
+        document.getElementById('statusTitle').textContent = 'Acesso não autorizado';
+        document.getElementById('statusText').textContent = 'Seu cadastro não foi aprovado para usar esta conta. Fale com o administrador para mais informações.';
+        return;
+      }
+
+      // approved
+      currentUid = user.uid;
+      dashboard.style.display = 'block';
+      document.getElementById('userEmailLabel').textContent = data.email || user.email;
+      if(!unsubscribeDebts) watchDebts(user.uid);
+    },
+    (error) => {
+      console.error('Erro ao ler cadastro do usuário:', error);
+      statusScreen.style.display = 'flex';
+      document.getElementById('statusIcon').textContent = '⚠️';
+      document.getElementById('statusTitle').textContent = 'Não foi possível carregar sua conta';
+      document.getElementById('statusText').textContent =
+        'Código do erro: ' + (error.code || 'desconhecido') +
+        '. Verifique sua conexão e tente novamente. Se o erro continuar, avise o administrador.';
+    }
+  );
+});
+
+/* ---------- Debts ---------- */
+const debtsList = document.getElementById('debtsList');
+const statPaid = document.getElementById('statPaid');
+const statDue = document.getElementById('statDue');
+const statLate = document.getElementById('statLate');
+
+function watchDebts(uid){
+  const q = query(collection(db, 'debts'), where('userId', '==', uid));
+  unsubscribeDebts = onSnapshot(q, (querySnap) => {
+    const debts = [];
+    querySnap.forEach(d => debts.push({ id: d.id, ...d.data() }));
+    renderDebts(debts);
+  });
+}
+
+function classifyInstallment(inst){
+  if(inst.paid) return 'paid';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const due = new Date(inst.dueDate);
+  const diffDays = Math.round((due - today) / 86400000);
+  if(diffDays < 0) return 'late';
+  if(diffDays <= 7) return 'upcoming';
+  return 'future';
+}
+
+function fmtDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function renderDebts(debts){
+  let paidCount = 0, dueCount = 0, lateCount = 0;
+
+  if(debts.length === 0){
+    debtsList.innerHTML = '<div class="empty-state">Nenhuma dívida cadastrada ainda. Clique em "Nova dívida" para começar.</div>';
+    statPaid.textContent = '0'; statDue.textContent = '0'; statLate.textContent = '0';
+    return;
+  }
+
+  debtsList.innerHTML = '';
+  debts.sort((a,b) => (a.createdAtMs||0) - (b.createdAtMs||0));
+
+  debts.forEach(debt => {
+    const card = document.createElement('div');
+    card.className = 'debt-card';
+
+    const installments = debt.installments || [];
+    const paidInDebt = installments.filter(i => i.paid).length;
+
+    const head = document.createElement('div');
+    head.className = 'debt-head';
+    head.innerHTML = `
+      <div>
+        <h3>${escapeHtml(debt.nome)}</h3>
+        <div class="debt-meta">${paidInDebt}/${installments.length} parcelas pagas${debt.valorParcela ? ' · R$ ' + Number(debt.valorParcela).toFixed(2).replace('.',',') + '/mês' : ''}</div>
+      </div>
+      <div class="debt-actions">
+        <button class="icon-btn" title="Excluir dívida" data-del="${debt.id}">✕</button>
+      </div>`;
+    card.appendChild(head);
+
+    const strip = document.createElement('div');
+    strip.className = 'installments-strip';
+    installments.forEach((inst, idx) => {
+      const cls = classifyInstallment(inst);
+      if(cls === 'paid') paidCount++;
+      else if(cls === 'late') lateCount++;
+      else if(cls === 'upcoming') dueCount++;
+
+      const tagText = { paid:'PAGO', late:'ATRASADO', upcoming:'EM BREVE', future:'A VENCER' }[cls];
+      const el = document.createElement('button');
+      el.className = `installment ${cls}`;
+      el.innerHTML = `
+        <span class="num">PARCELA ${inst.numero}</span>
+        <span class="date mono">${fmtDate(inst.dueDate)}</span>
+        <span class="tag">${tagText}</span>`;
+      el.onclick = () => togglePaid(debt, idx);
+      strip.appendChild(el);
+    });
+    card.appendChild(strip);
+    debtsList.appendChild(card);
+  });
+
+  statPaid.textContent = paidCount;
+  statDue.textContent = dueCount;
+  statLate.textContent = lateCount;
+
+  document.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = () => {
+      if(confirm('Excluir esta dívida e todo o histórico de parcelas?')){
+        deleteDoc(doc(db, 'debts', btn.dataset.del));
+      }
+    };
+  });
+}
+
+async function togglePaid(debt, idx){
+  const newInstallments = (debt.installments || []).map((inst, i) =>
+    i === idx ? { ...inst, paid: !inst.paid } : inst
+  );
+  await updateDoc(doc(db, 'debts', debt.id), { installments: newInstallments });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+
+/* ---------- Add debt modal ---------- */
+const addDebtOverlay = document.getElementById('addDebtOverlay');
+document.getElementById('openAddDebt').onclick = () => {
+  document.getElementById('debtName').value = '';
+  document.getElementById('debtMonths').value = '';
+  document.getElementById('debtValue').value = '';
+  document.getElementById('debtFirstDue').value = '';
+  addDebtOverlay.classList.add('active');
+};
+document.getElementById('cancelAddDebt').onclick = () => addDebtOverlay.classList.remove('active');
+addDebtOverlay.onclick = (e) => { if(e.target === addDebtOverlay) addDebtOverlay.classList.remove('active'); };
+
+document.getElementById('confirmAddDebt').onclick = async () => {
+  const nome = document.getElementById('debtName').value.trim();
+  const months = parseInt(document.getElementById('debtMonths').value, 10);
+  const valor = document.getElementById('debtValue').value;
+  const firstDue = document.getElementById('debtFirstDue').value;
+
+  if(!nome || !months || months < 1 || !firstDue){
+    alert('Preencha o nome, o número de parcelas e a data do primeiro vencimento.');
+    return;
+  }
+
+  const installments = [];
+  const base = new Date(firstDue + 'T00:00:00');
+  for(let i = 0; i < months; i++){
+    const due = new Date(base);
+    due.setMonth(due.getMonth() + i);
+    installments.push({
+      numero: i + 1,
+      dueDate: due.toISOString().slice(0,10),
+      paid: false
+    });
+  }
+
+  await addDoc(collection(db, 'debts'), {
+    userId: currentUid,
+    nome,
+    totalMeses: months,
+    valorParcela: valor ? Number(valor) : null,
+    installments,
+    createdAt: serverTimestamp(),
+    createdAtMs: Date.now()
+  });
+
+  addDebtOverlay.classList.remove('active');
+};
+</script>
+</body>
+</html>

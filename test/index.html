@@ -1,832 +1,1004 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
- <head><script src="/_sdk/telemetry_sdk.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dindim da Lella</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#F8BBD0',
-            secondary: '#FCE4EC',
-            accent: '#E91E63',
-            dark: '#333333'
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    * { font-family: 'DM Sans', sans-serif; }
-    .toast { animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s; }
-    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes fadeOut { to { opacity: 0; } }
-    .cart-badge { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.2); } }
-  </style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
- </head>
- <body data-template-id="__page-root" class="min-h-screen">
-  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div><!-- Header -->
-  <header data-template-id="header-bg" class="canva-header sticky top-0 z-40 bg-white shadow-sm">
-   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    <h1 data-template-id="app-title" class="canva-text text-xl font-bold"></h1>
-    <div class="flex items-center gap-2"><button id="btn-cliente" class="px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white transition">Cliente</button> <button id="btn-admin" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition">Admin</button> <button id="btn-meus-pedidos" class="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark transition hidden">Meus Pedidos</button> <button id="btn-cart" class="relative p-2 rounded-full bg-secondary text-accent hidden"> <i data-lucide="shopping-bag" class="w-5 h-5"></i> <span id="cart-count" class="cart-badge absolute -top-1 -right-1 bg-accent text-white text-xs w-5 h-5 rounded-full flex items-center justify-center hidden">0</span> </button>
-    </div>
-   </div>
-  </header>
-  <main class="max-w-6xl mx-auto px-4 py-6"><!-- CUSTOMER PANEL -->
-   <section id="panel-cliente">
-    <div class="text-center mb-4">
-     <p data-template-id="welcome-text" class="canva-text text-lg"></p>
-    </div><!-- Login/Cadastro do cliente (email e senha) -->
-    <div id="client-login-area" class="max-w-sm mx-auto mb-6">
-     <div id="client-auth-box" class="bg-white rounded-2xl shadow-sm p-5">
-      <div class="flex gap-2 mb-4">
-       <button id="client-tab-login" class="flex-1 py-2 rounded-xl text-sm font-medium bg-accent text-white" data-mode="login">Entrar</button>
-       <button id="client-tab-cadastro" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-200 text-dark" data-mode="cadastro">Cadastrar</button>
-      </div>
-      <form id="client-auth-form" class="space-y-3">
-       <input id="client-nome" type="text" placeholder="Seu nome" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent hidden">
-       <input id="client-email" type="email" required placeholder="E-mail" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
-       <input id="client-senha" type="password" required placeholder="Senha (mín. 6 caracteres)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent">
-       <button type="submit" id="btn-client-auth-submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
-      </form>
-      <p id="client-auth-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
-     </div>
-     <div id="client-logged-info" class="text-center mt-3 hidden">
-      <p id="client-user-info" class="text-sm text-gray-500"></p>
-      <button id="btn-client-logout" class="text-xs text-accent mt-1">Sair</button>
-     </div>
-    </div>
-    <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-    <div id="empty-products" class="text-center py-12 text-gray-400 hidden">
-     <p>Carregando produtos...</p>
-    </div>
-   </section><!-- CART PANEL -->
-   <section id="panel-cart" class="hidden"><button id="btn-back-shop" class="flex items-center gap-1 text-accent mb-4 font-medium"> <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar às compras </button>
-    <h2 data-template-id="cart-title" class="canva-text text-xl font-bold mb-4"></h2>
-    <div id="cart-items" class="space-y-3 mb-6"></div>
-    <div id="cart-empty" class="text-center py-8 text-gray-400">
-     Seu carrinho está vazio
-    </div>
-    <div data-template-id="delivery-notice" class="canva-card border-2 border-accent rounded-xl p-4 mb-6" style="display:block!important;visibility:visible!important;border:2px solid #E91E63;border-radius:12px;padding:16px;margin-bottom:24px;background:#FCE4EC;">
-     <p data-template-id="delivery-title" class="canva-text font-bold text-center mb-2" style="display:block!important;font-weight:700;text-align:center;margin-bottom:8px;color:#333;"></p>
-     <p data-template-id="delivery-text" class="canva-text text-sm text-center leading-relaxed" style="display:block!important;font-size:0.875rem;text-align:center;line-height:1.6;color:#333;"></p>
-     <!-- Fallback: shown if canva-text fields are empty -->
-     <div id="delivery-notice-fallback" class="hidden">
-       <p class="font-bold text-center mb-2" style="color:#E91E63;">🛵 Atenção sobre a entrega</p>
-       <p class="text-sm text-center leading-relaxed">O cliente é responsável pela retirada ou pelo combinado da entrega diretamente com a vendedora.</p>
-     </div>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-4">
-     <div class="flex justify-between items-center text-lg font-bold">
-      <span>Total:</span><span id="cart-total" class="text-accent">R$ 0,00</span>
-     </div>
-    </div>
-    <form id="order-form" class="bg-white rounded-xl p-4 shadow-sm space-y-3"><label for="cliente-nome" class="block text-sm font-medium text-dark">Seu nome</label> <input id="cliente-nome" type="text" required placeholder="Nome completo" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <label for="cliente-whatsapp" class="block text-sm font-medium text-dark">WhatsApp</label> <input id="cliente-whatsapp" type="tel" required placeholder="(84) 99999-9999" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <button type="submit" id="btn-finalizar" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition disabled:opacity-50">Finalizar Pedido</button>
-    </form>
-   </section><!-- PIX PANEL -->
-   <section id="panel-pix" class="hidden">
-    <div class="max-w-sm mx-auto bg-white rounded-2xl shadow-md p-6 text-center">
-     <h2 class="text-xl font-bold text-dark mb-2">💰 Pagamento via Pix</h2>
-     <p class="text-sm text-gray-500 mb-4">Faça o pagamento para confirmar seu pedido</p>
-     <div class="bg-gray-50 rounded-xl p-4 mb-4">
-      <p class="text-xs text-gray-500 mb-1">Chave Pix (Celular):</p>
-      <p class="text-lg font-bold text-dark select-all" id="pix-key">84921695039</p><button onclick="copyPix()" class="mt-2 text-xs bg-accent text-white px-3 py-1 rounded-lg">Copiar chave</button>
-     </div>
-     <p class="text-sm font-bold text-dark mb-1">Total: <span id="pix-total" class="text-accent"></span></p>
-     <p class="text-xs text-gray-400 mb-4">Após pagar, envie o comprovante pelo WhatsApp</p><a id="btn-whatsapp-pix" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-600 transition">
-      <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
-       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.558 4.143 1.534 5.883L0 24l6.293-1.501A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-1.875 0-3.622-.508-5.127-1.392l-.368-.218-3.81.909.957-3.693-.24-.379A9.709 9.709 0 012.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75z" />
-      </svg> Enviar comprovante no WhatsApp </a> <button onclick="switchPanel('cliente')" class="mt-4 text-sm text-accent font-medium block mx-auto">Voltar à loja</button>
-    </div>
-   </section><!-- MEUS PEDIDOS (Client) -->
-   <section id="panel-meus-pedidos" class="hidden"><button onclick="switchPanel('cliente')" class="flex items-center gap-1 text-accent mb-4 font-medium"> <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar </button>
-    <h2 class="text-xl font-bold text-dark mb-4">📦 Meus Pedidos</h2>
-    <div id="my-orders-list" class="space-y-3"></div>
-    <div id="my-orders-empty" class="text-center py-8 text-gray-400">
-     Nenhum pedido encontrado. Faça login com Google para acompanhar.
-    </div>
-   </section><!-- ADMIN PANEL -->
-   <section id="panel-admin" class="hidden">
-    <div id="admin-login" class="max-w-sm mx-auto">
-     <div class="bg-white rounded-2xl shadow-md p-6">
-      <h2 data-template-id="admin-login-title" class="canva-text text-xl font-bold text-center mb-4"></h2>
-      <form id="login-form" class="space-y-3"><input id="login-email" type="email" required placeholder="Email" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <input id="login-senha" type="password" required placeholder="Senha" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"> <button type="submit" class="w-full bg-accent text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition">Entrar</button>
-      </form>
-      <p id="login-error" class="text-red-500 text-xs text-center mt-2 hidden"></p>
-     </div>
-    </div>
-    <div id="admin-dashboard" class="hidden">
-     <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-dark">Painel Admin</h2><button id="btn-logout" class="text-sm text-accent font-medium">Sair</button>
-     </div>
-     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-accent" id="stat-total">0</p>
-       <p class="text-xs text-gray-500">Total Pedidos</p>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-yellow-500" id="stat-pendentes">0</p>
-       <p class="text-xs text-gray-500">Pendentes</p>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-green-500" id="stat-concluidos">0</p>
-       <p class="text-xs text-gray-500">Concluídos</p>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm text-center">
-       <p class="text-2xl font-bold text-accent" id="stat-faturamento">R$ 0</p>
-       <p class="text-xs text-gray-500">Faturamento</p>
-      </div>
-     </div>
-     <div class="flex gap-2 mb-4 overflow-x-auto"><button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white" data-tab="produtos">Produtos</button> <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="pedidos">Pedidos</button> <button class="admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark" data-tab="entregadores">🛵 Entregadores</button>
-     </div>
-     <div id="tab-produtos"><button id="btn-add-product" class="mb-4 flex items-center gap-1 bg-accent text-white px-4 py-2 rounded-xl font-medium text-sm"><i data-lucide="plus" class="w-4 h-4"></i> Novo Produto</button>
-      <div id="admin-products" class="space-y-3"></div>
-     </div>
-     <div id="tab-pedidos" class="hidden">
-      <div id="admin-orders" class="space-y-3"></div>
-      <div id="orders-empty" class="text-center py-8 text-gray-400">
-       Nenhum pedido ainda
-      </div>
-     </div>
-     <div id="tab-entregadores" class="hidden">
-      <p class="text-xs text-gray-400 mb-3">Entregadores cadastrados — aprove ou bloqueie o acesso</p>
-      <div id="admin-entregadores" class="space-y-3"></div>
-      <div id="entregadores-empty" class="text-center py-8 text-gray-400">
-       Nenhum entregador cadastrado ainda
-      </div>
-     </div>
-    </div>
-   </section>
-  </main><!-- Product Modal -->
-  <div id="modal-product" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
-   <div class="bg-white rounded-2xl p-6 w-[90%] max-w-md max-h-[90vh] overflow-y-auto">
-    <h3 id="modal-product-title" class="text-lg font-bold mb-4">Novo Produto</h3>
-    <form id="product-form" class="space-y-3"><input id="pf-emoji" type="text" placeholder="Emoji (ex: 🍓)" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-nome" type="text" required placeholder="Nome" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-descricao" type="text" placeholder="Descrição" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-preco" type="number" step="0.01" required placeholder="Preço" class="w-full border rounded-lg px-3 py-2 text-sm"> <input id="pf-estoque" type="number" required placeholder="Estoque" class="w-full border rounded-lg px-3 py-2 text-sm"> <input type="hidden" id="pf-id">
-     <div class="flex gap-2"><button type="submit" class="flex-1 bg-accent text-white py-2 rounded-xl font-medium">Salvar</button> <button type="button" id="btn-cancel-product" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
-     </div>
-    </form>
-   </div>
-  </div><!-- Delete Confirmation Modal -->
-  <div id="modal-delete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden">
-   <div class="bg-white rounded-2xl p-6 w-[90%] max-w-sm text-center">
-    <p class="text-lg font-bold mb-2">Excluir pedido?</p>
-    <p class="text-sm text-gray-500 mb-4">Esta ação não pode ser desfeita.</p>
-    <div class="flex gap-2"><button id="btn-confirm-delete" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-medium">Excluir</button> <button id="btn-cancel-delete" class="flex-1 bg-gray-200 text-dark py-2 rounded-xl font-medium">Cancelar</button>
-    </div>
-   </div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curso: Crie sua Página de Vendas e Catálogo Online</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    min-height: 100vh;
+    color: #1e293b;
+  }
+
+  /* ===== TELA DE LOGIN ===== */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  #login-box {
+    background: #ffffff;
+    padding: 40px 32px;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+
+  #login-box h1 { font-size: 22px; color: #1e293b; margin-bottom: 8px; }
+  #login-box p { color: #64748b; font-size: 14px; margin-bottom: 24px; }
+
+  #senha-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+  }
+  #senha-input:focus { border-color: #3b82f6; }
+
+  #btn-entrar {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #btn-entrar:hover { background: #2563eb; }
+  #erro-msg { color: #ef4444; font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  /* ===== CONTEÚDO DO CURSO ===== */
+  #conteudo { display: none; }
+
+  .top-bar {
+    background: #0f172a;
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .top-bar h2 { font-size: 16px; }
+  .top-bar h2 span { color: #60a5fa; }
+  #btn-sair {
+    padding: 8px 16px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  #btn-sair:hover { background: #dc2626; }
+
+  .layout {
+    display: flex;
+    max-width: 1300px;
+    margin: 0 auto;
+    align-items: flex-start;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #fff;
+    min-height: 100vh;
+    padding: 24px 16px;
+    position: sticky;
+    top: 64px;
+    border-right: 1px solid #e2e8f0;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  #sidebar h3 { font-size: 13px; text-transform: uppercase; color: #94a3b8; margin-bottom: 12px; letter-spacing: 0.05em; }
+  #sidebar a {
+    display: block;
+    padding: 8px 10px;
+    color: #334155;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 8px;
+    margin-bottom: 2px;
+  }
+  #sidebar a:hover { background: #eff6ff; color: #2563eb; }
+
+  /* Main content */
+  main {
+    flex: 1;
+    padding: 32px 40px 100px;
+    background: #f8fafc;
+    min-height: 100vh;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #3b82f6, #1e40af);
+    color: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+  }
+  .hero h1 { font-size: 28px; margin-bottom: 12px; }
+  .hero p { font-size: 15px; opacity: 0.95; line-height: 1.6; }
+  .hero .tags { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .hero .tag { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 12px; }
+
+  section.modulo {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    scroll-margin-top: 80px;
+  }
+  section.modulo h2 {
+    font-size: 22px;
+    color: #1e3a8a;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section.modulo .subtitulo { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+  section.modulo h3 { font-size: 17px; color: #1e293b; margin: 24px 0 10px; }
+  section.modulo p { line-height: 1.7; color: #334155; margin-bottom: 12px; font-size: 15px; }
+  section.modulo ul, section.modulo ol { margin: 10px 0 16px 24px; color: #334155; line-height: 1.8; font-size: 15px; }
+  section.modulo li { margin-bottom: 4px; }
+  section.modulo strong { color: #1e293b; }
+
+  .box-dica {
+    background: #f0fdf4;
+    border-left: 4px solid #22c55e;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .box-atencao {
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .box-tarefa {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  .box-celular {
+    background: #fdf4ff;
+    border-left: 4px solid #a855f7;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+
+  .passo {
+    display: flex;
+    gap: 14px;
+    margin: 16px 0;
+    align-items: flex-start;
+  }
+  .passo .num {
+    background: #3b82f6;
+    color: #fff;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .passo .texto { font-size: 15px; line-height: 1.6; color: #334155; }
+  .passo .texto strong { color: #1e293b; }
+
+  .mockup {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 20px;
+    background: #f8fafc;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .mockup .legenda { font-size: 12px; color: #94a3b8; margin-top: 8px; }
+
+  .ferramenta-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .ferramenta-card .icone { font-size: 28px; }
+  .ferramenta-card h4 { font-size: 15px; margin-bottom: 4px; color: #1e293b; }
+  .ferramenta-card p { font-size: 13px; margin-bottom: 0; color: #64748b; }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 18px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 14px 0;
+  }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+  .codigo-titulo {
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 8px 8px 0 0;
+    margin-top: 14px;
+    margin-bottom: -14px;
+  }
+
+  table.comparativo { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  table.comparativo th, table.comparativo td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }
+  table.comparativo th { background: #f1f5f9; color: #1e293b; }
+
+  .checklist label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #334155; cursor: pointer; }
+  .checklist input { width: 18px; height: 18px; }
+
+  .grade-icones { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 12px; margin: 16px 0; }
+  .grade-icones .item { text-align: center; background: #f8fafc; border-radius: 10px; padding: 16px 10px; border: 1px solid #e2e8f0; }
+  .grade-icones .item .emoji { font-size: 30px; margin-bottom: 6px; }
+  .grade-icones .item .nome { font-size: 12px; color: #475569; }
+
+  .numero-modulo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #1e3a8a;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  footer.curso {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 13px;
+    padding: 30px 0 10px;
+  }
+
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    #sidebar { position: relative; width: 100%; top: 0; max-height: none; border-right: none; border-bottom: 1px solid #e2e8f0; }
+    main { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TELA DE LOGIN ============ -->
+<div id="login-screen">
+  <div id="login-box">
+    <h1>🔒 Curso Protegido</h1>
+    <p>Digite a senha para acessar o conteúdo completo</p>
+    <input type="password" id="senha-input" placeholder="Senha" autocomplete="off">
+    <button id="btn-entrar">Entrar</button>
+    <div id="erro-msg"></div>
   </div>
-  <script src="/_sdk/editing_sdk.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCLm5c_SHMQMEBdipdSjBa7ITOwVNrbMLA",
-      authDomain: "vendas-do-dia.firebaseapp.com",
-      projectId: "vendas-do-dia",
-      storageBucket: "vendas-do-dia.firebasestorage.app",
-      messagingSenderId: "13884510180",
-      appId: "1:13884510180:web:4ca17867ea29bf936301f1"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+</div>
 
-    let cart = [];
-    let products = [];
-    let orders = [];
-    let currentUser = null;
-    let clientUser = null;
-    let editingProductId = null;
-    let deleteOrderId = null;
-    let previousOrderCount = 0;
-    let isAdminLoggedIn = false;
+<!-- ============ CONTEÚDO DO CURSO ============ -->
+<div id="conteudo">
 
-    const panelCliente = document.getElementById('panel-cliente');
-    const panelCart = document.getElementById('panel-cart');
-    const panelAdmin = document.getElementById('panel-admin');
-    const panelPix = document.getElementById('panel-pix');
-    const panelMeusPedidos = document.getElementById('panel-meus-pedidos');
-    const adminLogin = document.getElementById('admin-login');
-    const adminDashboard = document.getElementById('admin-dashboard');
-    const btnCart = document.getElementById('btn-cart');
+  <div class="top-bar">
+    <h2>📚 Curso <span>Catálogo & Página de Vendas</span></h2>
+    <button id="btn-sair">Sair</button>
+  </div>
 
-    // Audio notification (alta e com pelo menos 3 segundos de duração)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playNotification() {
-      const masterGain = audioCtx.createGain();
-      masterGain.connect(audioCtx.destination);
-      masterGain.gain.value = 1; // volume máximo
+  <div class="layout">
 
-      // Toca 5 "bips" duplos (alto/agudo) espaçados ao longo de ~3.2s
-      const beepStarts = [0, 0.65, 1.3, 1.95, 2.6];
-      beepStarts.forEach(startOffset => {
-        const t0 = audioCtx.currentTime + startOffset;
-        [0, 0.15].forEach(noteOffset => {
-          const t = t0 + noteOffset;
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.connect(gain);
-          gain.connect(masterGain);
-          osc.type = 'square'; // som mais alto e penetrante que sine
-          osc.frequency.setValueAtTime(noteOffset === 0 ? 1046 : 1318, t); // dó/mi agudos
-          gain.gain.setValueAtTime(0, t);
-          gain.gain.linearRampToValueAtTime(0.9, t + 0.02);
-          gain.gain.setValueAtTime(0.9, t + 0.18);
-          gain.gain.linearRampToValueAtTime(0, t + 0.22);
-          osc.start(t);
-          osc.stop(t + 0.25);
-        });
-      });
-    }
+    <!-- ===== MENU LATERAL ===== -->
+    <nav id="sidebar">
+      <h3>Conteúdo do Curso</h3>
+      <a href="#intro">🚀 Introdução</a>
+      <a href="#m1">1️⃣ Fundamentos</a>
+      <a href="#m2">2️⃣ Ferramentas Gratuitas</a>
+      <a href="#m3">3️⃣ Primeiros Passos no HTML</a>
+      <a href="#m4">4️⃣ Criando o Catálogo (index.html)</a>
+      <a href="#m5">5️⃣ Criando o Painel Admin</a>
+      <a href="#m6">6️⃣ IA para Textos e Descrições</a>
+      <a href="#m7">7️⃣ IA para Imagens de Produtos</a>
+      <a href="#m8">8️⃣ Modelos por Tipo de Negócio</a>
+      <a href="#m9">9️⃣ Publicando Grátis (PC e Celular)</a>
+      <a href="#m10">🔟 Botão de Pedido no WhatsApp</a>
+      <a href="#m11">11️⃣ Nível Avançado</a>
+      <a href="#m12">12️⃣ Como Vender Esse Serviço</a>
+      <a href="#m13">✅ Checklist Final</a>
+    </nav>
 
-    function showToast(msg, type = 'success') {
-      const t = document.createElement('div');
-      t.className = `toast px-4 py-2 rounded-xl shadow-lg text-sm font-medium text-white ${type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`;
-      t.textContent = msg;
-      document.getElementById('toast-container').appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
+    <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+    <main>
 
-    // Navigation
-    document.getElementById('btn-cliente').addEventListener('click', () => switchPanel('cliente'));
-    document.getElementById('btn-admin').addEventListener('click', () => switchPanel('admin'));
-    document.getElementById('btn-cart').addEventListener('click', () => showCart());
-    document.getElementById('btn-back-shop').addEventListener('click', () => switchPanel('cliente'));
-    document.getElementById('btn-meus-pedidos').addEventListener('click', () => switchPanel('meus-pedidos'));
-
-    function switchPanel(panel) {
-      panelCliente.classList.toggle('hidden', panel !== 'cliente');
-      panelCart.classList.add('hidden');
-      panelPix.classList.toggle('hidden', panel !== 'pix');
-      panelAdmin.classList.toggle('hidden', panel !== 'admin');
-      panelMeusPedidos.classList.toggle('hidden', panel !== 'meus-pedidos');
-      btnCart.classList.toggle('hidden', panel !== 'cliente');
-      document.getElementById('btn-cliente').className = `px-3 py-1.5 rounded-full text-sm font-medium transition ${panel === 'cliente' || panel === 'meus-pedidos' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
-      document.getElementById('btn-admin').className = `px-3 py-1.5 rounded-full text-sm font-medium transition ${panel === 'admin' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
-      if (panel === 'meus-pedidos') loadMyOrders();
-    }
-
-    function showCart() {
-      panelCliente.classList.add('hidden');
-      panelCart.classList.remove('hidden');
-      panelPix.classList.add('hidden');
-      panelMeusPedidos.classList.add('hidden');
-      btnCart.classList.add('hidden');
-      renderCart();
-      checkDeliveryNoticeFallback();
-    }
-
-    // E-mail autorizado a acessar o painel Admin
-    const ADMIN_EMAIL = 'lella-dindim@gmail.com';
-
-    // Login / Cadastro do cliente (email e senha)
-    let clientAuthMode = 'login'; // 'login' | 'cadastro'
-
-    const clientTabLogin = document.getElementById('client-tab-login');
-    const clientTabCadastro = document.getElementById('client-tab-cadastro');
-    const clientNomeInput = document.getElementById('client-nome');
-    const clientAuthSubmitBtn = document.getElementById('btn-client-auth-submit');
-    const clientAuthError = document.getElementById('client-auth-error');
-
-    function setClientAuthMode(mode) {
-      clientAuthMode = mode;
-      clientTabLogin.className = `flex-1 py-2 rounded-xl text-sm font-medium ${mode === 'login' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
-      clientTabCadastro.className = `flex-1 py-2 rounded-xl text-sm font-medium ${mode === 'cadastro' ? 'bg-accent text-white' : 'bg-gray-200 text-dark'}`;
-      clientNomeInput.classList.toggle('hidden', mode !== 'cadastro');
-      clientAuthSubmitBtn.textContent = mode === 'cadastro' ? 'Cadastrar' : 'Entrar';
-      clientAuthError.classList.add('hidden');
-    }
-    clientTabLogin.addEventListener('click', () => setClientAuthMode('login'));
-    clientTabCadastro.addEventListener('click', () => setClientAuthMode('cadastro'));
-
-    document.getElementById('client-auth-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const email = document.getElementById('client-email').value.trim();
-      const senha = document.getElementById('client-senha').value;
-      const nome = clientNomeInput.value.trim();
-      clientAuthError.classList.add('hidden');
-      if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-        clientAuthError.textContent = 'Use a área Admin para esse e-mail.';
-        clientAuthError.classList.remove('hidden');
-        return;
-      }
-      clientAuthSubmitBtn.disabled = true;
-      try {
-        if (clientAuthMode === 'cadastro') {
-          if (!nome) { clientAuthError.textContent = 'Informe seu nome.'; clientAuthError.classList.remove('hidden'); clientAuthSubmitBtn.disabled = false; return; }
-          const result = await auth.createUserWithEmailAndPassword(email, senha);
-          await result.user.updateProfile({ displayName: nome });
-          clientUser = result.user;
-          updateClientUI();
-          showToast('Conta criada com sucesso!');
-        } else {
-          const result = await auth.signInWithEmailAndPassword(email, senha);
-          clientUser = result.user;
-          updateClientUI();
-        }
-        document.getElementById('client-auth-form').reset();
-      } catch (err) {
-        const messages = {
-          'auth/email-already-in-use': 'Esse e-mail já está cadastrado. Tente entrar.',
-          'auth/weak-password': 'Senha muito fraca (mínimo 6 caracteres).',
-          'auth/invalid-email': 'E-mail inválido.',
-          'auth/user-not-found': 'E-mail ou senha incorretos.',
-          'auth/wrong-password': 'E-mail ou senha incorretos.',
-          'auth/invalid-credential': 'E-mail ou senha incorretos.'
-        };
-        clientAuthError.textContent = messages[err.code] || `Erro: ${err.code || err.message}`;
-        clientAuthError.classList.remove('hidden');
-      }
-      clientAuthSubmitBtn.disabled = false;
-    });
-
-    document.getElementById('btn-client-logout').addEventListener('click', async () => {
-      await auth.signOut();
-      clientUser = null;
-      updateClientUI();
-    });
-
-    function updateClientUI() {
-      const authBox = document.getElementById('client-auth-box');
-      const loggedInfo = document.getElementById('client-logged-info');
-      const info = document.getElementById('client-user-info');
-      const meusPedidosBtn = document.getElementById('btn-meus-pedidos');
-      if (clientUser) {
-        info.textContent = `Olá, ${clientUser.displayName || clientUser.email}`;
-        authBox.classList.add('hidden');
-        loggedInfo.classList.remove('hidden');
-        meusPedidosBtn.classList.remove('hidden');
-        startClientOrderNotifications();
-      } else {
-        authBox.classList.remove('hidden');
-        loggedInfo.classList.add('hidden');
-        meusPedidosBtn.classList.add('hidden');
-        stopClientOrderNotifications();
-      }
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // Apenas o e-mail definido em ADMIN_EMAIL tem acesso ao painel Admin
-        if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          currentUser = user;
-          isAdminLoggedIn = true;
-          adminLogin.classList.add('hidden');
-          adminDashboard.classList.remove('hidden');
-          loadAdminData();
-        } else {
-          clientUser = user;
-          updateClientUI();
-        }
-      } else {
-        currentUser = null;
-        clientUser = null;
-        isAdminLoggedIn = false;
-        adminLogin.classList.remove('hidden');
-        adminDashboard.classList.add('hidden');
-        updateClientUI();
-      }
-    });
-
-    // Products
-    db.collection('produtos').where('ativo', '==', true).onSnapshot(snap => {
-      products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderProducts();
-    });
-
-    function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      const empty = document.getElementById('empty-products');
-      if (!products.length) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-      grid.innerHTML = products.map(p => `
-        <div class="bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center text-center relative">
-          ${p.estoque <= 5 && p.estoque > 0 ? '<span class="absolute top-2 right-2 text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">🔥 Últimas</span>' : ''}
-          ${p.estoque <= 0 ? '<span class="absolute top-2 right-2 text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full font-medium">Esgotado</span>' : ''}
-          <span class="text-3xl mb-2">${p.emoji || '🍧'}</span>
-          <h3 class="font-bold text-sm text-dark">${p.nome}</h3>
-          <p class="text-xs text-gray-400 mb-2">${p.descricao || ''}</p>
-          <p class="text-accent font-bold mb-3">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</p>
-          <button onclick="addToCart('${p.id}')" class="w-full bg-accent text-white text-xs py-2 rounded-xl font-medium hover:bg-pink-700 transition ${p.estoque <= 0 ? 'opacity-50 pointer-events-none' : ''}">Adicionar</button>
+      <div class="hero" id="intro">
+        <h1>🛍️ Crie Catálogos e Páginas de Vendas do Zero — Sem Saber Programar</h1>
+        <p>Neste curso você vai aprender, passo a passo, a montar uma página de catálogo online (index) e um painel de controle (admin) para lojas, lanchonetes e materiais de construção — usando apenas ferramentas gratuitas e Inteligência Artificial. Tudo explicado de forma simples, do básico ao avançado, para computador e celular.</p>
+        <div class="tags">
+          <span class="tag">🆓 100% Gratuito</span>
+          <span class="tag">📱 Funciona no Celular</span>
+          <span class="tag">🤖 Usa Inteligência Artificial</span>
+          <span class="tag">🎯 Do Zero ao Avançado</span>
         </div>
-      `).join('');
-    }
+      </div>
 
-    // Cart
-    function addToCart(id) {
-      const p = products.find(x => x.id === id);
-      if (!p || p.estoque <= 0) return;
-      const item = cart.find(x => x.id === id);
-      if (item) { if (item.qty < p.estoque) item.qty++; else { showToast('Estoque insuficiente', 'error'); return; } }
-      else cart.push({ id, qty: 1 });
-      updateCartBadge();
-      showToast(`${p.emoji} ${p.nome} adicionado!`);
-    }
+      <!-- ============ MÓDULO 1 ============ -->
+      <section class="modulo" id="m1">
+        <h2><span class="numero-modulo">1</span> Fundamentos: o que é Catálogo e Página de Vendas</h2>
+        <p class="subtitulo">Entenda os conceitos antes de colocar a mão na massa</p>
 
-    function updateCartBadge() {
-      const count = cart.reduce((s, i) => s + i.qty, 0);
-      const badge = document.getElementById('cart-count');
-      badge.textContent = count;
-      badge.classList.toggle('hidden', count === 0);
-      btnCart.classList.remove('hidden');
-    }
+        <p>Antes de criar qualquer coisa, você precisa entender duas peças fundamentais que vamos construir juntos:</p>
 
-    // Show delivery notice fallback if canva-text fields are empty
-    function checkDeliveryNoticeFallback() {
-      const title = document.querySelector('[data-template-id="delivery-title"]');
-      const text = document.querySelector('[data-template-id="delivery-text"]');
-      const fallback = document.getElementById('delivery-notice-fallback');
-      if (fallback && (!title || !title.textContent.trim()) && (!text || !text.textContent.trim())) {
-        fallback.classList.remove('hidden');
-      } else if (fallback) {
-        fallback.classList.add('hidden');
-      }
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cart-items');
-      const empty = document.getElementById('cart-empty');
-      if (!cart.length) { container.innerHTML = ''; empty.classList.remove('hidden'); document.getElementById('cart-total').textContent = 'R$ 0,00'; return; }
-      empty.classList.add('hidden');
-      let total = 0;
-      container.innerHTML = cart.map(item => {
-        const p = products.find(x => x.id === item.id);
-        if (!p) return '';
-        const sub = p.preco * item.qty;
-        total += sub;
-        return `<div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <span class="text-2xl">${p.emoji || '🍧'}</span>
-          <div class="flex-1"><p class="font-medium text-sm">${p.nome}</p><p class="text-xs text-gray-400">R$ ${Number(p.preco).toFixed(2).replace('.', ',')} × ${item.qty}</p></div>
-          <div class="flex items-center gap-1">
-            <button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold">−</button>
-            <span class="text-sm font-medium w-6 text-center">${item.qty}</span>
-            <button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold">+</button>
-          </div>
-        </div>`;
-      }).join('');
-      document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    }
-
-    function changeQty(id, delta) {
-      const item = cart.find(x => x.id === id);
-      if (!item) return;
-      const p = products.find(x => x.id === id);
-      item.qty += delta;
-      if (item.qty <= 0) cart = cart.filter(x => x.id !== id);
-      else if (p && item.qty > p.estoque) { item.qty = p.estoque; showToast('Estoque máximo', 'error'); }
-      updateCartBadge();
-      renderCart();
-    }
-
-    // Order Submit
-    document.getElementById('order-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!cart.length) { showToast('Carrinho vazio!', 'error'); return; }
-      const nome = document.getElementById('cliente-nome').value.trim();
-      const whatsapp = document.getElementById('cliente-whatsapp').value.trim();
-      if (!nome || !whatsapp) { showToast('Preencha seus dados', 'error'); return; }
-      const btn = document.getElementById('btn-finalizar');
-      btn.disabled = true; btn.textContent = 'Enviando...';
-      try {
-        const itens = cart.map(i => { const p = products.find(x => x.id === i.id); return { produtoId: i.id, nome: p?.nome, emoji: p?.emoji, qty: i.qty, preco: p?.preco }; });
-        const total = itens.reduce((s, i) => s + i.preco * i.qty, 0);
-        const orderData = { cliente: nome, whatsapp, itens, total, status: 'Pendente', dataPedido: firebase.firestore.FieldValue.serverTimestamp() };
-        if (clientUser) orderData.uid = clientUser.uid;
-        await db.collection('pedidos').add(orderData);
-        // Show Pix screen
-        document.getElementById('pix-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        const msg = encodeURIComponent(`Olá! Fiz um pedido no Dindim da Lella no valor de R$ ${total.toFixed(2).replace('.', ',')}. Segue o comprovante do Pix.`);
-        document.getElementById('btn-whatsapp-pix').href = `https://wa.me/5584921695039?text=${msg}`;
-        cart = [];
-        updateCartBadge();
-        document.getElementById('order-form').reset();
-        switchPanel('pix');
-        showToast('Pedido enviado! Faça o Pix 🎉');
-      } catch (err) { showToast('Erro ao enviar pedido', 'error'); }
-      btn.disabled = false; btn.textContent = 'Finalizar Pedido';
-    });
-
-    function copyPix() {
-      navigator.clipboard.writeText('84921695039').then(() => showToast('Chave copiada!')).catch(() => showToast('Erro ao copiar', 'error'));
-    }
-
-    // My Orders (Client)
-    let unsubscribeMyOrders = null;
-    let knownOrderStatuses = {}; // track status per order id to detect changes
-    let clientOrdersLoaded = false; // avoid notifying on first load
-
-    // Always listen to client's orders in background (for notifications even outside "Meus Pedidos" panel)
-    let unsubscribeClientOrdersBackground = null;
-
-    function startClientOrderNotifications() {
-      if (!clientUser || unsubscribeClientOrdersBackground) return;
-      const statusMessages = {
-        'Confirmado': '✅ Seu pedido foi confirmado!',
-        'Saiu para Entrega': '🚀 Seu pedido saiu para entrega!',
-        'Entregue': '📦 Seu pedido foi entregue!'
-      };
-      unsubscribeClientOrdersBackground = db.collection('pedidos').where('uid', '==', clientUser.uid).onSnapshot(snap => {
-        if (!clientOrdersLoaded) {
-          // First load: just record statuses
-          snap.docs.forEach(d => { knownOrderStatuses[d.id] = d.data().status; });
-          clientOrdersLoaded = true;
-          return;
-        }
-        snap.docChanges().forEach(change => {
-          if (change.type === 'modified') {
-            const newStatus = change.doc.data().status;
-            const oldStatus = knownOrderStatuses[change.doc.id];
-            if (newStatus !== oldStatus && statusMessages[newStatus]) {
-              showToast(statusMessages[newStatus], 'success');
-              try { playNotification(); } catch(e) {}
-            }
-          }
-          knownOrderStatuses[change.doc.id] = change.doc.data().status;
-        });
-      });
-    }
-
-    function stopClientOrderNotifications() {
-      if (unsubscribeClientOrdersBackground) {
-        unsubscribeClientOrdersBackground();
-        unsubscribeClientOrdersBackground = null;
-      }
-      knownOrderStatuses = {};
-      clientOrdersLoaded = false;
-    }
-
-    function loadMyOrders() {
-      const list = document.getElementById('my-orders-list');
-      const empty = document.getElementById('my-orders-empty');
-      if (unsubscribeMyOrders) { unsubscribeMyOrders(); unsubscribeMyOrders = null; }
-      if (!clientUser) { list.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = 'Faça login para ver seus pedidos.'; return; }
-      list.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Carregando pedidos...</p>';
-      empty.classList.add('hidden');
-      // Sem orderBy na consulta para não depender de índice composto no Firestore; ordenamos no código.
-      unsubscribeMyOrders = db.collection('pedidos').where('uid', '==', clientUser.uid).onSnapshot(snap => {
-        let myOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        myOrders.sort((a, b) => (b.dataPedido?.toMillis?.() || 0) - (a.dataPedido?.toMillis?.() || 0));
-        if (!myOrders.length) { list.innerHTML = ''; empty.classList.remove('hidden'); empty.textContent = 'Você ainda não fez nenhum pedido.'; return; }
-        empty.classList.add('hidden');
-        const statusIcons = { Pendente: '⏳', Confirmado: '✅', 'Saiu para Entrega': '🚀', Entregue: '📦', Cancelado: '❌' };
-        const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
-        const statusSteps = ['Pendente', 'Confirmado', 'Saiu para Entrega', 'Entregue'];
-        list.innerHTML = myOrders.map(o => {
-          const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
-          const stepIndex = statusSteps.indexOf(o.status);
-          const isCancelado = o.status === 'Cancelado';
-          const progressBar = !isCancelado ? `
-            <div class="flex items-center gap-1 my-3">
-              ${statusSteps.map((s, i) => `
-                <div class="flex-1 h-1.5 rounded-full ${i <= stepIndex ? 'bg-accent' : 'bg-gray-200'}"></div>
-              `).join('')}
-            </div>
-            <div class="flex justify-between text-[10px] text-gray-400 mb-1">
-              <span>Pedido</span><span>Confirmado</span><span>A caminho</span><span>Entregue</span>
-            </div>` : '';
-          return `<div class="bg-white rounded-xl p-4 shadow-sm">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-xs text-gray-400">${date}</span>
-              <span class="text-[11px] px-2 py-0.5 rounded-full font-medium ${statusColors[o.status] || ''}">${statusIcons[o.status] || ''} ${o.status}</span>
-            </div>
-            <div class="text-sm text-gray-600 mb-1">${(o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ')}</div>
-            <p class="font-bold text-accent text-sm mb-1">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</p>
-            ${progressBar}
-          </div>`;
-        }).join('');
-      }, err => {
-        console.error('Erro ao carregar meus pedidos:', err.code, err.message);
-        list.innerHTML = '';
-        empty.classList.remove('hidden');
-        empty.textContent = 'Não foi possível carregar seus pedidos agora.';
-      });
-    }
-
-    // Admin Auth
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value.trim();
-      const senha = document.getElementById('login-senha').value;
-      if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
-        document.getElementById('login-error').textContent = 'Acesso restrito ao administrador.';
-        document.getElementById('login-error').classList.remove('hidden');
-        return;
-      }
-      try {
-        await auth.signInWithEmailAndPassword(email, senha);
-        document.getElementById('login-error').classList.add('hidden');
-      } catch (err) {
-        document.getElementById('login-error').textContent = 'Credenciais inválidas';
-        document.getElementById('login-error').classList.remove('hidden');
-      }
-    });
-
-    document.getElementById('btn-logout').addEventListener('click', () => { isAdminLoggedIn = false; auth.signOut(); });
-
-    // Admin Data
-    function loadAdminData() {
-      db.collection('produtos').onSnapshot(snap => {
-        const prods = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderAdminProducts(prods);
-      });
-      loadEntregadores();
-      db.collection('pedidos').orderBy('dataPedido', 'desc').onSnapshot(snap => {
-        const newOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Notification sound for new orders
-        if (isAdminLoggedIn && newOrders.length > previousOrderCount && previousOrderCount > 0) {
-          playNotification();
-          showToast('🔔 Novo pedido recebido!', 'warning');
-        }
-        previousOrderCount = newOrders.length;
-        orders = newOrders;
-        renderAdminOrders();
-        updateStats();
-      });
-    }
-
-    function updateStats() {
-      const today = new Date(); today.setHours(0,0,0,0);
-      document.getElementById('stat-total').textContent = orders.length;
-      document.getElementById('stat-pendentes').textContent = orders.filter(o => o.status === 'Pendente').length;
-      document.getElementById('stat-concluidos').textContent = orders.filter(o => o.status === 'Entregue').length;
-      const fat = orders.filter(o => { const d = o.dataPedido?.toDate?.(); return d && d >= today && (o.status === 'Confirmado' || o.status === 'Entregue'); }).reduce((s, o) => s + (o.total || 0), 0);
-      document.getElementById('stat-faturamento').textContent = `R$ ${fat.toFixed(2).replace('.', ',')}`;
-    }
-
-    function renderAdminProducts(prods) {
-      document.getElementById('admin-products').innerHTML = prods.map(p => `
-        <div class="bg-white rounded-xl p-3 shadow-sm flex items-center gap-3">
-          <span class="text-2xl">${p.emoji || '🍧'}</span>
-          <div class="flex-1">
-            <p class="font-medium text-sm">${p.nome} <span class="text-xs text-gray-400">(${p.estoque} un) ${!p.ativo ? '• Inativo' : ''}</span></p>
-            <p class="text-xs text-gray-400">R$ ${Number(p.preco).toFixed(2).replace('.', ',')}</p>
-          </div>
-          <button onclick="editProduct('${p.id}')" class="text-accent text-xs font-medium">Editar</button>
-          <button onclick="deleteProduct('${p.id}')" class="text-red-400 text-xs font-medium">Excluir</button>
+        <div class="grade-icones">
+          <div class="item"><div class="emoji">🖼️</div><div class="nome"><strong>index.html</strong><br>Página do Catálogo</div></div>
+          <div class="item"><div class="emoji">⚙️</div><div class="nome"><strong>admin.html</strong><br>Painel de Controle</div></div>
         </div>
-      `).join('');
-    }
 
-    function renderAdminOrders() {
-      const container = document.getElementById('admin-orders');
-      const empty = document.getElementById('orders-empty');
-      if (!orders.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-      container.innerHTML = orders.map(o => {
-        const date = o.dataPedido?.toDate?.() ? o.dataPedido.toDate().toLocaleString('pt-BR') : '';
-        const statusColors = { Pendente: 'bg-yellow-100 text-yellow-700', Confirmado: 'bg-blue-100 text-blue-700', 'Saiu para Entrega': 'bg-purple-100 text-purple-700', Entregue: 'bg-green-100 text-green-700', Cancelado: 'bg-gray-200 text-gray-500' };
-        return `<div class="bg-white rounded-xl p-4 shadow-sm">
-          <div class="flex justify-between items-start mb-2">
-            <div><p class="font-bold text-sm">${o.cliente}</p><p class="text-xs text-gray-400">${o.whatsapp} • ${date}</p></div>
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColors[o.status] || ''}">${o.status}</span>
-          </div>
-          <div class="text-xs text-gray-500 mb-2">${(o.itens || []).map(i => `${i.emoji || ''} ${i.nome} ×${i.qty}`).join(', ')}</div>
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-accent text-sm">R$ ${Number(o.total).toFixed(2).replace('.', ',')}</span>
-            <div class="flex gap-1 flex-wrap">
-              ${o.status === 'Pendente' ? `<button onclick="updateOrder('${o.id}','Confirmado')" class="text-[10px] bg-blue-500 text-white px-2 py-1 rounded-lg">Confirmar</button><button onclick="updateOrder('${o.id}','Cancelado')" class="text-[10px] bg-gray-300 text-dark px-2 py-1 rounded-lg">Cancelar</button>` : ''}
-              ${o.status === 'Confirmado' ? `<button onclick="updateOrder('${o.id}','Saiu para Entrega')" class="text-[10px] bg-purple-500 text-white px-2 py-1 rounded-lg">Saiu Entrega</button>` : ''}
-              ${o.status === 'Saiu para Entrega' ? `<button onclick="updateOrder('${o.id}','Entregue')" class="text-[10px] bg-green-500 text-white px-2 py-1 rounded-lg">Entregue</button>` : ''}
-              <button onclick="confirmDeleteOrder('${o.id}')" class="text-[10px] bg-red-500 text-white px-2 py-1 rounded-lg">Excluir</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
-    }
+        <h3>📖 O que é o "index" (Catálogo)?</h3>
+        <p>É a página que o <strong>cliente</strong> vê. Nela aparecem as fotos dos produtos, nomes, preços e descrições, organizados de forma bonita, com um botão para fazer o pedido (geralmente pelo WhatsApp).</p>
 
-    async function updateOrder(id, status) {
-      try {
-        const order = orders.find(o => o.id === id);
-        await db.collection('pedidos').doc(id).update({ status });
-        if (status === 'Confirmado' && order?.itens) {
-          for (const item of order.itens) {
-            if (item.produtoId) await db.collection('produtos').doc(item.produtoId).update({ estoque: firebase.firestore.FieldValue.increment(-item.qty) });
-          }
-        }
-        showToast(`Pedido ${status.toLowerCase()}!`);
-      } catch (err) { showToast('Erro ao atualizar', 'error'); }
-    }
+        <h3>⚙️ O que é o "admin" (Painel de Controle)?</h3>
+        <p>É a página que <strong>só o dono do negócio</strong> acessa. Nela é possível adicionar produtos novos, mudar preços, trocar fotos, remover itens que acabaram — tudo sem precisar mexer em código.</p>
 
-    // Delete order
-    function confirmDeleteOrder(id) {
-      deleteOrderId = id;
-      document.getElementById('modal-delete').classList.remove('hidden');
-    }
-    document.getElementById('btn-cancel-delete').addEventListener('click', () => {
-      document.getElementById('modal-delete').classList.add('hidden');
-      deleteOrderId = null;
-    });
-    document.getElementById('btn-confirm-delete').addEventListener('click', async () => {
-      if (!deleteOrderId) return;
-      try {
-        await db.collection('pedidos').doc(deleteOrderId).delete();
-        showToast('Pedido excluído!');
-      } catch (err) { showToast('Erro ao excluir', 'error'); }
-      document.getElementById('modal-delete').classList.add('hidden');
-      deleteOrderId = null;
-    });
+        <div class="box-dica">
+          💡 <strong>Pense assim:</strong> o <em>index</em> é a vitrine da loja, e o <em>admin</em> é o estoque/escritório nos fundos, onde você organiza tudo que vai aparecer na vitrine.
+        </div>
 
-    // Product CRUD
-    document.getElementById('btn-add-product').addEventListener('click', () => {
-      editingProductId = null;
-      document.getElementById('modal-product-title').textContent = 'Novo Produto';
-      document.getElementById('product-form').reset();
-      document.getElementById('pf-id').value = '';
-      document.getElementById('modal-product').classList.remove('hidden');
-    });
+        <h3>🏪 Para quais negócios isso serve?</h3>
+        <ul>
+          <li><strong>Lojas</strong> (roupas, calçados, acessórios, presentes)</li>
+          <li><strong>Lanchonetes e restaurantes</strong> (cardápio digital)</li>
+          <li><strong>Materiais de construção</strong> (catálogo de produtos e preços)</li>
+          <li><strong>Qualquer negócio</strong> que venda produtos com foto, nome e preço</li>
+        </ul>
 
-    document.getElementById('btn-cancel-product').addEventListener('click', () => {
-      document.getElementById('modal-product').classList.add('hidden');
-    });
+        <div class="box-tarefa">
+          📝 <strong>Tarefa do módulo:</strong> Pense em qual negócio você vai usar como exemplo durante o curso (o seu, ou de um cliente) e anote: nome do negócio, 5 produtos principais e os preços. Vamos usar isso nos próximos módulos.
+        </div>
+      </section>
 
-    window.editProduct = async (id) => {
-      const doc = await db.collection('produtos').doc(id).get();
-      if (!doc.exists) return;
-      const p = doc.data();
-      editingProductId = id;
-      document.getElementById('modal-product-title').textContent = 'Editar Produto';
-      document.getElementById('pf-emoji').value = p.emoji || '';
-      document.getElementById('pf-nome').value = p.nome || '';
-      document.getElementById('pf-descricao').value = p.descricao || '';
-      document.getElementById('pf-preco').value = p.preco || '';
-      document.getElementById('pf-estoque').value = p.estoque || 0;
-      document.getElementById('pf-id').value = id;
-      document.getElementById('modal-product').classList.remove('hidden');
-    };
+      <!-- ============ MÓDULO 2 ============ -->
+      <section class="modulo" id="m2">
+        <h2><span class="numero-modulo">2</span> Ferramentas Gratuitas que Vamos Usar</h2>
+        <p class="subtitulo">Tudo o que você precisa — sem gastar nada</p>
 
-    window.deleteProduct = async (id) => {
-      try { await db.collection('produtos').doc(id).update({ ativo: false }); showToast('Produto removido'); } catch (e) { showToast('Erro', 'error'); }
-    };
+        <p>Você não precisa instalar nenhum programa pesado. Tudo pode ser feito direto no navegador, inclusive pelo celular.</p>
 
-    document.getElementById('product-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = { emoji: document.getElementById('pf-emoji').value, nome: document.getElementById('pf-nome').value, descricao: document.getElementById('pf-descricao').value, preco: parseFloat(document.getElementById('pf-preco').value), estoque: parseInt(document.getElementById('pf-estoque').value), ativo: true };
-      try {
-        if (editingProductId) await db.collection('produtos').doc(editingProductId).update(data);
-        else { data.criadoEm = firebase.firestore.FieldValue.serverTimestamp(); await db.collection('produtos').add(data); }
-        document.getElementById('modal-product').classList.add('hidden');
-        showToast('Produto salvo!');
-      } catch (err) { showToast('Erro ao salvar', 'error'); }
-    });
+        <div class="ferramenta-card">
+          <div class="icone">📝</div>
+          <div><h4>Editor de código online — <strong>VS Code Web</strong> ou Bloco de Notas</h4>
+          <p>Para escrever o código HTML. No celular, pode usar apps como "Code Editor" ou até o próprio Google Drive/Bloco de notas.</p></div>
+        </div>
 
-    // Admin tabs
-    document.querySelectorAll('.admin-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.admin-tab').forEach(b => b.className = 'admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-gray-200 text-dark');
-        btn.className = 'admin-tab px-3 py-1.5 rounded-full text-sm font-medium bg-accent text-white';
-        document.getElementById('tab-produtos').classList.toggle('hidden', btn.dataset.tab !== 'produtos');
-        document.getElementById('tab-pedidos').classList.toggle('hidden', btn.dataset.tab !== 'pedidos');
-        document.getElementById('tab-entregadores').classList.toggle('hidden', btn.dataset.tab !== 'entregadores');
+        <div class="ferramenta-card">
+          <div class="icone">🤖</div>
+          <div><h4>ChatGPT ou Google Gemini (versão gratuita)</h4>
+          <p>Para gerar textos de produtos, descrições, ideias e até pedir ajuda para corrigir o código.</p></div>
+        </div>
+
+        <div class="ferramenta-card">
+          <div class="icone">🎨</div>
+          <div><h4>Canva (gratuito)</h4>
+          <p>Para criar e editar imagens dos produtos, logotipos e banners, com modelos prontos.</p></div>
+        </div>
+
+        <div class="ferramenta-card">
+          <div class="icone">✂️</div>
+          <div><h4>remove.bg</h4>
+          <p>Remove o fundo das fotos dos produtos gratuitamente, deixando-as com aparência profissional.</p></div>
+        </div>
+
+        <div class="ferramenta-card">
+          <div class="icone">📦</div>
+          <div><h4>TinyPNG</h4>
+          <p>Reduz o tamanho das imagens sem perder qualidade, para a página carregar rápido.</p></div>
+        </div>
+
+        <div class="ferramenta-card">
+          <div class="icone">🌐</div>
+          <div><h4>Netlify ou GitHub Pages</h4>
+          <p>Para publicar sua página na internet gratuitamente, com um link que você pode enviar para qualquer pessoa.</p></div>
+        </div>
+
+        <div class="ferramenta-card">
+          <div class="icone">💬</div>
+          <div><h4>WhatsApp / WhatsApp Business</h4>
+          <p>Para receber os pedidos feitos através do botão da página.</p></div>
+        </div>
+
+        <table class="comparativo">
+          <tr><th>Ferramenta</th><th>Para quê serve</th><th>Funciona no celular?</th></tr>
+          <tr><td>ChatGPT/Gemini</td><td>Gerar textos e código</td><td>✅ Sim</td></tr>
+          <tr><td>Canva</td><td>Criar imagens</td><td>✅ Sim (app)</td></tr>
+          <tr><td>remove.bg</td><td>Remover fundo de fotos</td><td>✅ Sim</td></tr>
+          <tr><td>Netlify</td><td>Publicar a página</td><td>✅ Sim</td></tr>
+        </table>
+
+        <div class="box-celular">
+          📱 <strong>Pelo celular:</strong> tudo isso funciona direto no navegador (Chrome ou Safari), sem precisar instalar nada — exceto o app do Canva e do WhatsApp, que são opcionais mas recomendados.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 3 ============ -->
+      <section class="modulo" id="m3">
+        <h2><span class="numero-modulo">3</span> Primeiros Passos: Entendendo o HTML do Jeito Simples</h2>
+        <p class="subtitulo">Sem termos complicados — só o essencial para você criar sua página</p>
+
+        <p>HTML é a "receita" que o navegador lê para montar a página. Pense nele como blocos de Lego: cada bloco (chamado de <strong>tag</strong>) tem uma função.</p>
+
+        <div class="grade-icones">
+          <div class="item"><div class="emoji">🏷️</div><div class="nome">&lt;h1&gt; = Título</div></div>
+          <div class="item"><div class="emoji">📄</div><div class="nome">&lt;p&gt; = Texto/Parágrafo</div></div>
+          <div class="item"><div class="emoji">🖼️</div><div class="nome">&lt;img&gt; = Imagem</div></div>
+          <div class="item"><div class="emoji">🔘</div><div class="nome">&lt;button&gt; = Botão</div></div>
+          <div class="item"><div class="emoji">📦</div><div class="nome">&lt;div&gt; = Caixa/Bloco</div></div>
+        </div>
+
+        <h3>🔧 Como criar seu primeiro arquivo</h3>
+        <div class="passo"><div class="num">1</div><div class="texto">Abra o Bloco de Notas (Windows) ou um app de edição de texto simples no celular.</div></div>
+        <div class="passo"><div class="num">2</div><div class="texto">Cole o código de exemplo abaixo.</div></div>
+        <div class="passo"><div class="num">3</div><div class="texto">Salve o arquivo com o nome <strong>index.html</strong> (é importante terminar com <code>.html</code>).</div></div>
+        <div class="passo"><div class="num">4</div><div class="texto">Dê dois cliques no arquivo (ou abra com o navegador) para ver o resultado.</div></div>
+
+        <div class="codigo-titulo">📄 exemplo-simples.html</div>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Minha Primeira Página&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Olá, esta é minha loja!&lt;/h1&gt;
+  &lt;p&gt;Em breve meu catálogo completo estará aqui.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <div class="box-dica">
+          💡 <strong>Dica:</strong> Não precisa decorar nada disso! Nos próximos módulos você vai copiar códigos prontos e apenas trocar os textos, preços e imagens.
+        </div>
+
+        <div class="box-celular">
+          📱 <strong>Pelo celular:</strong> use o app gratuito "Code Editor" (Android) ou "Textastic"/"Koder" (iPhone) para criar e salvar arquivos .html diretamente no celular.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 4 ============ -->
+      <section class="modulo" id="m4">
+        <h2><span class="numero-modulo">4</span> Criando o Catálogo — index.html</h2>
+        <p class="subtitulo">A vitrine que seus clientes vão ver</p>
+
+        <p>Agora vamos montar a página real do catálogo. Esse código já vem pronto, organizado e comentado — você só precisa copiar, colar e personalizar.</p>
+
+        <div class="mockup">
+          🏪<br><strong>LOJA EXEMPLO</strong><br>
+          🟦 [Foto] Produto 1 — R$ 29,90 — <em>Comprar</em><br>
+          🟩 [Foto] Produto 2 — R$ 49,90 — <em>Comprar</em><br>
+          🟧 [Foto] Produto 3 — R$ 19,90 — <em>Comprar</em>
+          <div class="legenda">Exemplo visual de como o catálogo vai ficar organizado em "cards" (cartões)</div>
+        </div>
+
+        <h3>📋 O código completo do index.html</h3>
+        <p>Esse catálogo busca os produtos automaticamente do <strong>painel admin</strong> (módulo 5). Ou seja: tudo que você cadastrar no admin aparece aqui sozinho, sem precisar editar o código de novo.</p>
+
+        <div class="codigo-titulo">📄 index.html</div>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;title&gt;Catálogo - Nome da Loja&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; }
+  header { background:#1e3a8a; color:#fff; padding:20px; text-align:center; }
+  header h1 { margin:0; font-size:24px; }
+  #busca { width:90%; max-width:400px; padding:10px; margin:16px auto; display:block; border-radius:8px; border:1px solid #ccc; }
+  #produtos { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; padding:20px; max-width:1100px; margin:0 auto; }
+  .card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  .card img { width:100%; height:180px; object-fit:cover; }
+  .card-info { padding:14px; }
+  .card-info h3 { margin:0 0 6px; font-size:16px; }
+  .card-info p { color:#666; font-size:13px; margin-bottom:10px; }
+  .preco { color:#1e3a8a; font-weight:bold; font-size:18px; margin-bottom:10px; }
+  .btn-comprar { display:block; text-align:center; background:#25D366; color:#fff; padding:10px; border-radius:8px; text-decoration:none; font-weight:bold; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;header&gt;
+    &lt;h1&gt;🏪 Nome da Loja&lt;/h1&gt;
+    &lt;p&gt;Catálogo Online&lt;/p&gt;
+  &lt;/header&gt;
+
+  &lt;input type="text" id="busca" placeholder="🔍 Buscar produto..."&gt;
+  &lt;div id="produtos"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  const numeroWhatsApp = "5511999999999"; // troque pelo seu número com DDD
+
+  function carregarProdutos() {
+    const produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+    const container = document.getElementById('produtos');
+    const termo = document.getElementById('busca').value.toLowerCase();
+    container.innerHTML = '';
+
+    produtos
+      .filter(p =&gt; p.nome.toLowerCase().includes(termo))
+      .forEach(p =&gt; {
+        const link = `https://wa.me/${numeroWhatsApp}?text=Olá! Tenho interesse no produto: ${p.nome} (R$ ${p.preco})`;
+        container.innerHTML += `
+          &lt;div class="card"&gt;
+            &lt;img src="${p.imagem}" alt="${p.nome}"&gt;
+            &lt;div class="card-info"&gt;
+              &lt;h3&gt;${p.nome}&lt;/h3&gt;
+              &lt;p&gt;${p.descricao}&lt;/p&gt;
+              &lt;div class="preco"&gt;R$ ${p.preco}&lt;/div&gt;
+              &lt;a class="btn-comprar" href="${link}" target="_blank"&gt;💬 Pedir no WhatsApp&lt;/a&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;`;
       });
+  }
+
+  document.getElementById('busca').addEventListener('input', carregarProdutos);
+  carregarProdutos();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <div class="box-atencao">
+          ⚠️ <strong>Importante:</strong> Troque <code>5511999999999</code> pelo número de WhatsApp real, com código do país (55) + DDD + número, sem espaços ou símbolos.
+        </div>
+
+        <div class="box-dica">
+          💡 Esse código usa o <strong>localStorage</strong>, que é uma "gaveta" de memória do navegador. Os produtos cadastrados no admin ficam guardados ali e o catálogo lê essas informações automaticamente.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 5 ============ -->
+      <section class="modulo" id="m5">
+        <h2><span class="numero-modulo">5</span> Criando o Painel Admin — admin.html</h2>
+        <p class="subtitulo">Onde você controla tudo o que aparece no catálogo</p>
+
+        <p>Esse é o "painel de controle". Nele você adiciona produto, define nome, preço, descrição e imagem (a foto é convertida automaticamente para que funcione sem precisar de servidor).</p>
+
+        <div class="mockup">
+          ⚙️<br><strong>PAINEL ADMIN</strong><br>
+          ➕ Nome do produto: ____________<br>
+          💲 Preço: ____________<br>
+          📝 Descrição: ____________<br>
+          📷 [Escolher Imagem]&nbsp; [Salvar Produto]
+          <div class="legenda">Formulário simples para cadastrar cada item do catálogo</div>
+        </div>
+
+        <div class="codigo-titulo">📄 admin.html</div>
+        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+&lt;title&gt;Painel Admin - Catálogo&lt;/title&gt;
+&lt;style&gt;
+  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
+  h1 { color:#1e3a8a; }
+  form { background:#fff; padding:20px; border-radius:12px; max-width:500px; margin-bottom:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+  label { display:block; margin-top:12px; font-size:14px; font-weight:bold; color:#333; }
+  input, textarea { width:100%; padding:10px; margin-top:4px; border:1px solid #ccc; border-radius:8px; font-size:14px; }
+  button { margin-top:16px; background:#1e3a8a; color:#fff; padding:12px; border:none; border-radius:8px; width:100%; font-size:15px; cursor:pointer; }
+  .lista-produto { background:#fff; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; gap:12px; align-items:center; max-width:600px; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+  .lista-produto img { width:60px; height:60px; object-fit:cover; border-radius:8px; }
+  .lista-produto .info { flex:1; }
+  .lista-produto button { width:auto; background:#ef4444; padding:8px 14px; margin:0; font-size:13px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;h1&gt;⚙️ Painel de Controle do Catálogo&lt;/h1&gt;
+
+  &lt;form id="form-produto"&gt;
+    &lt;label&gt;Nome do produto&lt;/label&gt;
+    &lt;input type="text" id="nome" required&gt;
+
+    &lt;label&gt;Preço (somente números, ex: 29,90)&lt;/label&gt;
+    &lt;input type="text" id="preco" required&gt;
+
+    &lt;label&gt;Descrição curta&lt;/label&gt;
+    &lt;textarea id="descricao" rows="2"&gt;&lt;/textarea&gt;
+
+    &lt;label&gt;Imagem do produto&lt;/label&gt;
+    &lt;input type="file" id="imagem" accept="image/*" required&gt;
+
+    &lt;button type="submit"&gt;➕ Salvar Produto&lt;/button&gt;
+  &lt;/form&gt;
+
+  &lt;h2&gt;📦 Produtos Cadastrados&lt;/h2&gt;
+  &lt;div id="lista"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  function getProdutos() { return JSON.parse(localStorage.getItem('produtos')) || []; }
+  function salvarProdutos(lista) { localStorage.setItem('produtos', JSON.stringify(lista)); }
+
+  function renderizarLista() {
+    const produtos = getProdutos();
+    const lista = document.getElementById('lista');
+    lista.innerHTML = '';
+    produtos.forEach((p, index) =&gt; {
+      lista.innerHTML += `
+        &lt;div class="lista-produto"&gt;
+          &lt;img src="${p.imagem}"&gt;
+          &lt;div class="info"&gt;&lt;strong&gt;${p.nome}&lt;/strong&gt;&lt;br&gt;R$ ${p.preco}&lt;/div&gt;
+          &lt;button onclick="excluirProduto(${index})"&gt;🗑️ Excluir&lt;/button&gt;
+        &lt;/div&gt;`;
     });
+  }
 
-    // Entregadores
-    function loadEntregadores() {
-      db.collection('entregadores').orderBy('cadastradoEm', 'desc').onSnapshot(snap => {
-        const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const container = document.getElementById('admin-entregadores');
-        const empty = document.getElementById('entregadores-empty');
-        if (!lista.length) { container.innerHTML = ''; empty.classList.remove('hidden'); return; }
-        empty.classList.add('hidden');
-        container.innerHTML = lista.map(e => {
-          const statusColor = e.status === 'aprovado' ? 'bg-green-100 text-green-700' : e.status === 'bloqueado' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700';
-          const statusLabel = e.status === 'aprovado' ? '✅ Aprovado' : e.status === 'bloqueado' ? '🚫 Bloqueado' : '⏳ Pendente';
-          return `<div class="bg-white rounded-xl p-4 shadow-sm flex items-center gap-3">
-            <span class="text-2xl">🛵</span>
-            <div class="flex-1">
-              <p class="font-medium text-sm">${e.nome || '—'}</p>
-              <p class="text-xs text-gray-400">${e.email}</p>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${statusColor}">${statusLabel}</span>
-            </div>
-            <div class="flex gap-1 flex-wrap">
-              ${e.status !== 'aprovado' ? `<button onclick="setEntregadorStatus('${e.id}','aprovado')" class="text-[10px] bg-green-500 text-white px-2 py-1 rounded-lg">Aprovar</button>` : ''}
-              ${e.status !== 'bloqueado' ? `<button onclick="setEntregadorStatus('${e.id}','bloqueado')" class="text-[10px] bg-red-400 text-white px-2 py-1 rounded-lg">Bloquear</button>` : ''}
-              ${e.status !== 'pendente' ? `<button onclick="setEntregadorStatus('${e.id}','pendente')" class="text-[10px] bg-gray-300 text-dark px-2 py-1 rounded-lg">Pendente</button>` : ''}
-            </div>
-          </div>`;
-        }).join('');
-      });
-    }
+  function excluirProduto(index) {
+    const produtos = getProdutos();
+    produtos.splice(index, 1);
+    salvarProdutos(produtos);
+    renderizarLista();
+  }
 
-    window.setEntregadorStatus = async (id, status) => {
-      try {
-        await db.collection('entregadores').doc(id).update({ status });
-        showToast(status === 'aprovado' ? '✅ Entregador aprovado!' : status === 'bloqueado' ? '🚫 Entregador bloqueado' : 'Status atualizado');
-      } catch (err) { showToast('Erro ao atualizar', 'error'); }
+  document.getElementById('form-produto').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const nome = document.getElementById('nome').value;
+    const preco = document.getElementById('preco').value;
+    const descricao = document.getElementById('descricao').value;
+    const arquivo = document.getElementById('imagem').files[0];
+
+    const leitor = new FileReader();
+    leitor.onload = function() {
+      const produtos = getProdutos();
+      produtos.push({ nome, preco, descricao, imagem: leitor.result });
+      salvarProdutos(produtos);
+      renderizarLista();
+      e.target.reset();
     };
+    leitor.readAsDataURL(arquivo);
+  });
 
-    lucide.createIcons();
-  </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0f0679b11c5ef81',t:'MTc4MjAxNzU1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  renderizarLista();
+&lt;/script&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+        <div class="box-dica">
+          💡 <strong>Como funciona a mágica:</strong> ao salvar um produto no admin, ele entra na mesma "gaveta" (localStorage) que o index.html lê. Por isso é essencial que os dois arquivos (index.html e admin.html) fiquem <strong>na mesma pasta e no mesmo site publicado</strong>.
+        </div>
+
+        <div class="box-atencao">
+          ⚠️ <strong>Limitação importante:</strong> o localStorage guarda os dados só naquele navegador/computador. Para um catálogo "de verdade" que sincroniza em qualquer aparelho, é preciso evoluir para um banco de dados online (vamos falar disso no Módulo 11 - Avançado).
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 6 ============ -->
+      <section class="modulo" id="m6">
+        <h2><span class="numero-modulo">6</span> Usando IA Gratuita para Criar Textos e Descrições</h2>
+        <p class="subtitulo">Nunca mais fique sem saber o que escrever</p>
+
+        <p>Use o ChatGPT ou Google Gemini (gratuitos) para gerar nomes chamativos, descrições e até sugestões de preço. Veja modelos de prompts (instruções) prontos para copiar:</p>
+
+        <h3>🍔 Prompt para Lanchonete</h3>
+        <pre><code>Crie uma descrição curta e apetitosa (até 20 palavras) para um
+hambúrguer artesanal com carne 180g, queijo cheddar, bacon e
+molho especial. Use linguagem que dê vontade de comprar.</code></pre>
+
+        <h3>👕 Prompt para Loja de Roupas</h3>
+        <pre><code>Escreva uma descrição de venda, curta e atrativa, para uma
+camiseta básica de algodão, cor branca, modelo unissex.
+Foque no conforto e versatilidade.</code></pre>
+
+        <h3>🧱 Prompt para Material de Construção</h3>
+        <pre><code>Crie uma descrição técnica e simples para um saco de cimento
+50kg, explicando a aplicação principal (alvenaria e reboco)
+em até 25 palavras.</code></pre>
+
+        <div class="box-dica">
+          💡 <strong>Dica de ouro:</strong> peça para a IA gerar "5 variações diferentes" de uma vez. Assim você escolhe a que mais combina com o seu negócio.
+        </div>
+
+        <h3>📋 Prompt para gerar uma lista inteira de produtos</h3>
+        <pre><code>Tenho uma [tipo de negócio]. Crie uma tabela com 10 produtos
+comuns desse tipo de negócio, incluindo: nome do produto,
+descrição curta e faixa de preço sugerida no Brasil.</code></pre>
+
+        <div class="box-celular">
+          📱 <strong>Pelo celular:</strong> abra o app do ChatGPT ou Gemini, cole o prompt, copie a resposta e cole direto no campo "Descrição" do seu Painel Admin.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 7 ============ -->
+      <section class="modulo" id="m7">
+        <h2><span class="numero-modulo">7</span> Usando IA Gratuita para Imagens de Produtos</h2>
+        <p class="subtitulo">Fotos profissionais sem precisar de fotógrafo</p>
+
+        <div class="passo"><div class="num">1</div><div class="texto"><strong>Tire a foto do produto</strong> com boa luz natural (perto de uma janela, de dia).</div></div>
+        <div class="passo"><div class="num">2</div><div class="texto">Acesse <strong>remove.bg</strong> pelo navegador, envie a foto e baixe a versão sem fundo (gratuito).</div></div>
+        <div class="passo"><div class="num">3</div><div class="texto">Abra o <strong>Canva</strong>, crie um design com fundo bonito (cor lisa ou textura) e cole o produto sem fundo por cima.</div></div>
+        <div class="passo"><div class="num">4</div><div class="texto">Use a ferramenta de <strong>IA do Canva</strong> ("Magic Studio") para gerar fundos ou melhorar a iluminação automaticamente.</div></div>
+        <div class="passo"><div class="num">5</div><div class="texto">Baixe a imagem final e use o <strong>TinyPNG</strong> para deixá-la leve (carregamento rápido na página).</div></div>
+
+        <div class="mockup">
+          📷 Foto Original ➜ ✂️ Sem Fundo ➜ 🎨 Com Fundo Bonito ➜ 📦 Compactada
+          <div class="legenda">Fluxo completo de tratamento de imagem do produto</div>
+        </div>
+
+        <h3>🪄 Não tem fotos? Crie imagens com IA</h3>
+        <p>Caso ainda não tenha o produto fotografado (ex: está só planejando o catálogo), você pode usar geradores de imagem por IA gratuitos como o <strong>Bing Image Creator</strong> ou o <strong>Canva IA</strong>, descrevendo o produto em texto.</p>
+
+        <pre><code>Exemplo de prompt: "Foto realista de um hambúrguer artesanal
+suculento, fundo branco, estilo fotografia de cardápio,
+iluminação profissional"</code></pre>
+
+        <div class="box-atencao">
+          ⚠️ Imagens 100% geradas por IA podem não representar o produto real — use preferencialmente fotos reais sempre que possível, principalmente em alimentos.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 8 ============ -->
+      <section class="modulo" id="m8">
+        <h2><span class="numero-modulo">8</span> Modelos Prontos por Tipo de Negócio</h2>
+        <p class="subtitulo">Ajustes de cor, ícone e textos para cada segmento</p>
+
+        <h3>🍔 Lanchonete / Restaurante</h3>
+        <ul>
+          <li>Cor sugerida: vermelho/laranja (<code>#dc2626</code>) — transmite apetite</li>
+          <li>Use categorias: Lanches, Bebidas, Sobremesas</li>
+          <li>Inclua tempo estimado de entrega na descrição</li>
+        </ul>
+
+        <h3>👗 Loja de Roupas / Acessórios</h3>
+        <ul>
+          <li>Cor sugerida: preto/dourado ou rosa, conforme o público</li>
+          <li>Inclua tamanhos disponíveis na descrição (P, M, G)</li>
+          <li>Fotos em fundo branco neutro, sempre no mesmo padrão</li>
+        </ul>
+
+        <h3>🧱 Material de Construção</h3>
+        <ul>
+          <li>Cor sugerida: laranja/cinza (<code>#ea580c</code>) — remete a obra</li>
+          <li>Inclua unidade de medida (saco, m², unidade, metro)</li>
+          <li>Organize por categoria: Cimento, Tintas, Elétrica, Hidráulica</li>
+        </ul>
+
+        <div class="box-dica">
+          💡 Para trocar a cor principal, basta alterar o valor de <code>background:#1e3a8a</code> no <code>&lt;style&gt;</code> do index.html pelo código de cor do seu negócio.
+        </div>
+
+        <h3>🗂️ Adicionando categorias no catálogo (avançado simples)</h3>
+        <p>Você pode adicionar um campo "categoria" no formulário do admin e um filtro no index, repetindo a mesma lógica do campo "busca" já criado no Módulo 4.</p>
+      </section>
+
+      <!-- ============ MÓDULO 9 ============ -->
+      <section class="modulo" id="m9">
+        <h2><span class="numero-modulo">9</span> Publicando sua Página Gratuitamente</h2>
+        <p class="subtitulo">Colocando o catálogo no ar com um link real</p>
+
+        <h3>💻 Pelo Computador — usando Netlify</h3>
+        <div class="passo"><div class="num">1</div><div class="texto">Acesse <strong>netlify.com</strong> e crie uma conta gratuita (pode usar o e-mail ou Google).</div></div>
+        <div class="passo"><div class="num">2</div><div class="texto">Coloque os arquivos <strong>index.html</strong> e <strong>admin.html</strong> dentro de uma mesma pasta no computador.</div></div>
+        <div class="passo"><div class="num">3</div><div class="texto">No painel do Netlify, procure a opção "Deploy manually" e <strong>arraste a pasta</strong> para a área indicada.</div></div>
+        <div class="passo"><div class="num">4</div><div class="texto">Em poucos segundos, o Netlify gera um link (ex: <code>seunegocio.netlify.app</code>).</div></div>
+        <div class="passo"><div class="num">5</div><div class="texto">Para acessar o admin, basta visitar <code>seunegocio.netlify.app/admin.html</code>.</div></div>
+
+        <div class="box-dica">
+          💡 É possível personalizar o nome do site nas configurações do Netlify, gratuitamente, em "Site settings &gt; Change site name".
+        </div>
+
+        <h3>📱 Pelo Celular</h3>
+        <div class="passo"><div class="num">1</div><div class="texto">Salve os dois arquivos (.html) em uma pasta no app de Arquivos do celular.</div></div>
+        <div class="passo"><div class="num">2</div><div class="texto">Acesse <strong>netlify.com</strong> pelo navegador do celular e entre na sua conta.</div></div>
+        <div class="passo"><div class="num">3</div><div class="texto">Use a opção de upload de pasta/arquivos (em alguns celulares pode ser necessário compactar a pasta em .zip antes).</div></div>
+        <div class="passo"><div class="num">4</div><div class="texto">Aguarde a publicação e copie o link gerado.</div></div>
+
+        <h3>🌐 Alternativa: GitHub Pages</h3>
+        <p>Outra opção 100% gratuita é o <strong>GitHub Pages</strong>: crie uma conta no GitHub, suba os arquivos em um repositório e ative o "Pages" nas configurações. O processo é parecido e também gera um link público.</p>
+
+        <div class="box-atencao">
+          ⚠️ Guarde bem o link do <code>admin.html</code> — ele não tem senha por padrão neste modelo simples. Para proteger, use o mesmo sistema de senha desta própria página que você está vendo agora (login com senha simples em JavaScript).
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 10 ============ -->
+      <section class="modulo" id="m10">
+        <h2><span class="numero-modulo">10</span> Botão de Pedido Direto no WhatsApp</h2>
+        <p class="subtitulo">Transformando visitas em vendas de verdade</p>
+
+        <p>O botão "Pedir no WhatsApp" já está incluso no código do Módulo 4. Ele funciona criando um link especial que abre o WhatsApp já com uma mensagem pronta, citando o produto escolhido.</p>
+
+        <div class="codigo-titulo">🔗 Estrutura do link mágico do WhatsApp</div>
+        <pre><code>https://wa.me/NUMERO?text=MENSAGEM</code></pre>
+
+        <ul>
+          <li><strong>NUMERO</strong>: código do país (55) + DDD + número, sem espaços (ex: 5511999999999)</li>
+          <li><strong>MENSAGEM</strong>: o texto que já aparece pronto no WhatsApp do cliente</li>
+        </ul>
+
+        <div class="box-dica">
+          💡 Você pode personalizar a mensagem para incluir automaticamente o nome e o preço do produto, exatamente como já está programado no código do Módulo 4.
+        </div>
+
+        <h3>📲 Configurando o WhatsApp Business (recomendado)</h3>
+        <div class="passo"><div class="num">1</div><div class="texto">Baixe o app <strong>WhatsApp Business</strong> (gratuito).</div></div>
+        <div class="passo"><div class="num">2</div><div class="texto">Configure mensagens automáticas de boas-vindas para quando o cliente clicar no botão.</div></div>
+        <div class="passo"><div class="num">3</div><div class="texto">Cadastre o catálogo de produtos também dentro do próprio WhatsApp Business como reforço.</div></div>
+      </section>
+
+      <!-- ============ MÓDULO 11 ============ -->
+      <section class="modulo" id="m11">
+        <h2><span class="numero-modulo">11</span> Nível Avançado</h2>
+        <p class="subtitulo">Evoluindo seu catálogo para um sistema profissional</p>
+
+        <h3>☁️ Banco de dados online (sincronizar entre aparelhos)</h3>
+        <p>O localStorage funciona só no navegador onde foi cadastrado. Para que o admin atualize o catálogo em <strong>qualquer dispositivo</strong>, o próximo passo é usar um banco de dados gratuito como o <strong>Google Firebase</strong> (plano gratuito) ou <strong>Supabase</strong>.</p>
+        <ul>
+          <li>Crie uma conta gratuita no Firebase ou Supabase</li>
+          <li>Troque as funções <code>localStorage.setItem</code> e <code>getItem</code> por chamadas à API do banco (a própria IA, como ChatGPT, pode te ajudar a adaptar o código colando-o e pedindo: "adapte este código para usar Firebase no lugar de localStorage")</li>
+        </ul>
+
+        <h3>🛒 Carrinho de compras com vários produtos</h3>
+        <p>Permite que o cliente escolha vários produtos antes de enviar um único pedido pelo WhatsApp, somando os valores automaticamente.</p>
+
+        <h3>🔎 SEO básico (aparecer no Google)</h3>
+        <ul>
+          <li>Adicione no <code>&lt;head&gt;</code> a tag <code>&lt;meta name="description" content="..."&gt;</code> com uma frase descrevendo seu negócio</li>
+          <li>Use um título (<code>&lt;title&gt;</code>) claro, com o nome do negócio e a cidade</li>
+          <li>Cadastre seu site gratuitamente no <strong>Google Meu Negócio</strong></li>
+        </ul>
+
+        <h3>📐 Categorias e filtros</h3>
+        <p>Adicione um campo "categoria" no admin e crie botões de filtro no topo do catálogo (ex: Todos | Lanches | Bebidas), filtrando o array de produtos por essa categoria, da mesma forma que já fizemos com a busca por texto.</p>
+
+        <h3>🔐 Protegendo o admin com senha</h3>
+        <p>Use exatamente o mesmo sistema de senha desta página do curso (tela de login em JavaScript) na frente do seu <code>admin.html</code>, para impedir que outras pessoas mexam no catálogo.</p>
+
+        <div class="box-dica">
+          💡 Sempre que travar em algo técnico nesse nível avançado, copie seu código atual, cole no ChatGPT/Gemini e descreva exatamente o que você quer adicionar. A IA ajuda a adaptar o código sem você precisar saber programar profundamente.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 12 ============ -->
+      <section class="modulo" id="m12">
+        <h2><span class="numero-modulo">12</span> Como Vender Esse Serviço Para Outras Pessoas</h2>
+        <p class="subtitulo">Transformando esse conhecimento em renda</p>
+
+        <p>Depois de dominar a criação de catálogos, você pode oferecer esse serviço para comerciantes locais que ainda não têm presença online.</p>
+
+        <h3>💰 Como precificar</h3>
+        <ul>
+          <li><strong>Criação do catálogo:</strong> cobre um valor fixo pela montagem inicial (design, cadastro de produtos, publicação)</li>
+          <li><strong>Manutenção mensal:</strong> ofereça um plano para atualizar produtos e preços todo mês</li>
+          <li><strong>Pacote completo:</strong> inclua tratamento de imagens com IA e textos prontos como diferencial</li>
+        </ul>
+
+        <h3>📣 Onde encontrar clientes</h3>
+        <ul>
+          <li>Pequenos comércios do seu bairro que ainda usam apenas papel ou WhatsApp simples</li>
+          <li>Grupos de empreendedores no Facebook e WhatsApp</li>
+          <li>Indicação de clientes satisfeitos</li>
+        </ul>
+
+        <h3>🎯 Argumento de venda simples</h3>
+        <pre><code>"Eu monto um catálogo online para o seu negócio, onde o
+cliente vê os produtos, preços e já manda o pedido direto
+no seu WhatsApp — sem mensalidade de aplicativo caro,
+e você mesmo consegue atualizar preços quando quiser."</code></pre>
+
+        <div class="box-dica">
+          💡 Use esta própria página como exemplo de portfólio: mostre o catálogo funcionando ao vivo para o cliente em potencial, no celular dele.
+        </div>
+      </section>
+
+      <!-- ============ MÓDULO 13 - CHECKLIST ============ -->
+      <section class="modulo" id="m13">
+        <h2><span class="numero-modulo">✅</span> Checklist Final</h2>
+        <p class="subtitulo">Confirme que você completou cada etapa</p>
+
+        <div class="checklist">
+          <label><input type="checkbox"> Entendi a diferença entre index.html e admin.html</label>
+          <label><input type="checkbox"> Instalei/acessei as ferramentas gratuitas necessárias</label>
+          <label><input type="checkbox"> Criei e testei meu primeiro arquivo HTML simples</label>
+          <label><input type="checkbox"> Copiei e personalizei o código do index.html (catálogo)</label>
+          <label><input type="checkbox"> Copiei e personalizei o código do admin.html (painel)</label>
+          <label><input type="checkbox"> Cadastrei pelo menos 5 produtos de teste no admin</label>
+          <label><input type="checkbox"> Gerei descrições de produtos usando IA</label>
+          <label><input type="checkbox"> Tratei as imagens dos produtos (remove.bg + Canva)</label>
+          <label><input type="checkbox"> Configurei o botão de pedido com meu número de WhatsApp</label>
+          <label><input type="checkbox"> Publiquei a página gratuitamente (Netlify ou GitHub Pages)</label>
+          <label><input type="checkbox"> Testei o link publicado no celular</label>
+          <label><input type="checkbox"> (Opcional) Protegi o admin com senha</label>
+        </div>
+
+        <div class="box-dica">
+          🎉 <strong>Parabéns!</strong> Se você marcou todos os itens, seu catálogo online está pronto, publicado e funcionando. Continue praticando, ajustando cores e textos até deixar 100% com a cara do seu negócio.
+        </div>
+      </section>
+
+      <footer class="curso">
+        Curso completo — Catálogo & Página de Vendas Online · Feito com 💙 para quem quer começar do zero
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  const SENHA_CORRETA = "12345678";
+
+  const loginScreen = document.getElementById('login-screen');
+  const conteudo = document.getElementById('conteudo');
+  const senhaInput = document.getElementById('senha-input');
+  const btnEntrar = document.getElementById('btn-entrar');
+  const btnSair = document.getElementById('btn-sair');
+  const erroMsg = document.getElementById('erro-msg');
+
+  function tentarLogin() {
+    if (senhaInput.value === SENHA_CORRETA) {
+      loginScreen.style.display = 'none';
+      conteudo.style.display = 'block';
+      erroMsg.textContent = '';
+      sessionStorage.setItem('autenticado', 'sim');
+    } else {
+      erroMsg.textContent = 'Senha incorreta. Tente novamente.';
+      senhaInput.value = '';
+      senhaInput.focus();
+    }
+  }
+
+  btnEntrar.addEventListener('click', tentarLogin);
+  senhaInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') tentarLogin();
+  });
+
+  btnSair.addEventListener('click', function() {
+    sessionStorage.removeItem('autenticado');
+    conteudo.style.display = 'none';
+    loginScreen.style.display = 'flex';
+    senhaInput.value = '';
+  });
+
+  if (sessionStorage.getItem('autenticado') === 'sim') {
+    loginScreen.style.display = 'none';
+    conteudo.style.display = 'block';
+  }
+</script>
+
+</body>
 </html>

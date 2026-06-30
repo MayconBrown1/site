@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Controle de Dívidas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1521;
+    --bg-soft:#121A28;
+    --card:#161E2E;
+    --card-border:#232E42;
+    --text:#E8ECF1;
+    --muted:#8B95A7;
+    --accent:#34D399;
+    --accent-soft:rgba(52,211,153,.12);
+    --warn:#F59E0B;
+    --warn-soft:rgba(245,158,11,.12);
+    --danger:#F87171;
+    --danger-soft:rgba(248,113,113,.12);
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 85% 0%, rgba(245,158,11,.06), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;margin:0;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+  input{font-family:inherit;}
+
+  #authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .auth-box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:32px;}
+  .auth-brand{display:flex;align-items:baseline;gap:8px;}
+  .auth-brand .dot{color:var(--warn);}
+  .auth-sub{color:var(--muted);font-size:13px;margin:6px 0 24px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .field input{width:100%;background:var(--bg-soft);border:1px solid var(--card-border);border-radius:9px;padding:11px 12px;color:var(--text);font-size:14px;outline:none;}
+  .field input:focus{border-color:var(--warn);}
+  .primary-btn{width:100%;background:var(--warn);color:#2b1d02;font-weight:700;padding:12px 0;border-radius:9px;font-size:14.5px;margin-top:6px;}
+  .primary-btn:hover{filter:brightness(1.07);}
+  .auth-msg{font-size:13px;margin-top:14px;text-align:center;min-height:18px;}
+  .auth-msg.err{color:var(--danger);}
+  .auth-msg.ok{color:var(--accent);}
+
+  #adminPanel{display:none;}
+  header.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--card-border);background:rgba(18,26,40,.6);position:sticky;top:0;backdrop-filter:blur(6px);z-index:5;}
+  .topbar-brand{display:flex;align-items:center;gap:10px;}
+  .topbar-brand .dot{color:var(--warn);font-size:20px;}
+  .user-email{color:var(--muted);font-size:13px;}
+  .logout-btn{background:var(--bg-soft);color:var(--muted);padding:8px 14px;border-radius:8px;font-size:13px;border:1px solid var(--card-border);}
+  .logout-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+  main{max-width:760px;margin:0 auto;padding:28px 20px 80px;}
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 14px;}
+  .section-head h2{font-size:17px;}
+  .badge{font-size:11.5px;font-weight:700;background:var(--warn-soft);color:var(--warn);padding:3px 9px;border-radius:20px;}
+
+  .req-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .req-email{font-size:14.5px;font-weight:600;word-break:break-all;}
+  .req-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+  .req-actions{display:flex;gap:8px;flex-shrink:0;}
+  .approve-btn{background:var(--accent-soft);color:var(--accent);border:1px solid rgba(52,211,153,.3);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;}
+  .approve-btn:hover{background:rgba(52,211,153,.2);}
+  .deny-btn{background:var(--danger-soft);color:var(--danger);border:1px solid rgba(248,113,113,.3);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;}
+  .deny-btn:hover{background:rgba(248,113,113,.2);}
+
+  .empty-state{border:1px dashed var(--card-border);border-radius:var(--radius);padding:30px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+
+  table.users-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.users-table th{text-align:left;color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;padding:0 10px 10px;}
+  table.users-table td{padding:12px 10px;border-top:1px solid var(--card-border);}
+  .status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;display:inline-block;}
+  .status-pill.approved{background:var(--accent-soft);color:var(--accent);}
+  .status-pill.pending{background:var(--warn-soft);color:var(--warn);}
+  .status-pill.denied{background:var(--danger-soft);color:var(--danger);}
+  .revoke-btn{background:transparent;color:var(--muted);border:1px solid var(--card-border);padding:6px 12px;border-radius:7px;font-size:12px;}
+  .revoke-btn:hover{color:var(--danger);border-color:var(--danger);}
+
+  section{margin-bottom:34px;}
+
+  @media(max-width:560px){
+    header.topbar{padding:14px 16px;}
+    main{padding:20px 14px 70px;}
+    .req-card{flex-direction:column;align-items:flex-start;}
+    table.users-table{display:block;overflow-x:auto;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH (admin login only) ============ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-brand"><h1>Admin<span class="dot">.</span></h1></div>
+    <p class="auth-sub">Acesso restrito à administração de contas.</p>
+    <div class="field"><label>E-mail</label><input type="email" id="loginEmail" placeholder="admin@email.com"></div>
+    <div class="field"><label>Senha</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <button class="primary-btn" id="loginBtn">Entrar</button>
+    <div class="auth-msg" id="authMsg"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN PANEL ============ -->
+<div id="adminPanel">
+  <header class="topbar">
+    <div class="topbar-brand"><h1 style="font-size:18px;">Admin<span class="dot">.</span></h1></div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="user-email" id="userEmailLabel"></span>
+      <button class="logout-btn" id="logoutBtn">Sair</button>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <div class="section-head">
+        <h2>Solicitações pendentes</h2>
+        <span class="badge" id="pendingCount">0</span>
+      </div>
+      <div id="pendingList"></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Todas as contas</h2></div>
+      <table class="users-table">
+        <thead><tr><th>E-mail</th><th>Status</th><th></th></tr></thead>
+        <tbody id="allUsersBody"></tbody>
+      </table>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, onSnapshot, updateDoc
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBzpY1K_J1ejCPzNKHOTMlcepxP7bi96ys",
+  authDomain: "controle-dividas-2a6be.firebaseapp.com",
+  projectId: "controle-dividas-2a6be",
+  storageBucket: "controle-dividas-2a6be.firebasestorage.app",
+  messagingSenderId: "200003512144",
+  appId: "1:200003512144:web:76f37d5598007e21846e55"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const SUPER_ADMIN_EMAIL = 'mayconbrown083@gmail.com';
+
+const authScreen = document.getElementById('authScreen');
+const adminPanel = document.getElementById('adminPanel');
+const authMsg = document.getElementById('authMsg');
+
+function showMsg(text, type){
+  authMsg.textContent = text;
+  authMsg.className = 'auth-msg ' + (type||'');
+}
+
+function friendlyError(code){
+  const map = {
+    'auth/invalid-email':'E-mail inválido.',
+    'auth/user-not-found':'E-mail ou senha incorretos.',
+    'auth/wrong-password':'E-mail ou senha incorretos.',
+    'auth/invalid-credential':'E-mail ou senha incorretos.',
+  };
+  return map[code] || 'Ocorreu um erro. Tente novamente.';
+}
+
+document.getElementById('loginBtn').onclick = async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  if(!email || !pass){ showMsg('Preencha e-mail e senha.', 'err'); return; }
+  showMsg('Entrando...', '');
+  try{
+    await signInWithEmailAndPassword(auth, email, pass);
+  }catch(e){
+    showMsg(friendlyError(e.code), 'err');
+  }
+};
+
+document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+let unsubscribeUsers = null;
+
+onAuthStateChanged(auth, async (user) => {
+  authScreen.style.display = 'none';
+  adminPanel.style.display = 'none';
+  if(unsubscribeUsers){ unsubscribeUsers(); unsubscribeUsers = null; }
+
+  if(!user){
+    authScreen.style.display = 'flex';
+    return;
+  }
+
+  let snap;
+  try{
+    snap = await getDoc(doc(db, 'users', user.uid));
+  }catch(e){
+    showMsg('Erro ao verificar permissão de administrador.', 'err');
+    authScreen.style.display = 'flex';
+    return;
+  }
+
+  let data = snap.exists() ? snap.data() : null;
+
+  // Autocorreção: se este é o e-mail do super-admin mas o cadastro ainda
+  // não está marcado como admin/aprovado (ex: conta criada antes da regra), conserta agora.
+  const isSuperAdmin = (user.email || '').toLowerCase() === SUPER_ADMIN_EMAIL;
+  if(isSuperAdmin && (!data || data.isAdmin !== true || data.status !== 'approved')){
+    try{
+      const fixed = {
+        email: user.email,
+        status: 'approved',
+        isAdmin: true,
+        createdAt: data && data.createdAt ? data.createdAt : new Date()
+      };
+      await setDoc(doc(db, 'users', user.uid), fixed, { merge: true });
+      data = { ...data, ...fixed };
+    }catch(e){
+      showMsg('Não foi possível liberar o acesso de administrador automaticamente. Verifique se as regras do Firestore foram publicadas corretamente.', 'err');
+      authScreen.style.display = 'flex';
+      await signOut(auth);
+      return;
+    }
+  }
+
+  if(!data || data.isAdmin !== true){
+    showMsg('Esta conta não tem permissão de administrador.', 'err');
+    authScreen.style.display = 'flex';
+    await signOut(auth);
+    return;
+  }
+
+  adminPanel.style.display = 'block';
+  document.getElementById('userEmailLabel').textContent = data.email || user.email;
+  watchUsers();
+});
+
+const pendingList = document.getElementById('pendingList');
+const pendingCount = document.getElementById('pendingCount');
+const allUsersBody = document.getElementById('allUsersBody');
+
+function watchUsers(){
+  unsubscribeUsers = onSnapshot(collection(db, 'users'), (querySnap) => {
+    const users = [];
+    querySnap.forEach(d => users.push({ id: d.id, ...d.data() }));
+    renderUsers(users);
+  });
+}
+
+function renderUsers(users){
+  const pending = users.filter(u => u.status === 'pending' && !u.isAdmin);
+
+  pendingCount.textContent = pending.length;
+  if(pending.length === 0){
+    pendingList.innerHTML = '<div class="empty-state">Nenhuma solicitação pendente no momento.</div>';
+  }else{
+    pendingList.innerHTML = '';
+    pending.forEach(u => {
+      const card = document.createElement('div');
+      card.className = 'req-card';
+      card.innerHTML = `
+        <div>
+          <div class="req-email">${escapeHtml(u.email)}</div>
+          <div class="req-meta">Solicitou acesso à conta</div>
+        </div>
+        <div class="req-actions">
+          <button class="approve-btn" data-approve="${u.id}">Autorizar</button>
+          <button class="deny-btn" data-deny="${u.id}">Recusar</button>
+        </div>`;
+      pendingList.appendChild(card);
+    });
+    pendingList.querySelectorAll('[data-approve]').forEach(btn => {
+      btn.onclick = () => runUserAction(btn, doc(db, 'users', btn.dataset.approve), { status: 'approved' });
+    });
+    pendingList.querySelectorAll('[data-deny]').forEach(btn => {
+      btn.onclick = () => runUserAction(btn, doc(db, 'users', btn.dataset.deny), { status: 'denied' });
+    });
+  }
+
+  // full table, sorted: pending first, then approved, then denied; admins last
+  const order = { pending: 0, approved: 1, denied: 2 };
+  const sorted = [...users].sort((a,b) => {
+    if(a.isAdmin !== b.isAdmin) return a.isAdmin ? 1 : -1;
+    return (order[a.status] ?? 3) - (order[b.status] ?? 3);
+  });
+
+  allUsersBody.innerHTML = '';
+  sorted.forEach(u => {
+    const tr = document.createElement('tr');
+    const statusLabel = { approved:'Autorizado', pending:'Pendente', denied:'Recusado' }[u.status] || u.status;
+    const actionCell = u.isAdmin
+      ? '<span style="color:var(--muted);font-size:12px;">admin</span>'
+      : (u.status === 'approved'
+          ? `<button class="revoke-btn" data-revoke="${u.id}">Revogar acesso</button>`
+          : (u.status === 'denied'
+              ? `<button class="revoke-btn" data-reapprove="${u.id}">Autorizar</button>`
+              : ''));
+    tr.innerHTML = `
+      <td>${escapeHtml(u.email)}</td>
+      <td><span class="status-pill ${u.status}">${statusLabel}</span></td>
+      <td>${actionCell}</td>`;
+    allUsersBody.appendChild(tr);
+  });
+
+  allUsersBody.querySelectorAll('[data-revoke]').forEach(btn => {
+    btn.onclick = () => runUserAction(btn, doc(db, 'users', btn.dataset.revoke), { status: 'denied' });
+  });
+  allUsersBody.querySelectorAll('[data-reapprove]').forEach(btn => {
+    btn.onclick = () => runUserAction(btn, doc(db, 'users', btn.dataset.reapprove), { status: 'approved' });
+  });
+}
+
+async function runUserAction(btn, docRef, changes){
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Salvando...';
+  try{
+    await updateDoc(docRef, changes);
+    // o onSnapshot da lista atualiza a tela sozinho quando a escrita confirmar
+  }catch(e){
+    console.error('Erro ao atualizar usuário:', e);
+    alert('Não foi possível salvar (' + (e.code || 'erro desconhecido') + '). Verifique se as regras do Firestore foram publicadas corretamente e tente novamente.');
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
