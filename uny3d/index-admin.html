@@ -77,6 +77,33 @@
 
           <div>
             <label class="text-sm font-semibold text-gray-700">
+              Categoria
+            </label>
+
+            <select
+              id="categoria"
+              required
+              class="w-full mt-1 border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-200 bg-white"
+            >
+              <option value="">Selecione uma categoria</option>
+              <option value="🔑 Chaveiros">🔑 Chaveiros</option>
+              <option value="🏠 Utilidades Domésticas">🏠 Utilidades Domésticas</option>
+              <option value="🗂️ Organização">🗂️ Organização</option>
+              <option value="📱 Suportes">📱 Suportes</option>
+              <option value="🛠️ Ferramentas e Oficina">🛠️ Ferramentas e Oficina</option>
+              <option value="🚗 Automotivo">🚗 Automotivo</option>
+              <option value="🏡 Decoração">🏡 Decoração</option>
+              <option value="🐶 Pets">🐶 Pets</option>
+              <option value="🎁 Presentes">🎁 Presentes</option>
+              <option value="🎮 Geek e Games">🎮 Geek e Games</option>
+              <option value="🧩 Brinquedos e Fidgets">🧩 Brinquedos e Fidgets</option>
+              <option value="⚙️ Peças e Reposição">⚙️ Peças e Reposição</option>
+              <option value="✨ Personalizados">✨ Personalizados</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
               Preço
             </label>
 
@@ -285,6 +312,8 @@
 
         const nome = document.getElementById("nome").value;
 
+        const categoria = document.getElementById("categoria").value;
+
         const preco = document.getElementById("preco").value;
 
         const precoRevenda = document.getElementById("precoRevenda").value;
@@ -304,6 +333,7 @@ if(editandoId){
   await updateDoc(doc(db, "produtos", editandoId), {
 
     nome,
+    categoria,
     preco,
     precoRevenda,
     minimoRevenda,
@@ -324,6 +354,7 @@ if(editandoId){
   await addDoc(collection(db, "produtos"), {
 
     nome,
+    categoria,
     preco,
     precoRevenda,
     minimoRevenda,
@@ -406,6 +437,10 @@ carregarProdutos();
 
             <div class="p-4">
 
+              <span class="inline-block bg-orange-50 text-orange-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                ${produto.categoria || "Sem categoria"}
+              </span>
+
               <h3 class="font-bold text-gray-800 line-clamp-2 mb-2">
                 ${produto.nome}
               </h3>
@@ -433,6 +468,7 @@ carregarProdutos();
   onclick="editarProduto(
     '${docItem.id}',
     '${produto.nome}',
+    '${(produto.categoria || "").replace(/'/g, "\\'")}',
     '${produto.preco}',
     '${produto.precoRevenda || ""}',
     '${produto.minimoRevenda || ""}',
@@ -507,6 +543,7 @@ carregarProdutos();
 window.editarProduto = (
   id,
   nome,
+  categoria,
   preco,
   precoRevenda,
   minimoRevenda,
@@ -517,6 +554,8 @@ window.editarProduto = (
   editandoId = id;
 
   document.getElementById("nome").value = nome;
+
+  document.getElementById("categoria").value = categoria;
 
   document.getElementById("preco").value = preco;
 

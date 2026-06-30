@@ -80,6 +80,13 @@
   <!-- PRODUTOS -->
 <main class="max-w-7xl mx-auto px-4 py-8">
 
+    <!-- CATEGORIAS -->
+    <div
+      id="categoryTabs"
+      class="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-1 px-1"
+      style="scrollbar-width:thin;">
+    </div>
+
     <!-- AVISO -->
     <div class="mb-6 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl p-4 flex items-start gap-3">
       <span class="text-2xl">📦</span>
@@ -146,6 +153,25 @@
     const productsGrid = document.getElementById("productsGrid");
     const searchInput = document.getElementById("searchInput");
     const emptyState = document.getElementById("emptyState");
+    const categoryTabs = document.getElementById("categoryTabs");
+
+    const CATEGORIAS = [
+      "🔑 Chaveiros",
+      "🏠 Utilidades Domésticas",
+      "🗂️ Organização",
+      "📱 Suportes",
+      "🛠️ Ferramentas e Oficina",
+      "🚗 Automotivo",
+      "🏡 Decoração",
+      "🐶 Pets",
+      "🎁 Presentes",
+      "🎮 Geek e Games",
+      "🧩 Brinquedos e Fidgets",
+      "⚙️ Peças e Reposição",
+      "✨ Personalizados"
+    ];
+
+    let categoriaAtiva = "Todos";
 
     let todosProdutos = [];
 
@@ -174,7 +200,9 @@
 
         });
 
-        renderizarProdutos(todosProdutos);
+        renderizarTabs();
+
+        aplicarFiltros();
 
       }catch(error){
 
@@ -187,6 +215,74 @@
         `;
 
       }
+
+    }
+
+    // =========================================
+    // CATEGORIAS (TABS)
+    // =========================================
+
+    function renderizarTabs(){
+
+      const categoriasExistentes = CATEGORIAS.filter((cat) =>
+        todosProdutos.some((p) => p.categoria === cat)
+      );
+
+      const tabs = ["Todos", ...categoriasExistentes];
+
+      categoryTabs.innerHTML = "";
+
+      tabs.forEach((cat) => {
+
+        const btn = document.createElement("button");
+
+        const ativo = cat === categoriaAtiva;
+
+        btn.textContent = cat;
+
+        btn.className = `
+          whitespace-nowrap px-4 py-2 rounded-full text-sm font-semibold border transition
+          ${ativo
+            ? "bg-orange-500 text-white border-orange-500"
+            : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"}
+        `;
+
+        btn.onclick = () => {
+
+          categoriaAtiva = cat;
+
+          renderizarTabs();
+
+          aplicarFiltros();
+
+        };
+
+        categoryTabs.appendChild(btn);
+
+      });
+
+    }
+
+    // =========================================
+    // FILTROS (BUSCA + CATEGORIA)
+    // =========================================
+
+    function aplicarFiltros(){
+
+      const termo = searchInput.value.toLowerCase();
+
+      const filtrados = todosProdutos.filter((produto) => {
+
+        const bateNome = produto.nome.toLowerCase().includes(termo);
+
+        const bateCategoria =
+          categoriaAtiva === "Todos" || produto.categoria === categoriaAtiva;
+
+        return bateNome && bateCategoria;
+
+      });
+
+      renderizarProdutos(filtrados);
 
     }
 
@@ -241,6 +337,12 @@
           </div>
 
           <div class="p-3 flex flex-col flex-1">
+
+            ${produto.categoria ? `
+            <span class="inline-block w-fit bg-orange-50 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-full mb-2">
+              ${produto.categoria}
+            </span>
+            ` : ""}
 
             <h2 class="text-sm text-gray-800 font-medium line-clamp-2 mb-2 flex-1">
               ${produto.nome}
@@ -305,15 +407,7 @@ Pode me passar mais informações?`
 
     searchInput.addEventListener("input", () => {
 
-      const termo = searchInput.value.toLowerCase();
-
-      const filtrados = todosProdutos.filter((produto) => {
-
-        return produto.nome.toLowerCase().includes(termo);
-
-      });
-
-      renderizarProdutos(filtrados);
+      aplicarFiltros();
 
     });
 
