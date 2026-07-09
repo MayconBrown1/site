@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="pt-BR">
+ <head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260709-05-e5cead5"}');</script><script src="/_sdk/f432b76fb310b513.telemetry_sdk.js" integrity="sha512-9FJQ55EKmmqhyyik8BhrMVfm0+iYYfb8uOlRsjtkxJMEI97qOVEI4PnHohDjQAtvAep0IOEpdQ64eki0sz62ug=="></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Contrato de Permuta</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&amp;family=Libre+Franklin:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+        :root {
+            --primary: #1e3a5f;
+            --primary-light: #2c5282;
+            --accent: #c9a227;
+            --bg: #f7f8fa;
+            --card-bg: #ffffff;
+            --text: #1a202c;
+            --text-muted: #4a5568;
+            --border: #e2e8f0;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+        }
+        body { font-family: 'Libre Franklin', sans-serif; background: var(--bg); color: var(--text); }
+        .card-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .card-section h3 { font-family: 'Source Serif Pro', serif; color: var(--primary); font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--accent); }
+        .form-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem; display: block; }
+        .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 0.9rem; transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+        .form-input.error { border-color: var(--danger); }
+        .error-msg { color: var(--danger); font-size: 0.75rem; margin-top: 2px; }
+        .btn { padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-gray { background: #6b7280; color: white; }
+        .contract-output { font-family: 'Source Serif Pro', serif; background: white; padding: 3rem; max-width: 800px; margin: 2rem auto; line-height: 1.8; font-size: 0.95rem; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border-radius: 4px; }
+        .contract-output h1 { font-size: 1.3rem; text-align: center; font-weight: 700; margin-bottom: 0.25rem; }
+        .contract-output h2 { font-size: 1rem; text-align: center; font-weight: 600; margin-bottom: 2rem; color: #555; }
+        .contract-output h3 { font-size: 1rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+        .contract-output p { text-align: justify; margin-bottom: 0.75rem; }
+        .signature-line { border-top: 1px solid #333; width: 300px; margin: 2rem auto 0.25rem; text-align: center; }
+        .signature-name { text-align: center; font-size: 0.85rem; }
+        .checkbox-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .checkbox-item input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--primary); }
+        @media print {
+            body * { visibility: hidden; }
+            #contract-output, #contract-output * { visibility: visible; }
+            #contract-output { position: absolute; left: 0; top: 0; width: 100%; padding: 20mm; box-shadow: none; }
+        }
+        .hidden { display: none; }
+    </style>
+  <script src="/_sdk/0179d719c431a79e.data_sdk.js" type="text/javascript" integrity="sha512-OsRvJkI5GkC3MJQcgotQYotpzrMSX415GiKKgvYdxQEEkzD/fdchShO2FMSy0PJr/tiINMXOk5Vl2zAgg6bUiA=="></script>
+  <script src="/_sdk/9432170dbd2ae0df.resizing_sdk.js" type="text/javascript" integrity="sha512-FeT+58sb1f9ejWPWFjCbJvTT+SDwGV+ngrHUnlO7TWEOoqwOLj6p256kO3vOL7DIWl1cIgrobiof8v2bOigwPg=="></script>
+ </head>
+ <body data-template-id="__page-root" class="min-h-screen">
+  <header data-template-id="header-section" class="canva-header py-6 text-center" style="background: linear-gradient(135deg, #1e3a5f, #2c5282);">
+   <h1 data-template-id="page-title" class="canva-text text-2xl font-bold text-white" style="font-family:'Source Serif Pro',serif;"></h1>
+   <p data-template-id="page-subtitle" class="canva-text text-white/80 mt-1"></p>
+  </header>
+  <main class="max-w-5xl mx-auto px-4 py-8">
+   <form id="permuta-form" novalidate><!-- PERMUTANTE 1 -->
+    <div class="card-section">
+     <h3>1 — DADOS DO PERMUTANTE 1 (Proprietário do Imóvel)</h3>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2">
+       <label class="form-label">Nome completo *</label><input class="form-input" id="p1_nome" required>
+      </div>
+      <div>
+       <label class="form-label">CPF *</label><input class="form-input" id="p1_cpf" required maxlength="14" placeholder="000.000.000-00">
+      </div>
+      <div>
+       <label class="form-label">RG</label><input class="form-input" id="p1_rg">
+      </div>
+      <div>
+       <label class="form-label">Data de nascimento</label><input class="form-input" type="date" id="p1_nascimento">
+      </div>
+      <div>
+       <label class="form-label">Nacionalidade</label><input class="form-input" id="p1_nacionalidade" value="brasileira">
+      </div>
+      <div>
+       <label class="form-label">Estado civil</label><select class="form-input" id="p1_estado_civil"><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option></select>
+      </div>
+      <div>
+       <label class="form-label">Profissão</label><input class="form-input" id="p1_profissao">
+      </div>
+      <div>
+       <label class="form-label">Telefone</label><input class="form-input" id="p1_telefone">
+      </div>
+      <div>
+       <label class="form-label">E-mail</label><input class="form-input" type="email" id="p1_email">
+      </div>
+      <div>
+       <label class="form-label">CEP</label><input class="form-input" id="p1_cep" maxlength="9" placeholder="00000-000">
+      </div>
+      <div class="md:col-span-2">
+       <label class="form-label">Endereço</label><input class="form-input" id="p1_endereco">
+      </div>
+      <div>
+       <label class="form-label">Número</label><input class="form-input" id="p1_numero">
+      </div>
+      <div>
+       <label class="form-label">Complemento</label><input class="form-input" id="p1_complemento">
+      </div>
+      <div>
+       <label class="form-label">Bairro</label><input class="form-input" id="p1_bairro">
+      </div>
+      <div>
+       <label class="form-label">Cidade</label><input class="form-input" id="p1_cidade">
+      </div>
+      <div>
+       <label class="form-label">Estado</label><input class="form-input" id="p1_estado" maxlength="2">
+      </div>
+     </div>
+    </div><!-- PERMUTANTE 2 -->
+    <div class="card-section">
+     <h3>2 — DADOS DO PERMUTANTE 2 (Proprietário do Veículo)</h3>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2">
+       <label class="form-label">Nome completo *</label><input class="form-input" id="p2_nome" required>
+      </div>
+      <div>
+       <label class="form-label">CPF *</label><input class="form-input" id="p2_cpf" required maxlength="14" placeholder="000.000.000-00">
+      </div>
+      <div>
+       <label class="form-label">RG</label><input class="form-input" id="p2_rg">
+      </div>
+      <div>
+       <label class="form-label">Data de nascimento</label><input class="form-input" type="date" id="p2_nascimento">
+      </div>
+      <div>
+       <label class="form-label">Nacionalidade</label><input class="form-input" id="p2_nacionalidade" value="brasileira">
+      </div>
+      <div>
+       <label class="form-label">Estado civil</label><select class="form-input" id="p2_estado_civil"><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option></select>
+      </div>
+      <div>
+       <label class="form-label">Profissão</label><input class="form-input" id="p2_profissao">
+      </div>
+      <div>
+       <label class="form-label">Telefone</label><input class="form-input" id="p2_telefone">
+      </div>
+      <div>
+       <label class="form-label">E-mail</label><input class="form-input" type="email" id="p2_email">
+      </div>
+      <div>
+       <label class="form-label">CEP</label><input class="form-input" id="p2_cep" maxlength="9" placeholder="00000-000">
+      </div>
+      <div class="md:col-span-2">
+       <label class="form-label">Endereço</label><input class="form-input" id="p2_endereco">
+      </div>
+      <div>
+       <label class="form-label">Número</label><input class="form-input" id="p2_numero">
+      </div>
+      <div>
+       <label class="form-label">Complemento</label><input class="form-input" id="p2_complemento">
+      </div>
+      <div>
+       <label class="form-label">Bairro</label><input class="form-input" id="p2_bairro">
+      </div>
+      <div>
+       <label class="form-label">Cidade</label><input class="form-input" id="p2_cidade">
+      </div>
+      <div>
+       <label class="form-label">Estado</label><input class="form-input" id="p2_estado" maxlength="2">
+      </div>
+     </div>
+    </div><!-- IMÓVEL -->
+    <div class="card-section">
+     <h3>3 — DADOS DO IMÓVEL</h3>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+       <label class="form-label">Tipo do imóvel *</label><select class="form-input" id="imovel_tipo" required><option value="">Selecione</option><option>Casa</option><option>Terreno</option><option>Apartamento</option><option>Sítio</option><option>Chácara</option><option>Fazenda</option><option>Outro</option></select>
+      </div>
+      <div class="md:col-span-2">
+       <label class="form-label">Endereço completo *</label><input class="form-input" id="imovel_endereco" required>
+      </div>
+      <div>
+       <label class="form-label">Número</label><input class="form-input" id="imovel_numero">
+      </div>
+      <div>
+       <label class="form-label">Cidade *</label><input class="form-input" id="imovel_cidade" required>
+      </div>
+      <div>
+       <label class="form-label">Estado</label><input class="form-input" id="imovel_estado" maxlength="2">
+      </div>
+      <div>
+       <label class="form-label">CEP</label><input class="form-input" id="imovel_cep" maxlength="9">
+      </div>
+      <div>
+       <label class="form-label">Matrícula</label><input class="form-input" id="imovel_matricula">
+      </div>
+      <div>
+       <label class="form-label">Cartório de Registro</label><input class="form-input" id="imovel_cartorio">
+      </div>
+      <div>
+       <label class="form-label">Inscrição Municipal</label><input class="form-input" id="imovel_inscricao">
+      </div>
+      <div>
+       <label class="form-label">Área Total (m²)</label><input class="form-input" id="imovel_area_total">
+      </div>
+      <div>
+       <label class="form-label">Área Construída (m²)</label><input class="form-input" id="imovel_area_construida">
+      </div>
+      <div class="md:col-span-3">
+       <label class="form-label">Descrição completa</label><textarea class="form-input" id="imovel_descricao" rows="3"></textarea>
+      </div>
+      <div>
+       <label class="form-label">Valor atribuído ao imóvel (R$) *</label><input class="form-input" id="imovel_valor" required placeholder="0,00">
+      </div>
+     </div>
+    </div><!-- VEÍCULO -->
+    <div class="card-section">
+     <h3>4 — DADOS DO VEÍCULO</h3>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+       <label class="form-label">Marca *</label><input class="form-input" id="veiculo_marca" required>
+      </div>
+      <div>
+       <label class="form-label">Modelo *</label><input class="form-input" id="veiculo_modelo" required>
+      </div>
+      <div>
+       <label class="form-label">Ano Fabricação</label><input class="form-input" id="veiculo_ano_fab" maxlength="4">
+      </div>
+      <div>
+       <label class="form-label">Ano Modelo</label><input class="form-input" id="veiculo_ano_mod" maxlength="4">
+      </div>
+      <div>
+       <label class="form-label">Cor</label><input class="form-input" id="veiculo_cor">
+      </div>
+      <div>
+       <label class="form-label">Placa *</label><input class="form-input" id="veiculo_placa" required maxlength="7" placeholder="ABC1D23">
+      </div>
+      <div>
+       <label class="form-label">Renavam</label><input class="form-input" id="veiculo_renavam">
+      </div>
+      <div>
+       <label class="form-label">Chassi</label><input class="form-input" id="veiculo_chassi">
+      </div>
+      <div>
+       <label class="form-label">Combustível</label><select class="form-input" id="veiculo_combustivel"><option>Flex</option><option>Gasolina</option><option>Etanol</option><option>Diesel</option><option>Elétrico</option><option>Híbrido</option></select>
+      </div>
+      <div>
+       <label class="form-label">Quilometragem</label><input class="form-input" id="veiculo_km">
+      </div>
+      <div>
+       <label class="form-label">Valor atribuído ao veículo (R$) *</label><input class="form-input" id="veiculo_valor" required placeholder="0,00">
+      </div>
+      <div class="md:col-span-3">
+       <label class="form-label">Observações</label><textarea class="form-input" id="veiculo_obs" rows="2"></textarea>
+      </div>
+     </div>
+    </div><!-- PERMUTA -->
+    <div class="card-section">
+     <h3>5 — PERMUTA</h3>
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+       <label class="form-label">Existe diferença (torna)?</label><select class="form-input" id="permuta_diferenca" onchange="toggleTorna()"><option value="nao">Não</option><option value="sim">Sim</option></select>
+      </div>
+      <div id="torna-fields" class="md:col-span-3 hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+       <div>
+        <label class="form-label">Valor da diferença (R$)</label><input class="form-input" id="permuta_valor_diferenca">
+       </div>
+       <div>
+        <label class="form-label">Quem paga?</label><select class="form-input" id="permuta_quem_paga"><option>Permutante 1</option><option>Permutante 2</option></select>
+       </div>
+       <div>
+        <label class="form-label">Forma de pagamento</label><select class="form-input" id="permuta_forma_pgto"><option>PIX</option><option>Dinheiro</option><option>Transferência</option><option>Parcelado</option></select>
+       </div>
+       <div>
+        <label class="form-label">Número de parcelas</label><input class="form-input" id="permuta_parcelas" type="number" min="1">
+       </div>
+      </div>
+     </div>
+    </div><!-- POSSE -->
+    <div class="card-section">
+     <h3>6 — POSSE E PRAZOS</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+       <label class="form-label">Data da entrega do imóvel</label><input class="form-input" type="date" id="posse_entrega_imovel">
+      </div>
+      <div>
+       <label class="form-label">Data da entrega do veículo</label><input class="form-input" type="date" id="posse_entrega_veiculo">
+      </div>
+      <div>
+       <label class="form-label">Data para transferência do veículo</label><input class="form-input" type="date" id="posse_transferencia">
+      </div>
+      <div>
+       <label class="form-label">Prazo para escritura (dias)</label><input class="form-input" type="number" id="posse_escritura" value="60">
+      </div>
+     </div>
+    </div><!-- RESPONSABILIDADES -->
+    <div class="card-section">
+     <h3>7 — RESPONSABILIDADES E GARANTIAS</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_imovel_livre" checked><label for="resp_imovel_livre">O imóvel está livre de ônus</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_veiculo_multas" checked><label for="resp_veiculo_multas">O veículo está livre de multas</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_veiculo_alienacao" checked><label for="resp_veiculo_alienacao">O veículo está livre de alienação</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_imovel_quitado" checked><label for="resp_imovel_quitado">O imóvel está quitado</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_iptu" checked><label for="resp_iptu">IPTU quitado</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_ipva" checked><label for="resp_ipva">IPVA quitado</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="resp_licenciamento" checked><label for="resp_licenciamento">Licenciamento em dia</label>
+      </div>
+     </div>
+    </div><!-- DESPESAS -->
+    <div class="card-section">
+     <h3>8 — DESPESAS</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+       <label class="form-label">ITBI</label><select class="form-input" id="desp_itbi"><option>Permutante 1</option><option>Permutante 2</option><option>Dividido entre ambos</option></select>
+      </div>
+      <div>
+       <label class="form-label">Escritura</label><select class="form-input" id="desp_escritura"><option>Permutante 1</option><option>Permutante 2</option><option>Dividido entre ambos</option></select>
+      </div>
+      <div>
+       <label class="form-label">Registro</label><select class="form-input" id="desp_registro"><option>Permutante 1</option><option>Permutante 2</option><option>Dividido entre ambos</option></select>
+      </div>
+      <div>
+       <label class="form-label">Transferência do veículo</label><select class="form-input" id="desp_transferencia"><option>Permutante 2</option><option>Permutante 1</option><option>Dividido entre ambos</option></select>
+      </div>
+      <div>
+       <label class="form-label">Reconhecimento de firma</label><select class="form-input" id="desp_firma"><option>Dividido entre ambos</option><option>Permutante 1</option><option>Permutante 2</option></select>
+      </div>
+     </div>
+    </div><!-- CLÁUSULAS OPCIONAIS -->
+    <div class="card-section">
+     <h3>9 — CLÁUSULAS OPCIONAIS</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_multa" checked><label for="cl_multa">Multa por descumprimento</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_juros" checked><label for="cl_juros">Juros</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_rescisao" checked><label for="cl_rescisao">Rescisão</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_eviccao" checked><label for="cl_eviccao">Evicção</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_posse"><label for="cl_posse">Entrega da posse</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_benfeitorias"><label for="cl_benfeitorias">Benfeitorias</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_forca_maior"><label for="cl_forca_maior">Força maior</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_irrevogabilidade" checked><label for="cl_irrevogabilidade">Irrevogabilidade</label>
+      </div>
+      <div class="checkbox-item">
+       <input type="checkbox" id="cl_foro" checked><label for="cl_foro">Eleição de foro</label>
+      </div>
+     </div>
+     <div class="mt-4" id="foro-field"><label class="form-label">Foro (Comarca)</label> <input class="form-input" id="foro_comarca" placeholder="Ex: Natal/RN">
+     </div>
+    </div><!-- TESTEMUNHAS -->
+    <div class="card-section">
+     <h3>10 — TESTEMUNHAS</h3>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+       <label class="form-label">Testemunha 1 — Nome</label><input class="form-input" id="test1_nome">
+      </div>
+      <div>
+       <label class="form-label">Testemunha 1 — CPF</label><input class="form-input" id="test1_cpf" maxlength="14" placeholder="000.000.000-00">
+      </div>
+      <div>
+       <label class="form-label">Testemunha 2 — Nome</label><input class="form-input" id="test2_nome">
+      </div>
+      <div>
+       <label class="form-label">Testemunha 2 — CPF</label><input class="form-input" id="test2_cpf" maxlength="14" placeholder="000.000.000-00">
+      </div>
+     </div>
+    </div>
+   </form><!-- BUTTONS -->
+   <div class="flex flex-wrap gap-3 justify-center my-8"><button class="btn btn-primary" onclick="gerarContrato()"><i data-lucide="file-text" style="width:18px;height:18px"></i> Gerar Contrato</button> <button class="btn btn-success" onclick="visualizar()"><i data-lucide="eye" style="width:18px;height:18px"></i> Visualizar</button> <button class="btn btn-danger" onclick="gerarPDF()"><i data-lucide="download" style="width:18px;height:18px"></i> Gerar PDF</button> <button class="btn btn-gray" onclick="imprimir()"><i data-lucide="printer" style="width:18px;height:18px"></i> Imprimir</button> <button class="btn btn-warning" onclick="limparCampos()"><i data-lucide="trash-2" style="width:18px;height:18px"></i> Limpar Campos</button>
+   </div><!-- Validation messages -->
+   <div id="validation-msg" class="hidden text-center p-4 mb-4 rounded-lg bg-red-50 text-red-700 font-medium"></div><!-- CONTRACT OUTPUT -->
+   <div id="contract-output" class="contract-output hidden"></div>
+  </main>
+  <script src="/_sdk/719055fef2a85d14.editing_sdk.js" integrity="sha512-kFqrdGgIiTOsu307feB5Cy3JVP9IayftsmCIZ0csxYBGuBmJQPhyvcnmKR8F0fTW97h5s1gAvz3SumI8zJ6OxQ=="></script>
+  <script>
+    // Toggle torna fields visibility
+    function toggleTorna() {
+        const sel = document.getElementById('permuta_diferenca').value;
+        const fields = document.getElementById('torna-fields');
+        if (sel === 'sim') {
+            fields.classList.remove('hidden');
+            fields.style.display = 'grid';
+        } else {
+            fields.classList.add('hidden');
+            fields.style.display = '';
+        }
+    }
+
+    // CPF validation
+    function validarCPF(cpf) {
+        cpf = cpf.replace(/\D/g, '');
+        if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+        let soma = 0;
+        for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+        let rev = 11 - (soma % 11);
+        if (rev === 10 || rev === 11) rev = 0;
+        if (rev !== parseInt(cpf[9])) return false;
+        soma = 0;
+        for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
+        rev = 11 - (soma % 11);
+        if (rev === 10 || rev === 11) rev = 0;
+        return rev === parseInt(cpf[10]);
+    }
+
+    // Placa Mercosul validation
+    function validarPlaca(placa) {
+        return /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i.test(placa.replace(/\s|-/g, ''));
+    }
+
+    // Get form value helper
+    function v(id) { return document.getElementById(id)?.value?.trim() || ''; }
+    function chk(id) { return document.getElementById(id)?.checked; }
+
+    // Format currency
+    function formatCurrency(val) {
+        const num = parseFloat(val.replace(/\./g, '').replace(',', '.'));
+        if (isNaN(num)) return val;
+        return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+        if (!dateStr) return '___/___/______';
+        const [y, m, d] = dateStr.split('-');
+        return `${d}/${m}/${y}`;
+    }
+
+    // Validation
+    function validar() {
+        const errors = [];
+        if (!v('p1_nome')) errors.push('Nome do Permutante 1 é obrigatório');
+        if (!v('p1_cpf') || !validarCPF(v('p1_cpf'))) errors.push('CPF do Permutante 1 inválido');
+        if (!v('p2_nome')) errors.push('Nome do Permutante 2 é obrigatório');
+        if (!v('p2_cpf') || !validarCPF(v('p2_cpf'))) errors.push('CPF do Permutante 2 inválido');
+        if (!v('imovel_tipo')) errors.push('Tipo do imóvel é obrigatório');
+        if (!v('imovel_endereco')) errors.push('Endereço do imóvel é obrigatório');
+        if (!v('imovel_cidade')) errors.push('Cidade do imóvel é obrigatória');
+        if (!v('imovel_valor')) errors.push('Valor do imóvel é obrigatório');
+        if (!v('veiculo_marca')) errors.push('Marca do veículo é obrigatória');
+        if (!v('veiculo_modelo')) errors.push('Modelo do veículo é obrigatório');
+        if (!v('veiculo_placa') || !validarPlaca(v('veiculo_placa'))) errors.push('Placa do veículo inválida (formato Mercosul)');
+        if (!v('veiculo_valor')) errors.push('Valor do veículo é obrigatório');
+        return errors;
+    }
+
+    // Show validation errors
+    function showErrors(errors) {
+        const el = document.getElementById('validation-msg');
+        if (errors.length) {
+            el.innerHTML = '<strong>Corrija os seguintes erros:</strong><br>' + errors.join('<br>');
+            el.classList.remove('hidden');
+            el.scrollIntoView({ behavior: 'smooth' });
+            return true;
+        }
+        el.classList.add('hidden');
+        return false;
+    }
+
+    // Qualify a person for contract text
+    function qualificar(prefix) {
+        const nome = v(`${prefix}_nome`);
+        const cpf = v(`${prefix}_cpf`);
+        const rg = v(`${prefix}_rg`);
+        const nac = v(`${prefix}_nacionalidade`) || 'brasileira';
+        const ec = v(`${prefix}_estado_civil`) || 'solteiro(a)';
+        const prof = v(`${prefix}_profissao`);
+        const end = v(`${prefix}_endereco`);
+        const num = v(`${prefix}_numero`);
+        const bairro = v(`${prefix}_bairro`);
+        const cidade = v(`${prefix}_cidade`);
+        const estado = v(`${prefix}_estado`);
+        let text = `<strong>${nome.toUpperCase()}</strong>, ${nac}, ${ec.toLowerCase()}`;
+        if (prof) text += `, ${prof}`;
+        text += `, inscrito(a) no CPF sob o nº ${cpf}`;
+        if (rg) text += `, RG nº ${rg}`;
+        text += `, residente e domiciliado(a) na ${end}`;
+        if (num) text += `, nº ${num}`;
+        if (bairro) text += `, ${bairro}`;
+        if (cidade) text += `, ${cidade}`;
+        if (estado) text += `/${estado}`;
+        return text;
+    }
+
+    // Generate contract
+    function gerarContrato() {
+        const errors = validar();
+        if (showErrors(errors)) return;
+
+        const hoje = new Date();
+        const dataExtenso = hoje.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const cidadeForo = v('foro_comarca') || v('imovel_cidade') || '___________';
+
+        let clausulaNum = 0;
+        function cl() { return `CLÁUSULA ${++clausulaNum}ª`; }
+
+        let html = `<h1>INSTRUMENTO PARTICULAR DE PERMUTA DE BENS</h1>`;
+        html += `<h2>Permuta de Imóvel por Veículo Automotor</h2>`;
+
+        // Cláusula 1 - Partes
+        html += `<h3>${cl()} — DAS PARTES</h3>`;
+        html += `<p><strong>PERMUTANTE 1:</strong> ${qualificar('p1')}, doravante denominado(a) simplesmente <strong>PERMUTANTE 1</strong>.</p>`;
+        html += `<p><strong>PERMUTANTE 2:</strong> ${qualificar('p2')}, doravante denominado(a) simplesmente <strong>PERMUTANTE 2</strong>.</p>`;
+
+        // Cláusula 2 - Imóvel
+        html += `<h3>${cl()} — DO IMÓVEL</h3>`;
+        html += `<p>O PERMUTANTE 1 é legítimo(a) proprietário(a) de um imóvel do tipo <strong>${v('imovel_tipo')}</strong>, localizado na ${v('imovel_endereco')}`;
+        if (v('imovel_numero')) html += `, nº ${v('imovel_numero')}`;
+        html += `, ${v('imovel_cidade')}/${v('imovel_estado')}`;
+        if (v('imovel_matricula')) html += `, registrado sob a matrícula nº ${v('imovel_matricula')}`;
+        if (v('imovel_cartorio')) html += `, no ${v('imovel_cartorio')}`;
+        if (v('imovel_inscricao')) html += `, inscrição municipal nº ${v('imovel_inscricao')}`;
+        if (v('imovel_area_total')) html += `, com área total de ${v('imovel_area_total')} m²`;
+        if (v('imovel_area_construida')) html += ` e área construída de ${v('imovel_area_construida')} m²`;
+        html += `, ao qual as partes atribuem o valor de <strong>${formatCurrency(v('imovel_valor'))}</strong>.</p>`;
+        if (v('imovel_descricao')) html += `<p>Descrição: ${v('imovel_descricao')}</p>`;
+
+        // Cláusula 3 - Veículo
+        html += `<h3>${cl()} — DO VEÍCULO</h3>`;
+        html += `<p>O PERMUTANTE 2 é legítimo(a) proprietário(a) do veículo <strong>${v('veiculo_marca')} ${v('veiculo_modelo')}</strong>`;
+        if (v('veiculo_ano_fab')) html += `, ano fabricação ${v('veiculo_ano_fab')}`;
+        if (v('veiculo_ano_mod')) html += `/modelo ${v('veiculo_ano_mod')}`;
+        if (v('veiculo_cor')) html += `, cor ${v('veiculo_cor')}`;
+        html += `, placa ${v('veiculo_placa').toUpperCase()}`;
+        if (v('veiculo_renavam')) html += `, RENAVAM ${v('veiculo_renavam')}`;
+        if (v('veiculo_chassi')) html += `, chassi ${v('veiculo_chassi')}`;
+        html += `, combustível ${v('veiculo_combustivel')}`;
+        if (v('veiculo_km')) html += `, com ${v('veiculo_km')} km rodados`;
+        html += `, ao qual as partes atribuem o valor de <strong>${formatCurrency(v('veiculo_valor'))}</strong>.</p>`;
+        if (v('veiculo_obs')) html += `<p>Observações: ${v('veiculo_obs')}</p>`;
+
+        // Cláusula 4 - Objeto
+        html += `<h3>${cl()} — DO OBJETO DA PERMUTA</h3>`;
+        html += `<p>Pelo presente instrumento, as partes convencionam a permuta dos bens acima descritos, de modo que o PERMUTANTE 1 transfere ao PERMUTANTE 2 o imóvel descrito na Cláusula 2ª, recebendo em contrapartida o veículo descrito na Cláusula 3ª.</p>`;
+        if (v('permuta_diferenca') === 'sim' && v('permuta_valor_diferenca')) {
+            html += `<p>Em razão da diferença de valores entre os bens permutados, o <strong>${v('permuta_quem_paga')}</strong> pagará ao outro a quantia de <strong>${formatCurrency(v('permuta_valor_diferenca'))}</strong> a título de torna, na forma de <strong>${v('permuta_forma_pgto')}</strong>`;
+            if (v('permuta_forma_pgto') === 'Parcelado' && v('permuta_parcelas')) html += `, em ${v('permuta_parcelas')} parcelas`;
+            html += `.</p>`;
+        }
+
+        // Cláusula 5 - Posse
+        html += `<h3>${cl()} — DA TRANSFERÊNCIA DA POSSE</h3>`;
+        html += `<p>A posse do imóvel será entregue ao PERMUTANTE 2 em ${formatDate(v('posse_entrega_imovel'))}. A posse do veículo será entregue ao PERMUTANTE 1 em ${formatDate(v('posse_entrega_veiculo'))}.</p>`;
+
+        // Cláusula 6 - Transferência veículo
+        html += `<h3>${cl()} — DA TRANSFERÊNCIA DO VEÍCULO</h3>`;
+        html += `<p>O PERMUTANTE 2 se compromete a entregar toda a documentação necessária à transferência do veículo junto ao DETRAN até a data de ${formatDate(v('posse_transferencia'))}, devendo o veículo estar livre e desembaraçado de quaisquer ônus ou restrições.</p>`;
+
+        // Cláusula 7 - Escritura
+        html += `<h3>${cl()} — DA ESCRITURA</h3>`;
+        html += `<p>As partes se comprometem a lavrar a escritura pública de permuta no prazo de ${v('posse_escritura') || '60'} dias a contar da assinatura deste instrumento.</p>`;
+
+        // Cláusula 8 - Despesas
+        html += `<h3>${cl()} — DAS DESPESAS</h3>`;
+        html += `<p>As despesas decorrentes deste instrumento serão assim distribuídas:</p><ul style="margin-left:1.5rem;margin-bottom:1rem;">`;
+        html += `<li>ITBI: ${v('desp_itbi')}</li>`;
+        html += `<li>Escritura: ${v('desp_escritura')}</li>`;
+        html += `<li>Registro: ${v('desp_registro')}</li>`;
+        html += `<li>Transferência do veículo: ${v('desp_transferencia')}</li>`;
+        html += `<li>Reconhecimento de firma: ${v('desp_firma')}</li></ul>`;
+
+        // Cláusula 9 - Garantias
+        html += `<h3>${cl()} — DAS GARANTIAS</h3>`;
+        html += `<p>As partes declaram e garantem que:</p><ul style="margin-left:1.5rem;margin-bottom:1rem;">`;
+        if (chk('resp_imovel_livre')) html += `<li>O imóvel encontra-se livre e desembaraçado de quaisquer ônus, penhoras ou gravames;</li>`;
+        if (chk('resp_imovel_quitado')) html += `<li>O imóvel está inteiramente quitado;</li>`;
+        if (chk('resp_iptu')) html += `<li>O IPTU encontra-se quitado até a presente data;</li>`;
+        if (chk('resp_veiculo_multas')) html += `<li>O veículo está livre de multas;</li>`;
+        if (chk('resp_veiculo_alienacao')) html += `<li>O veículo está livre de alienação fiduciária;</li>`;
+        if (chk('resp_ipva')) html += `<li>O IPVA encontra-se quitado;</li>`;
+        if (chk('resp_licenciamento')) html += `<li>O licenciamento do veículo encontra-se em dia.</li>`;
+        html += `</ul>`;
+
+        // Cláusulas opcionais
+        if (chk('cl_multa')) {
+            html += `<h3>${cl()} — DA MULTA CONTRATUAL</h3>`;
+            html += `<p>Em caso de descumprimento de qualquer cláusula deste instrumento, a parte infratora pagará à parte inocente multa correspondente a 10% (dez por cento) do valor total da permuta, sem prejuízo das perdas e danos.</p>`;
+        }
+        if (chk('cl_juros')) {
+            html += `<h3>${cl()} — DOS JUROS</h3>`;
+            html += `<p>Em caso de mora no pagamento de quaisquer valores devidos em razão deste contrato, incidirão juros de 1% (um por cento) ao mês e correção monetária pelo IGP-M/FGV.</p>`;
+        }
+        if (chk('cl_rescisao')) {
+            html += `<h3>${cl()} — DA RESCISÃO</h3>`;
+            html += `<p>O presente contrato poderá ser rescindido por qualquer das partes mediante notificação escrita com antecedência mínima de 30 (trinta) dias, ressalvado o direito à multa contratual e à indenização por perdas e danos.</p>`;
+        }
+        if (chk('cl_eviccao')) {
+            html += `<h3>${cl()} — DA EVICÇÃO</h3>`;
+            html += `<p>As partes se responsabilizam pela evicção dos bens permutados, obrigando-se a responder integralmente caso terceiro venha a reivindicar qualquer direito sobre os bens objeto desta permuta.</p>`;
+        }
+        if (chk('cl_posse')) {
+            html += `<h3>${cl()} — DA ENTREGA DA POSSE</h3>`;
+            html += `<p>Os bens serão entregues no estado em que se encontram, declarando as partes tê-los vistoriado previamente, aceitando-os sem ressalvas.</p>`;
+        }
+        if (chk('cl_benfeitorias')) {
+            html += `<h3>${cl()} — DAS BENFEITORIAS</h3>`;
+            html += `<p>As benfeitorias necessárias realizadas após a tradição serão indenizáveis. As benfeitorias úteis e voluptuárias não serão indenizáveis, salvo acordo em contrário.</p>`;
+        }
+        if (chk('cl_forca_maior')) {
+            html += `<h3>${cl()} — DA FORÇA MAIOR</h3>`;
+            html += `<p>As partes não serão responsabilizadas pelo descumprimento de obrigações decorrentes de caso fortuito ou força maior, nos termos do art. 393 do Código Civil.</p>`;
+        }
+        if (chk('cl_irrevogabilidade')) {
+            html += `<h3>${cl()} — DA IRREVOGABILIDADE</h3>`;
+            html += `<p>O presente instrumento é celebrado em caráter irrevogável e irretratável, obrigando as partes, seus herdeiros e sucessores.</p>`;
+        }
+        if (chk('cl_foro')) {
+            html += `<h3>${cl()} — DO FORO</h3>`;
+            html += `<p>As partes elegem o foro da Comarca de <strong>${cidadeForo}</strong> para dirimir quaisquer controvérsias oriundas deste instrumento, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>`;
+        }
+
+        // Declaração final
+        html += `<p style="margin-top:2rem;">As partes declaram que leram todas as cláusulas deste instrumento, compreendendo integralmente seu conteúdo, firmando-o de livre e espontânea vontade, sem qualquer vício de consentimento.</p>`;
+
+        // Assinaturas
+        html += `<p style="text-align:center;margin-top:3rem;">${cidadeForo}, ${dataExtenso}.</p>`;
+        html += `<div class="signature-line"></div><p class="signature-name"><strong>${v('p1_nome').toUpperCase()}</strong><br>Permutante 1 — CPF: ${v('p1_cpf')}</p>`;
+        html += `<div class="signature-line"></div><p class="signature-name"><strong>${v('p2_nome').toUpperCase()}</strong><br>Permutante 2 — CPF: ${v('p2_cpf')}</p>`;
+
+        if (v('test1_nome')) {
+            html += `<div class="signature-line"></div><p class="signature-name">${v('test1_nome')}<br>Testemunha 1 — CPF: ${v('test1_cpf')}</p>`;
+        }
+        if (v('test2_nome')) {
+            html += `<div class="signature-line"></div><p class="signature-name">${v('test2_nome')}<br>Testemunha 2 — CPF: ${v('test2_cpf')}</p>`;
+        }
+
+        document.getElementById('contract-output').innerHTML = html;
+        document.getElementById('contract-output').classList.remove('hidden');
+        document.getElementById('contract-output').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Visualizar
+    function visualizar() {
+        gerarContrato();
+    }
+
+    // Gerar PDF
+    function gerarPDF() {
+        const el = document.getElementById('contract-output');
+        if (el.classList.contains('hidden')) { gerarContrato(); }
+        
+        // Get the full HTML content with styles
+        const styleSheet = document.querySelector('style').innerHTML;
+        const contractHTML = el.innerHTML;
+        
+        // Create wrapper with all styles
+        const fullHTML = `
+            <style>${styleSheet}</style>
+            <div class="contract-output" style="font-family: 'Source Serif Pro', serif; background: white; padding: 3rem; max-width: 800px; line-height: 1.8; font-size: 0.95rem;">
+                ${contractHTML}
+            </div>
+        `;
+        
+        const opt = {
+            margin: [10, 10, 10, 10],
+            filename: 'contrato_permuta.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: 'css', before: '.page-break' }
+        };
+        
+        html2pdf()
+            .set(opt)
+            .from(fullHTML)
+            .save();
+    }
+
+    // Imprimir
+    function imprimir() {
+        const el = document.getElementById('contract-output');
+        if (el.classList.contains('hidden')) { gerarContrato(); }
+        window.print();
+    }
+
+    // Limpar campos
+    function limparCampos() {
+        document.getElementById('permuta-form').reset();
+        document.getElementById('contract-output').classList.add('hidden');
+        document.getElementById('contract-output').innerHTML = '';
+        document.getElementById('torna-fields').classList.add('hidden');
+        document.getElementById('validation-msg').classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // CPF mask
+    document.querySelectorAll('[id$="_cpf"]').forEach(input => {
+        input.addEventListener('input', function() {
+            let val = this.value.replace(/\D/g, '').slice(0, 11);
+            if (val.length > 9) val = val.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            else if (val.length > 6) val = val.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            else if (val.length > 3) val = val.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            this.value = val;
+        });
+    });
+
+    lucide.createIcons();
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a188b8b7d7e9016e',t:'MTc4MzYxNDcxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
