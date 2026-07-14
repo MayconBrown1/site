@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mensagens Rápidas · Atendimento</title>
+<style>
+  :root{
+    --bg: #F3F4FB;
+    --bg-accent: radial-gradient(circle at 15% 0%, rgba(79,70,229,.10), transparent 45%),
+                 radial-gradient(circle at 85% 20%, rgba(56,189,248,.10), transparent 40%);
+    --card-bg: #FFFFFF;
+    --card-border: rgba(20,20,50,.06);
+    --text: #171A2B;
+    --text-muted: #676C82;
+    --primary: #4F46E5;
+    --primary-dark: #4338CA;
+    --primary-soft: rgba(79,70,229,.10);
+    --success: #16A34A;
+    --shadow-sm: 0 1px 2px rgba(20,20,50,.04);
+    --shadow-md: 0 12px 28px -8px rgba(30,32,70,.14);
+    --shadow-lg: 0 20px 45px -12px rgba(30,32,70,.22);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    color-scheme: light;
+  }
+
+  [data-theme="dark"]{
+    --bg: #0E0F1A;
+    --bg-accent: radial-gradient(circle at 15% 0%, rgba(99,102,241,.16), transparent 45%),
+                 radial-gradient(circle at 85% 20%, rgba(56,189,248,.10), transparent 40%);
+    --card-bg: #1A1C2B;
+    --card-border: rgba(255,255,255,.07);
+    --text: #EDEEF7;
+    --text-muted: #9498B0;
+    --primary: #818CF8;
+    --primary-dark: #6366F1;
+    --primary-soft: rgba(129,140,248,.16);
+    --success: #34D399;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+    --shadow-md: 0 12px 28px -8px rgba(0,0,0,.45);
+    --shadow-lg: 0 20px 45px -12px rgba(0,0,0,.55);
+    color-scheme: dark;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+
+  body{
+    font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg-accent), var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background .35s ease, color .35s ease;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 20px 90px;
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap: 20px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .heading h1{
+    font-size: clamp(26px, 4vw, 36px);
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .heading h1 .bubble{
+    display:inline-flex;
+    width: 44px; height:44px;
+    border-radius: 14px;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    box-shadow: var(--shadow-md);
+  }
+
+  .heading p{
+    margin:0;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+
+  .theme-toggle{
+    width: 46px; height:46px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    cursor:pointer;
+    font-size: 20px;
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .2s ease, box-shadow .2s ease;
+    flex-shrink:0;
+  }
+  .theme-toggle:hover{ transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .theme-toggle:active{ transform: translateY(0) scale(.95); }
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{
+    display:flex;
+    gap: 14px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    align-items:center;
+  }
+
+  .search-box{
+    flex: 1 1 260px;
+    position: relative;
+    display:flex;
+    align-items:center;
+  }
+
+  .search-box input{
+    width: 100%;
+    padding: 14px 16px 14px 46px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 15px;
+    outline: none;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow .2s ease, border-color .2s ease;
+  }
+  .search-box input::placeholder{ color: var(--text-muted); }
+  .search-box input:focus{
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+  }
+  .search-box .icon{
+    position:absolute;
+    left: 16px;
+    font-size: 16px;
+    opacity: .6;
+    pointer-events:none;
+  }
+
+  .btn{
+    border:none;
+    cursor:pointer;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 22px;
+    border-radius: var(--radius-md);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition: transform .15s ease, box-shadow .2s ease, filter .15s ease;
+    white-space: nowrap;
+  }
+  .btn:active{ transform: scale(.97); }
+
+  .btn-primary{
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color:#fff;
+    box-shadow: var(--shadow-md);
+  }
+  .btn-primary:hover{ filter: brightness(1.07); box-shadow: var(--shadow-lg); }
+
+  .btn-ghost{
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-ghost:hover{ box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+  .btn-whatsapp{
+    background: linear-gradient(135deg, #25D366, #16A34A);
+    color: #fff;
+    box-shadow: 0 10px 24px -6px rgba(22,163,74,.45);
+  }
+  .btn-whatsapp:hover{ filter: brightness(1.06); }
+
+  .btn-location{
+    background: linear-gradient(135deg, #FB7185, #E11D48);
+    color: #fff;
+    box-shadow: 0 10px 24px -6px rgba(225,29,72,.4);
+  }
+  .btn-location:hover{ filter: brightness(1.06); }
+
+  .btn-sm{ padding: 11px 16px; font-size: 13.5px; flex:1; justify-content:center; }
+
+  /* ---------- GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 22px;
+  }
+
+  .card{
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    display:flex;
+    flex-direction:column;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise .55s cubic-bezier(.2,.7,.3,1) forwards;
+    transition: box-shadow .25s ease, transform .25s ease, opacity .25s ease;
+  }
+  .card.hidden{ display:none; }
+  .card:hover{ box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+  @keyframes rise{
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  .card-top{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+
+  .icon-badge{
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 22px;
+    flex-shrink:0;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card h2{
+    font-size: 17px;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .card .msg{
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.65;
+    white-space: pre-line;
+    margin: 0;
+  }
+
+  .extra-line{
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--primary-soft);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-weight: 600;
+    display:inline-block;
+  }
+
+  .card-actions{
+    display:flex;
+    gap: 10px;
+    margin-top: auto;
+    flex-wrap: wrap;
+  }
+
+  /* icon badge color themes */
+  .ic-morning{ background: linear-gradient(135deg,#FDBA74,#F97316); }
+  .ic-afternoon{ background: linear-gradient(135deg,#38BDF8,#0284C7); }
+  .ic-night{ background: linear-gradient(135deg,#818CF8,#4338CA); }
+  .ic-whatsapp{ background: linear-gradient(135deg,#34D399,#059669); }
+  .ic-location{ background: linear-gradient(135deg,#FB7185,#E11D48); }
+  .ic-thanks{ background: linear-gradient(135deg,#C084FC,#7C3AED); }
+
+  .empty-state{
+    grid-column: 1/-1;
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 15px;
+  }
+  .empty-state .em{ font-size: 40px; display:block; margin-bottom: 10px; }
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--card-border);
+    padding: 15px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    font-size: 14.5px;
+    font-weight: 600;
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    transform: translateY(140%);
+    opacity: 0;
+    transition: transform .35s cubic-bezier(.2,.8,.3,1), opacity .35s ease;
+    z-index: 999;
+    max-width: calc(100vw - 40px);
+  }
+  .toast.show{
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  @media (max-width: 640px){
+    header{ flex-direction: column; }
+    .header-actions{ align-self: flex-end; }
+    .toast{ left: 16px; right:16px; bottom: 16px; }
+    .card-actions .btn-sm{ flex: 1 1 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{ animation: none; opacity:1; transform:none; }
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="heading">
+      <h1><span class="bubble">💬</span> Mensagens Rápidas</h1>
+      <p>Clique em um botão para copiar a mensagem desejada.</p>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="Alternar tema" aria-label="Alternar tema claro/escuro">🌙</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Pesquisar mensagem...">
+    </div>
+    <button class="btn btn-primary" id="copyAllBtn">📋 Copiar tudo</button>
+  </div>
+
+  <div class="grid" id="cardsGrid">
+
+    <div class="card" data-search="bom dia olá obrigado contato prazer atender dúvidas ajudar">
+      <div class="card-top">
+        <div class="icon-badge ic-morning">☀️</div>
+        <h2>Bom dia</h2>
+      </div>
+      <p class="msg">Olá! 😊 Bom dia!
+Muito obrigado pelo seu contato.
+Será um prazer atender você e tirar todas as suas dúvidas.
+Como posso ajudar?</p>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Olá! 😊 Bom dia!
+Muito obrigado pelo seu contato.
+Será um prazer atender você e tirar todas as suas dúvidas.
+Como posso ajudar?">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="card" data-search="boa tarde olá obrigado contato prazer atender dúvida">
+      <div class="card-top">
+        <div class="icon-badge ic-afternoon">🌤️</div>
+        <h2>Boa tarde</h2>
+      </div>
+      <p class="msg">Olá! 😊 Boa tarde!
+Muito obrigado pelo seu contato.
+Será um prazer atender você.
+Fique à vontade para enviar sua dúvida ou explicar o que precisa.</p>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Olá! 😊 Boa tarde!
+Muito obrigado pelo seu contato.
+Será um prazer atender você.
+Fique à vontade para enviar sua dúvida ou explicar o que precisa.">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="card" data-search="boa noite olá obrigado contato prazer conversar ajudar dúvida">
+      <div class="card-top">
+        <div class="icon-badge ic-night">🌙</div>
+        <h2>Boa noite</h2>
+      </div>
+      <p class="msg">Olá! 😊 Boa noite!
+Muito obrigado pelo seu contato.
+Será um prazer conversar com você e ajudar no que for necessário.
+Pode me enviar sua dúvida.</p>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Olá! 😊 Boa noite!
+Muito obrigado pelo seu contato.
+Será um prazer conversar com você e ajudar no que for necessário.
+Pode me enviar sua dúvida.">📋 Copiar</button>
+      </div>
+    </div>
+
+    <div class="card" data-search="atendimento whatsapp rápido telefone contato numero">
+      <div class="card-top">
+        <div class="icon-badge ic-whatsapp">💬</div>
+        <h2>Atendimento pelo WhatsApp</h2>
+      </div>
+      <p class="msg">Para um atendimento mais rápido, envie uma mensagem pelo WhatsApp.</p>
+      <span class="extra-line">📞 (84) 98177-0146</span>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Para um atendimento mais rápido, envie uma mensagem pelo WhatsApp.
+WhatsApp: (84) 98177-0146">📋 Copiar mensagem</button>
+        <button class="btn btn-whatsapp btn-sm" onclick="window.open('https://wa.me/5584981770146','_blank')">💬 Abrir WhatsApp</button>
+      </div>
+    </div>
+
+    <div class="card" data-search="localização endereço rua josé francisco araújo nova esperança parnamirim mapa">
+      <div class="card-top">
+        <div class="icon-badge ic-location">📍</div>
+        <h2>Localização</h2>
+      </div>
+      <p class="msg">Estamos localizados em:
+Rua José Francisco de Araújo, 86
+Nova Esperança
+Parnamirim/RN</p>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Estamos localizados em:
+Rua José Francisco de Araújo, 86
+Nova Esperança
+Parnamirim/RN">📋 Copiar endereço</button>
+        <button class="btn btn-location btn-sm" onclick="window.open('https://maps.app.goo.gl/GPgZ3GEB7CDJVZW59','_blank')">📍 Abrir localização</button>
+      </div>
+    </div>
+
+    <div class="card" data-search="agradecimento obrigado contato responder preferência">
+      <div class="card-top">
+        <div class="icon-badge ic-thanks">🙏</div>
+        <h2>Agradecimento</h2>
+      </div>
+      <p class="msg">Muito obrigado pelo contato!
+Assim que possível responderei sua mensagem.
+Agradeço pela preferência!</p>
+      <div class="card-actions">
+        <button class="btn btn-ghost btn-sm copy-btn" data-text="Muito obrigado pelo contato!
+Assim que possível responderei sua mensagem.
+Agradeço pela preferência!">📋 Copiar</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <span class="em">🔎</span>
+    Nenhuma mensagem encontrada para essa pesquisa.
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---------- THEME ----------
+  const themeToggle = document.getElementById('themeToggle');
+  const root = document.documentElement;
+
+  function applyTheme(theme){
+    if(theme === 'dark'){
+      root.setAttribute('data-theme','dark');
+      themeToggle.textContent = '☀️';
+    } else {
+      root.removeAttribute('data-theme');
+      themeToggle.textContent = '🌙';
+    }
+  }
+
+  const savedTheme = localStorage.getItem('theme') ||
+    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem('theme', next);
+  });
+
+  // ---------- TOAST ----------
+  let toastTimer = null;
+  function showToast(message){
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  // ---------- COPY ----------
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(err){
+      // fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      let ok = false;
+      try{ ok = document.execCommand('copy'); }catch(e){ ok = false; }
+      document.body.removeChild(ta);
+      return ok;
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const text = btn.getAttribute('data-text');
+      const ok = await copyText(text);
+      showToast(ok ? '✅ Mensagem copiada!' : '⚠️ Não foi possível copiar.');
+    });
+  });
+
+  document.getElementById('copyAllBtn').addEventListener('click', async () => {
+    const all = Array.from(document.querySelectorAll('.copy-btn'))
+      .map(b => b.getAttribute('data-text'))
+      .join('\n\n---\n\n');
+    const ok = await copyText(all);
+    showToast(ok ? '✅ Todas as mensagens foram copiadas!' : '⚠️ Não foi possível copiar.');
+  });
+
+  // ---------- SEARCH FILTER ----------
+  const searchInput = document.getElementById('searchInput');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const emptyState = document.getElementById('emptyState');
+
+  searchInput.addEventListener('input', () => {
+    const term = searchInput.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const haystack = (card.getAttribute('data-search') + ' ' + card.textContent).toLowerCase();
+      const match = haystack.includes(term);
+      card.classList.toggle('hidden', !match);
+      if(match) visibleCount++;
+    });
+
+    emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  });
+
+  // ---------- STAGGERED LOAD ANIMATION ----------
+  cards.forEach((card, i) => {
+    card.style.animationDelay = (i * 70) + 'ms';
+  });
+</script>
+
+</body>
+</html>
