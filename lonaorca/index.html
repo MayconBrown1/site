@@ -1,1 +1,396 @@
-test
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Orçamento — Lonas de Fachada</title>
+<meta name="description" content="Calculadora profissional de orçamento para lonas de fachada">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ TELA DE CARREGAMENTO ============ -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="grommet-spinner"><span></span><span></span><span></span><span></span></div>
+  <p>Calculando orçamento…</p>
+</div>
+
+<!-- ============ TOASTS ============ -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ============ CABEÇALHO ============ -->
+<header class="app-header no-print">
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <rect x="2" y="6" width="30" height="22" rx="2" stroke="currentColor" stroke-width="2"/>
+          <circle cx="6" cy="10" r="1.4" fill="currentColor"/>
+          <circle cx="17" cy="10" r="1.4" fill="currentColor"/>
+          <circle cx="28" cy="10" r="1.4" fill="currentColor"/>
+          <circle cx="6" cy="24" r="1.4" fill="currentColor"/>
+          <circle cx="17" cy="24" r="1.4" fill="currentColor"/>
+          <circle cx="28" cy="24" r="1.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <div>
+        <h1>Lona<span class="accent">Orça</span></h1>
+        <p class="tagline">Orçamentos de lonas de fachada, medidos com precisão</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Navegação principal">
+      <button class="tab-btn active" data-view="orcamento" role="tab" aria-selected="true">Orçamento</button>
+      <button class="tab-btn" data-view="historico" role="tab" aria-selected="false">Histórico</button>
+      <button class="tab-btn" data-view="config" role="tab" aria-selected="false">Configurações</button>
+    </nav>
+    <button id="themeToggle" class="icon-btn" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+      <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ VIEW: ORÇAMENTO ============ -->
+<section id="view-orcamento" class="view active">
+  <div class="container">
+
+    <!-- ---- Dados da Empresa ---- -->
+    <div class="card" id="cardEmpresa">
+      <div class="card-head">
+        <span class="card-eyebrow">01 · Emissor</span>
+        <h2>Dados da empresa</h2>
+      </div>
+      <div class="card-body grid grid-3">
+        <div class="field logo-field">
+          <label for="empLogo">Logotipo</label>
+          <div class="logo-upload" id="logoDropzone">
+            <img id="logoPreview" alt="Prévia do logotipo" class="hidden">
+            <span id="logoPlaceholder">Clique para enviar</span>
+            <input type="file" id="empLogo" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="field">
+          <label for="empNome">Nome da empresa</label>
+          <input type="text" id="empNome" placeholder="Comunicação Visual Ltda">
+        </div>
+        <div class="field">
+          <label for="empCnpj">CNPJ</label>
+          <input type="text" id="empCnpj" placeholder="00.000.000/0000-00" data-mask="cnpj">
+        </div>
+        <div class="field">
+          <label for="empTelefone">Telefone</label>
+          <input type="text" id="empTelefone" placeholder="(00) 0000-0000" data-mask="tel">
+        </div>
+        <div class="field">
+          <label for="empWhats">WhatsApp</label>
+          <input type="text" id="empWhats" placeholder="(00) 00000-0000" data-mask="tel">
+        </div>
+        <div class="field">
+          <label for="empEmail">E-mail</label>
+          <input type="email" id="empEmail" placeholder="contato@empresa.com.br">
+        </div>
+        <div class="field span-3">
+          <label for="empEndereco">Endereço</label>
+          <input type="text" id="empEndereco" placeholder="Rua, número, bairro, cidade — UF">
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Dados do Cliente ---- -->
+    <div class="card" id="cardCliente">
+      <div class="card-head">
+        <span class="card-eyebrow">02 · Destinatário</span>
+        <h2>Dados do cliente</h2>
+      </div>
+      <div class="card-body grid grid-3">
+        <div class="field">
+          <label for="cliNome">Nome <span class="req">*</span></label>
+          <input type="text" id="cliNome" placeholder="Nome do cliente" required>
+        </div>
+        <div class="field">
+          <label for="cliEmpresa">Empresa</label>
+          <input type="text" id="cliEmpresa" placeholder="Empresa do cliente">
+        </div>
+        <div class="field">
+          <label for="cliDoc">CPF/CNPJ</label>
+          <input type="text" id="cliDoc" placeholder="000.000.000-00" data-mask="doc">
+        </div>
+        <div class="field">
+          <label for="cliTelefone">Telefone</label>
+          <input type="text" id="cliTelefone" placeholder="(00) 0000-0000" data-mask="tel">
+        </div>
+        <div class="field">
+          <label for="cliWhats">WhatsApp</label>
+          <input type="text" id="cliWhats" placeholder="(00) 00000-0000" data-mask="tel">
+        </div>
+        <div class="field">
+          <label for="cliCidade">Cidade</label>
+          <input type="text" id="cliCidade" placeholder="Cidade — UF">
+        </div>
+        <div class="field">
+          <label for="cliData">Data</label>
+          <input type="date" id="cliData">
+        </div>
+        <div class="field span-2">
+          <label for="cliObs">Observações</label>
+          <input type="text" id="cliObs" placeholder="Condições, prazos, detalhes do pedido...">
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Área da lona ---- -->
+    <div class="card" id="cardArea">
+      <div class="card-head">
+        <span class="card-eyebrow">03 · Medidas</span>
+        <h2>Área da lona</h2>
+      </div>
+      <div class="card-body grid grid-4 align-end">
+        <div class="field">
+          <label for="largura">Largura (m) <span class="req">*</span></label>
+          <input type="number" id="largura" min="0" step="0.01" placeholder="0,00" required>
+        </div>
+        <div class="field">
+          <label for="altura">Altura (m) <span class="req">*</span></label>
+          <input type="number" id="altura" min="0" step="0.01" placeholder="0,00" required>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Área total</span>
+          <span class="readout-value" id="outArea">0,00 m²</span>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Perímetro (metalon)</span>
+          <span class="readout-value" id="outPerimetro">0,00 m</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Valor da lona + metalon ---- -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">04 · Materiais</span>
+        <h2>Lona e estrutura</h2>
+      </div>
+      <div class="card-body grid grid-4 align-end">
+        <div class="field">
+          <label for="precoLona">Preço da lona (R$/m²)</label>
+          <input type="text" id="precoLona" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+        </div>
+        <div class="readout">
+          <span class="readout-label">Valor total da lona</span>
+          <span class="readout-value" id="outValorLona">R$ 0,00</span>
+        </div>
+        <div class="field span-2">
+          <label for="precoMetalon">Preço da barra de metalon (6m)</label>
+          <input type="text" id="precoMetalon" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+        </div>
+        <div class="readout">
+          <span class="readout-label">Barras de 6m necessárias</span>
+          <span class="readout-value" id="outBarrasMetalon">0 barras</span>
+        </div>
+        <div class="readout">
+          <span class="readout-label">Valor total do metalon</span>
+          <span class="readout-value" id="outValorMetalon">R$ 0,00</span>
+        </div>
+        <p class="hint span-2" style="padding:0;margin:0;">O sistema calcula o perímetro necessário e arredonda para cima o número de barras inteiras de 6 metros.</p>
+      </div>
+    </div>
+
+    <!-- ---- Custos adicionais ---- -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">05 · Custos</span>
+        <h2>Arte, transporte e instalação</h2>
+      </div>
+      <div class="card-body grid grid-3">
+        <div class="field">
+          <label for="valorArte">Valor da arte</label>
+          <input type="text" id="valorArte" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+        </div>
+        <div class="field">
+          <label for="valorTransporte">Valor do transporte</label>
+          <input type="text" id="valorTransporte" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+        </div>
+        <div class="field">
+          <label for="valorInstalacao">Instalação <span class="opt">(opcional)</span></label>
+          <input type="text" id="valorInstalacao" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Outros custos dinâmicos ---- -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">06 · Itens extras</span>
+        <h2>Outros custos</h2>
+      </div>
+      <div class="card-body">
+        <div id="outrosCustosList" class="outros-list"></div>
+        <button type="button" id="btnAddCusto" class="btn btn-dashed">+ Adicionar novo custo</button>
+      </div>
+    </div>
+
+    <!-- ---- Lucro ---- -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">07 · Margem</span>
+        <h2>Lucro</h2>
+      </div>
+      <div class="card-body grid grid-4 align-end">
+        <div class="field">
+          <label for="lucroPerc">Porcentagem de lucro (%)</label>
+          <input type="number" id="lucroPerc" min="0" step="1" placeholder="30" value="30">
+        </div>
+        <div class="chip-row">
+          <button type="button" class="chip" data-lucro="10">10%</button>
+          <button type="button" class="chip" data-lucro="20">20%</button>
+          <button type="button" class="chip" data-lucro="30">30%</button>
+          <button type="button" class="chip" data-lucro="50">50%</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ---- Ações ---- -->
+    <div class="action-bar no-print">
+      <button id="btnLimpar" class="btn btn-ghost">Limpar</button>
+      <button id="btnCalcular" class="btn btn-outline">Calcular</button>
+      <button id="btnImprimir" class="btn btn-outline">Imprimir</button>
+      <button id="btnCopiar" class="btn btn-outline">Copiar orçamento</button>
+      <div class="share-wrap">
+        <button id="btnCompartilhar" class="btn btn-outline">Compartilhar ▾</button>
+        <div class="share-menu hidden" id="shareMenu">
+          <button data-share="whatsapp">WhatsApp</button>
+          <button data-share="telegram">Telegram</button>
+          <button data-share="email">E-mail</button>
+          <button data-share="copy">Copiar texto</button>
+        </div>
+      </div>
+      <button id="btnPdf" class="btn btn-primary">Gerar PDF</button>
+    </div>
+
+    <!-- ---- Resultado / Orçamento ---- -->
+    <div class="card result-card" id="resultCard">
+      <div class="card-head">
+        <span class="card-eyebrow">Resumo</span>
+        <h2>Orçamento</h2>
+      </div>
+      <div class="card-body">
+
+        <div id="printHeader" class="print-header hidden">
+          <img id="printLogo" class="hidden" alt="Logo">
+          <div>
+            <strong id="printEmpNome"></strong>
+            <p id="printEmpDados"></p>
+          </div>
+        </div>
+
+        <div class="result-grid">
+          <div class="result-block">
+            <h3>Cliente</h3>
+            <p id="resCliente">—</p>
+          </div>
+          <div class="result-block">
+            <h3>Área</h3>
+            <p id="resArea">0,00 m²</p>
+          </div>
+        </div>
+
+        <table class="detail-table" id="detailTable">
+          <thead>
+            <tr><th>Descrição</th><th>Quantidade</th><th>Valor unitário</th><th>Total</th></tr>
+          </thead>
+          <tbody id="detailTableBody"></tbody>
+        </table>
+
+        <div class="total-line">
+          <span>TOTAL DO ORÇAMENTO</span>
+          <strong id="resTotal">R$ 0,00</strong>
+        </div>
+
+        <p id="printFooter" class="print-footer hidden">
+          Data: <span id="printData"></span> · Observações: <span id="printObs">—</span>
+          <br><br>
+          ______________________________________<br>
+          Assinatura
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ VIEW: HISTÓRICO ============ -->
+<section id="view-historico" class="view">
+  <div class="container">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">Arquivo</span>
+        <h2>Histórico de orçamentos</h2>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label for="histSearch">Pesquisar</label>
+          <input type="text" id="histSearch" placeholder="Buscar por cliente...">
+        </div>
+        <div id="histList" class="hist-list"></div>
+        <p id="histEmpty" class="empty-state hidden">Nenhum orçamento salvo ainda. Calcule um orçamento para começar seu histórico.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIEW: CONFIGURAÇÕES ============ -->
+<section id="view-config" class="view">
+  <div class="container">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-eyebrow">Preferências</span>
+        <h2>Configurações</h2>
+      </div>
+      <div class="card-body grid grid-2">
+        <div class="field">
+          <label for="cfgTema">Tema</label>
+          <select id="cfgTema">
+            <option value="dark">Escuro</option>
+            <option value="light">Claro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="cfgMoeda">Moeda</label>
+          <select id="cfgMoeda">
+            <option value="BRL">Real (R$)</option>
+            <option value="USD">Dólar (US$)</option>
+            <option value="EUR">Euro (€)</option>
+          </select>
+        </div>
+      </div>
+      <p class="hint">Os dados da empresa são editados diretamente no cartão "Dados da empresa" do orçamento — tudo é salvo automaticamente neste dispositivo.</p>
+      <button id="btnSalvarConfig" class="btn btn-primary">Salvar configurações</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="app-footer no-print">
+  <p>Atalhos: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> calcular · <kbd>Ctrl</kbd>+<kbd>P</kbd> imprimir</p>
+</footer>
+
+<!-- item template -->
+<template id="tplOutroCusto">
+  <div class="outro-item">
+    <input type="text" class="outro-nome" placeholder="Ex: Ilhós, parafusos, mão de obra...">
+    <input type="text" class="outro-valor" inputmode="decimal" placeholder="R$ 0,00" data-mask="money">
+    <button type="button" class="btn-remove" title="Remover item" aria-label="Remover item">✕</button>
+  </div>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
