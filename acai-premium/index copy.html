@@ -780,9 +780,9 @@ function openComboAddonsSelector(idx) {
 
 function renderComboAddonsSelector() {
   document.getElementById('combo-addons-list').innerHTML =
-addons.map(a => `
+addons.map((a, i) => `
   <button
-    onclick="${a.available ? `toggleComboAddon('${a.name}')` : ''}"
+    onclick="${a.available ? `toggleComboAddon(this,${i})` : ''}"
     class="
       neon-border
       rounded-full
@@ -806,18 +806,15 @@ addons.map(a => `
   updateComboAddonsCounter();
 }
 
-function toggleComboAddon(name) {
-  const idx = currentComboAddons.indexOf(name);
-  if (idx > -1) {
-    currentComboAddons.splice(idx, 1);
-    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
-      if (b.textContent.trim() === name) b.classList.remove('chip-selected');
-    });
+function toggleComboAddon(el, idx) {
+  const name = addons[idx].name;
+  const i = currentComboAddons.indexOf(name);
+  if (i > -1) {
+    currentComboAddons.splice(i, 1);
+    el.classList.remove('chip-selected');
   } else {
     currentComboAddons.push(name);
-    document.querySelectorAll('#combo-addons-selector button').forEach(b => {
-      if (b.textContent.trim() === name) b.classList.add('chip-selected');
-    });
+    el.classList.add('chip-selected');
   }
   updateComboAddonsCounter();
 }
@@ -919,9 +916,9 @@ function renderAddonsModal() {
     ${!b.available ? ' ❌' : ''}
   </button>
 `).join('');
-  document.getElementById('addons-list').innerHTML = addons.map(a => `
+  document.getElementById('addons-list').innerHTML = addons.map((a, i) => `
   <button
-    onclick="${a.available ? `toggleAddon(this,'${a.name}')` : ''}"
+    onclick="${a.available ? `toggleAddon(this,${i})` : ''}"
     class="
       neon-border
       rounded-full
@@ -966,9 +963,10 @@ function updateAddonsCounter() {
   document.getElementById('addons-counter').textContent = text;
 }
 
-function toggleAddon(el, name) {
-  const idx = selectedAddons.indexOf(name);
-  if (idx > -1) { selectedAddons.splice(idx, 1); el.classList.remove('chip-selected'); }
+function toggleAddon(el, idx) {
+  const name = addons[idx].name;
+  const i = selectedAddons.indexOf(name);
+  if (i > -1) { selectedAddons.splice(i, 1); el.classList.remove('chip-selected'); }
   else { selectedAddons.push(name); el.classList.add('chip-selected'); }
   updateAddonsCounter();
 }
@@ -1564,6 +1562,10 @@ if (window.elementSdk && typeof window.elementSdk.init === 'function') {
 
 </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc6416c8760f622',t:'MTc3ODg5MTIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<button id="btnInstalarApp" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9999;background:#1a0a2e;color:#fff;border:none;padding:14px 22px;border-radius:50px;font-size:15px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3);cursor:pointer;">
+  📲 Instalar App
+</button>
+
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -1572,6 +1574,34 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+let deferredPrompt;
+const btnInstalar = document.getElementById('btnInstalarApp');
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+if (!isStandalone()) {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstalar.style.display = 'block';
+  });
+}
+
+btnInstalar.addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  btnInstalar.style.display = 'none';
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+
+window.addEventListener('appinstalled', () => {
+  btnInstalar.style.display = 'none';
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
