@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Painel Resposta Rápida: organize e envie mensagens, áudios, imagens, vídeos, PDFs e links no WhatsApp Web." />
+  <title>Resposta Rápida — Sua comunicação mais ágil</title>
+  <style>
+    :root {
+      --ink: #201f36;
+      --muted: #68647f;
+      --purple: #6957e8;
+      --purple-dark: #5040c3;
+      --lilac: #f1efff;
+      --line: #e7e4f5;
+      --green: #0e9f6e;
+      --yellow: #ffc857;
+      --shadow: 0 22px 55px rgba(51, 42, 115, .15);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #fff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+    .topbar {
+      padding: 10px 0;
+      background: var(--ink);
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .topbar span { color: var(--yellow); }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(231, 228, 245, .82);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(14px);
+    }
+    .nav { height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.03em; }
+    .brand-mark {
+      display: grid; place-items: center; width: 36px; height: 36px;
+      color: #fff; border-radius: 12px; font-size: 19px;
+      background: linear-gradient(135deg, #6957e8, #a37cff);
+      box-shadow: 0 8px 16px rgba(105, 87, 232, .25);
+    }
+    .brand small { display: block; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .nav-links { display: flex; gap: 26px; color: var(--muted); font-size: 14px; font-weight: 650; }
+    .nav-links a:hover { color: var(--purple); }
+
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px;
+      background: var(--purple); color: #fff; font: inherit; font-size: 15px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 12px 22px rgba(105, 87, 232, .24);
+      transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .button:hover { transform: translateY(-2px); background: var(--purple-dark); box-shadow: 0 16px 28px rgba(105, 87, 232, .3); }
+    .button--light { color: var(--purple); background: #fff; box-shadow: none; border: 1px solid var(--line); }
+    .button--light:hover { background: var(--lilac); }
+    .button--nav { min-height: 40px; padding: 0 16px; font-size: 13px; }
+
+    .hero { position: relative; overflow: hidden; padding: 86px 0 72px; background: linear-gradient(180deg, #fbfaff 0%, #f5f3ff 100%); }
+    .hero::before, .hero::after { content: ""; position: absolute; border-radius: 50%; filter: blur(2px); }
+    .hero::before { width: 370px; height: 370px; top: -210px; left: -125px; background: rgba(163, 124, 255, .18); }
+    .hero::after { width: 400px; height: 400px; right: -180px; bottom: -250px; background: rgba(105, 87, 232, .16); }
+    .hero-grid { position: relative; display: grid; grid-template-columns: 1.02fr .98fr; align-items: center; gap: 56px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border: 1px solid #ddd8fa; border-radius: 999px; color: var(--purple); background: rgba(255,255,255,.72); font-size: 12px; font-weight: 800; }
+    .eyebrow::before { content: "●"; font-size: 10px; color: #16b47a; }
+    h1 { margin: 17px 0; font-size: clamp(38px, 5.2vw, 62px); line-height: 1.04; letter-spacing: -.055em; }
+    h1 em { color: var(--purple); font-style: normal; }
+    .hero-copy { max-width: 550px; margin: 0 0 25px; color: var(--muted); font-size: 18px; }
+    .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
+    .micro-copy { width: 100%; margin: 1px 0 0; color: var(--muted); font-size: 12px; }
+    .checks { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 24px; color: #4e4965; font-size: 13px; font-weight: 700; }
+    .checks span::before { content: "✓"; display: inline-grid; place-items: center; width: 17px; height: 17px; margin-right: 6px; border-radius: 50%; color: #fff; background: var(--green); font-size: 11px; }
+
+    .product-window { padding: 9px; border: 1px solid rgba(221, 216, 250, .9); border-radius: 21px; background: rgba(255,255,255,.76); box-shadow: var(--shadow); transform: rotate(1.5deg); }
+    .product-window-inner { overflow: hidden; border-radius: 14px; background: #f6f7ff; }
+    .window-top { display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 13px; background: #fff; border-bottom: 1px solid #eceaf6; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #ffc857; } .dot:nth-child(2) { background: #ff8f70; } .dot:nth-child(3) { background: #7ad9b0; }
+    .window-label { margin-left: 5px; color: #8b86a4; font-size: 10px; font-weight: 700; }
+    .mockup { display: grid; grid-template-columns: 68px 1fr; min-height: 342px; }
+    .mockup-rail { padding: 15px 8px; background: #211e33; }
+    .mock-logo { display: grid; place-items: center; width: 31px; height: 31px; margin: 0 auto 21px; border-radius: 9px; background: #6957e8; color: #fff; font-size: 15px; }
+    .rail-line { width: 28px; height: 5px; margin: 11px auto; border-radius: 5px; background: #4a4662; } .rail-line.active { background: #b9adff; }
+    .mock-main { padding: 18px; }
+    .mock-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+    .mock-heading strong { font-size: 13px; } .mock-heading small { color: #6957e8; font-size: 10px; font-weight: 800; }
+    .mock-tabs { display: flex; gap: 6px; overflow: hidden; margin-bottom: 14px; } .mock-tabs span { padding: 5px 7px; border-radius: 7px; color: #79748e; background: #ecebfa; font-size: 9px; white-space: nowrap; } .mock-tabs span:first-child { color: #fff; background: #6957e8; }
+    .mock-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .mock-card { padding: 8px; min-height: 111px; border: 1px solid #e4e1f2; border-radius: 9px; background: #fff; }
+    .mock-icon { display: grid; place-items: center; width: 26px; height: 26px; margin-bottom: 8px; border-radius: 7px; background: #f0eeff; font-size: 12px; }
+    .mock-card b { display: block; margin-bottom: 3px; font-size: 9px; } .mock-card i { display: block; height: 4px; margin: 4px 0; border-radius: 2px; background: #e7e5f1; } .mock-card i:nth-child(3) { width: 73%; }
+    .mock-send { display: block; width: 100%; margin-top: 8px; padding: 4px; border-radius: 5px; color: #fff; background: #6957e8; text-align: center; font-size: 8px; font-weight: 800; }
+
+    .trust { padding: 22px 0; border-bottom: 1px solid var(--line); background: #fff; }
+    .trust-inner { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 18px 34px; color: #6c6682; font-size: 13px; font-weight: 750; }
+    .trust-item { display: flex; align-items: center; gap: 8px; } .trust-icon { color: var(--green); font-size: 18px; }
+
+    section { padding: 88px 0; }
+    .section-kicker { margin: 0 0 8px; color: var(--purple); font-size: 12px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+    h2 { max-width: 680px; margin: 0; font-size: clamp(29px, 3.5vw, 43px); letter-spacing: -.045em; line-height: 1.1; }
+    .section-lead { max-width: 600px; margin: 15px 0 0; color: var(--muted); font-size: 16px; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 17px; margin-top: 38px; }
+    .feature { padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: #fff; transition: transform .18s ease, box-shadow .18s ease; }
+    .feature:hover { transform: translateY(-4px); box-shadow: 0 15px 32px rgba(50,43,100,.09); }
+    .feature-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 17px; border-radius: 13px; background: var(--lilac); font-size: 20px; }
+    .feature h3 { margin: 0 0 7px; font-size: 16px; letter-spacing: -.02em; } .feature p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .how { background: #f8f7ff; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 42px; }
+    .step { position: relative; padding: 0 8px; } .step:not(:last-child)::after { content: ""; position: absolute; top: 22px; right: -14px; width: 28px; border-top: 2px dashed #c9c2f6; }
+    .step-number { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border-radius: 50%; color: #fff; background: var(--purple); font-size: 16px; font-weight: 850; }
+    .step h3 { margin: 0 0 7px; font-size: 16px; } .step p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .offer-wrap { position: relative; overflow: hidden; border-radius: 25px; padding: 46px; color: #fff; background: linear-gradient(130deg, #211e33, #4c3cbd); box-shadow: var(--shadow); }
+    .offer-wrap::after { content: ""; position: absolute; width: 400px; height: 400px; top: -240px; right: -130px; border-radius: 50%; background: rgba(177,151,255,.26); }
+    .offer-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 35px; }
+    .offer-wrap .section-kicker { color: #c9c1ff; } .offer-wrap h2 { max-width: 630px; } .offer-wrap p { max-width: 580px; margin: 13px 0 0; color: #e1ddff; }
+    .price-card { min-width: 240px; padding: 25px; border: 1px solid rgba(255,255,255,.2); border-radius: 17px; background: rgba(255,255,255,.11); text-align: center; backdrop-filter: blur(8px); }
+    .price-card small { display: block; color: #d8d2ff; font-size: 12px; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; } .price { margin: 5px 0 3px; font-size: 43px; font-weight: 850; letter-spacing: -.05em; } .price-card p { margin: 0 0 18px; color: #d8d2ff; font-size: 12px; }
+    .price-card .button { width: 100%; color: var(--purple); background: #fff; box-shadow: none; } .price-card .button:hover { background: #f0edff; }
+    .guarantee { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 13px; color: #d8d2ff; font-size: 10px; font-weight: 700; }
+
+    .faq { max-width: 760px; margin: 35px auto 0; }
+    details { border-bottom: 1px solid var(--line); } summary { position: relative; padding: 19px 28px 19px 0; cursor: pointer; font-size: 15px; font-weight: 750; list-style: none; } summary::-webkit-details-marker { display: none; } summary::after { content: "+"; position: absolute; right: 4px; color: var(--purple); font-size: 22px; font-weight: 400; } details[open] summary::after { content: "−"; } details p { max-width: 650px; margin: -3px 0 18px; color: var(--muted); font-size: 14px; }
+
+    footer { padding: 32px 0; color: #7a758e; background: #171525; text-align: center; font-size: 12px; } footer a { color: #d1caff; }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .hero { padding-top: 58px; } .hero-grid, .offer-grid { grid-template-columns: 1fr; } .product-window { max-width: 510px; margin: 15px auto 0; transform: none; }
+      .offer-grid { text-align: center; } .offer-wrap p { margin-left: auto; margin-right: auto; } .price-card { width: min(100%, 340px); margin: 0 auto; }
+      .features, .steps { grid-template-columns: 1fr; } .step:not(:last-child)::after { display: none; }
+    }
+    @media (max-width: 510px) {
+      .container { width: min(100% - 28px, 1120px); } .nav { height: 66px; } .brand { font-size: 14px; } .button--nav { display: none; }
+      .hero { padding: 48px 0 52px; } .hero-copy { font-size: 16px; } .hero-actions .button { width: 100%; } .button--light { display: none; }
+      .mockup { grid-template-columns: 47px 1fr; } .mockup-rail { padding: 13px 5px; } .rail-line { width: 20px; } .mock-main { padding: 13px; } .offer-wrap { padding: 34px 22px; } section { padding: 62px 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">⚡ Oferta especial: <span>licença vitalícia por R$ 19,99</span> — pagamento único, sem mensalidades.</div>
+
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#inicio" aria-label="Resposta Rápida">
+        <span class="brand-mark">✦</span>
+        <span>Resposta Rápida<small>Extensão para WhatsApp Web</small></span>
+      </a>
+      <nav class="nav-links" aria-label="Navegação principal">
+        <a href="#beneficios">Benefícios</a><a href="#como-funciona">Como funciona</a><a href="#duvidas">Dúvidas</a>
+      </nav>
+      <a class="button button--nav" href="cakto link" rel="noopener noreferrer">Quero minha licença</a>
+    </div>
+  </header>
+
+  <main>
+    <section id="inicio" class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Resposta rápida, organização total</span>
+          <h1>Atenda mais rápido.<br /><em>Venda com mais agilidade.</em></h1>
+          <p class="hero-copy">Centralize suas mensagens, áudios, imagens, vídeos, PDFs e links em um só painel no WhatsApp Web. Seus conteúdos favoritos ficam a um clique de distância.</p>
+          <div class="hero-actions">
+            <a class="button" href="cakto link" rel="noopener noreferrer">Quero a licença vitalícia →</a>
+            <a class="button button--light" href="#como-funciona">Veja como funciona</a>
+            <p class="micro-copy">R$ 19,99 • pagamento único • serial enviado por e-mail</p>
+          </div>
+          <div class="checks"><span>Ativação imediata</span><span>Sem mensalidade</span><span>Compra segura</span></div>
+        </div>
+
+        <div class="product-window" aria-label="Prévia do Painel Resposta Rápida">
+          <div class="product-window-inner">
+            <div class="window-top"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span class="window-label">web.whatsapp.com</span></div>
+            <div class="mockup">
+              <aside class="mockup-rail"><div class="mock-logo">✦</div><div class="rail-line active"></div><div class="rail-line"></div><div class="rail-line"></div><div class="rail-line"></div></aside>
+              <div class="mock-main">
+                <div class="mock-heading"><strong>Meu Painel</strong><small>+ Adicionar</small></div>
+                <div class="mock-tabs"><span>💬 Mensagens</span><span>🎤 Áudios</span><span>🔗 Sites</span></div>
+                <div class="mock-cards">
+                  <div class="mock-card"><span class="mock-icon">💬</span><b>Boas-vindas</b><i></i><i></i><span class="mock-send">Enviar</span></div>
+                  <div class="mock-card"><span class="mock-icon">🎤</span><b>Apresentação</b><i></i><i></i><span class="mock-send">Enviar</span></div>
+                  <div class="mock-card"><span class="mock-icon">🔗</span><b>Catálogo</b><i></i><i></i><span class="mock-send">Enviar</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust"><div class="container trust-inner"><div class="trust-item"><span class="trust-icon">🔒</span>Pagamento em ambiente seguro</div><div class="trust-item"><span class="trust-icon">✉</span>Serial enviado direto para o e-mail</div><div class="trust-item"><span class="trust-icon">⚡</span>Liberação automática</div></div></div>
+
+    <section id="beneficios">
+      <div class="container">
+        <p class="section-kicker">Tudo no lugar certo</p>
+        <h2>Menos tempo procurando. Mais tempo fechando conversas.</h2>
+        <p class="section-lead">Transforme respostas repetitivas em um atendimento consistente, rápido e profissional.</p>
+        <div class="features">
+          <article class="feature"><div class="feature-icon">💬</div><h3>Respostas em segundos</h3><p>Guarde textos prontos e envie a resposta certa sem precisar digitar tudo de novo.</p></article>
+          <article class="feature"><div class="feature-icon">🎧</div><h3>Mídias sempre à mão</h3><p>Organize áudios, imagens, vídeos e PDFs para compartilhar quando a conversa pedir.</p></article>
+          <article class="feature"><div class="feature-icon">🔗</div><h3>Links organizados</h3><p>Salve catálogo, pagamento, portfólio e qualquer site importante em uma aba exclusiva.</p></article>
+          <article class="feature"><div class="feature-icon">★</div><h3>Favoritos prioritários</h3><p>Deixe os conteúdos que mais usa no topo do painel para responder ainda mais rápido.</p></article>
+          <article class="feature"><div class="feature-icon">◫</div><h3>Seu painel, seu jeito</h3><p>Alterne entre lista e cartões, escolha tema e ajuste a transparência do painel.</p></article>
+          <article class="feature"><div class="feature-icon">🔐</div><h3>Acesso com serial</h3><p>Ative localmente com seu serial e mantenha o painel bloqueado quando precisar.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="como-funciona" class="how">
+      <div class="container">
+        <p class="section-kicker">Simples e imediato</p>
+        <h2>Da compra ao primeiro envio em poucos passos.</h2>
+        <div class="steps">
+          <article class="step"><div class="step-number">1</div><h3>Faça sua compra</h3><p>Conclua o pagamento único de R$ 19,99 em um ambiente seguro.</p></article>
+          <article class="step"><div class="step-number">2</div><h3>Receba seu serial</h3><p>Assim que o pagamento for aprovado, seu serial é enviado automaticamente para o seu e-mail.</p></article>
+          <article class="step"><div class="step-number">3</div><h3>Ative e use</h3><p>Instale a extensão, informe o serial e comece a responder com muito mais velocidade.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="comprar">
+      <div class="container">
+        <div class="offer-wrap">
+          <div class="offer-grid">
+            <div><p class="section-kicker">Oferta de lançamento</p><h2>Uma única compra para ganhar agilidade todos os dias.</h2><p>Sem assinatura, sem cobrança recorrente. Você compra hoje, recebe seu serial por e-mail e começa a usar assim que ativar.</p></div>
+            <aside class="price-card"><small>Licença vitalícia</small><div class="price">R$ 19,99</div><p>Pagamento único • sem mensalidade</p><a class="button" href="cakto link" rel="noopener noreferrer">Comprar agora</a><div class="guarantee">🔒 Checkout protegido e seguro</div></aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="duvidas"><div class="container"><p class="section-kicker" style="text-align:center">Tire suas dúvidas</p><h2 style="margin:auto;text-align:center">Perguntas frequentes</h2><div class="faq"><details><summary>O pagamento é mensal?</summary><p>Não. A licença custa R$ 19,99 em pagamento único. Não há mensalidade ou cobrança recorrente.</p></details><details><summary>Como recebo o serial?</summary><p>Após a confirmação do pagamento, o serial é enviado automaticamente para o e-mail informado no momento da compra.</p></details><details><summary>Quando posso usar a extensão?</summary><p>Assim que receber o serial, basta instalá-la no navegador e informar o código na tela de ativação.</p></details><details><summary>É seguro comprar?</summary><p>O pagamento é realizado em ambiente de checkout seguro. Seus dados de pagamento não ficam armazenados nesta página.</p></details></div></div></section>
+  </main>
+
+  <footer><div class="container">© 2026 Resposta Rápida • Desenvolvido por <a href="https://mayconbrown.com.br" rel="noopener noreferrer">mayconbrown.com.br</a></div></footer>
+</body>
+</html>
