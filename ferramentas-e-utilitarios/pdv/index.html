@@ -219,21 +219,21 @@
                                 </div>
                                 <div>
                                     <label for="pix-id" class="block text-sm font-medium text-gray-700 mb-1">ID da Transação (opcional)</label>
-                                    <input type="text" id="pix-id" class="w-full p-3 border rounded-lg text-base" placeholder="ID do PIX">
+                                    <input type="text" id="pix-id" class="w-full p-3 border rounded-lg text-base" placeholder="ID do PIX" onchange="salvarRascunhoVenda()">
                                 </div>
                             </div>
                             
                             <div id="cartao-form" class="hidden space-y-3">
                                 <div>
                                     <label for="tipo-cartao" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                                    <select id="tipo-cartao" class="w-full p-3 border rounded-lg text-base">
+                                    <select id="tipo-cartao" class="w-full p-3 border rounded-lg text-base" onchange="salvarRascunhoVenda()">
                                         <option value="credito">Crédito</option>
                                         <option value="debito">Débito</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label for="parcelas" class="block text-sm font-medium text-gray-700 mb-1">Parcelas</label>
-                                    <select id="parcelas" class="w-full p-3 border rounded-lg text-base">
+                                    <select id="parcelas" class="w-full p-3 border rounded-lg text-base" onchange="salvarRascunhoVenda()">
                                         <option value="1">1x</option>
                                         <option value="2">2x</option>
                                         <option value="3">3x</option>
@@ -863,6 +863,7 @@ if ('serviceWorker' in navigator) {
         let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"senha": "1234", "nomeEmpresa": "PDV - Sistema de Caixa", "cnpj": ""}');
         let carrinho = [];
         let vendaAtual = null;
+        const CHAVE_RASCUNHO_VENDA = 'pdv_rascunho_venda';
         let produtoEditando = null;
         let movimentoEditando = null;
         let vendaParaComprovante = null;
@@ -873,6 +874,7 @@ if ('serviceWorker' in navigator) {
         document.addEventListener('DOMContentLoaded', function() {
             carregarDados();
             carregarConfigPix();
+            restaurarRascunhoVenda();
             atualizarInterface();
             configurarAtalhos();
             atualizarInfoPix();
@@ -1737,6 +1739,7 @@ function showInstallButton() {
             if (vendaAtual) {
                 calcularTroco();
             }
+            salvarRascunhoVenda();
         }
 
         // Pagamento
@@ -1756,6 +1759,7 @@ function showInstallButton() {
                 // Limpar QR Code anterior
                 document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
             }
+            salvarRascunhoVenda();
         }
 
         function gerarQRCodePix() {
@@ -1990,6 +1994,7 @@ function showInstallButton() {
             
             document.getElementById('troco').textContent = `R$ ${troco.toFixed(2)}`;
             document.getElementById('troco').className = troco >= 0 ? 'text-green-600' : 'text-red-600';
+            salvarRascunhoVenda();
         }
 
         function finalizarVenda() {
@@ -2074,6 +2079,7 @@ function showInstallButton() {
         function limparVenda() {
             carrinho = [];
             vendaAtual = null;
+            localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
             document.getElementById('desconto').value = '0';
             document.getElementById('valor-recebido').value = '';
             document.getElementById('pix-id').value = '';
@@ -3208,6 +3214,45 @@ function showInstallButton() {
             localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
             localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
+        }
+
+        function salvarRascunhoVenda() {
+            if (!carrinho.length) {
+                localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
+                return;
+            }
+            const rascunho = {
+                carrinho,
+                vendaAtual,
+                desconto: document.getElementById('desconto').value,
+                valorRecebido: document.getElementById('valor-recebido').value,
+                pixId: document.getElementById('pix-id').value,
+                tipoCartao: document.getElementById('tipo-cartao').value,
+                parcelas: document.getElementById('parcelas').value
+            };
+            localStorage.setItem(CHAVE_RASCUNHO_VENDA, JSON.stringify(rascunho));
+        }
+
+        function restaurarRascunhoVenda() {
+            try {
+                const rascunho = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO_VENDA) || 'null');
+                if (!rascunho || !Array.isArray(rascunho.carrinho) || !rascunho.carrinho.length) return;
+                carrinho = rascunho.carrinho;
+                vendaAtual = rascunho.vendaAtual || null;
+                document.getElementById('desconto').value = rascunho.desconto || '0';
+                document.getElementById('valor-recebido').value = rascunho.valorRecebido || '';
+                document.getElementById('pix-id').value = rascunho.pixId || '';
+                document.getElementById('tipo-cartao').value = rascunho.tipoCartao || 'credito';
+                document.getElementById('parcelas').value = rascunho.parcelas || '1';
+                if (vendaAtual?.tipo) {
+                    document.getElementById('pagamento-detalhes').classList.remove('hidden');
+                    document.querySelectorAll('#pagamento-detalhes > div').forEach(div => div.classList.add('hidden'));
+                    document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
+                }
+            } catch (erro) {
+                console.warn('Não foi possível restaurar a venda em andamento:', erro);
+                localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
+            }
         }
 
         function carregarDados() {

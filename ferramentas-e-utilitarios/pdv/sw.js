@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdv-caixa-v3';
+const CACHE_NAME = 'pdv-caixa-v4';
 const APP_SHELL = [
   './', './index.html', './manifest.json',
   'https://cdn.tailwindcss.com',
