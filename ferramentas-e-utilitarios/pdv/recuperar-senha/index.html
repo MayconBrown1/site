@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar senha do administrador — PDV</title>
+  <style>
+    :root { --teal: #0f766e; --ink: #172033; --muted: #526177; --line: #dbe4ee; --bg: #f1f5f9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: Arial, Helvetica, sans-serif; line-height: 1.55; }
+    main { width: min(760px, calc(100% - 32px)); margin: 36px auto; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: clamp(24px, 5vw, 42px); box-shadow: 0 10px 30px rgba(15, 23, 42, .08); }
+    .tag { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #ccfbf1; color: #115e59; font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    h1 { font-size: clamp(1.7rem, 5vw, 2.35rem); line-height: 1.15; margin: 15px 0 12px; }
+    h2 { font-size: 1.15rem; margin: 0 0 8px; }
+    p { margin: 0 0 16px; color: var(--muted); }
+    .notice { border-left: 4px solid #f59e0b; background: #fffbeb; padding: 14px 16px; border-radius: 8px; color: #713f12; margin: 24px 0; }
+    .steps { display: grid; gap: 16px; margin-top: 24px; }
+    .step { border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+    .step-title { display: flex; align-items: center; gap: 10px; }
+    .number { display: grid; place-items: center; flex: none; width: 29px; height: 29px; border-radius: 50%; background: var(--teal); color: #fff; font-size: .9rem; font-weight: bold; }
+    code { font-family: Consolas, Monaco, monospace; }
+    .inline-code { background: #e8eef5; color: #172033; padding: 2px 5px; border-radius: 4px; }
+    .command { margin-top: 12px; overflow: hidden; border-radius: 9px; background: #0f172a; }
+    .command pre { overflow-x: auto; margin: 0; padding: 15px 16px; color: #e2e8f0; font-size: .9rem; white-space: pre-wrap; word-break: break-word; }
+    .copy { width: 100%; border: 0; padding: 11px 14px; background: #0f766e; color: #fff; font-size: .95rem; font-weight: 700; cursor: pointer; }
+    .copy:hover, .copy:focus { background: #115e59; }
+    .result { margin-top: 24px; padding: 16px; border-radius: 10px; background: #ecfdf5; color: #065f46; }
+    .footer { text-align: center; font-size: .85rem; color: #64748b; margin: 22px 0 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card">
+      <span class="tag">PDV · Ajuda</span>
+      <h1>Recuperar a senha do administrador</h1>
+      <p>Use este passo a passo somente no computador e navegador em que o PDV é utilizado. Ele redefine apenas a senha administrativa; produtos, vendas e dados do caixa não serão apagados.</p>
+
+      <div class="notice"><strong>Atenção:</strong> siga os comandos exatamente como estão abaixo. Não cole comandos recebidos de pessoas ou sites desconhecidos no Console do navegador.</div>
+
+      <div class="steps">
+        <article class="step">
+          <div class="step-title"><span class="number">1</span><h2>Abra as ferramentas do navegador</h2></div>
+          <p>Com o PDV aberto, pressione a tecla <code class="inline-code">F12</code> no teclado.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-title"><span class="number">2</span><h2>Abra a aba Console</h2></div>
+          <p>Na janela que aparecer, clique na aba <strong>Console</strong>.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-title"><span class="number">3</span><h2>Libere a colagem</h2></div>
+          <p>Se aparecer o aviso amarelo “Don’t paste code…”, não use o botão de copiar ainda. Clique na área de digitação do Console e <strong>digite manualmente</strong> a palavra abaixo — não copie e cole esta etapa.</p>
+          <div class="command"><pre><code>allow pasting</code></pre></div>
+          <p style="margin:12px 0 0">Depois, pressione <strong>Enter</strong>. Esse texto apenas libera a colagem no Console.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-title"><span class="number">4</span><h2>Redefina a configuração da senha</h2></div>
+          <p>Agora clique em <strong>Copiar comando</strong>, cole no Console e pressione <strong>Enter</strong>.</p>
+          <div class="command"><pre><code id="comando-reset">localStorage.removeItem('pdv_config_sistema')</code></pre><button class="copy" type="button" data-copy="comando-reset">Copiar comando</button></div>
+        </article>
+
+        <article class="step">
+          <div class="step-title"><span class="number">5</span><h2>Recarregue o PDV</h2></div>
+          <p>Por fim, copie este segundo comando, cole no Console e pressione <strong>Enter</strong>.</p>
+          <div class="command"><pre><code id="comando-recarregar">location.reload()</code></pre><button class="copy" type="button" data-copy="comando-recarregar">Copiar comando</button></div>
+        </article>
+      </div>
+
+      <div class="result"><strong>Pronto.</strong> Quando o PDV voltar, entre na área ADM usando a senha padrão <strong>1234</strong>. Depois, altere-a para uma nova senha de sua preferência.</div>
+    </section>
+    <p class="footer">Guia de recuperação de senha do PDV</p>
+  </main>
+
+  <script>
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const texto = document.getElementById(button.dataset.copy).textContent;
+        try {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(texto);
+          } else {
+            const campo = document.createElement('textarea');
+            campo.value = texto;
+            campo.style.position = 'fixed';
+            campo.style.opacity = '0';
+            document.body.appendChild(campo);
+            campo.select();
+            document.execCommand('copy');
+            campo.remove();
+          }
+          const original = button.textContent;
+          button.textContent = 'Copiado!';
+          setTimeout(() => { button.textContent = original; }, 1800);
+        } catch (erro) {
+          button.textContent = 'Não foi possível copiar';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
