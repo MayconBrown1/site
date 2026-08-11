@@ -278,10 +278,7 @@
                             </div>
                             <div>
                                 <label for="produto-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
-                                <div class="flex gap-2">
-                                    <input type="text" id="produto-codigo" class="min-w-0 flex-1 p-3 border rounded-lg text-base">
-                                    <button type="button" onclick="abrirLeitorCodigoBarras('cadastro')" class="md:hidden shrink-0 rounded-lg bg-teal-600 px-4 text-xl text-white shadow-sm hover:bg-teal-700" aria-label="Ler código de barras com a câmera" title="Ler código de barras">📷</button>
-                                </div>
+                                <input type="text" id="produto-codigo" class="w-full p-3 border rounded-lg text-base">
                             </div>
                             <div>
                                 <label for="produto-preco" class="block text-sm font-medium text-gray-700 mb-1" id="label-produto-preco">Preço de Venda *</label>
@@ -474,8 +471,7 @@
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🛠️ Produtos e serviços</h3><p class="mt-2 text-sm text-slate-700">No cadastro, escolha <strong>Produto</strong> ou <strong>Serviço</strong>. Serviços não controlam estoque e o valor unitário pode ser alterado no carrinho antes de concluir a venda.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🏷️ Categorias reutilizáveis</h3><p class="mt-2 text-sm text-slate-700">Há categorias padrão e você pode criar outras no cadastro usando <strong>+ Nova</strong>. Em <strong>Gerenciar</strong>, use o botão <strong>×</strong> para excluir uma categoria que não deseja mais.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🔎 Venda mais rápida com leitor</h3><p class="mt-2 text-sm text-slate-700">Ao abrir ou voltar a <strong>Vendas</strong>, o cursor fica automaticamente no campo de busca. Basta ler o código de barras ou digitar o código/nome do item.</p></article>
-                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">📷 Leitura pela câmera do celular</h3><p class="mt-2 text-sm text-slate-700">No celular, toque no ícone de câmera ao lado da busca e aponte para o <strong>código de barras</strong>. O produto cadastrado é localizado e adicionado ao carrinho automaticamente. Ao confirmar a leitura, o PDV emite um bipe. Use o PDV em HTTPS e no Chrome atualizado.</p></article>
-                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">➕ Código de barras no cadastro</h3><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar um produto pelo celular, toque no ícone de câmera ao lado de <strong>Código de Barras</strong>. A leitura preenche o campo automaticamente, sem precisar digitar.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">📷 Leitura pela câmera do celular</h3><p class="mt-2 text-sm text-slate-700">No celular, toque no ícone de câmera ao lado da busca e aponte para o <strong>código de barras</strong>. O produto cadastrado é localizado e adicionado ao carrinho automaticamente. Use o PDV em HTTPS e no Chrome atualizado.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">📦 Backup e funcionamento offline</h3><p class="mt-2 text-sm text-slate-700">O backup ficou compatível com mais navegadores e o PDV passou a usar cache para os recursos essenciais. Faça backups periódicos na área ADM.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">✨ Interface renovada</h3><p class="mt-2 text-sm text-slate-700">A tela recebeu visual mais moderno, melhor contraste, adaptação para celular e ajustes de segurança no acesso administrativo.</p></article>
                     </div>
@@ -1284,9 +1280,8 @@ function showInstallButton() {
         let detectorCodigoBarras = null;
         let ultimoCodigoLido = '';
         let ultimoCodigoLidoEm = 0;
-        let destinoLeitorCodigo = 'venda';
 
-        async function abrirLeitorCodigoBarras(destino = 'venda') {
+        async function abrirLeitorCodigoBarras() {
             if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
                 mostrarMensagem('A câmera exige que o PDV esteja aberto em HTTPS.', 'erro');
                 return;
@@ -1299,8 +1294,6 @@ function showInstallButton() {
             const modal = document.getElementById('modal-leitor-codigo');
             const video = document.getElementById('video-leitor-codigo');
             const status = document.getElementById('status-leitor-codigo');
-            destinoLeitorCodigo = destino;
-            document.getElementById('titulo-leitor-codigo').textContent = destino === 'cadastro' ? 'Ler código para o cadastro' : 'Ler código de barras';
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             status.textContent = 'Solicitando acesso à câmera...';
@@ -1340,22 +1333,12 @@ function showInstallButton() {
                     if (codigo && (codigo !== ultimoCodigoLido || agora - ultimoCodigoLidoEm > 1800)) {
                         ultimoCodigoLido = codigo;
                         ultimoCodigoLidoEm = agora;
-                        if (destinoLeitorCodigo === 'cadastro') {
-                            document.getElementById('produto-codigo').value = codigo;
-                            status.textContent = `Código lido: ${codigo}`;
-                            fecharLeitorCodigoBarras(false);
-                            document.getElementById('produto-codigo').focus();
-                            mostrarMensagem('Código de barras preenchido no cadastro.', 'sucesso');
-                            return;
-                        }
                         const produto = produtos.find(item => String(item.codigo || '') === codigo);
                         if (produto) {
                             status.textContent = `Código encontrado: ${produto.nome}`;
                             fecharLeitorCodigoBarras(false);
-                            if (adicionarAoCarrinho(produto.id)) {
-                                tocarBipeLeitura();
-                                mostrarMensagem(`${produto.nome} adicionado ao carrinho.`, 'sucesso');
-                            }
+                            adicionarAoCarrinho(produto.id);
+                            mostrarMensagem(`${produto.nome} adicionado ao carrinho.`, 'sucesso');
                             return;
                         }
                         document.getElementById('busca-produto').value = codigo;
@@ -1382,27 +1365,6 @@ function showInstallButton() {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             if (focarBusca) focarBuscaProduto();
-        }
-
-        function tocarBipeLeitura() {
-            try {
-                const ContextoAudio = window.AudioContext || window.webkitAudioContext;
-                if (!ContextoAudio) return;
-                const contexto = new ContextoAudio();
-                const oscilador = contexto.createOscillator();
-                const ganho = contexto.createGain();
-                oscilador.type = 'sine';
-                oscilador.frequency.setValueAtTime(1500, contexto.currentTime);
-                ganho.gain.setValueAtTime(0.08, contexto.currentTime);
-                ganho.gain.exponentialRampToValueAtTime(0.001, contexto.currentTime + 0.12);
-                oscilador.connect(ganho);
-                ganho.connect(contexto.destination);
-                oscilador.start();
-                oscilador.stop(contexto.currentTime + 0.12);
-                oscilador.addEventListener('ended', () => contexto.close());
-            } catch (erro) {
-                console.warn('Não foi possível tocar o bipe de leitura:', erro);
-            }
         }
 
         function buscarProduto(termo) {
@@ -1583,18 +1545,18 @@ function showInstallButton() {
         // Gerenciamento do carrinho
         function adicionarAoCarrinho(produtoId) {
             const produto = produtos.find(p => p.id === produtoId);
-            if (!produto) return false;
+            if (!produto) return;
 
             const ehServico = produto.tipo === 'servico';
             if (!ehServico && produto.estoque <= 0) {
                 mostrarMensagem('Produto sem estoque!', 'erro');
-                return false;
+                return;
             }
 
             // Se for produto por kg, mostrar modal para inserir peso
             if (!ehServico && produto.unidade === 'kg') {
                 mostrarModalPesagem(produto);
-                return false;
+                return;
             }
 
             const itemExistente = carrinho.find(item => item.produtoId === produtoId);
@@ -1602,7 +1564,7 @@ function showInstallButton() {
             if (itemExistente) {
                 if (!ehServico && itemExistente.quantidade >= produto.estoque) {
                     mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
-                    return false;
+                    return;
                 }
                 itemExistente.quantidade += 1;
             } else {
@@ -1619,7 +1581,6 @@ function showInstallButton() {
             atualizarCarrinho();
             document.getElementById('busca-produto').value = '';
             document.getElementById('busca-produto').focus();
-            return true;
         }
 
         function alterarQuantidade(produtoId, novaQuantidade) {
@@ -1648,7 +1609,7 @@ function showInstallButton() {
             if (!item || !Number.isFinite(preco) || preco < 0) {
                 mostrarMensagem('Informe um valor válido para o serviço.', 'erro');
                 atualizarCarrinho();
-                return false;
+                return;
             }
             item.preco = preco;
             atualizarCarrinho();
@@ -3095,7 +3056,7 @@ function showInstallButton() {
 
             if (cnpj && !validarCNPJ(cnpj)) {
                 mostrarMensagem('Informe um CNPJ válido ou deixe o campo vazio.', 'erro');
-                return false;
+                return;
             }
             configSistema.cnpj = cnpj;
             

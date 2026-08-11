@@ -1,0 +1,16 @@
+{
+  "name": "PDV",
+  "short_name": "PDV - Sistema de Caixa",
+  "description": "Sistema de frente de caixa simples e profissional.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/img/pdv1-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    }
+  ]
+}
