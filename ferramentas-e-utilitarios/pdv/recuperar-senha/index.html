@@ -34,7 +34,7 @@
     <section class="card">
       <span class="tag">PDV · Ajuda</span>
       <h1>Recuperar a senha do administrador</h1>
-      <p>Use este passo a passo somente no computador e navegador em que o PDV é utilizado. Ele redefine apenas a senha administrativa; produtos, vendas e dados do caixa não serão apagados.</p>
+      <p>Use este passo a passo somente no computador e navegador em que o PDV é utilizado. Ele redefine apenas a senha administrativa e preserva o nome da empresa, CNPJ, produtos, vendas e dados do caixa.</p>
 
       <div class="notice"><strong>Atenção:</strong> siga os comandos exatamente como estão abaixo. Não cole comandos recebidos de pessoas ou sites desconhecidos no Console do navegador.</div>
 
@@ -57,9 +57,9 @@
         </article>
 
         <article class="step">
-          <div class="step-title"><span class="number">4</span><h2>Redefina a configuração da senha</h2></div>
+          <div class="step-title"><span class="number">4</span><h2>Redefina somente a senha</h2></div>
           <p>Agora clique em <strong>Copiar comando</strong>, cole no Console e pressione <strong>Enter</strong>.</p>
-          <div class="command"><pre><code id="comando-reset">localStorage.removeItem('pdv_config_sistema')</code></pre><button class="copy" type="button" data-copy="comando-reset">Copiar comando</button></div>
+          <div class="command"><pre><code id="comando-reset">const config = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{}'); config.senha = '1234'; localStorage.setItem('pdv_config_sistema', JSON.stringify(config))</code></pre><button class="copy" type="button" data-copy="comando-reset">Copiar comando</button></div>
         </article>
 
         <article class="step">
