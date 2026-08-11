@@ -1,11 +1,11 @@
 {
   "name": "PDV",
   "short_name": "PDV - Sistema de Caixa",
-  "description": "Soluções Digitais para o Seu Dia a Dia",
-  "start_url": "/ferramentas-e-utilitarios/pdv",
+  "description": "Sistema de frente de caixa simples e profissional.",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FFFFFF",
+  "background_color": "#f1f5f9",
+  "theme_color": "#0f766e",
   "icons": [
     {
       "src": "/img/pdv1-152.png",

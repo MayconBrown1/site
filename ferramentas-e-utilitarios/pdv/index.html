@@ -6,7 +6,7 @@
     <title>PDV - Sistema de Frente de Caixa</title>
     <link rel="shortcut icon" href="/img/pdv1.ico" type="image/x-icon">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#FFFFFF">
+    <meta name="theme-color" content="#0f766e">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -82,10 +82,28 @@
   transition: 0.3s;
 }
 
-.opiniao-btn:hover{
+        .opiniao-btn:hover{
   background: #1b5dbf;
   transform: scale(1.05);
 }
+
+        /* Identidade visual do PDV */
+        :root { --pdv-primary: #0f766e; --pdv-primary-dark: #115e59; --pdv-accent: #f59e0b; --pdv-ink: #172033; }
+        body { background: #f1f5f9; color: var(--pdv-ink); }
+        header { background: linear-gradient(120deg, #0f766e 0%, #0b4f4a 100%) !important; border-bottom: 1px solid rgba(255,255,255,.14); }
+        header h1::before { content: '◈'; color: #fbbf24; margin-right: .55rem; }
+        header button { background: rgba(255,255,255,.12) !important; border: 1px solid rgba(255,255,255,.15); font-weight: 600; }
+        header button:hover { background: rgba(255,255,255,.22) !important; transform: translateY(-1px); }
+        main { max-width: 1600px; width: 100%; margin: 0 auto; }
+        .bg-white.rounded-lg.shadow-md { border: 1px solid #e2e8f0; box-shadow: 0 8px 24px rgba(15, 23, 42, .06); border-radius: .9rem; }
+        input, select, textarea { border-color: #cbd5e1 !important; }
+        input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(13, 148, 136, .16) !important; border-color: #0f766e !important; }
+        button { transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease; }
+        button:hover { box-shadow: 0 4px 12px rgba(15,23,42,.12); }
+        #total-venda, #comprovante-total-final { letter-spacing: -.025em; }
+        .pdv-cnpj-hint { font-size: .75rem; color: #64748b; margin-top: .35rem; }
+        @media print { .print-area { width: 72mm; font-family: monospace; } }
+        @media (max-width: 640px) { main { padding: .75rem !important; } header { position: sticky; top: 0; z-index: 40; } .opiniao-btn { bottom: 12px; left: 12px; padding: 10px 13px; } }
 
     </style>
 </head>
@@ -234,15 +252,22 @@
             <div id="produtos-section" class="section hidden">
                 <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-6">
-                        <h2 class="text-xl lg:text-2xl font-semibold">Gerenciar Produtos</h2>
+                        <h2 class="text-xl lg:text-2xl font-semibold">Produtos e Serviços</h2>
                         <button onclick="mostrarFormProduto()" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
-                            Novo Produto
+                            Novo item
                         </button>
                     </div>
                     
                     <div id="form-produto" class="hidden mb-4 lg:mb-6 p-4 bg-gray-50 rounded-lg">
-                        <h3 class="text-base lg:text-lg font-semibold mb-4">Cadastrar/Editar Produto</h3>
+                        <h3 class="text-base lg:text-lg font-semibold mb-4">Cadastrar/Editar Produto ou Serviço</h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+                            <div>
+                                <label for="produto-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                                <select id="produto-tipo" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposTipoItem()">
+                                    <option value="produto">Produto</option>
+                                    <option value="servico">Serviço</option>
+                                </select>
+                            </div>
                             <div>
                                 <label for="produto-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
                                 <input type="text" id="produto-nome" required class="w-full p-3 border rounded-lg text-base">
@@ -252,14 +277,14 @@
                                 <input type="text" id="produto-codigo" class="w-full p-3 border rounded-lg text-base">
                             </div>
                             <div>
-                                <label for="produto-preco" class="block text-sm font-medium text-gray-700 mb-1">Preço de Venda *</label>
+                                <label for="produto-preco" class="block text-sm font-medium text-gray-700 mb-1" id="label-produto-preco">Preço de Venda *</label>
                                 <input type="number" id="produto-preco" step="0.01" min="0" required class="w-full p-3 border rounded-lg text-base">
                             </div>
-                            <div>
+                            <div id="campo-produto-custo">
                                 <label for="produto-custo" class="block text-sm font-medium text-gray-700 mb-1">Custo</label>
                                 <input type="number" id="produto-custo" step="0.01" min="0" class="w-full p-3 border rounded-lg text-base">
                             </div>
-                            <div>
+                            <div id="campo-produto-unidade">
                                 <label for="produto-unidade" class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
                                 <select id="produto-unidade" class="w-full p-3 border rounded-lg text-base">
                                     <option value="un">Unidade</option>
@@ -269,13 +294,19 @@
                                     <option value="ml">Mililitro</option>
                                 </select>
                             </div>
-                            <div>
+                            <div id="campo-produto-estoque">
                                 <label for="produto-estoque" class="block text-sm font-medium text-gray-700 mb-1">Estoque Inicial</label>
                                 <input type="number" id="produto-estoque" step="0.01" min="0" value="0" class="w-full p-3 border rounded-lg text-base">
                             </div>
                             <div class="sm:col-span-2 lg:col-span-1">
                                 <label for="produto-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                                <input type="text" id="produto-categoria" class="w-full p-3 border rounded-lg text-base">
+                                <div class="flex gap-2">
+                                    <input type="text" id="produto-categoria" list="lista-categorias" class="w-full p-3 border rounded-lg text-base" placeholder="Selecione ou crie uma categoria">
+                                    <button type="button" onclick="adicionarCategoria()" class="shrink-0 bg-teal-600 hover:bg-teal-700 text-white px-3 rounded-lg text-sm font-semibold" title="Adicionar nova categoria">+ Nova</button>
+                                    <button type="button" onclick="mostrarGerenciadorCategorias()" class="shrink-0 bg-slate-600 hover:bg-slate-700 text-white px-3 rounded-lg text-sm font-semibold" title="Gerenciar categorias">Gerenciar</button>
+                                </div>
+                                <datalist id="lista-categorias"></datalist>
+                                <p class="pdv-cnpj-hint">Digite uma nova categoria e clique em “+ Nova” para salvá-la.</p>
                             </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3 mt-4">
@@ -299,7 +330,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-2 text-left">Nome</th>
-                                    <th class="px-4 py-2 text-left">Código</th>
+                                    <th class="px-4 py-2 text-left">Tipo / Código</th>
                                     <th class="px-4 py-2 text-right">Preço</th>
                                     <th class="px-4 py-2 text-right">Estoque</th>
                                     <th class="px-4 py-2 text-left">Categoria</th>
@@ -497,6 +528,11 @@
                                     <label for="adm-nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
                                     <input type="text" id="adm-nome-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="Nome que aparece no comprovante">
                                 </div>
+                                <div>
+                                    <label for="adm-cnpj-empresa" class="block text-sm font-medium text-gray-700 mb-1">CNPJ da Empresa</label>
+                                    <input type="text" id="adm-cnpj-empresa" inputmode="numeric" maxlength="18" class="w-full p-3 border rounded-lg text-base" placeholder="00.000.000/0000-00" oninput="formatarCampoCNPJ(this)">
+                                    <p class="pdv-cnpj-hint">Opcional. Será exibido no comprovante e no cupom térmico.</p>
+                                </div>
                             </div>
                             
                             <div class="flex gap-3 mt-4">
@@ -512,6 +548,16 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="modal-categorias" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-categorias">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-5 border-b">
+                <h3 id="titulo-modal-categorias" class="text-lg font-bold">Gerenciar categorias</h3>
+                <button type="button" onclick="fecharGerenciadorCategorias()" class="text-slate-500 hover:text-slate-900 text-2xl leading-none" aria-label="Fechar">×</button>
+            </div>
+            <div id="lista-gerenciador-categorias" class="p-5 overflow-y-auto space-y-2"></div>
+        </div>
     </div>
 
     <!-- Modal de Editar Movimento -->
@@ -679,7 +725,7 @@
 
     <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('./sw.js')
     .then(() => console.log('Service Worker registrado'))
     .catch(err => console.error('Erro ao registrar SW:', err));
 }
@@ -713,6 +759,31 @@ if ('serviceWorker' in navigator) {
          * 5. BANCO: Altere 'nomeBanco' (apenas para exibição)
          */
         
+        function formatarCNPJ(valor) {
+            const digitos = String(valor || '').replace(/\D/g, '').slice(0, 14);
+            return digitos.replace(/^(\d{2})(\d)/, '$1.$2')
+                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1/$2')
+                .replace(/(\d{4})(\d)/, '$1-$2');
+        }
+
+        function formatarCampoCNPJ(campo) {
+            campo.value = formatarCNPJ(campo.value);
+        }
+
+        function validarCNPJ(cnpj) {
+            cnpj = String(cnpj).replace(/\D/g, '');
+            if (cnpj.length !== 14 || /^(\d)\1{13}$/.test(cnpj)) return false;
+            const calcularDigito = (base, pesos) => {
+                const soma = base.split('').reduce((total, digito, indice) => total + Number(digito) * pesos[indice], 0);
+                const resto = soma % 11;
+                return resto < 2 ? 0 : 11 - resto;
+            };
+            const primeiro = calcularDigito(cnpj.slice(0, 12), [5,4,3,2,9,8,7,6,5,4,3,2]);
+            const segundo = calcularDigito(cnpj.slice(0, 12) + primeiro, [6,5,4,3,2,9,8,7,6,5,4,3,2]);
+            return Number(cnpj[12]) === primeiro && Number(cnpj[13]) === segundo;
+        }
+
         const CONFIG_PIX = {
             chavePix: '00000000000',           // ⬅️ ALTERE AQUI: Sua chave PIX
             nomeRecebedor: 'Seu Nome Aqui',  // ⬅️ ALTERE AQUI: Seu nome completo
@@ -725,10 +796,21 @@ if ('serviceWorker' in navigator) {
         // ========================================
 
         // Estado da aplicação
+        const CATEGORIAS_PADRAO = [
+            'Alimentos', 'Bebidas', 'Doces e Sobremesas', 'Roupas e Calçados',
+            'Acessórios', 'Casa e Decoração', 'Eletrônicos', 'Informática',
+            'Celulares', 'Software', 'Papelaria', 'Brinquedos',
+            'Beleza e Cosméticos', 'Higiene e Limpeza', 'Ferramentas',
+            'Automotivo', 'Esportes', 'Pet', 'Personalizados e Brindes',
+            'Serviços', 'Produtos Digitais', 'Outros'
+        ];
         let produtos = JSON.parse(localStorage.getItem('pdv_produtos') || '[]');
         let vendas = JSON.parse(localStorage.getItem('pdv_vendas') || '[]');
         let movimentos = JSON.parse(localStorage.getItem('pdv_movimentos') || '[]');
-        let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"senha": "1234", "nomeEmpresa": "PDV - Sistema de Caixa"}');
+        let categoriasOcultas = JSON.parse(localStorage.getItem('pdv_categorias_ocultas') || '[]');
+        let categorias = [...new Set([...CATEGORIAS_PADRAO, ...JSON.parse(localStorage.getItem('pdv_categorias') || '[]')])]
+            .filter(categoria => !categoriasOcultas.includes(categoria));
+        let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"senha": "1234", "nomeEmpresa": "PDV - Sistema de Caixa", "cnpj": ""}');
         let carrinho = [];
         let vendaAtual = null;
         let produtoEditando = null;
@@ -802,6 +884,16 @@ if ('serviceWorker' in navigator) {
         }
 
         // Navegação entre seções
+        function focarBuscaProduto() {
+            const campo = document.getElementById('busca-produto');
+            const secaoVendas = document.getElementById('vendas-section');
+            if (!campo || secaoVendas.classList.contains('hidden')) return;
+            requestAnimationFrame(() => {
+                campo.focus({ preventScroll: true });
+                campo.select();
+            });
+        }
+
         function showSection(sectionName) {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
@@ -817,6 +909,7 @@ if ('serviceWorker' in navigator) {
                 calcularSaldoCaixa();
             } else if (sectionName === 'vendas') {
                 atualizarListaProdutos();
+                focarBuscaProduto();
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
             }
@@ -835,6 +928,7 @@ if ('serviceWorker' in navigator) {
         }
 
         function limparFormProduto() {
+            document.getElementById('produto-tipo').value = 'produto';
             document.getElementById('produto-nome').value = '';
             document.getElementById('produto-codigo').value = '';
             document.getElementById('produto-preco').value = '';
@@ -842,25 +936,38 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-unidade').value = 'un';
             document.getElementById('produto-estoque').value = '0';
             document.getElementById('produto-categoria').value = '';
+            atualizarCamposTipoItem();
+        }
+
+        function atualizarCamposTipoItem() {
+            const ehServico = document.getElementById('produto-tipo').value === 'servico';
+            document.getElementById('campo-produto-custo').classList.toggle('hidden', ehServico);
+            document.getElementById('campo-produto-unidade').classList.toggle('hidden', ehServico);
+            document.getElementById('campo-produto-estoque').classList.toggle('hidden', ehServico);
+            document.getElementById('produto-codigo').closest('div').classList.toggle('hidden', ehServico);
+            document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
+            document.getElementById('produto-preco').required = !ehServico;
         }
 
         function salvarProduto() {
             const nome = document.getElementById('produto-nome').value.trim();
             const preco = parseFloat(document.getElementById('produto-preco').value);
+            const tipo = document.getElementById('produto-tipo').value;
             
-            if (!nome || !preco || preco <= 0) {
-                mostrarMensagem('Nome e preço são obrigatórios e o preço deve ser maior que zero!', 'erro');
+            if (!nome || Number.isNaN(preco) || preco < 0 || (tipo === 'produto' && preco <= 0)) {
+                mostrarMensagem(tipo === 'servico' ? 'Informe o nome e um valor-base válido para o serviço.' : 'Nome e preço são obrigatórios e o preço deve ser maior que zero!', 'erro');
                 return;
             }
 
             const produto = {
                 id: produtoEditando ? produtoEditando.id : 'p_' + Date.now(),
+                tipo: tipo,
                 nome: nome,
-                codigo: document.getElementById('produto-codigo').value.trim(),
+                codigo: tipo === 'servico' ? '' : document.getElementById('produto-codigo').value.trim(),
                 preco: preco,
-                custo: parseFloat(document.getElementById('produto-custo').value) || 0,
-                unidade: document.getElementById('produto-unidade').value,
-                estoque: parseFloat(document.getElementById('produto-estoque').value) || 0,
+                custo: tipo === 'servico' ? 0 : (parseFloat(document.getElementById('produto-custo').value) || 0),
+                unidade: tipo === 'servico' ? 'serviço' : document.getElementById('produto-unidade').value,
+                estoque: tipo === 'servico' ? null : (parseFloat(document.getElementById('produto-estoque').value) || 0),
                 categoria: document.getElementById('produto-categoria').value.trim()
             };
 
@@ -871,11 +978,111 @@ if ('serviceWorker' in navigator) {
                 produtos.push(produto);
             }
 
+            registrarCategoria(produto.categoria);
+
             salvarDados();
             atualizarTabelaProdutos();
             atualizarListaProdutos();
             cancelarEdicaoProduto();
             mostrarMensagem('Produto salvo com sucesso!', 'sucesso');
+        }
+
+        function normalizarCategoria(categoria) {
+            return String(categoria || '').trim().replace(/\s+/g, ' ');
+        }
+
+        function registrarCategoria(categoria) {
+            const nome = normalizarCategoria(categoria);
+            if (!nome) return false;
+            categoriasOcultas = categoriasOcultas.filter(item => item.toLocaleLowerCase('pt-BR') !== nome.toLocaleLowerCase('pt-BR'));
+            if (categorias.some(item => item.toLocaleLowerCase('pt-BR') === nome.toLocaleLowerCase('pt-BR'))) return false;
+            categorias.push(nome);
+            categorias.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
+            localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
+            atualizarListaCategorias();
+            return true;
+        }
+
+        function adicionarCategoria() {
+            const campo = document.getElementById('produto-categoria');
+            const categoria = normalizarCategoria(campo.value);
+            if (!categoria) {
+                mostrarMensagem('Digite o nome da nova categoria primeiro.', 'erro');
+                campo.focus();
+                return;
+            }
+            if (registrarCategoria(categoria)) {
+                campo.value = categoria;
+                mostrarMensagem(`Categoria “${categoria}” adicionada.`, 'sucesso');
+            } else {
+                mostrarMensagem('Esta categoria já está disponível.', 'erro');
+            }
+        }
+
+        function atualizarListaCategorias() {
+            const lista = document.getElementById('lista-categorias');
+            if (!lista) return;
+            const categoriasDosProdutos = produtos.map(produto => normalizarCategoria(produto.categoria)).filter(Boolean);
+            const opcoes = [...new Set([...categorias, ...categoriasDosProdutos].map(categoria => categoria.toLocaleLowerCase('pt-BR')))]
+                .map(categoriaNormalizada => [...categorias, ...categoriasDosProdutos].find(categoria => categoria.toLocaleLowerCase('pt-BR') === categoriaNormalizada))
+                .sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            lista.innerHTML = '';
+            opcoes.forEach(categoria => {
+                const opcao = document.createElement('option');
+                opcao.value = categoria;
+                lista.appendChild(opcao);
+            });
+        }
+
+        function mostrarGerenciadorCategorias() {
+            const modal = document.getElementById('modal-categorias');
+            const lista = document.getElementById('lista-gerenciador-categorias');
+            lista.innerHTML = '';
+            if (!categorias.length) {
+                lista.textContent = 'Nenhuma categoria cadastrada.';
+            }
+            categorias.forEach(categoria => {
+                const linha = document.createElement('div');
+                linha.className = 'flex items-center justify-between gap-3 rounded-lg border border-slate-200 px-3 py-2';
+                const nome = document.createElement('span');
+                nome.className = 'font-medium text-slate-700';
+                nome.textContent = categoria;
+                const excluir = document.createElement('button');
+                excluir.type = 'button';
+                excluir.className = 'shrink-0 rounded-md bg-red-50 px-2 py-1 text-lg font-bold leading-none text-red-600 hover:bg-red-100';
+                excluir.textContent = '×';
+                excluir.title = `Excluir categoria ${categoria}`;
+                excluir.setAttribute('aria-label', `Excluir categoria ${categoria}`);
+                excluir.onclick = () => removerCategoria(categoria);
+                linha.append(nome, excluir);
+                lista.appendChild(linha);
+            });
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharGerenciadorCategorias() {
+            const modal = document.getElementById('modal-categorias');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function removerCategoria(categoria) {
+            const itensVinculados = produtos.filter(produto => normalizarCategoria(produto.categoria).toLocaleLowerCase('pt-BR') === categoria.toLocaleLowerCase('pt-BR'));
+            const aviso = itensVinculados.length ? `\n\n${itensVinculados.length} item(ns) usa(m) esta categoria e ficará(ão) sem categoria.` : '';
+            if (!confirm(`Excluir a categoria “${categoria}”?${aviso}`)) return;
+            categorias = categorias.filter(item => item.toLocaleLowerCase('pt-BR') !== categoria.toLocaleLowerCase('pt-BR'));
+            categoriasOcultas = [...new Set([...categoriasOcultas, categoria])];
+            produtos.forEach(produto => {
+                if (normalizarCategoria(produto.categoria).toLocaleLowerCase('pt-BR') === categoria.toLocaleLowerCase('pt-BR')) produto.categoria = '';
+            });
+            salvarDados();
+            localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
+            atualizarListaCategorias();
+            atualizarTabelaProdutos();
+            mostrarGerenciadorCategorias();
+            mostrarMensagem('Categoria excluída com sucesso.', 'sucesso');
         }
 
         // Variáveis para controle de ações protegidas
@@ -899,6 +1106,7 @@ if ('serviceWorker' in navigator) {
             if (!produto) return;
 
             produtoEditando = produto;
+            document.getElementById('produto-tipo').value = produto.tipo || 'produto';
             document.getElementById('produto-nome').value = produto.nome;
             document.getElementById('produto-codigo').value = produto.codigo || '';
             document.getElementById('produto-preco').value = produto.preco;
@@ -906,6 +1114,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-unidade').value = produto.unidade;
             document.getElementById('produto-estoque').value = produto.estoque;
             document.getElementById('produto-categoria').value = produto.categoria || '';
+            atualizarCamposTipoItem();
             
             mostrarFormProduto();
         }
@@ -928,7 +1137,8 @@ if ('serviceWorker' in navigator) {
             cardsContainer.innerHTML = '';
 
             produtos.forEach(produto => {
-                const estoqueClass = produto.estoque <= 5 ? 'text-red-600 font-semibold' : '';
+                const ehServico = produto.tipo === 'servico';
+                const estoqueClass = !ehServico && produto.estoque <= 5 ? 'text-red-600 font-semibold' : '';
                 
                 // Tabela desktop
                 const tr = document.createElement('tr');
@@ -936,9 +1146,9 @@ if ('serviceWorker' in navigator) {
                 
                 tr.innerHTML = `
                     <td class="px-4 py-2">${produto.nome}</td>
-                    <td class="px-4 py-2">${produto.codigo || '-'}</td>
+                    <td class="px-4 py-2">${ehServico ? '<span class="text-teal-700 font-semibold">Serviço</span>' : (produto.codigo || '-')}</td>
                     <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-right ${estoqueClass}">${produto.estoque} ${produto.unidade}</td>
+                    <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${produto.estoque} ${produto.unidade}`}</td>
                     <td class="px-4 py-2">${produto.categoria || '-'}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="editarProduto('${produto.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
@@ -959,12 +1169,12 @@ if ('serviceWorker' in navigator) {
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
                             <h4 class="font-semibold text-base">${produto.nome}</h4>
-                            <p class="text-sm text-gray-600">${produto.codigo || 'Sem código'}</p>
+                            <p class="text-sm text-gray-600">${ehServico ? 'Serviço' : (produto.codigo || 'Sem código')}</p>
                             <p class="text-sm text-gray-600">${produto.categoria || 'Sem categoria'}</p>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>
-                            <div class="text-sm ${estoqueClass}">Estoque: ${produto.estoque} ${produto.unidade}</div>
+                            <div class="text-sm ${estoqueClass}">${ehServico ? 'Valor ajustável na venda' : `Estoque: ${produto.estoque} ${produto.unidade}`}</div>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-3">
@@ -1038,11 +1248,12 @@ function showInstallButton() {
                 div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors';
                 div.onclick = () => adicionarAoCarrinho(produto.id);
                 
-                const estoqueClass = produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600';
+                const ehServico = produto.tipo === 'servico';
+                const estoqueClass = !ehServico && (produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
-                    <div class="font-medium">${produto.nome}</div>
-                    <div class="text-sm text-gray-600">R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span></div>
+                    <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
+                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span>`}</div>
                 `;
                 lista.appendChild(div);
             });
@@ -1057,11 +1268,12 @@ function showInstallButton() {
                 div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors';
                 div.onclick = () => adicionarAoCarrinho(produto.id);
                 
-                const estoqueClass = produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600';
+                const ehServico = produto.tipo === 'servico';
+                const estoqueClass = !ehServico && (produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
-                    <div class="font-medium">${produto.nome}</div>
-                    <div class="text-sm text-gray-600">R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span></div>
+                    <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
+                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span>`}</div>
                 `;
                 lista.appendChild(div);
             });
@@ -1197,13 +1409,14 @@ function showInstallButton() {
             const produto = produtos.find(p => p.id === produtoId);
             if (!produto) return;
 
-            if (produto.estoque <= 0) {
+            const ehServico = produto.tipo === 'servico';
+            if (!ehServico && produto.estoque <= 0) {
                 mostrarMensagem('Produto sem estoque!', 'erro');
                 return;
             }
 
             // Se for produto por kg, mostrar modal para inserir peso
-            if (produto.unidade === 'kg') {
+            if (!ehServico && produto.unidade === 'kg') {
                 mostrarModalPesagem(produto);
                 return;
             }
@@ -1211,7 +1424,7 @@ function showInstallButton() {
             const itemExistente = carrinho.find(item => item.produtoId === produtoId);
             
             if (itemExistente) {
-                if (itemExistente.quantidade >= produto.estoque) {
+                if (!ehServico && itemExistente.quantidade >= produto.estoque) {
                     mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
                     return;
                 }
@@ -1222,7 +1435,8 @@ function showInstallButton() {
                     nome: produto.nome,
                     preco: produto.preco,
                     quantidade: 1,
-                    unidade: produto.unidade
+                    unidade: produto.unidade,
+                    tipo: produto.tipo || 'produto'
                 });
             }
 
@@ -1242,12 +1456,24 @@ function showInstallButton() {
                 return;
             }
 
-            if (novaQuantidade > produto.estoque) {
+            if (produto.tipo !== 'servico' && novaQuantidade > produto.estoque) {
                 mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
                 return;
             }
 
             item.quantidade = novaQuantidade;
+            atualizarCarrinho();
+        }
+
+        function alterarPrecoServico(produtoId, novoPreco) {
+            const item = carrinho.find(item => item.produtoId === produtoId);
+            const preco = Number(novoPreco);
+            if (!item || !Number.isFinite(preco) || preco < 0) {
+                mostrarMensagem('Informe um valor válido para o serviço.', 'erro');
+                atualizarCarrinho();
+                return;
+            }
+            item.preco = preco;
             atualizarCarrinho();
         }
 
@@ -1289,11 +1515,16 @@ function showInstallButton() {
                     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                         <div class="flex-1">
                             <div class="font-medium text-sm lg:text-base">${item.nome}</div>
-                            <div class="text-xs lg:text-sm text-gray-600">R$ ${item.preco.toFixed(2)} x ${quantidadeDisplay}</div>
+                            <div class="text-xs lg:text-sm text-gray-600">${item.tipo === 'servico' ? '🛠️ Serviço — ' : ''}R$ ${item.preco.toFixed(2)} x ${quantidadeDisplay}</div>
                         </div>
                         <div class="flex items-center justify-between lg:justify-end gap-2">
                             <div class="flex items-center space-x-2">
-                                ${item.unidade === 'kg' ? 
+                                ${item.tipo === 'servico' ?
+                                    `<label class="text-xs text-gray-600">Valor unitário
+                                        <input type="number" value="${item.preco.toFixed(2)}" min="0" step="0.01"
+                                            class="w-24 p-1 border rounded text-center text-sm ml-1"
+                                            onchange="alterarPrecoServico('${item.produtoId}', this.value)" aria-label="Valor do serviço ${item.nome}">
+                                    </label>` : item.unidade === 'kg' ? 
                                     `<button onclick="editarPesagem('${item.produtoId}')" 
                                             class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">⚖️ Editar</button>` :
                                     `<button onclick="alterarQuantidade('${item.produtoId}', ${item.quantidade - 1})" 
@@ -1619,7 +1850,7 @@ function showInstallButton() {
             // Verificar estoque antes de finalizar
             for (let item of carrinho) {
                 const produto = produtos.find(p => p.id === item.produtoId);
-                if (produto.estoque < item.quantidade) {
+                if (produto.tipo !== 'servico' && produto.estoque < item.quantidade) {
                     mostrarMensagem(`Estoque insuficiente para ${produto.nome}!`, 'erro');
                     return;
                 }
@@ -1640,7 +1871,7 @@ function showInstallButton() {
             // Atualizar estoque
             carrinho.forEach(item => {
                 const produto = produtos.find(p => p.id === item.produtoId);
-                produto.estoque -= item.quantidade;
+                if (produto.tipo !== 'servico') produto.estoque -= item.quantidade;
             });
 
             // Salvar venda
@@ -1699,6 +1930,7 @@ function showInstallButton() {
                 <div><strong>Venda:</strong> ${venda.id}</div>
                 <div><strong>Data:</strong> ${data.toLocaleDateString('pt-BR')} - <strong>Hora:</strong> ${data.toLocaleTimeString('pt-BR')}</div>
                 <div><strong>Estabelecimento:</strong> ${configSistema.nomeEmpresa || 'PDV - Sistema de Caixa'}</div>
+                ${configSistema.cnpj ? `<div><strong>CNPJ:</strong> ${formatarCNPJ(configSistema.cnpj)}</div>` : ''}
             `;
             
             // Criar HTML dos itens com mais detalhes
@@ -1833,8 +2065,8 @@ function showInstallButton() {
         // 1️⃣  PRIMEIRA PASSAGEM: medir altura
         // ===============================
         let yPos = 8;
-        const calcAltura = () => {
-            yPos += 8 + 8 + 5 + 4 + 4 + 8; // cabeçalho
+            const calcAltura = () => {
+            yPos += 8 + (configSistema.cnpj ? 4 : 0) + 8 + 5 + 4 + 8; // cabeçalho
             yPos += 6 + 5 + 5; // separadores e cabeçalhos
 
             // itens
@@ -1874,6 +2106,13 @@ function showInstallButton() {
         const nomeEmpresa = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
         doc.text(nomeEmpresa, largura / 2, y, { align: 'center' });
         y += 8;
+
+        if (configSistema.cnpj) {
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`CNPJ: ${formatarCNPJ(configSistema.cnpj)}`, largura / 2, y, { align: 'center' });
+            y += 4;
+        }
 
         // Título
         doc.setFontSize(12);
@@ -2293,10 +2532,7 @@ function showInstallButton() {
         function confirmarSenhaAcao() {
     const senhaDigitada = document.getElementById('senha-exclusao').value;
     const senhaAdm = configSistema.senha || '1234';
-    const senhaTI = '@m30r19b24'; // senha fixa do TI (não pode ser alterada)
-    
-    // Verifica se a senha digitada corresponde a ADM ou TI
-    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+    if (senhaDigitada !== senhaAdm) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-exclusao').value = '';
         document.getElementById('senha-exclusao').focus();
@@ -2341,7 +2577,7 @@ function showInstallButton() {
             // Restaurar estoque dos produtos
             vendaParaExcluir.itens.forEach(item => {
                 const produto = produtos.find(p => p.id === item.produtoId);
-                if (produto) {
+                if (produto && produto.tipo !== 'servico') {
                     produto.estoque += item.quantidade;
                 }
             });
@@ -2372,7 +2608,7 @@ function showInstallButton() {
                     // Restaurar estoque dos produtos
                     venda.itens.forEach(item => {
                         const produto = produtos.find(p => p.id === item.produtoId);
-                        if (produto) {
+                        if (produto && produto.tipo !== 'servico') {
                             produto.estoque += item.quantidade;
                         }
                     });
@@ -2443,11 +2679,26 @@ function showInstallButton() {
         movimentos: movimentos,
         configSistema: configSistema,
         configPix: CONFIG_PIX,
+        categorias: categorias,
+        categoriasOcultas: categoriasOcultas,
         dataExportacao: new Date().toISOString()
     };
 
     try {
-        // Pergunta onde salvar
+        // API disponível no Chrome/Edge; há fallback para os demais navegadores.
+        if (!window.showSaveFilePicker) {
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `backup_pdv_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(link.href);
+            mostrarMensagem('Backup completo criado com sucesso!', 'sucesso');
+            return;
+        }
+
         const handle = await window.showSaveFilePicker({
             suggestedName: `backup_pdv_${new Date().toISOString().split('T')[0]}.json`,
             types: [
@@ -2551,9 +2802,7 @@ function showInstallButton() {
         function confirmarSenhaAdm() {
     const senhaDigitada = document.getElementById('senha-adm').value;
     const senhaAdm = configSistema.senha || '1234';
-    const senhaTI = '@m30r19b24'; // senha fixa do TI
-    
-    if (senhaDigitada !== senhaAdm && senhaDigitada !== senhaTI) {
+    if (senhaDigitada !== senhaAdm) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-adm').value = '';
         document.getElementById('senha-adm').focus();
@@ -2582,6 +2831,7 @@ function showInstallButton() {
             
             // Carregar configurações do sistema
             document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Sistema de Caixa';
+            document.getElementById('adm-cnpj-empresa').value = formatarCNPJ(configSistema.cnpj || '');
         }
 
         function salvarConfigPix() {
@@ -2650,6 +2900,7 @@ function showInstallButton() {
         function salvarConfigSistema() {
             const novaSenha = document.getElementById('adm-senha-sistema').value.trim();
             const nomeEmpresa = document.getElementById('adm-nome-empresa').value.trim();
+            const cnpj = document.getElementById('adm-cnpj-empresa').value.replace(/\D/g, '');
             
             if (novaSenha && novaSenha.length < 4) {
                 mostrarMensagem('Senha deve ter pelo menos 4 caracteres!', 'erro');
@@ -2664,6 +2915,12 @@ function showInstallButton() {
             if (nomeEmpresa) {
                 configSistema.nomeEmpresa = nomeEmpresa;
             }
+
+            if (cnpj && !validarCNPJ(cnpj)) {
+                mostrarMensagem('Informe um CNPJ válido ou deixe o campo vazio.', 'erro');
+                return;
+            }
+            configSistema.cnpj = cnpj;
             
             // Salvar no localStorage
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
@@ -2687,6 +2944,8 @@ function showInstallButton() {
             localStorage.removeItem('pdv_produtos');
             localStorage.removeItem('pdv_vendas');
             localStorage.removeItem('pdv_movimentos');
+            localStorage.removeItem('pdv_categorias');
+            localStorage.removeItem('pdv_categorias_ocultas');
             localStorage.removeItem('pdv_config_sistema');
             localStorage.removeItem('pdv_config_pix');
             
@@ -2727,6 +2986,9 @@ function showInstallButton() {
                     produtos = backup.produtos || [];
                     vendas = backup.vendas || [];
                     movimentos = backup.movimentos || [];
+                    categoriasOcultas = Array.isArray(backup.categoriasOcultas) ? backup.categoriasOcultas : [];
+                    categorias = [...new Set([...CATEGORIAS_PADRAO, ...(Array.isArray(backup.categorias) ? backup.categorias : [])])]
+                        .filter(categoria => !categoriasOcultas.includes(categoria));
                     
                     if (backup.configSistema) {
                         configSistema = backup.configSistema;
@@ -2766,6 +3028,8 @@ function showInstallButton() {
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
             localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
             localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));
+            localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
+            localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
         }
 
@@ -2819,6 +3083,7 @@ function showInstallButton() {
         }
 
         function atualizarInterface() {
+            atualizarListaCategorias();
             atualizarListaProdutos();
             atualizarCarrinho();
             calcularSaldoCaixa();
