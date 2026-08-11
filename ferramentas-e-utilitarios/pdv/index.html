@@ -118,6 +118,7 @@
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
+                    <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
                     <button onclick="acessarAdm()" class="bg-red-500 hover:bg-red-700 px-3 py-2 rounded transition-colors text-sm">ADM</button>
                 </div>
             </div>
@@ -448,6 +449,29 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Seção Novidades -->
+            <div id="novidades-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow-md p-5 lg:p-7">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+                        <div>
+                            <p class="text-sm font-semibold uppercase tracking-wider text-teal-700">Central de atualizações</p>
+                            <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
+                            <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
+                        </div>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Versão atual</span>
+                    </div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🧾 Dados da empresa no cupom</h3><p class="mt-2 text-sm text-slate-700">Cadastre o CNPJ em <strong>ADM → Configurações do Sistema</strong>. Ele aparece no comprovante e no PDF térmico, com validação automática.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🛠️ Produtos e serviços</h3><p class="mt-2 text-sm text-slate-700">No cadastro, escolha <strong>Produto</strong> ou <strong>Serviço</strong>. Serviços não controlam estoque e o valor unitário pode ser alterado no carrinho antes de concluir a venda.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🏷️ Categorias reutilizáveis</h3><p class="mt-2 text-sm text-slate-700">Há categorias padrão e você pode criar outras no cadastro usando <strong>+ Nova</strong>. Em <strong>Gerenciar</strong>, use o botão <strong>×</strong> para excluir uma categoria que não deseja mais.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🔎 Venda mais rápida com leitor</h3><p class="mt-2 text-sm text-slate-700">Ao abrir ou voltar a <strong>Vendas</strong>, o cursor fica automaticamente no campo de busca. Basta ler o código de barras ou digitar o código/nome do item.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">📦 Backup e funcionamento offline</h3><p class="mt-2 text-sm text-slate-700">O backup ficou compatível com mais navegadores e o PDV passou a usar cache para os recursos essenciais. Faça backups periódicos na área ADM.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">✨ Interface renovada</h3><p class="mt-2 text-sm text-slate-700">A tela recebeu visual mais moderno, melhor contraste, adaptação para celular e ajustes de segurança no acesso administrativo.</p></article>
+                    </div>
+                    <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Para próximas versões:</strong> esta página é o histórico do PDV. Ao adicionar uma melhoria, inclua aqui uma explicação curta do que mudou e de como usar.</div>
                 </div>
             </div>
 
