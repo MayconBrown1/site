@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BORA PRO CORRE — Conectando quem precisa entregar com quem tá no corre</title>
+<meta name="description" content="Plataforma que conecta lojas e entregadores em Parnamirim/RN. A loja publica a corrida, o entregador escolhe se aceita. Simples, rápido e justo.">
+<meta name="theme-color" content="#0F1115">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/responsive.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          asfalto: '#0F1115',
+          superficie: '#171A20',
+          'superficie-alt': '#1D2129',
+          borda: '#262B33',
+          rota: '#FF6B35',
+          'rota-escuro': '#E0551F',
+          mare: '#00C2B8',
+          sucesso: '#3DDC84',
+          perigo: '#FF4D4F',
+          aviso: '#FFC145',
+        },
+        fontFamily: {
+          display: ['"Archivo Black"', 'Inter', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          dados: ['"JetBrains Mono"', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-asfalto text-[#F5F3EE] antialiased">
+
+<!-- ============ HEADER ============ -->
+<header class="sticky top-0 z-40 bg-asfalto/90 backdrop-blur border-b border-borda">
+  <div class="max-w-6xl mx-auto px-5 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
+      <span class="font-display text-sm tracking-tight">BORA PRO CORRE</span>
+    </div>
+    <a href="/login.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-borda hover:border-mare transition-colors">
+      Entrar
+    </a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="max-w-6xl mx-auto px-5 pt-14 pb-16 grid md:grid-cols-2 gap-12 items-center">
+  <div>
+    <p class="inline-block text-xs font-semibold tracking-widest uppercase text-mare border border-mare/30 bg-mare/10 rounded-full px-3 py-1 mb-6">
+      Funcionando em Parnamirim/RN
+    </p>
+    <h1 class="font-display text-4xl sm:text-5xl leading-[1.05] mb-5">
+      Conectando quem<br>
+      precisa entregar com<br>
+      quem <span class="text-rota">tá no corre.</span>
+    </h1>
+    <p class="text-[#9AA1AC] text-lg mb-8 max-w-md">
+      A loja publica a corrida e diz quanto paga. O entregador que quiser, cai na rota.
+      Sem intermediário complicando o que já era simples.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">
+        🏪 Sou Loja
+      </a>
+      <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">
+        🛵 Sou Entregador
+      </a>
+    </div>
+  </div>
+
+  <!-- Demo ao vivo do mecanismo central: valor sobe até alguém aceitar -->
+  <div class="card-corrida rounded-2xl p-5 shadow-2xl max-w-sm mx-auto w-full">
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-xs font-bold tracking-widest text-rota uppercase">🚀 Nova corrida</span>
+      <span class="text-xs text-[#9AA1AC] font-dados">há 30s</span>
+    </div>
+    <div class="space-y-2 text-sm mb-4">
+      <div class="flex justify-between">
+        <span class="text-[#9AA1AC]">Loja</span>
+        <span class="font-medium">Hamburgueria X</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-[#9AA1AC]">Retirada</span>
+        <span class="font-medium">Nova Esperança</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-[#9AA1AC]">Destino</span>
+        <span class="font-medium">Centro</span>
+      </div>
+    </div>
+    <div class="flex items-end justify-between border-t border-borda pt-4 mb-4">
+      <span class="text-xs text-[#9AA1AC] uppercase tracking-wide">Valor</span>
+      <span id="valor-demo" class="valor-animado font-dados text-3xl font-bold text-sucesso">R$ 10</span>
+    </div>
+    <button id="btn-demo" class="btn-rota w-full rounded-xl py-3 font-bold text-sm">
+      CAIR NA ROTA
+    </button>
+  </div>
+</section>
+
+<!-- ============ COMO FUNCIONA ============ -->
+<section class="border-t border-borda bg-superficie/40">
+  <div class="max-w-6xl mx-auto px-5 py-16">
+    <h2 class="font-display text-2xl sm:text-3xl mb-10 text-center">Como funciona</h2>
+    <div class="relative grid sm:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-xl bg-superficie border border-borda flex items-center justify-center text-xl mx-auto mb-4">🏪</div>
+        <h3 class="font-semibold mb-2">A loja publica</h3>
+        <p class="text-sm text-[#9AA1AC]">Endereço de retirada, destino e quanto está disposta a pagar pela entrega.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-xl bg-superficie border border-borda flex items-center justify-center text-xl mx-auto mb-4">📡</div>
+        <h3 class="font-semibold mb-2">Entregadores veem</h3>
+        <p class="text-sm text-[#9AA1AC]">Todo entregador online e aprovado enxerga a corrida em tempo real.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 rounded-xl bg-superficie border border-borda flex items-center justify-center text-xl mx-auto mb-4">🛵</div>
+        <h3 class="font-semibold mb-2">Quem quiser, aceita</h3>
+        <p class="text-sm text-[#9AA1AC]">O primeiro a aceitar fica com a corrida. Ela some pra todo mundo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BENEFÍCIOS ============ -->
+<section class="max-w-6xl mx-auto px-5 py-16 grid md:grid-cols-2 gap-8">
+  <div class="bg-superficie border border-borda rounded-2xl p-6">
+    <h3 class="font-display text-lg mb-4 text-mare">Para lojas</h3>
+    <ul class="space-y-3 text-sm text-[#D9D6CE]">
+      <li>✔️ Você define quanto quer pagar por cada entrega</li>
+      <li>✔️ Sem taxa por corrida — só a mensalidade fixa</li>
+      <li>✔️ Rede de entregadores verificados manualmente</li>
+      <li>✔️ Histórico completo de cada pedido</li>
+    </ul>
+  </div>
+  <div class="bg-superficie border border-borda rounded-2xl p-6">
+    <h3 class="font-display text-lg mb-4 text-rota">Para entregadores</h3>
+    <ul class="space-y-3 text-sm text-[#D9D6CE]">
+      <li>✔️ Escolha as corridas que quiser aceitar</li>
+      <li>✔️ Fique online só quando quiser trabalhar</li>
+      <li>✔️ Receba direto da loja, sem repasse escondido</li>
+      <li>✔️ Avaliações constroem sua reputação</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ SEGURANÇA E MENSALIDADE ============ -->
+<section class="border-t border-borda bg-superficie/40">
+  <div class="max-w-6xl mx-auto px-5 py-16 grid md:grid-cols-2 gap-8">
+    <div>
+      <h3 class="font-display text-lg mb-3">🔒 Segurança</h3>
+      <p class="text-sm text-[#9AA1AC] leading-relaxed">
+        Lojas e entregadores passam por aprovação manual antes de operar.
+        Documentos pessoais nunca ficam públicos — só a administração
+        autorizada tem acesso, e apenas para fins de verificação.
+      </p>
+    </div>
+    <div>
+      <h3 class="font-display text-lg mb-3">💳 Mensalidade</h3>
+      <p class="text-sm text-[#9AA1AC] leading-relaxed">
+        R$ 20/mês para lojas e R$ 20/mês para entregadores. Sem comissão
+        sobre cada corrida — o valor combinado vai inteiro para quem entrega.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA FINAL ============ -->
+<section class="max-w-6xl mx-auto px-5 py-16 text-center">
+  <h2 class="font-display text-2xl sm:text-3xl mb-6">Bora pro corre?</h2>
+  <div class="flex flex-wrap justify-center gap-3">
+    <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">Cadastrar minha loja</a>
+    <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">Cadastrar como entregador</a>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="border-t border-borda">
+  <div class="max-w-6xl mx-auto px-5 py-10 flex flex-wrap gap-x-8 gap-y-3 justify-between text-sm text-[#9AA1AC]">
+    <span>© <span id="ano"></span> Bora Pro Corre — Parnamirim/RN</span>
+    <div class="flex flex-wrap gap-x-6 gap-y-2">
+      <a href="/termos.html" class="hover:text-mare transition-colors">Termos de Uso</a>
+      <a href="/privacidade.html" class="hover:text-mare transition-colors">Política de Privacidade</a>
+      <a href="/suporte.html" class="hover:text-mare transition-colors">Suporte</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('ano').textContent = new Date().getFullYear();
+
+  // Demo do hero: alterna valor pra ilustrar o item 20 do prompt mestre
+  const valores = ['R$ 10', 'R$ 12', 'R$ 15', 'R$ 18'];
+  let i = 0;
+  const valorEl = document.getElementById('valor-demo');
+  setInterval(() => {
+    i = (i + 1) % valores.length;
+    valorEl.textContent = valores[i];
+  }, 2200);
+
+  document.getElementById('btn-demo').addEventListener('click', function () {
+    this.textContent = 'PEGOU! ✅';
+    this.classList.add('!bg-sucesso');
+    setTimeout(() => {
+      this.textContent = 'CAIR NA ROTA';
+      this.classList.remove('!bg-sucesso');
+    }, 1500);
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').catch(console.error);
+    });
+  }
+</script>
+</body>
+</html>

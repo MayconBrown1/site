@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cadastro de Loja — BORA PRO CORRE</title>
+<meta name="theme-color" content="#0F1115">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { asfalto:'#0F1115', superficie:'#171A20', borda:'#262B33', rota:'#FF6B35', 'rota-escuro':'#E0551F', mare:'#00C2B8', perigo:'#FF4D4F' },
+    fontFamily: { display:['"Archivo Black"','Inter','sans-serif'], sans:['Inter','sans-serif'] }
+  } } }
+</script>
+</head>
+<body class="bg-asfalto text-[#F5F3EE] antialiased min-h-screen">
+
+<header class="px-5 py-4 border-b border-borda">
+  <a href="/index.html" class="inline-flex items-center gap-2">
+    <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
+    <span class="font-display text-sm">BORA PRO CORRE</span>
+  </a>
+</header>
+
+<main class="max-w-lg mx-auto px-5 py-8">
+  <h1 class="font-display text-2xl mb-1">🏪 Cadastro de loja</h1>
+  <p class="text-sm text-[#9AA1AC] mb-2">Válido inicialmente apenas para <strong>Parnamirim/RN</strong>.</p>
+  <p class="text-sm text-[#9AA1AC] mb-8">Após o cadastro, sua loja fica em análise. Vamos te chamar no <strong>WhatsApp</strong> pra confirmar os dados e liberar o acesso.</p>
+
+  <form id="form-loja" class="space-y-5" novalidate>
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-bold uppercase tracking-widest text-mare mb-1">Dados do estabelecimento</legend>
+
+      <div>
+        <label class="text-sm font-medium block mb-1.5">Nome comercial *</label>
+        <input required id="nomeComercial" class="input" placeholder="Hamburgueria X">
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">Razão social</label>
+        <input id="razaoSocial" class="input" placeholder="Opcional">
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">CPF ou CNPJ *</label>
+        <input required id="cnpjCpf" class="input" placeholder="000.000.000-00">
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">Horário de funcionamento</label>
+        <input id="horarioFuncionamento" class="input" placeholder="Seg a Sáb, 18h às 23h">
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-bold uppercase tracking-widest text-mare mb-1">Responsável</legend>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">Nome do responsável *</label>
+        <input required id="responsavel" class="input">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium block mb-1.5">Telefone *</label>
+          <input required id="telefone" class="input" placeholder="(84) 90000-0000">
+        </div>
+        <div>
+          <label class="text-sm font-medium block mb-1.5">WhatsApp *</label>
+          <input required id="whatsapp" class="input" placeholder="(84) 90000-0000">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-bold uppercase tracking-widest text-mare mb-1">Endereço (Parnamirim/RN)</legend>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          <label class="text-sm font-medium block mb-1.5">Endereço *</label>
+          <input required id="endereco" class="input" placeholder="Rua, Av...">
+        </div>
+        <div>
+          <label class="text-sm font-medium block mb-1.5">Número *</label>
+          <input required id="numero" class="input">
+        </div>
+        <div>
+          <label class="text-sm font-medium block mb-1.5">CEP *</label>
+          <input required id="cep" class="input" placeholder="59000-000">
+        </div>
+        <div>
+          <label class="text-sm font-medium block mb-1.5">Complemento</label>
+          <input id="complemento" class="input">
+        </div>
+        <div>
+          <label class="text-sm font-medium block mb-1.5">Bairro *</label>
+          <input required id="bairro" class="input">
+        </div>
+        <div class="col-span-2">
+          <label class="text-sm font-medium block mb-1.5">Ponto de referência</label>
+          <input id="pontoReferencia" class="input">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="text-xs font-bold uppercase tracking-widest text-mare mb-1">Acesso</legend>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">E-mail *</label>
+        <input required type="email" id="email" class="input" autocomplete="email">
+      </div>
+      <div>
+        <label class="text-sm font-medium block mb-1.5">Senha *</label>
+        <input required type="password" id="senha" minlength="6" class="input" autocomplete="new-password">
+        <p class="text-xs text-[#9AA1AC] mt-1">Mínimo de 6 caracteres.</p>
+      </div>
+    </fieldset>
+
+    <label class="flex items-start gap-2.5 text-sm text-[#9AA1AC]">
+      <input type="checkbox" id="aceiteTermos" required class="mt-1 accent-rota">
+      <span>Li e aceito os <a href="/termos.html" target="_blank" class="text-mare hover:underline">Termos de Uso</a> e a <a href="/privacidade.html" target="_blank" class="text-mare hover:underline">Política de Privacidade</a>.</span>
+    </label>
+
+    <div id="erro-cadastro" class="hidden text-sm text-perigo bg-perigo/10 border border-perigo/30 rounded-xl px-4 py-3"></div>
+
+    <button type="submit" id="btn-cadastrar" class="btn-rota w-full rounded-xl py-3.5 font-bold text-sm">
+      Cadastrar loja
+    </button>
+
+    <p class="text-xs text-center text-[#9AA1AC]">
+      Já tem conta? <a href="/login.html" class="text-mare hover:underline">Entrar</a>
+    </p>
+  </form>
+</main>
+
+<style>
+  .input {
+    width: 100%;
+    background: var(--cor-superficie);
+    border: 1px solid var(--cor-borda);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+  .input:focus { border-color: var(--cor-mare); }
+</style>
+
+<script type="module">
+  import { cadastrarLoja } from '/js/auth.js';
+  import { redirecionarPorPerfil } from '/js/permissions.js';
+  import { formatarTelefone, formatarCEP, mensagemErroAmigavel, monitorarConexao } from '/js/utils.js';
+
+  monitorarConexao();
+
+  document.getElementById('telefone').addEventListener('input', (e) => e.target.value = formatarTelefone(e.target.value));
+  document.getElementById('whatsapp').addEventListener('input', (e) => e.target.value = formatarTelefone(e.target.value));
+  document.getElementById('cep').addEventListener('input', (e) => e.target.value = formatarCEP(e.target.value));
+
+  const form = document.getElementById('form-loja');
+  const btn = document.getElementById('btn-cadastrar');
+  const erroBox = document.getElementById('erro-cadastro');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    erroBox.classList.add('hidden');
+
+    if (!document.getElementById('aceiteTermos').checked) {
+      erroBox.textContent = 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.';
+      erroBox.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
+
+    const dados = {
+      nomeComercial: document.getElementById('nomeComercial').value.trim(),
+      razaoSocial: document.getElementById('razaoSocial').value.trim(),
+      cnpjCpf: document.getElementById('cnpjCpf').value.trim(),
+      horarioFuncionamento: document.getElementById('horarioFuncionamento').value.trim(),
+      responsavel: document.getElementById('responsavel').value.trim(),
+      telefone: document.getElementById('telefone').value.trim(),
+      whatsapp: document.getElementById('whatsapp').value.trim(),
+      endereco: document.getElementById('endereco').value.trim(),
+      numero: document.getElementById('numero').value.trim(),
+      cep: document.getElementById('cep').value.trim(),
+      complemento: document.getElementById('complemento').value.trim(),
+      bairro: document.getElementById('bairro').value.trim(),
+      pontoReferencia: document.getElementById('pontoReferencia').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      senha: document.getElementById('senha').value,
+    };
+
+    try {
+      await cadastrarLoja(dados);
+      redirecionarPorPerfil('loja');
+    } catch (err) {
+      erroBox.textContent = mensagemErroAmigavel(err);
+      erroBox.classList.remove('hidden');
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar loja';
+    }
+  });
+</script>
+</body>
+</html>

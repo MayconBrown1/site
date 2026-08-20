@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Entrar — BORA PRO CORRE</title>
+<meta name="theme-color" content="#0F1115">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon-192.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/responsive.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { asfalto:'#0F1115', superficie:'#171A20', borda:'#262B33', rota:'#FF6B35', 'rota-escuro':'#E0551F', mare:'#00C2B8', perigo:'#FF4D4F' },
+    fontFamily: { display:['"Archivo Black"','Inter','sans-serif'], sans:['Inter','sans-serif'] }
+  } } }
+</script>
+</head>
+<body class="bg-asfalto text-[#F5F3EE] antialiased min-h-screen flex flex-col">
+
+<header class="px-5 py-4">
+  <a href="/index.html" class="inline-flex items-center gap-2">
+    <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
+    <span class="font-display text-sm">BORA PRO CORRE</span>
+  </a>
+</header>
+
+<main class="flex-1 flex items-center justify-center px-5 py-8">
+  <div class="w-full max-w-sm">
+    <h1 class="font-display text-2xl mb-1">Entrar</h1>
+    <p class="text-sm text-[#9AA1AC] mb-8">Bora pro corre — acesse sua conta.</p>
+
+    <form id="form-login" class="space-y-4" novalidate>
+      <div>
+        <label for="email" class="text-sm font-medium block mb-1.5">E-mail</label>
+        <input type="email" id="email" required autocomplete="email"
+          class="w-full bg-superficie border border-borda rounded-xl px-4 py-3 text-sm focus:border-mare outline-none transition-colors"
+          placeholder="seuemail@exemplo.com">
+      </div>
+      <div>
+        <label for="senha" class="text-sm font-medium block mb-1.5">Senha</label>
+        <input type="password" id="senha" required autocomplete="current-password"
+          class="w-full bg-superficie border border-borda rounded-xl px-4 py-3 text-sm focus:border-mare outline-none transition-colors"
+          placeholder="••••••••">
+      </div>
+
+      <div id="erro-login" class="hidden text-sm text-perigo bg-perigo/10 border border-perigo/30 rounded-xl px-4 py-3"></div>
+
+      <button type="submit" id="btn-entrar" class="btn-rota w-full rounded-xl py-3.5 font-bold text-sm">
+        Entrar
+      </button>
+    </form>
+
+    <button id="btn-esqueci" class="text-sm text-mare mt-4 hover:underline">Esqueci minha senha</button>
+
+    <div class="border-t border-borda mt-8 pt-6 text-sm text-[#9AA1AC] space-y-2">
+      <p>Ainda não tem conta?</p>
+      <div class="flex flex-col gap-2">
+        <a href="/cadastro-loja.html" class="text-mare hover:underline">🏪 Cadastrar minha loja</a>
+        <a href="/cadastro-entregador.html" class="text-mare hover:underline">🛵 Cadastrar como entregador</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { login, recuperarSenha } from '/js/auth.js';
+  import { obterSessao, redirecionarPorPerfil } from '/js/permissions.js';
+  import { mensagemErroAmigavel, mostrarToast, monitorarConexao } from '/js/utils.js';
+
+  monitorarConexao();
+
+  // Se já estiver logado, redireciona direto
+  obterSessao().then((sessao) => {
+    if (sessao.user && sessao.role) redirecionarPorPerfil(sessao.role);
+  });
+
+  const form = document.getElementById('form-login');
+  const btnEntrar = document.getElementById('btn-entrar');
+  const erroBox = document.getElementById('erro-login');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    erroBox.classList.add('hidden');
+    btnEntrar.disabled = true;
+    btnEntrar.textContent = 'Entrando...';
+
+    const email = document.getElementById('email').value.trim();
+    const senha = document.getElementById('senha').value;
+
+    try {
+      await login(email, senha);
+      const sessao = await obterSessao();
+
+      if (!sessao.role) {
+        erroBox.textContent = 'Não foi possível identificar seu perfil. Fale com o suporte.';
+        erroBox.classList.remove('hidden');
+        btnEntrar.disabled = false;
+        btnEntrar.textContent = 'Entrar';
+        return;
+      }
+
+      redirecionarPorPerfil(sessao.role);
+    } catch (err) {
+      erroBox.textContent = mensagemErroAmigavel(err);
+      erroBox.classList.remove('hidden');
+      btnEntrar.disabled = false;
+      btnEntrar.textContent = 'Entrar';
+    }
+  });
+
+  document.getElementById('btn-esqueci').addEventListener('click', async () => {
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      mostrarToast('Digite seu e-mail no campo acima primeiro.', 'aviso');
+      return;
+    }
+    try {
+      await recuperarSenha(email);
+      mostrarToast('Enviamos um link de recuperação para seu e-mail.', 'sucesso');
+    } catch (err) {
+      mostrarToast(mensagemErroAmigavel(err), 'erro');
+    }
+  });
+</script>
+</body>
+</html>
