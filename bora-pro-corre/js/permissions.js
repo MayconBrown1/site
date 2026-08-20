@@ -65,7 +65,7 @@ export async function exigirPerfil(perfisPermitidos = []) {
   const sessao = await obterSessao();
 
   if (!sessao.user) {
-    window.location.href = "/login.html";
+    window.location.href = "/bora-pro-corre/login.html";
     return null;
   }
 
@@ -80,20 +80,20 @@ export async function exigirPerfil(perfisPermitidos = []) {
 export function redirecionarPorPerfil(role) {
   switch (role) {
     case "admin":
-      window.location.href = "/admin/dashboard.html";
+      window.location.href = "/bora-pro-corre/admin/dashboard.html";
       break;
     case "loja":
-      window.location.href = "/loja/dashboard.html";
+      window.location.href = "/bora-pro-corre/loja/dashboard.html";
       break;
     case "entregador":
-      window.location.href = "/entregador/dashboard.html";
+      window.location.href = "/bora-pro-corre/entregador/dashboard.html";
       break;
     default:
-      window.location.href = "/login.html";
+      window.location.href = "/bora-pro-corre/login.html";
   }
 }
 
 export async function sair() {
   await signOut(auth);
-  window.location.href = "/index.html";
+  window.location.href = "/bora-pro-corre/index.html";
 }
