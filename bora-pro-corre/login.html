@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Entrar — BORA PRO CORRE</title>
 <meta name="theme-color" content="#0F1115">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icons/icon-192.png">
+<link rel="manifest" href="/bora-pro-corre/manifest.json">
+<link rel="icon" href="/bora-pro-corre/icons/icon-192.png">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="/bora-pro-corre/css/style.css">
+<link rel="stylesheet" href="/bora-pro-corre/css/responsive.css">
 <script>
   tailwind.config = { theme: { extend: {
     colors: { asfalto:'#0F1115', superficie:'#171A20', borda:'#262B33', rota:'#FF6B35', 'rota-escuro':'#E0551F', mare:'#00C2B8', perigo:'#FF4D4F' },
@@ -22,7 +22,7 @@
 <body class="bg-asfalto text-[#F5F3EE] antialiased min-h-screen flex flex-col">
 
 <header class="px-5 py-4">
-  <a href="/index.html" class="inline-flex items-center gap-2">
+  <a href="/bora-pro-corre/index.html" class="inline-flex items-center gap-2">
     <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
     <span class="font-display text-sm">BORA PRO CORRE</span>
   </a>
@@ -59,17 +59,17 @@
     <div class="border-t border-borda mt-8 pt-6 text-sm text-[#9AA1AC] space-y-2">
       <p>Ainda não tem conta?</p>
       <div class="flex flex-col gap-2">
-        <a href="/cadastro-loja.html" class="text-mare hover:underline">🏪 Cadastrar minha loja</a>
-        <a href="/cadastro-entregador.html" class="text-mare hover:underline">🛵 Cadastrar como entregador</a>
+        <a href="/bora-pro-corre/cadastro-loja.html" class="text-mare hover:underline">🏪 Cadastrar minha loja</a>
+        <a href="/bora-pro-corre/cadastro-entregador.html" class="text-mare hover:underline">🛵 Cadastrar como entregador</a>
       </div>
     </div>
   </div>
 </main>
 
 <script type="module">
-  import { login, recuperarSenha } from '/js/auth.js';
-  import { obterSessao, redirecionarPorPerfil } from '/js/permissions.js';
-  import { mensagemErroAmigavel, mostrarToast, monitorarConexao } from '/js/utils.js';
+  import { login, recuperarSenha } from '/bora-pro-corre/js/auth.js';
+  import { obterSessao, redirecionarPorPerfil } from '/bora-pro-corre/js/permissions.js';
+  import { mensagemErroAmigavel, mostrarToast, monitorarConexao } from '/bora-pro-corre/js/utils.js';
 
   monitorarConexao();
 

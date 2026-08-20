@@ -8,17 +8,17 @@
 const CACHE_NOME = "bpc-shell-v1";
 
 const ARQUIVOS_SHELL = [
-  "/index.html",
-  "/login.html",
-  "/cadastro-loja.html",
-  "/cadastro-entregador.html",
-  "/manifest.json",
-  "/css/style.css",
-  "/css/responsive.css",
-  "/js/firebase-config.js",
-  "/js/auth.js",
-  "/js/permissions.js",
-  "/js/utils.js"
+  "/bora-pro-corre/index.html",
+  "/bora-pro-corre/login.html",
+  "/bora-pro-corre/cadastro-loja.html",
+  "/bora-pro-corre/cadastro-entregador.html",
+  "/bora-pro-corre/manifest.json",
+  "/bora-pro-corre/css/style.css",
+  "/bora-pro-corre/css/responsive.css",
+  "/bora-pro-corre/js/firebase-config.js",
+  "/bora-pro-corre/js/auth.js",
+  "/bora-pro-corre/js/permissions.js",
+  "/bora-pro-corre/js/utils.js"
 ];
 
 self.addEventListener("install", (event) => {
@@ -67,7 +67,7 @@ self.addEventListener("fetch", (event) => {
             caches.open(CACHE_NOME).then((cache) => cache.put(event.request, clone));
             return respostaRede;
           })
-          .catch(() => caches.match("/index.html"))
+          .catch(() => caches.match("/bora-pro-corre/index.html"))
       );
     })
   );

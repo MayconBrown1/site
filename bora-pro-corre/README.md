@@ -29,6 +29,18 @@ Stack: HTML5 + CSS3 (Tailwind via CDN) + JavaScript puro (ES Modules, sem build 
 
 ---
 
+## ⚠️ Sobre os caminhos absolutos deste projeto
+
+Todos os links, imports de módulo, o manifest e o service worker usam caminhos absolutos prefixados com `/bora-pro-corre/` (ex: `/bora-pro-corre/css/style.css`). Isso só funciona corretamente se o site for publicado exatamente em:
+
+```
+https://SEU_USUARIO.github.io/bora-pro-corre/
+```
+
+Ou seja, **o repositório precisa se chamar `bora-pro-corre`**. Se você renomear o repositório ou publicar em domínio próprio na raiz (ex: `https://boraprocorre.com.br/`, sem subpasta), será preciso rodar novamente a substituição de caminhos removendo o prefixo `/bora-pro-corre`.
+
+---
+
 ## 1. Criar o projeto Firebase
 
 Você já tem o projeto criado (`bora-pro-corre`) e a config já está em `js/firebase-config.js`. Se precisar recriar: [console.firebase.google.com](https://console.firebase.google.com) → **Adicionar projeto**.
@@ -108,15 +120,18 @@ Ainda não implementado neste estágio. Quando chegarmos na Etapa 13: a chave se
 
 ## 12. Testar localmente
 
-Como o projeto não usa build tools, basta servir os arquivos estáticos:
+Como os caminhos são absolutos com o prefixo `/bora-pro-corre/`, ao testar localmente você precisa servir a partir de uma pasta que contenha uma subpasta `bora-pro-corre/` com o projeto dentro — reproduzindo a mesma estrutura do GitHub Pages:
 
 ```bash
+mkdir -p /tmp/site-teste/bora-pro-corre
+cp -r ./* /tmp/site-teste/bora-pro-corre/
+cd /tmp/site-teste
 npx serve .
 # ou
 python3 -m http.server 8080
 ```
 
-Abra `http://localhost:8080` (ou a porta indicada). Teste cadastro de loja, cadastro de entregador, login, logout e recuperação de senha.
+Abra `http://localhost:8080/bora-pro-corre/index.html` (ajuste a porta conforme indicado). Teste cadastro de loja, cadastro de entregador, login, logout e recuperação de senha.
 
 ## 13. Publicar
 
