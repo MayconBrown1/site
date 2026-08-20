@@ -1,0 +1,29 @@
+/* =====================================================
+   BORA PRO CORRE — Ajustes responsivos complementares
+   (Tailwind cobre a maior parte; aqui só refinos específicos)
+   ===================================================== */
+
+/* Área de toque mínima confortável no celular (item 48) */
+@media (max-width: 640px) {
+  button, a.btn, input[type="submit"] {
+    min-height: 44px;
+  }
+
+  .font-display {
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Evita zoom automático em inputs no iOS (font-size < 16px causa zoom) */
+@media (max-width: 480px) {
+  input, select, textarea {
+    font-size: 16px;
+  }
+}
+
+/* Boa leitura ao ar livre — mais contraste em telas pequenas (item 48) */
+@media (max-width: 640px) {
+  body {
+    background-color: #0A0B0E;
+  }
+}

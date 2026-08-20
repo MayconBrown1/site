@@ -1,0 +1,134 @@
+/* =====================================================
+   BORA PRO CORRE — Design tokens
+   Paleta: asfalto noturno + laranja-sinaleira (rota) + verde-água
+   (litoral potiguar). Tipografia: Archivo Black (display,
+   inspirada em placas de rodovia) + Inter (corpo).
+   ===================================================== */
+
+:root {
+  --cor-asfalto: #0F1115;
+  --cor-superficie: #171A20;
+  --cor-superficie-alt: #1D2129;
+  --cor-borda: #262B33;
+  --cor-texto: #F5F3EE;
+  --cor-texto-muted: #9AA1AC;
+
+  --cor-rota: #FF6B35;       /* laranja-sinaleira — ação, "cair na rota" */
+  --cor-rota-escuro: #E0551F;
+  --cor-mare: #00C2B8;       /* verde-água — litoral potiguar */
+  --cor-sucesso: #3DDC84;
+  --cor-perigo: #FF4D4F;
+  --cor-aviso: #FFC145;
+
+  --fonte-display: "Archivo Black", "Inter", sans-serif;
+  --fonte-corpo: "Inter", sans-serif;
+  --fonte-dados: "JetBrains Mono", monospace;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--cor-asfalto);
+  color: var(--cor-texto);
+  font-family: var(--fonte-corpo);
+}
+
+.font-display {
+  font-family: var(--fonte-display);
+  letter-spacing: -0.01em;
+}
+
+.font-dados {
+  font-family: var(--fonte-dados);
+}
+
+/* ---------- Foco visível (acessibilidade) ---------- */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--cor-mare);
+  outline-offset: 2px;
+}
+
+/* ---------- Linha de rota (elemento de assinatura da marca) ---------- */
+.rota-linha {
+  position: relative;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--cor-rota) 0,
+    var(--cor-rota) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  width: 2px;
+}
+
+.rota-ponto {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cor-rota);
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.18);
+}
+
+/* ---------- Card de corrida (hero demo) ---------- */
+.card-corrida {
+  background: linear-gradient(180deg, var(--cor-superficie) 0%, var(--cor-superficie-alt) 100%);
+  border: 1px solid var(--cor-borda);
+}
+
+@keyframes valorSobe {
+  0% { transform: translateY(4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-4px); opacity: 0; }
+}
+
+.valor-animado {
+  animation: valorSobe 2.2s ease-in-out infinite;
+}
+
+@keyframes pulsarOnline {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(61, 220, 132, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(61, 220, 132, 0); }
+}
+
+.status-online {
+  animation: pulsarOnline 2s ease-out infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Botão primário (rota) ---------- */
+.btn-rota {
+  background: var(--cor-rota);
+  color: #10110F;
+  font-weight: 700;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-rota:hover {
+  background: var(--cor-rota-escuro);
+}
+
+.btn-rota:active {
+  transform: scale(0.98);
+}
+
+/* ---------- Respeita usuários que preferem menos movimento ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .valor-animado,
+  .status-online,
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
