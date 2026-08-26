@@ -519,6 +519,17 @@ const endereco = `${rua}${numero ? ", " + numero : ""}${bairro ? " - " + bairro 
 
     function montarPDF(){
 
+      const margemInferior = 15;
+      const lineHeight = 6;
+
+      function verificarQuebraDePagina(alturaNecessaria){
+        const alturaPagina = doc.internal.pageSize.height;
+        if(y + alturaNecessaria > alturaPagina - margemInferior){
+          doc.addPage();
+          y = 20;
+        }
+      }
+
       doc.setFontSize(22);
       doc.setFont(undefined, 'bold');
       doc.text(nome, 10, y);
@@ -555,22 +566,45 @@ if(estadoCivil){
 
       function adicionarBloco(titulo, conteudo){
 
-        if(conteudo.trim() !== ""){
+        const conteudoLimpo = conteudo.trim().replace(/\n{2,}/g, "\n");
+
+        if(conteudoLimpo !== ""){
+
+          const texto = doc.splitTextToSize(conteudoLimpo, 180);
+
+          const alturaTitulo = 10;
+          const alturaTexto = texto.length * lineHeight;
+          const alturaBloco = alturaTitulo + alturaTexto + 6;
+
+          // Se o bloco inteiro couber na página, quebra a página antes dele
+          // para não cortar o título separado do texto.
+          const alturaPagina = doc.internal.pageSize.height;
+          const alturaDisponivel = alturaPagina - margemInferior;
+
+          if(alturaBloco <= (alturaDisponivel - 20)){
+            verificarQuebraDePagina(alturaBloco);
+          } else {
+            // Bloco maior que uma página inteira: garante espaço mínimo
+            // para o título e a primeira linha, o resto flui naturalmente.
+            verificarQuebraDePagina(alturaTitulo + lineHeight);
+          }
 
           doc.setFontSize(14);
           doc.setFont(undefined, 'bold');
           doc.text(titulo, 10, y);
 
-          y += 7;
+          y += alturaTitulo;
 
           doc.setFontSize(11);
           doc.setFont(undefined, 'normal');
 
-          const texto = doc.splitTextToSize(conteudo, 180);
+          texto.forEach(linha => {
+            verificarQuebraDePagina(lineHeight);
+            doc.text(linha, 10, y);
+            y += lineHeight;
+          });
 
-          doc.text(texto, 10, y);
-
-          y += texto.length * 6 + 8;
+          y += 6;
 
         }
 
