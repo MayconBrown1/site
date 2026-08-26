@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correção Definitiva: Erro Sentinel LDK 0x7101 no Wilcom</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #181825 100%);
+            color: #cdd6f4;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f5c2e7;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #a6adc8;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: #313244;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #45475a;
+        }
+        
+        h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #89b4fa;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        p {
+            font-size: 14px;
+            color: #bac2de;
+            margin-bottom: 12px;
+        }
+        
+        code {
+            background: #1e1e2e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #a6e3a1;
+        }
+        
+        .code-block {
+            background: #1e1e2e;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid #45475a;
+        }
+        
+        .code-block .comment { color: #6c7086; }
+        .code-block .keyword { color: #cba6f7; }
+        .code-block .string { color: #a6e3a1; }
+        .code-block .function { color: #89b4fa; }
+        .code-block .number { color: #fab387; }
+        
+        .info-box {
+            background: rgba(137, 180, 250, 0.1);
+            border-left: 3px solid #89b4fa;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+        }
+        
+        .success-box {
+            background: rgba(166, 227, 161, 0.1);
+            border-left: 3px solid #a6e3a1;
+            padding: 12px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+        }
+        
+        ul {
+            margin-left: 20px;
+            color: #bac2de;
+            font-size: 14px;
+        }
+        
+        li {
+            margin-bottom: 6px;
+        }
+        
+        strong {
+            color: #f5c2e7;
+        }
+        
+        kbd {
+            background: #45475a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .step {
+            background: #1e1e2e;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #f5c2e7;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #45475a;
+        }
+        
+        th {
+            color: #f5c2e7;
+            font-weight: 600;
+        }
+        
+        td {
+            color: #bac2de;
+        }
+        
+        .emoji {
+            font-size: 20px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .card {
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🛠️</span> Correção Definitiva: Erro Sentinel LDK 0x7101 no Wilcom</h1>
+        <p class="subtitle">Guia completo para remover automaticamente o erro de licença do Wilcom Embroidery Studio</p>
+
+        <!-- O que é o erro -->
+        <div class="card">
+            <h2><span class="emoji">📋</span> O que é o erro 0x7101?</h2>
+            <p>
+                O <strong>Sentinel LDK Protection System</strong> é o sistema de licenciamento da Thales (Gemalto). 
+                O erro <strong>0x7101</strong> indica falha na verificação da licença do Wilcom.
+            </p>
+            <p>
+                Os arquivos "Remove LDK" apagam a chave de registro <code>HKEY_CURRENT_USER\Software\Gemalto</code>, 
+                mas o sistema a recria periodicamente (por isso volta a dar erro).
+            </p>
+        </div>
+
+        <!-- Arquivo BAT -->
+        <div class="card">
+            <h2><span class="emoji">📁</span> Arquivo BAT Silencioso</h2>
+            <p>Crie um arquivo chamado <strong>Remove_LDK_Silencioso.bat</strong> com este conteúdo:</p>
+            
+            <div class="code-block">
+                <span class="comment">@echo off</span><br>
+                <span class="keyword">>nul 2>&1</span> (<br>
+                &nbsp;&nbsp;<span class="function">reg delete</span> <span class="string">"HKEY_CURRENT_USER\Software\Gemalto"</span> /f<br>
+                )<br>
+                <span class="keyword">exit</span>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>🔧 Como funciona:</strong></p>
+                <ul>
+                    <li><code>@echo off</code> — desativa exibição dos comandos</li>
+                    <li><code>>nul 2>&1</code> — oculta TODA a saída (silencioso)</li>
+                    <li>Apaga a chave Gemalto do registro sem mostrar nada na tela</li>
+                </ul>
+            </div>
+            
+            <p>💾 <strong>Salve em:</strong> <code>C:\Tools\Remove_LDK_Silencioso.bat</code></p>
+        </div>
+
+        <!-- Agendador de Tarefas -->
+        <div class="card">
+            <h2><span class="emoji">⚙️</span> Configurar Execução Automática Diária</h2>
+            
+            <div class="step">
+                <div class="step-title">Passo 1: Abrir o Agendador de Tarefas</div>
+                <p>Pressione <kbd>Win + R</kbd>, digite <code>taskschd.msc</code> e pressione Enter</p>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">Passo 2: Criar nova tarefa</div>
+                <p>No painel direito, clique em <strong>"Criar Tarefa..."</strong></p>
+            </div>
+
+            <div class="step">
+                <div class="step-title">📌 Aba "Geral"</div>
+                <ul>
+                    <li><strong>Nome:</strong> Remove LDK Wilcom</li>
+                    <li>☑️ <strong>"Executar estando o usuário conectado ou não"</strong></li>
+                    <li>☑️ <strong>"Oculta"</strong> (não aparece na tela)</li>
+                    <li>☑️ <strong>"Executar com privilégios mais altos"</strong></li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-title">📌 Aba "Disparadores" → Clique em "Novo..."</div>
+                <ul>
+                    <li>Opção A: <strong>"Ao fazer logon"</strong> — executa toda vez que ligar o PC</li>
+                    <li>Opção B: <strong>"Diariamente"</strong> — escolha o horário (ex: 09:00)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-title">📌 Aba "Ações" → Clique em "Novo..."</div>
+                <ul>
+                    <li><strong>Ação:</strong> Iniciar um programa</li>
+                    <li><strong>Programa/script:</strong> <code>C:\Tools\Remove_LDK_Silencioso.bat</code></li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <div class="step-title">📌 Aba "Configurações"</div>
+                <ul>
+                    <li>☑️ "Executar a tarefa assim que possível se uma programação for perdida"</li>
+                    <li>☑️ "Se a tarefa falhar, reiniciar a cada: 1 minuto" (3 tentativas)</li>
+                </ul>
+            </div>
+            
+            <div class="success-box">
+                <p>✅ Clique em <strong>OK</strong> e digite sua senha do Windows quando solicitado.</p>
+            </div>
+        </div>
+
+        <!-- Script VBS -->
+        <div class="card">
+            <h2><span class="emoji">🔄</span> Alternativa: Script VBS (100% Invisível)</h2>
+            <p>Se ainda aparecer alguma janela, use este script VBS que executa o BAT de forma completamente oculta:</p>
+            
+            <div class="code-block">
+                <span class="keyword">Set</span> WshShell = <span class="function">CreateObject</span>(<span class="string">"WScript.Shell"</span>)<br>
+                WshShell.<span class="function">Run</span> <span class="function">chr</span>(<span class="number">34</span>) & <span class="string">"C:\Tools\Remove_LDK_Silencioso.bat"</span> & <span class="function">Chr</span>(<span class="number">34</span>), <span class="number">0</span><br>
+                <span class="keyword">Set</span> WshShell = <span class="keyword">Nothing</span>
+            </div>
+            
+            <div class="info-box">
+                <p>💾 <strong>Salve como:</strong> <code>Executar_Silencioso.vbs</code></p>
+                <p>🔧 No Agendador de Tarefas, aponte para o arquivo <strong>.vbs</strong> em vez do .bat</p>
+            </div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="card">
+            <h2><span class="emoji">📊</span> Resumo dos Arquivos</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Arquivo</th>
+                        <th>Função</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Remove_LDK_Silencioso.bat</code></td>
+                        <td>Apaga o registro silenciosamente</td>
+                    </tr>
+                    <tr>
+                        <td><code>Executar_Silencioso.vbs</code></td>
+                        <td>(Opcional) Executa o BAT 100% invisível</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="success-box" style="margin-top: 16px;">
+                <p><strong>🎯 Pronto!</strong> Agora o erro não vai mais te incomodar — o sistema vai "limpar" 
+                automaticamente todo dia ou toda vez que ligar o computador.</p>
+            </div>
+        </div>
+        
+        <p style="text-align: center; color: #6c7086; font-size: 12px; margin-top: 30px;">
+            Guia criado para correção do erro Sentinel LDK 0x7101 no Wilcom
+        </p>
+    </div>
+</body>
+</html>
