@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>PDV - Pro | Compra confirmada</title>
+  <style>
+    :root { --gold: #d4af37; --gold-light: #f3d778; --black: #050505; --panel: #101010; --line: #4c3d13; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 15% 10%, #2c2207 0, transparent 35%), radial-gradient(circle at 90% 90%, #191304 0, transparent 32%), var(--black); color: #fff; font-family: Arial, Helvetica, sans-serif; }
+    main { width: min(92vw, 590px); padding: 42px 34px; text-align: center; background: rgba(16,16,16,.94); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 24px 70px rgba(0,0,0,.6); }
+    .seal { width: 82px; height: 82px; margin: 0 auto 22px; display: grid; place-items: center; border: 2px solid var(--gold); border-radius: 50%; color: var(--gold); font-size: 40px; box-shadow: inset 0 0 22px rgba(212,175,55,.15); }
+    h1 { margin: 0 0 16px; color: var(--gold); font-size: clamp(29px, 6vw, 42px); line-height: 1.08; }
+    p { margin: 0 auto 16px; max-width: 460px; color: #ddd; font-size: 17px; line-height: 1.6; }
+    strong { color: var(--gold-light); }
+    .detail { margin-top: 24px; padding: 16px; border-left: 3px solid var(--gold); border-radius: 8px; background: #191919; color: #f1f1f1; font-size: 15px; line-height: 1.5; text-align: left; }
+    .brand { margin-top: 30px; color: #8e8e8e; font-size: 13px; letter-spacing: .09em; text-transform: uppercase; }
+    .whatsapp { position: fixed; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 10px; padding: 13px 17px; border: 1px solid #62dd8d; border-radius: 999px; background: #1fa855; color: #fff; box-shadow: 0 10px 28px rgba(0,0,0,.45); font-weight: 700; text-decoration: none; transition: transform .2s ease, filter .2s ease; }
+    .whatsapp:hover { transform: translateY(-3px); filter: brightness(1.08); }
+    .whatsapp-icon { font-size: 24px; line-height: 1; }
+    @media (max-width: 520px) { main { padding: 34px 23px; } .whatsapp { right: 15px; bottom: 15px; padding: 13px; } .whatsapp-label { display: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="seal" aria-hidden="true">✓</div>
+    <h1>Obrigado pela compra!</h1>
+    <p>Recebemos sua solicitação para o <strong>PDV - Pro</strong>. É um prazer ter você conosco.</p>
+    <div class="detail">Seu acesso está aguardando confirmação e aprovação do administrador. <strong>Em até 24 horas</strong>, seu acesso será liberado e você poderá entrar no sistema.</div>
+    <p class="brand">PDV - Pro · Gestão simples e profissional</p>
+  </main>
+  <a class="whatsapp" href="https://wa.me/5584981770146?text=Olá!%20Preciso%20de%20suporte%20sobre%20minha%20compra%20do%20PDV%20-%20Pro." target="_blank" rel="noopener noreferrer" aria-label="Falar com o suporte pelo WhatsApp">
+    <span class="whatsapp-icon" aria-hidden="true">☏</span><span class="whatsapp-label">Suporte WhatsApp</span>
+  </a>
+</body>
+</html>
