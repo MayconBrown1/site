@@ -62,6 +62,7 @@
                 <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
                     <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
+                    <button onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
@@ -127,6 +128,7 @@
                                     class="w-full p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors text-sm lg:text-base">
                                 💳 Cartão
                             </button>
+                            <button onclick="selecionarPagamento('fiado')" class="w-full p-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm lg:text-base">🧾 Fiado</button>
                         </div>
                         
                         <div id="pagamento-detalhes" class="hidden">
@@ -187,6 +189,11 @@
                                         <option value="12">12x</option>
                                     </select>
                                 </div>
+                            </div>
+                            <div id="fiado-form" class="hidden space-y-3">
+                                <div><label for="fiado-cliente" class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label><select id="fiado-cliente" class="w-full p-3 border rounded-lg text-base" onchange="atualizarInfoFiadoVenda()"></select></div>
+                                <div id="fiado-info" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Selecione um cliente cadastrado.</div>
+                                <div><label for="fiado-vencimento" class="block text-sm font-medium text-gray-700 mb-1">Data prevista para pagamento</label><input id="fiado-vencimento" type="date" class="w-full p-3 border rounded-lg text-base"></div>
                             </div>
                             
                             <button onclick="finalizarVenda()" 
@@ -294,6 +301,15 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Seção Clientes Fiado -->
+            <div id="clientes-section" class="section hidden">
+                <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                    <div class="flex flex-col sm:flex-row justify-between gap-3 mb-5"><div><h2 class="text-xl lg:text-2xl font-semibold">Clientes Fiado</h2><p class="text-sm text-gray-500">Limites, vencimentos, pagamentos e extratos.</p></div><button onclick="mostrarFormClienteFiado()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-lg">Novo cliente</button></div>
+                    <div id="form-cliente-fiado" class="hidden mb-5 rounded-lg bg-gray-50 p-4"><h3 class="font-semibold mb-3">Cadastrar cliente fiado</h3><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"><input id="cliente-fiado-nome" placeholder="Nome *" class="p-3 border rounded-lg"><input id="cliente-fiado-telefone" placeholder="Telefone" class="p-3 border rounded-lg"><input id="cliente-fiado-limite" type="number" min="0" step="0.01" placeholder="Limite mensal (R$)" class="p-3 border rounded-lg"><input id="cliente-fiado-dia" type="number" min="1" max="31" placeholder="Dia de pagamento" class="p-3 border rounded-lg"></div><label class="mt-3 flex items-center gap-2 text-sm"><input id="cliente-fiado-sem-limite" type="checkbox"> Sem limite de compra</label><div class="flex gap-3 mt-4"><button onclick="salvarClienteFiado()" class="bg-green-600 text-white px-4 py-2 rounded-lg">Salvar cliente</button><button onclick="cancelarClienteFiado()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Cancelar</button></div></div>
+                    <div id="lista-clientes-fiado" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
                 </div>
             </div>
 
@@ -815,6 +831,8 @@ if ('serviceWorker' in navigator) {
         let vendaParaComprovante = null;
         let vendaParaExcluir = null;
         let movimentoParaExcluir = null;
+        let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
+        let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
             vendas: { get: () => vendas, set: v => { vendas = v; } },
@@ -822,6 +840,8 @@ if ('serviceWorker' in navigator) {
             categorias: { get: () => categorias, set: v => { categorias = v; } },
             categoriasOcultas: { get: () => categoriasOcultas, set: v => { categoriasOcultas = v; } },
             configSistema: { get: () => configSistema, set: v => { configSistema = v; } },
+            clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
+            pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
             CONFIG_PIX: { get: () => CONFIG_PIX }
         });
 
@@ -917,6 +937,8 @@ if ('serviceWorker' in navigator) {
             } else if (sectionName === 'vendas') {
                 atualizarListaProdutos();
                 focarBuscaProduto();
+            } else if (sectionName === 'clientes') {
+                atualizarClientesFiado();
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
             }
@@ -1719,6 +1741,9 @@ function showInstallButton() {
             } else if (tipo === 'pix') {
                 // Limpar QR Code anterior
                 document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
+            } else if (tipo === 'fiado') {
+                atualizarSelectClientesFiado();
+                atualizarInfoFiadoVenda();
             }
             salvarRascunhoVenda();
         }
@@ -1988,6 +2013,14 @@ function showInstallButton() {
             } else if (vendaAtual.tipo === 'cartao') {
                 vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
                 vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
+            } else if (vendaAtual.tipo === 'fiado') {
+                const cliente = clientesFiado.find(c => c.id === document.getElementById('fiado-cliente').value);
+                if (!cliente) { mostrarMensagem('Selecione um cliente para a venda fiado.', 'erro'); return; }
+                const saldo = saldoClienteFiado(cliente.id);
+                if (!cliente.semLimite && saldo + total > Number(cliente.limite || 0)) { mostrarMensagem(`Limite insuficiente. Saldo atual: R$ ${saldo.toFixed(2)}.`, 'erro'); return; }
+                vendaAtual.clienteId = cliente.id;
+                vendaAtual.clienteNome = cliente.nome;
+                vendaAtual.vencimento = document.getElementById('fiado-vencimento').value || '';
             }
 
             // Verificar estoque antes de finalizar
@@ -2020,11 +2053,11 @@ function showInstallButton() {
             // Salvar venda
             vendas.push(venda);
             
-            // Registrar movimento de caixa
+            // Vendas à vista entram no caixa; vendas fiado ficam no saldo do cliente.
             const movimento = {
                 id: 'm_' + Date.now(),
                 data: new Date().toISOString(),
-                tipo: 'entrada',
+                tipo: vendaAtual.tipo === 'fiado' ? 'fiado' : 'entrada',
                 valor: total,
                 descricao: `Venda #${venda.id} - ${vendaAtual.tipo}`,
                 vendaId: venda.id
@@ -2046,6 +2079,8 @@ function showInstallButton() {
             document.getElementById('pix-id').value = '';
             document.getElementById('tipo-cartao').value = 'credito';
             document.getElementById('parcelas').value = '1';
+            document.getElementById('fiado-cliente').value = '';
+            document.getElementById('fiado-vencimento').value = '';
             document.getElementById('pagamento-detalhes').classList.add('hidden');
             
             // Resetar status PIX
@@ -3168,6 +3203,53 @@ function showInstallButton() {
             input.value = '';
         }
 
+        // Clientes fiado
+        function mostrarFormClienteFiado() { document.getElementById('form-cliente-fiado').classList.remove('hidden'); }
+        function cancelarClienteFiado() { document.getElementById('form-cliente-fiado').classList.add('hidden'); ['cliente-fiado-nome','cliente-fiado-telefone','cliente-fiado-limite','cliente-fiado-dia'].forEach(id => document.getElementById(id).value=''); document.getElementById('cliente-fiado-sem-limite').checked=false; }
+        function saldoClienteFiado(clienteId) {
+            const compras = vendas.filter(v => v.pagamento?.tipo === 'fiado' && v.pagamento.clienteId === clienteId).reduce((s,v) => s + Number(v.total || 0), 0);
+            const pagos = pagamentosFiado.filter(p => p.clienteId === clienteId).reduce((s,p) => s + Number(p.valor || 0), 0);
+            return Math.max(0, compras - pagos);
+        }
+        function salvarClienteFiado() {
+            const nome = document.getElementById('cliente-fiado-nome').value.trim();
+            const semLimite = document.getElementById('cliente-fiado-sem-limite').checked;
+            const limite = Number(document.getElementById('cliente-fiado-limite').value || 0);
+            if (!nome || (!semLimite && limite < 0)) { mostrarMensagem('Informe o nome e um limite válido.', 'erro'); return; }
+            clientesFiado.push({ id:'cf_'+Date.now(), nome, telefone:document.getElementById('cliente-fiado-telefone').value.trim(), limite, semLimite, diaPagamento:Number(document.getElementById('cliente-fiado-dia').value || 0), createdAt:new Date().toISOString() });
+            salvarDados(); cancelarClienteFiado(); atualizarClientesFiado(); mostrarMensagem('Cliente fiado cadastrado.', 'sucesso');
+        }
+        function atualizarSelectClientesFiado() {
+            const select = document.getElementById('fiado-cliente'); if (!select) return;
+            const atual = select.value; select.innerHTML = '<option value="">Selecione o cliente</option>' + clientesFiado.map(c => `<option value="${c.id}">${c.nome} — saldo R$ ${saldoClienteFiado(c.id).toFixed(2)}</option>`).join(''); select.value = atual;
+        }
+        function atualizarInfoFiadoVenda() {
+            const cliente = clientesFiado.find(c => c.id === document.getElementById('fiado-cliente').value);
+            const info = document.getElementById('fiado-info'); if (!cliente) { info.textContent='Selecione um cliente cadastrado.'; return; }
+            const limite = cliente.semLimite ? 'Sem limite' : `R$ ${Number(cliente.limite||0).toFixed(2)}`;
+            info.innerHTML = `<strong>Saldo atual:</strong> R$ ${saldoClienteFiado(cliente.id).toFixed(2)} · <strong>Limite:</strong> ${limite}${cliente.diaPagamento ? ` · <strong>Vencimento:</strong> dia ${cliente.diaPagamento}` : ''}`;
+            if (!document.getElementById('fiado-vencimento').value && cliente.diaPagamento) { const d=new Date(); d.setDate(cliente.diaPagamento); if(d<new Date()) d.setMonth(d.getMonth()+1); document.getElementById('fiado-vencimento').value=d.toISOString().slice(0,10); }
+        }
+        function atualizarClientesFiado() {
+            const lista = document.getElementById('lista-clientes-fiado'); if (!lista) return;
+            atualizarSelectClientesFiado();
+            lista.innerHTML = clientesFiado.map(c => { const saldo=saldoClienteFiado(c.id), limite=c.semLimite?'Sem limite':`R$ ${Number(c.limite||0).toFixed(2)}`; return `<article class="border rounded-xl p-4 bg-gray-50"><div class="flex justify-between gap-3"><div><h3 class="font-bold text-lg">${c.nome}</h3><p class="text-sm text-gray-600">${c.telefone||'Sem telefone'} · Pagamento: ${c.diaPagamento ? 'dia '+c.diaPagamento : 'não definido'}</p></div><div class="text-right"><div class="text-sm">Limite: ${limite}</div><div class="font-bold ${saldo>0?'text-red-600':'text-green-600'}">Saldo: R$ ${saldo.toFixed(2)}</div></div></div><div class="mt-4 flex flex-wrap gap-2"><button onclick="registrarPagamentoFiado('${c.id}')" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">Receber / Fechamento</button><button onclick="gerarExtratoFiado('${c.id}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">Extrato PDF</button></div></article>`; }).join('') || '<p class="text-gray-500">Nenhum cliente fiado cadastrado.</p>';
+        }
+        function registrarPagamentoFiado(clienteId) {
+            const cliente=clientesFiado.find(c=>c.id===clienteId), saldo=saldoClienteFiado(clienteId); if(!cliente || saldo<=0){ mostrarMensagem('Este cliente não possui saldo pendente.', 'erro'); return; }
+            const texto=prompt(`Fechamento de ${cliente.nome}\nSaldo atual: R$ ${saldo.toFixed(2)}\nInforme o valor recebido:`); if(texto===null) return;
+            const valor=Number(String(texto).replace(',','.')); if(!valor || valor<=0 || valor>saldo){ mostrarMensagem('Informe um valor entre R$ 0,01 e R$ '+saldo.toFixed(2)+'.', 'erro'); return; }
+            pagamentosFiado.push({id:'pf_'+Date.now(),clienteId,valor,data:new Date().toISOString()}); movimentos.push({id:'m_'+Date.now(),data:new Date().toISOString(),tipo:'entrada',valor,descricao:`Pagamento fiado — ${cliente.nome}`}); salvarDados(); atualizarClientesFiado(); calcularSaldoCaixa(); mostrarMensagem(`Pagamento registrado. Restante: R$ ${(saldo-valor).toFixed(2)}.`, 'sucesso');
+        }
+        function gerarExtratoFiado(clienteId) {
+            const cliente=clientesFiado.find(c=>c.id===clienteId); if(!cliente) return;
+            const compras=vendas.filter(v=>v.pagamento?.tipo==='fiado'&&v.pagamento.clienteId===clienteId), pagos=pagamentosFiado.filter(p=>p.clienteId===clienteId); const {jsPDF}=window.jspdf; const pdf=new jsPDF(); let y=16;
+            pdf.setFontSize(18); pdf.text(configSistema.nomeEmpresa||'PDV - Pro',14,y); y+=10; pdf.setFontSize(14); pdf.text('EXTRATO DE FIADO',14,y); y+=9; pdf.setFontSize(10); pdf.text(`Cliente: ${cliente.nome}`,14,y); y+=6; pdf.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,y); y+=9;
+            pdf.setFont('helvetica','bold'); pdf.text('COMPRAS',14,y); y+=6; pdf.setFont('helvetica','normal');
+            compras.forEach(v=>{ if(y>270){pdf.addPage();y=16;} const itens=v.itens.map(i=>`${i.quantidade}x ${i.nome}`).join(', '); pdf.text(`${new Date(v.data).toLocaleString('pt-BR')} — R$ ${v.total.toFixed(2)}`,14,y); y+=5; const linhas=pdf.splitTextToSize(itens,175); pdf.text(linhas,18,y); y+=linhas.length*5+3; });
+            if(y>255){pdf.addPage();y=16;} pdf.setFont('helvetica','bold'); pdf.text('PAGAMENTOS',14,y); y+=6; pdf.setFont('helvetica','normal'); pagos.forEach(p=>{pdf.text(`${new Date(p.data).toLocaleString('pt-BR')} — R$ ${Number(p.valor).toFixed(2)}`,14,y);y+=6;}); y+=4; pdf.setFont('helvetica','bold'); pdf.text(`SALDO PENDENTE: R$ ${saldoClienteFiado(clienteId).toFixed(2)}`,14,y); pdf.save(`extrato-fiado-${cliente.nome.replace(/[^a-z0-9]/gi,'-')}.pdf`);
+        }
+
         // Persistência
         function salvarDados() {
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
@@ -3176,6 +3258,8 @@ function showInstallButton() {
             localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
             localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
+            localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
+            localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
         }
 
         function salvarRascunhoVenda() {

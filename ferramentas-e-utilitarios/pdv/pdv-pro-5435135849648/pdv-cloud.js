@@ -11,6 +11,7 @@ function state() {
   return {
     ownerUid: uid,
     produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [],
+    clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
     configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}, updatedAt: serverTimestamp()
   };
@@ -26,6 +27,7 @@ function iniciarContaVazia() {
   // Nunca reutiliza produtos, vendas, PIX ou empresa que estavam no navegador de outra conta.
   writing = true;
   window.produtos = []; window.vendas = []; window.movimentos = [];
+  window.clientesFiado = []; window.pagamentosFiado = [];
   window.categorias = []; window.categoriasOcultas = [];
   window.configSistema = { nomeEmpresa: 'PDV - Pro', cnpj: '' };
   Object.assign(window.CONFIG_PIX, pixPadrao);
@@ -46,6 +48,7 @@ protegerPagina((user) => {
     if (!snap.exists()) { iniciarContaVazia(); return; }
     const d = snap.data(); writing = true;
     window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || [];
+    window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
     window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
     window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
