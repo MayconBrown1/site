@@ -1,11 +1,16 @@
 import { auth, db } from './firebase-config.js';
 import { signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
-import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+
+const OWNER_EMAIL = 'mayconbrown083@gmail.com';
 
 export async function entrar(email, senha) {
   const cred = await signInWithEmailAndPassword(auth, email, senha);
-  // Direcionamento inicial; a permissão real é concedida e validada no backend.
-  if (cred.user.email?.toLowerCase() === 'mayconbrown083@gmail.com') {
+  // O proprietário é validado pelas Firestore Rules, não apenas por esta navegação.
+  if (cred.user.email?.toLowerCase() === OWNER_EMAIL) {
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      email: OWNER_EMAIL, role: 'owner', status: 'ativo', updatedAt: serverTimestamp()
+    }, { merge: true });
     location.replace('./admin.html');
     return;
   }
