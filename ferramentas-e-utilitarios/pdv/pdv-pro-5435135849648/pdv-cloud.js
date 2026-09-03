@@ -38,7 +38,7 @@ protegerPagina((user) => {
   uid = user.uid;
   document.body.style.visibility = 'visible';
   document.title = 'PDV - Pro';
-  const header = document.querySelector('header div');
+  const header = document.querySelector('#menu-pdv');
   if (header && !document.querySelector('#btn-sair')) header.insertAdjacentHTML('beforeend', '<button id="btn-sair" class="bg-black px-3 py-2 rounded text-sm">Sair</button>');
   document.querySelector('#btn-sair')?.addEventListener('click', sair);
 

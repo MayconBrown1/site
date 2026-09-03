@@ -11,6 +11,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="./pdv-cloud.js"></script>
+    <script src="./pwa-install.js"></script>
 
 
     <style>
@@ -54,8 +55,11 @@
         <!-- Header -->
         <header class="bg-blue-600 text-white p-3 md:p-4 shadow-lg">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1>
-                <div class="grid grid-cols-2 sm:flex gap-2 w-full sm:w-auto">
+                <div class="flex w-full items-center justify-between sm:w-auto">
+                    <h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1>
+                    <button type="button" onclick="alternarMenuPdv()" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xl sm:hidden" aria-label="Abrir menu" aria-controls="menu-pdv">☰</button>
+                </div>
+                <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
                     <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
@@ -916,6 +920,12 @@ if ('serviceWorker' in navigator) {
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
             }
+        }
+
+        function alternarMenuPdv() {
+            const menu = document.getElementById('menu-pdv');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('grid');
         }
 
         // Gerenciamento de produtos

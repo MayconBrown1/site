@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    // A verificação ocorre no token autenticado do Firebase e nas Rules, não no HTML.
+    function owner() { return signedIn() && request.auth.token.email == 'mayconbrown083@gmail.com'; }
+    function self(uid) { return signedIn() && request.auth.uid == uid; }
+    function activeSelf(uid) {
+      return self(uid) && exists(/databases/$(database)/documents/users/$(uid))
+        && get(/databases/$(database)/documents/users/$(uid)).data.status == 'ativo';
+    }
+
+    match /accessRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name','email','whatsapp','status','createdAt','requestId','uid'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.name is string && request.resource.data.whatsapp is string;
+      allow read, update, delete: if owner();
+    }
+
+    match /users/{uid} {
+      allow read: if owner() || self(uid);
+      allow create: if owner() || (self(uid)
+        && request.resource.data.keys().hasOnly(['name','email','whatsapp','status','createdAt','role','approvedAt','blockedAt'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.role == 'client');
+      allow update, delete: if owner();
+
+      match /app/{document=**} {
+        allow read, write: if owner() || activeSelf(uid);
+      }
+    }
+  }
+}
