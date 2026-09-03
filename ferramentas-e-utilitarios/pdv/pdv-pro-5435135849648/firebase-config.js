@@ -14,4 +14,4 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const PAYMENT_URL = 'https://mayconbrown.com.br';
+export const PAYMENT_URL = 'https://pay.cakto.com.br/3czeosb_1083777';
