@@ -1,0 +1,31 @@
+name: Publicar PDV Pro no Firebase
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Preparar credencial segura do Firebase
+        shell: bash
+        env:
+          FIREBASE_SERVICE_ACCOUNT_PDV_BROWN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PDV_BROWN }}
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT_PDV_BROWN"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT_PDV_BROWN" > "$RUNNER_TEMP/firebase-service-account.json"
+      - name: Instalar dependências das Functions
+        run: npm install --prefix functions
+      - name: Publicar Hosting, Rules e Functions
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+        run: npx firebase-tools@latest deploy --project pdv-brown --only hosting,firestore:rules,functions --non-interactive

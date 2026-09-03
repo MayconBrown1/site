@@ -1,6 +1,19 @@
 # PDV - Pro
 
-## Publicação inicial
+## Publicação automática pelo GitHub (recomendado)
+
+O GitHub Pages sozinho hospeda apenas HTML. A aprovação de clientes e a criação segura de contas exigem Cloud Functions, que este repositório publica automaticamente no Firebase pelo GitHub Actions.
+
+1. Envie **o conteúdo desta pasta** para a raiz de um repositório GitHub.
+2. No Google Cloud Console, selecione o projeto `pdv-brown` e vá em **IAM e administrador > Contas de serviço**. Crie uma conta de serviço para implantação e gere uma chave JSON. Atribua as permissões **Firebase Admin** e **Cloud Functions Admin**.
+3. No GitHub do repositório, vá em **Settings > Secrets and variables > Actions > New repository secret**. Nome: `FIREBASE_SERVICE_ACCOUNT_PDV_BROWN`. Cole o conteúdo completo do JSON da chave e salve.
+4. Vá em **Actions > Publicar PDV Pro no Firebase > Run workflow**. Aguarde finalizar em verde. O endereço correto será `https://pdv-brown.web.app/login.html` (ou o URL informado no log), não o GitHub Pages.
+5. No Firebase Console, em **Authentication > Settings > Authorized domains**, inclua `pdv-brown.web.app` e `pdv-brown.firebaseapp.com`. Habilite **E-mail/senha**.
+6. Entre em `https://pdv-brown.web.app/login.html` com `mayconbrown083@gmail.com` e abra `admin.html` uma vez. A Function atribui a permissão segura de proprietário a essa conta.
+
+Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em `firebase-config.js`: ele deve existir apenas no Secret do GitHub.
+
+## Publicação inicial por terminal
 
 1. No Firebase Console do projeto **pdv-brown**, habilite Authentication > E-mail/senha. A conta proprietária configurada é **mayconbrown083@gmail.com**.
 2. Após publicar as Functions, entre com essa conta e abra `admin.html` uma vez. A Function segura atribuirá a custom claim `admin: true` somente a ela.
