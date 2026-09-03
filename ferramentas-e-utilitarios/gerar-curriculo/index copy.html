@@ -1,169 +1,3329 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Gerador de Currículo</title>
+
   <link rel="shortcut icon" href="../../img/icone.png" type="image/x-icon">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #121212;
-      color: #ffffff;
+      background: #0f0f0f;
+      color: #fff;
+      padding: 30px 15px;
     }
+
     header {
       text-align: center;
-      padding: 20px;
+      margin-bottom: 30px;
     }
+
     header img {
-      width: 200px;
+      width: 220px;
+      max-width: 90%;
     }
+
+    .container {
+      max-width: 1250px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      align-items: start;
+    }
+
+    .box {
+      background: #1a1a1a;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
     h2 {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
+      font-size: 28px;
     }
-    form {
-      max-width: 600px;
-      margin: 0 auto;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+
+    h3 {
+      margin-top: 25px;
+      margin-bottom: 12px;
+      color: #2d89ef;
+      font-size: 19px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
     }
+
     label {
       display: block;
-      margin-top: 10px;
+      margin-top: 14px;
+      margin-bottom: 6px;
       font-weight: bold;
+      font-size: 14px;
     }
-    input, textarea {
+
+    input,
+    textarea,
+    select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: none;
-      border-radius: 5px;
-      background-color: #2a2a2a;
+      background: #2a2a2a;
+      border: 1px solid #333;
+      outline: none;
       color: white;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: Arial, sans-serif;
     }
-    #foto {
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: #2d89ef;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: #aaa;
+    }
+
+    input[type="file"] {
+      padding: 9px;
+    }
+
+    .optional {
+      color: #999;
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    .dica {
+      background: #222;
+      border-left: 3px solid #2d89ef;
+      padding: 10px 12px;
+      margin-top: 10px;
+      border-radius: 5px;
+      color: #bbb;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .linha-campos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .linha-campos-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 10px;
+      background: #2d89ef;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1b5dbf;
+    }
+
+    .btn-adicionar {
+      background: #252525;
+      border: 1px solid #444;
+      font-size: 14px;
+      padding: 11px;
+      margin-top: 12px;
+    }
+
+    .btn-adicionar:hover {
+      background: #333;
+    }
+
+    .btn-remover {
+      background: #7d2222;
+      font-size: 12px;
+      padding: 9px;
       margin-top: 10px;
     }
-    button {
-      margin-top: 20px;
-      padding: 12px 20px;
-      background-color: #2d89ef;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      width: 100%;
-      font-size: 16px;
+
+    .btn-remover:hover {
+      background: #a52b2b;
     }
-    button:hover {
-      background-color: #1b5dbf;
+
+    .item-dinamico {
+      background: #202020;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+
+    .item-titulo {
+      color: #ddd;
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    /* ==============================
+       PREVIEW
+       ============================== */
+
+    .preview {
+      background: white;
+      color: #000;
+      min-height: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .preview-topo {
+      background: #2d89ef;
+      color: white;
+      padding: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .preview-topo img {
+      width: 95px;
+      height: 95px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 3px solid white;
+      flex-shrink: 0;
+    }
+
+    .preview-nome {
+      font-size: 27px;
+      font-weight: bold;
+      word-break: break-word;
+    }
+
+    .preview-objetivo-topo {
+      margin-top: 5px;
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    .preview-contato {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .preview-content {
+      padding: 28px;
+    }
+
+    .secao {
+      margin-bottom: 22px;
+    }
+
+    .secao h4 {
+      font-size: 17px;
+      margin-bottom: 9px;
+      color: #2d89ef;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 5px;
+    }
+
+    .secao p {
+      line-height: 1.55;
+      white-space: pre-line;
+      font-size: 13.5px;
+    }
+
+    .preview-item {
+      margin-bottom: 15px;
+    }
+
+    .preview-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .preview-item .periodo {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .preview-item .descricao {
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .sem-conteudo {
+      display: none;
+    }
+
+    /* ==============================
+       BOTÃO DE OPINIÃO
+       ============================== */
+
+    .opiniao-btn {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: rgba(45, 137, 239, 0.75);
+      color: white;
+      padding: 14px 18px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+      z-index: 999;
+      transition: 0.3s;
+    }
+
+    .opiniao-btn:hover {
+      background: #1b5dbf;
+      transform: scale(1.05);
+    }
+
+    .aviso-pdf {
+      text-align: center;
+      color: #999;
+      font-size: 11px;
+      margin-top: 12px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .linha-campos,
+      .linha-campos-3 {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 15px 8px;
+      }
+
+      .box {
+        padding: 18px;
+      }
+
+      .preview-topo {
+        padding: 20px;
+      }
+
+      .preview-topo img {
+        width: 75px;
+        height: 75px;
+      }
+
+      .preview-nome {
+        font-size: 21px;
+      }
+
+      .preview-content {
+        padding: 20px;
+      }
+
+      .opiniao-btn {
+        right: 10px;
+        bottom: 10px;
+        font-size: 12px;
+        padding: 11px 14px;
+      }
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <img src="/img/logo-brown-branco.png" alt="Logo Maycon Brown">
-  </header>
-  <h2>Crie seu Currículo Simples e Rápido</h2>
-  <form id="curriculoForm">
-    <label>Digite seu nome completo:</label>
-    <input type="text" id="nome" required>
 
-    <label>Seu e-mail para contato:</label>
-    <input type="email" id="email" required>
+<header>
+  <img src="/img/logo-brown-branco.png" alt="Logo">
+</header>
 
-    <label>Seu número de telefone (com DDD):</label>
-    <input type="text" id="telefone" required>
+<div class="container">
 
-    <label>Endereço onde você mora:</label>
-    <input type="text" id="endereco" required>
+  <!-- ======================================================
+       FORMULÁRIO
+       ====================================================== -->
 
-    <label>Fale um pouco sobre você e sua experiência:</label>
-    <textarea id="resumo" rows="4" required></textarea>
+  <div class="box">
 
-    <label>Onde você já trabalhou? E o que fazia?</label>
-    <textarea id="experiencia" rows="4" required></textarea>
+    <h2>Crie seu Currículo</h2>
 
-    <label>Qual a sua escolaridade ou cursos feitos?</label>
-    <textarea id="formacao" rows="3" required></textarea>
+    <form id="curriculoForm">
 
-    <label>Liste suas habilidades (Ex: Informática, Vendas, Atendimento):</label>
-    <textarea id="habilidades" rows="2"></textarea>
+      <!-- ==============================
+           DADOS PESSOAIS
+           ============================== -->
 
-    <label>Idiomas que você fala (Ex: Português, Inglês):</label>
-    <textarea id="idiomas" rows="2"></textarea>
+      <h3>Dados Pessoais</h3>
 
-    <label>Envie sua foto 3x4:</label>
-    <input type="file" id="foto" accept="image/*">
+      <label>Nome completo</label>
 
-    <button type="button" onclick="gerarPDF()">Baixar Currículo em PDF</button>
-  </form>
+      <input
+        type="text"
+        id="nome"
+        placeholder="Digite seu nome completo"
+        required
+      >
 
-  <script>
-    async function gerarPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+      <div class="linha-campos">
 
-      const nome = document.getElementById("nome").value;
-      const email = document.getElementById("email").value;
-      const telefone = document.getElementById("telefone").value;
-      const endereco = document.getElementById("endereco").value;
-      const resumo = document.getElementById("resumo").value;
-      const experiencia = document.getElementById("experiencia").value;
-      const formacao = document.getElementById("formacao").value;
-      const habilidades = document.getElementById("habilidades").value;
-      const idiomas = document.getElementById("idiomas").value;
-      const foto = document.getElementById("foto").files[0];
+        <div>
+          <label>Telefone com DDD</label>
 
-      if (foto) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const imgData = e.target.result;
-          doc.addImage(imgData, 'JPEG', 150, 10, 40, 50);
-          montarTexto();
-        };
-        reader.readAsDataURL(foto);
-      } else {
-        montarTexto();
+          <input
+            type="text"
+            id="telefone"
+            placeholder="(84) 99999-9999"
+            required
+          >
+        </div>
+
+        <div>
+          <label>E-mail</label>
+
+          <input
+            type="email"
+            id="email"
+            placeholder="seuemail@email.com"
+          >
+        </div>
+
+      </div>
+
+      <div class="linha-campos">
+
+        <div>
+          <label>Data de nascimento</label>
+
+          <input
+            type="date"
+            id="nascimento"
+          >
+        </div>
+
+        <div>
+          <label>Estado civil</label>
+
+          <select id="estadoCivil">
+
+            <option value="">
+              Selecione
+            </option>
+
+            <option value="Solteiro(a)">
+              Solteiro(a)
+            </option>
+
+            <option value="Casado(a)">
+              Casado(a)
+            </option>
+
+            <option value="União Estável">
+              União Estável
+            </option>
+
+            <option value="Divorciado(a)">
+              Divorciado(a)
+            </option>
+
+            <option value="Viúvo(a)">
+              Viúvo(a)
+            </option>
+
+          </select>
+        </div>
+
+      </div>
+
+      <!-- ==============================
+           ENDEREÇO
+           ORDEM: RUA → NÚMERO → BAIRRO → CIDADE
+           ============================== -->
+
+      <h3>Endereço</h3>
+
+      <label>Rua</label>
+
+      <input
+        type="text"
+        id="rua"
+        placeholder="Nome da rua"
+      >
+
+      <div class="linha-campos-3">
+
+        <div>
+          <label>Número</label>
+
+          <input
+            type="text"
+            id="numero"
+            placeholder="Número"
+          >
+        </div>
+
+        <div>
+          <label>Bairro</label>
+
+          <input
+            type="text"
+            id="bairro"
+            placeholder="Bairro"
+          >
+        </div>
+
+        <div>
+          <label>Cidade / Estado</label>
+
+          <input
+            type="text"
+            id="cidade"
+            placeholder="Ex: Parnamirim - RN"
+          >
+        </div>
+
+      </div>
+
+      <label>
+        LinkedIn
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <input
+        type="text"
+        id="linkedin"
+        placeholder="linkedin.com/in/seunome"
+      >
+
+      <label>
+        Portfólio / Site
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <input
+        type="text"
+        id="portfolio"
+        placeholder="www.seusite.com.br"
+      >
+
+      <!-- ==============================
+           OBJETIVO
+           ============================== -->
+
+      <h3>Objetivo Profissional</h3>
+
+      <label>Cargo ou área desejada</label>
+
+      <input
+        type="text"
+        id="objetivo"
+        placeholder="Ex: Auxiliar Administrativo, Vendedor, Técnico em Informática"
+      >
+
+      <div class="dica">
+        Informe o cargo ou área em que deseja trabalhar.
+        O ideal é manter o objetivo curto, direto e específico.
+      </div>
+
+      <!-- ==============================
+           SOBRE VOCÊ
+           ============================== -->
+
+      <h3>Sobre Você</h3>
+
+      <label>
+        Resumo profissional
+      </label>
+
+      <textarea
+        id="resumo"
+        rows="5"
+        placeholder="Conte brevemente sobre você profissionalmente. Ex: Profissional com experiência em atendimento ao cliente, vendas e rotinas administrativas, com facilidade para trabalhar em equipe, organização e compromisso com resultados."
+      ></textarea>
+
+      <div class="dica">
+        Escreva de 3 a 5 linhas falando sobre sua experiência,
+        conhecimentos, pontos fortes e perfil profissional.
+        Evite informações pessoais que não tenham relação com o trabalho.
+      </div>
+
+      <!-- ==============================
+           EXPERIÊNCIA
+           ============================== -->
+
+      <h3>Experiência Profissional</h3>
+
+      <div id="experienciasContainer"></div>
+
+      <button
+        type="button"
+        class="btn-adicionar"
+        onclick="adicionarExperiencia()"
+      >
+        + Adicionar experiência
+      </button>
+
+      <!-- ==============================
+           FORMAÇÃO
+           ============================== -->
+
+      <h3>Formação Acadêmica</h3>
+
+      <div id="formacoesContainer"></div>
+
+      <button
+        type="button"
+        class="btn-adicionar"
+        onclick="adicionarFormacao()"
+      >
+        + Adicionar formação
+      </button>
+
+      <!-- ==============================
+           CURSOS
+           ============================== -->
+
+      <h3>Cursos e Certificações</h3>
+
+      <div id="cursosContainer"></div>
+
+      <button
+        type="button"
+        class="btn-adicionar"
+        onclick="adicionarCurso()"
+      >
+        + Adicionar curso
+      </button>
+
+      <!-- ==============================
+           HABILIDADES
+           ============================== -->
+
+      <h3>Habilidades</h3>
+
+      <label>
+        Principais habilidades
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <textarea
+        id="habilidades"
+        rows="3"
+        placeholder="Ex: Atendimento ao cliente, vendas, informática, Excel, organização, trabalho em equipe"
+      ></textarea>
+
+      <!-- ==============================
+           IDIOMAS
+           ============================== -->
+
+      <h3>Idiomas</h3>
+
+      <label>
+        Idiomas e níveis
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <textarea
+        id="idiomas"
+        rows="2"
+        placeholder="Ex: Inglês - Básico&#10;Espanhol - Intermediário"
+      ></textarea>
+
+      <!-- ==============================
+           INFORMAÇÕES COMPLEMENTARES
+           ============================== -->
+
+      <h3>Informações Complementares</h3>
+
+      <label>
+        CNH
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <select id="cnh">
+
+        <option value="">
+          Não informar
+        </option>
+
+        <option value="Não possui CNH">
+          Não possui CNH
+        </option>
+
+        <option value="Categoria A">
+          Categoria A
+        </option>
+
+        <option value="Categoria B">
+          Categoria B
+        </option>
+
+        <option value="Categoria AB">
+          Categoria AB
+        </option>
+
+        <option value="Categoria C">
+          Categoria C
+        </option>
+
+        <option value="Categoria D">
+          Categoria D
+        </option>
+
+        <option value="Categoria E">
+          Categoria E
+        </option>
+
+      </select>
+
+      <label>
+        Disponibilidade
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <input
+        type="text"
+        id="disponibilidade"
+        placeholder="Ex: Disponibilidade para viagens e mudança de cidade"
+      >
+
+      <!-- ==============================
+           FOTO
+           ============================== -->
+
+      <h3>Foto</h3>
+
+      <label>
+        Foto profissional
+        <span class="optional">(opcional)</span>
+      </label>
+
+      <input
+        type="file"
+        id="foto"
+        accept="image/*"
+      >
+
+      <div class="dica">
+        Prefira uma foto profissional, bem iluminada e com fundo simples.
+      </div>
+
+      <!-- ==============================
+           PDF
+           ============================== -->
+
+      <button
+        type="button"
+        onclick="gerarPDF()"
+      >
+        Baixar Currículo em PDF
+      </button>
+
+      <div class="aviso-pdf">
+        O currículo será organizado automaticamente em formato profissional e compacto.
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- ======================================================
+       PRÉ-VISUALIZAÇÃO
+       ====================================================== -->
+
+  <div class="box">
+
+    <h2>Pré-visualização</h2>
+
+    <div
+      class="preview"
+      id="preview"
+    >
+
+      <div class="preview-topo">
+
+        <img
+          id="previewFoto"
+          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          alt="Foto"
+        >
+
+        <div>
+
+          <div
+            class="preview-nome"
+            id="previewNome"
+          >
+            Seu Nome
+          </div>
+
+          <div
+            class="preview-objetivo-topo"
+            id="previewObjetivoTopo"
+          >
+            Seu objetivo profissional
+          </div>
+
+          <div
+            class="preview-contato"
+            id="previewContato"
+          >
+            Seu contato aparecerá aqui
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="preview-content">
+
+        <div
+          class="secao"
+          id="secaoObjetivo"
+        >
+          <h4>
+            Objetivo Profissional
+          </h4>
+
+          <p id="previewObjetivo"></p>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoResumo"
+        >
+          <h4>
+            Sobre Você
+          </h4>
+
+          <p id="previewResumo"></p>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoExperiencia"
+        >
+          <h4>
+            Experiência Profissional
+          </h4>
+
+          <div id="previewExperiencias"></div>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoFormacao"
+        >
+          <h4>
+            Formação Acadêmica
+          </h4>
+
+          <div id="previewFormacoes"></div>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoCursos"
+        >
+          <h4>
+            Cursos e Certificações
+          </h4>
+
+          <div id="previewCursos"></div>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoHabilidades"
+        >
+          <h4>
+            Habilidades
+          </h4>
+
+          <p id="previewHabilidades"></p>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoIdiomas"
+        >
+          <h4>
+            Idiomas
+          </h4>
+
+          <p id="previewIdiomas"></p>
+        </div>
+
+
+        <div
+          class="secao"
+          id="secaoComplementares"
+        >
+          <h4>
+            Informações Complementares
+          </h4>
+
+          <p id="previewComplementares"></p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================================
+   CAMPOS PRINCIPAIS
+   ========================================================== */
+
+const campos = [
+  "nome",
+  "telefone",
+  "email",
+  "nascimento",
+  "estadoCivil",
+  "rua",
+  "numero",
+  "bairro",
+  "cidade",
+  "linkedin",
+  "portfolio",
+  "objetivo",
+  "resumo",
+  "habilidades",
+  "idiomas",
+  "cnh",
+  "disponibilidade"
+];
+
+campos.forEach(id => {
+
+  const campo = document.getElementById(id);
+
+  if (campo) {
+
+    campo.addEventListener(
+      "input",
+      atualizarPreview
+    );
+
+    campo.addEventListener(
+      "change",
+      atualizarPreview
+    );
+  }
+
+});
+
+
+/* ==========================================================
+   FOTO
+   ========================================================== */
+
+document
+  .getElementById("foto")
+  .addEventListener("change", function(e) {
+
+    const file = e.target.files[0];
+
+    if (!file)
+      return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+
+      document
+        .getElementById("previewFoto")
+        .src = event.target.result;
+
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+
+/* ==========================================================
+   CONTADORES
+   ========================================================== */
+
+let contadorExperiencias = 0;
+let contadorFormacoes = 0;
+let contadorCursos = 0;
+
+
+/* ==========================================================
+   ADICIONAR EXPERIÊNCIA
+   ========================================================== */
+
+function adicionarExperiencia() {
+
+  contadorExperiencias++;
+
+  const container =
+    document.getElementById(
+      "experienciasContainer"
+    );
+
+  const div =
+    document.createElement("div");
+
+  div.className =
+    "item-dinamico";
+
+  div.dataset.tipo =
+    "experiencia";
+
+  div.innerHTML = `
+    <div class="item-titulo">
+      Experiência ${contadorExperiencias}
+    </div>
+
+    <label>Empresa</label>
+
+    <input
+      type="text"
+      class="exp-empresa"
+      placeholder="Nome da empresa"
+    >
+
+    <label>Cargo</label>
+
+    <input
+      type="text"
+      class="exp-cargo"
+      placeholder="Cargo ocupado"
+    >
+
+    <label>Período</label>
+
+    <input
+      type="text"
+      class="exp-periodo"
+      placeholder="Ex: Janeiro/2022 - Março/2025 ou Atual"
+    >
+
+    <label>Principais atividades</label>
+
+    <textarea
+      class="exp-descricao"
+      rows="3"
+      placeholder="Descreva brevemente suas principais atividades e responsabilidades"
+    ></textarea>
+
+    <button
+      type="button"
+      class="btn-remover"
+      onclick="removerItem(this)"
+    >
+      Remover experiência
+    </button>
+  `;
+
+  container.appendChild(div);
+
+  adicionarEventosDinamicos(div);
+
+  atualizarPreview();
+}
+
+
+/* ==========================================================
+   ADICIONAR FORMAÇÃO
+   ========================================================== */
+
+function adicionarFormacao() {
+
+  contadorFormacoes++;
+
+  const container =
+    document.getElementById(
+      "formacoesContainer"
+    );
+
+  const div =
+    document.createElement("div");
+
+  div.className =
+    "item-dinamico";
+
+  div.dataset.tipo =
+    "formacao";
+
+  div.innerHTML = `
+    <div class="item-titulo">
+      Formação ${contadorFormacoes}
+    </div>
+
+    <label>Curso / Formação</label>
+
+    <input
+      type="text"
+      class="formacao-curso"
+      placeholder="Ex: Ensino Médio, Administração, Técnico em Informática"
+    >
+
+    <label>Instituição</label>
+
+    <input
+      type="text"
+      class="formacao-instituicao"
+      placeholder="Nome da instituição"
+    >
+
+    <label>Período</label>
+
+    <input
+      type="text"
+      class="formacao-periodo"
+      placeholder="Ex: 2022 - 2025 ou Cursando"
+    >
+
+    <button
+      type="button"
+      class="btn-remover"
+      onclick="removerItem(this)"
+    >
+      Remover formação
+    </button>
+  `;
+
+  container.appendChild(div);
+
+  adicionarEventosDinamicos(div);
+
+  atualizarPreview();
+}
+
+
+/* ==========================================================
+   ADICIONAR CURSO
+   ========================================================== */
+
+function adicionarCurso() {
+
+  contadorCursos++;
+
+  const container =
+    document.getElementById(
+      "cursosContainer"
+    );
+
+  const div =
+    document.createElement("div");
+
+  div.className =
+    "item-dinamico";
+
+  div.dataset.tipo =
+    "curso";
+
+  div.innerHTML = `
+    <div class="item-titulo">
+      Curso ${contadorCursos}
+    </div>
+
+    <label>Nome do curso</label>
+
+    <input
+      type="text"
+      class="curso-nome"
+      placeholder="Ex: Excel Avançado"
+    >
+
+    <label>
+      Instituição
+      <span class="optional">(opcional)</span>
+    </label>
+
+    <input
+      type="text"
+      class="curso-instituicao"
+      placeholder="Nome da instituição"
+    >
+
+    <label>
+      Ano / período
+      <span class="optional">(opcional)</span>
+    </label>
+
+    <input
+      type="text"
+      class="curso-periodo"
+      placeholder="Ex: 2025"
+    >
+
+    <button
+      type="button"
+      class="btn-remover"
+      onclick="removerItem(this)"
+    >
+      Remover curso
+    </button>
+  `;
+
+  container.appendChild(div);
+
+  adicionarEventosDinamicos(div);
+
+  atualizarPreview();
+}
+
+
+/* ==========================================================
+   EVENTOS DOS CAMPOS DINÂMICOS
+   ========================================================== */
+
+function adicionarEventosDinamicos(elemento) {
+
+  const camposDinamicos =
+    elemento.querySelectorAll(
+      "input, textarea, select"
+    );
+
+  camposDinamicos.forEach(campo => {
+
+    campo.addEventListener(
+      "input",
+      atualizarPreview
+    );
+
+    campo.addEventListener(
+      "change",
+      atualizarPreview
+    );
+
+  });
+
+}
+
+
+/* ==========================================================
+   REMOVER ITEM
+   ========================================================== */
+
+function removerItem(botao) {
+
+  const item =
+    botao.closest(
+      ".item-dinamico"
+    );
+
+  if (item) {
+
+    item.remove();
+
+    atualizarPreview();
+
+  }
+
+}
+
+
+/* ==========================================================
+   VALOR DO CAMPO
+   ========================================================== */
+
+function valorCampo(id) {
+
+  const elemento =
+    document.getElementById(id);
+
+  if (!elemento)
+    return "";
+
+  return elemento.value.trim();
+
+}
+
+
+/* ==========================================================
+   ESCAPAR HTML
+   ========================================================== */
+
+function escaparHTML(texto) {
+
+  return String(texto || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* ==========================================================
+   FORMATAR DATA
+   ========================================================== */
+
+function formatarData(data) {
+
+  if (!data)
+    return "";
+
+  const partes =
+    data.split("-");
+
+  if (partes.length !== 3)
+    return data;
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+}
+
+
+/* ==========================================================
+   MONTAR ENDEREÇO
+   ORDEM CORRETA:
+   RUA → NÚMERO → BAIRRO → CIDADE
+   ========================================================== */
+
+function montarEndereco(dados) {
+
+  let endereco = "";
+
+  if (dados.rua) {
+
+    endereco += dados.rua;
+
+  }
+
+  if (dados.numero) {
+
+    endereco +=
+      (endereco ? ", " : "") +
+      dados.numero;
+
+  }
+
+  if (dados.bairro) {
+
+    endereco +=
+      (endereco ? " - " : "") +
+      dados.bairro;
+
+  }
+
+  if (dados.cidade) {
+
+    endereco +=
+      (endereco ? " - " : "") +
+      dados.cidade;
+
+  }
+
+  return endereco;
+
+}
+
+
+/* ==========================================================
+   ATUALIZAR PREVIEW
+   ========================================================== */
+
+function atualizarPreview() {
+
+  const nome =
+    valorCampo("nome") ||
+    "Seu Nome";
+
+  const telefone =
+    valorCampo("telefone");
+
+  const email =
+    valorCampo("email");
+
+  const nascimento =
+    formatarData(
+      valorCampo("nascimento")
+    );
+
+  const estadoCivil =
+    valorCampo("estadoCivil");
+
+  const rua =
+    valorCampo("rua");
+
+  const numero =
+    valorCampo("numero");
+
+  const bairro =
+    valorCampo("bairro");
+
+  const cidade =
+    valorCampo("cidade");
+
+  const linkedin =
+    valorCampo("linkedin");
+
+  const portfolio =
+    valorCampo("portfolio");
+
+  const objetivo =
+    valorCampo("objetivo");
+
+  const resumo =
+    valorCampo("resumo");
+
+  const habilidades =
+    valorCampo("habilidades");
+
+  const idiomas =
+    valorCampo("idiomas");
+
+  const cnh =
+    valorCampo("cnh");
+
+  const disponibilidade =
+    valorCampo("disponibilidade");
+
+
+  /* ==============================
+     CABEÇALHO
+     ============================== */
+
+  document
+    .getElementById("previewNome")
+    .innerText = nome;
+
+
+  document
+    .getElementById("previewObjetivoTopo")
+    .innerText =
+      objetivo ||
+      "Seu objetivo profissional";
+
+
+  let contatoHTML = [];
+
+
+  if (telefone) {
+
+    contatoHTML.push(
+      escaparHTML(telefone)
+    );
+
+  }
+
+
+  if (email) {
+
+    contatoHTML.push(
+      escaparHTML(email)
+    );
+
+  }
+
+
+  /*
+    Endereço completo aparece
+    em uma linha própria.
+    Ordem:
+    Rua, Número - Bairro - Cidade/Estado
+  */
+
+  const endereco =
+    montarEndereco({
+      rua,
+      numero,
+      bairro,
+      cidade
+    });
+
+
+  if (endereco) {
+
+    contatoHTML.push(
+      escaparHTML(endereco)
+    );
+
+  }
+
+
+  /*
+    Dados pessoais:
+    nascimento + estado civil
+  */
+
+  let dadosPessoais = [];
+
+
+  if (nascimento) {
+
+    dadosPessoais.push(
+      "Nascimento: " + nascimento
+    );
+
+  }
+
+
+  if (estadoCivil) {
+
+    dadosPessoais.push(
+      "Estado civil: " +
+      escaparHTML(estadoCivil)
+    );
+
+  }
+
+
+  if (dadosPessoais.length) {
+
+    contatoHTML.push(
+      dadosPessoais.join(" • ")
+    );
+
+  }
+
+
+  /*
+    LinkedIn e portfólio
+  */
+
+  let links = [];
+
+
+  if (linkedin) {
+
+    links.push(
+      escaparHTML(linkedin)
+    );
+
+  }
+
+
+  if (portfolio) {
+
+    links.push(
+      escaparHTML(portfolio)
+    );
+
+  }
+
+
+  if (links.length) {
+
+    contatoHTML.push(
+      links.join(" • ")
+    );
+
+  }
+
+
+  document
+    .getElementById("previewContato")
+    .innerHTML =
+      contatoHTML.length
+        ? contatoHTML.join("<br>")
+        : "Seu contato aparecerá aqui";
+
+
+  /* ==============================
+     OBJETIVO
+     ============================== */
+
+  atualizarSecaoTexto(
+    "secaoObjetivo",
+    "previewObjetivo",
+    objetivo
+  );
+
+
+  /* ==============================
+     SOBRE VOCÊ
+     ============================== */
+
+  atualizarSecaoTexto(
+    "secaoResumo",
+    "previewResumo",
+    resumo
+  );
+
+
+  /* ==============================
+     EXPERIÊNCIAS
+     ============================== */
+
+  const previewExperiencias =
+    document.getElementById(
+      "previewExperiencias"
+    );
+
+  previewExperiencias.innerHTML = "";
+
+
+  const experiencias =
+    document.querySelectorAll(
+      "#experienciasContainer .item-dinamico"
+    );
+
+
+  experiencias.forEach(item => {
+
+    const empresa =
+      item
+        .querySelector(".exp-empresa")
+        .value.trim();
+
+    const cargo =
+      item
+        .querySelector(".exp-cargo")
+        .value.trim();
+
+    const periodo =
+      item
+        .querySelector(".exp-periodo")
+        .value.trim();
+
+    const descricao =
+      item
+        .querySelector(".exp-descricao")
+        .value.trim();
+
+
+    if (
+      !empresa &&
+      !cargo &&
+      !periodo &&
+      !descricao
+    ) {
+      return;
+    }
+
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "preview-item";
+
+
+    let titulo = "";
+
+
+    if (cargo && empresa) {
+
+      titulo =
+        `${cargo} — ${empresa}`;
+
+    } else {
+
+      titulo =
+        cargo ||
+        empresa;
+
+    }
+
+
+    div.innerHTML = `
+
+      ${
+        titulo
+          ? `<strong>${escaparHTML(titulo)}</strong>`
+          : ""
       }
 
-      function montarTexto() {
-        let y = 20;
-        doc.setFontSize(16);
-        doc.setFont(undefined, 'bold');
-        doc.text(nome, 10, y); y += 10;
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
+      ${
+        periodo
+          ? `<div class="periodo">${escaparHTML(periodo)}</div>`
+          : ""
+      }
 
-        doc.text(`Email: ${email}`, 10, y); y += 10;
-        doc.text(`Telefone: ${telefone}`, 10, y); y += 10;
-        doc.text(`Endereço: ${endereco}`, 10, y); y += 15;
+      ${
+        descricao
+          ? `<div class="descricao">${escaparHTML(descricao)}</div>`
+          : ""
+      }
 
-        function adicionarBloco(titulo, conteudo) {
-          if (conteudo.trim() !== "") {
-            doc.setFont(undefined, 'bold');
-            doc.text(`${titulo}`, 10, y); y += 7;
-            doc.setFont(undefined, 'normal');
-            const texto = doc.splitTextToSize(conteudo, 180);
-            doc.text(texto, 10, y);
-            y += texto.length * 7 + 5;
-          }
+    `;
+
+
+    previewExperiencias.appendChild(div);
+
+  });
+
+
+  controlarSecao(
+    "secaoExperiencia",
+    previewExperiencias.children.length > 0
+  );
+
+
+  /* ==============================
+     FORMAÇÕES
+     ============================== */
+
+  const previewFormacoes =
+    document.getElementById(
+      "previewFormacoes"
+    );
+
+  previewFormacoes.innerHTML = "";
+
+
+  const formacoes =
+    document.querySelectorAll(
+      "#formacoesContainer .item-dinamico"
+    );
+
+
+  formacoes.forEach(item => {
+
+    const curso =
+      item
+        .querySelector(".formacao-curso")
+        .value.trim();
+
+    const instituicao =
+      item
+        .querySelector(".formacao-instituicao")
+        .value.trim();
+
+    const periodo =
+      item
+        .querySelector(".formacao-periodo")
+        .value.trim();
+
+
+    if (
+      !curso &&
+      !instituicao &&
+      !periodo
+    ) {
+      return;
+    }
+
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "preview-item";
+
+
+    let titulo =
+      curso ||
+      instituicao;
+
+
+    if (curso && instituicao) {
+
+      titulo =
+        `${curso} — ${instituicao}`;
+
+    }
+
+
+    div.innerHTML = `
+
+      ${
+        titulo
+          ? `<strong>${escaparHTML(titulo)}</strong>`
+          : ""
+      }
+
+      ${
+        periodo
+          ? `<div class="periodo">${escaparHTML(periodo)}</div>`
+          : ""
+      }
+
+    `;
+
+
+    previewFormacoes.appendChild(div);
+
+  });
+
+
+  controlarSecao(
+    "secaoFormacao",
+    previewFormacoes.children.length > 0
+  );
+
+
+  /* ==============================
+     CURSOS
+     ============================== */
+
+  const previewCursos =
+    document.getElementById(
+      "previewCursos"
+    );
+
+  previewCursos.innerHTML = "";
+
+
+  const cursos =
+    document.querySelectorAll(
+      "#cursosContainer .item-dinamico"
+    );
+
+
+  cursos.forEach(item => {
+
+    const nome =
+      item
+        .querySelector(".curso-nome")
+        .value.trim();
+
+    const instituicao =
+      item
+        .querySelector(".curso-instituicao")
+        .value.trim();
+
+    const periodo =
+      item
+        .querySelector(".curso-periodo")
+        .value.trim();
+
+
+    if (
+      !nome &&
+      !instituicao &&
+      !periodo
+    ) {
+      return;
+    }
+
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "preview-item";
+
+
+    let titulo =
+      nome ||
+      instituicao;
+
+
+    if (nome && instituicao) {
+
+      titulo =
+        `${nome} — ${instituicao}`;
+
+    }
+
+
+    div.innerHTML = `
+
+      ${
+        titulo
+          ? `<strong>${escaparHTML(titulo)}</strong>`
+          : ""
+      }
+
+      ${
+        periodo
+          ? `<div class="periodo">${escaparHTML(periodo)}</div>`
+          : ""
+      }
+
+    `;
+
+
+    previewCursos.appendChild(div);
+
+  });
+
+
+  controlarSecao(
+    "secaoCursos",
+    previewCursos.children.length > 0
+  );
+
+
+  /* ==============================
+     HABILIDADES
+     ============================== */
+
+  atualizarSecaoTexto(
+    "secaoHabilidades",
+    "previewHabilidades",
+    habilidades
+  );
+
+
+  /* ==============================
+     IDIOMAS
+     ============================== */
+
+  atualizarSecaoTexto(
+    "secaoIdiomas",
+    "previewIdiomas",
+    idiomas
+  );
+
+
+  /* ==============================
+     COMPLEMENTARES
+     ============================== */
+
+  let complementares = [];
+
+
+  if (
+    cnh &&
+    cnh !== "Não informar"
+  ) {
+
+    complementares.push(
+      "CNH: " + cnh
+    );
+
+  }
+
+
+  if (disponibilidade) {
+
+    complementares.push(
+      disponibilidade
+    );
+
+  }
+
+
+  atualizarSecaoTexto(
+    "secaoComplementares",
+    "previewComplementares",
+    complementares.join("\n")
+  );
+
+}
+
+
+/* ==========================================================
+   CONTROLE DAS SEÇÕES
+   ========================================================== */
+
+function controlarSecao(
+  id,
+  mostrar
+) {
+
+  const secao =
+    document.getElementById(id);
+
+  if (!secao)
+    return;
+
+
+  if (mostrar) {
+
+    secao.classList.remove(
+      "sem-conteudo"
+    );
+
+  } else {
+
+    secao.classList.add(
+      "sem-conteudo"
+    );
+
+  }
+
+}
+
+
+/* ==========================================================
+   ATUALIZAR SEÇÃO DE TEXTO
+   ========================================================== */
+
+function atualizarSecaoTexto(
+  secaoId,
+  elementoId,
+  texto
+) {
+
+  const elemento =
+    document.getElementById(
+      elementoId
+    );
+
+
+  if (texto) {
+
+    elemento.innerText =
+      texto;
+
+    controlarSecao(
+      secaoId,
+      true
+    );
+
+  } else {
+
+    elemento.innerText =
+      "";
+
+    controlarSecao(
+      secaoId,
+      false
+    );
+
+  }
+
+}
+
+
+/* ==========================================================
+   OBTER DADOS
+   ========================================================== */
+
+function obterDados() {
+
+  const dados = {
+
+    nome:
+      valorCampo("nome"),
+
+    telefone:
+      valorCampo("telefone"),
+
+    email:
+      valorCampo("email"),
+
+    nascimento:
+      formatarData(
+        valorCampo("nascimento")
+      ),
+
+    estadoCivil:
+      valorCampo("estadoCivil"),
+
+    rua:
+      valorCampo("rua"),
+
+    numero:
+      valorCampo("numero"),
+
+    bairro:
+      valorCampo("bairro"),
+
+    cidade:
+      valorCampo("cidade"),
+
+    linkedin:
+      valorCampo("linkedin"),
+
+    portfolio:
+      valorCampo("portfolio"),
+
+    objetivo:
+      valorCampo("objetivo"),
+
+    resumo:
+      valorCampo("resumo"),
+
+    habilidades:
+      valorCampo("habilidades"),
+
+    idiomas:
+      valorCampo("idiomas"),
+
+    cnh:
+      valorCampo("cnh"),
+
+    disponibilidade:
+      valorCampo("disponibilidade"),
+
+    experiencias: [],
+
+    formacoes: [],
+
+    cursos: []
+
+  };
+
+
+  /* ==============================
+     EXPERIÊNCIAS
+     ============================== */
+
+  document
+    .querySelectorAll(
+      "#experienciasContainer .item-dinamico"
+    )
+    .forEach(item => {
+
+      const empresa =
+        item
+          .querySelector(".exp-empresa")
+          .value.trim();
+
+      const cargo =
+        item
+          .querySelector(".exp-cargo")
+          .value.trim();
+
+      const periodo =
+        item
+          .querySelector(".exp-periodo")
+          .value.trim();
+
+      const descricao =
+        item
+          .querySelector(".exp-descricao")
+          .value.trim();
+
+
+      if (
+        empresa ||
+        cargo ||
+        periodo ||
+        descricao
+      ) {
+
+        dados.experiencias.push({
+
+          empresa,
+          cargo,
+          periodo,
+          descricao
+
+        });
+
+      }
+
+    });
+
+
+  /* ==============================
+     FORMAÇÕES
+     ============================== */
+
+  document
+    .querySelectorAll(
+      "#formacoesContainer .item-dinamico"
+    )
+    .forEach(item => {
+
+      const curso =
+        item
+          .querySelector(".formacao-curso")
+          .value.trim();
+
+      const instituicao =
+        item
+          .querySelector(".formacao-instituicao")
+          .value.trim();
+
+      const periodo =
+        item
+          .querySelector(".formacao-periodo")
+          .value.trim();
+
+
+      if (
+        curso ||
+        instituicao ||
+        periodo
+      ) {
+
+        dados.formacoes.push({
+
+          curso,
+          instituicao,
+          periodo
+
+        });
+
+      }
+
+    });
+
+
+  /* ==============================
+     CURSOS
+     ============================== */
+
+  document
+    .querySelectorAll(
+      "#cursosContainer .item-dinamico"
+    )
+    .forEach(item => {
+
+      const nome =
+        item
+          .querySelector(".curso-nome")
+          .value.trim();
+
+      const instituicao =
+        item
+          .querySelector(".curso-instituicao")
+          .value.trim();
+
+      const periodo =
+        item
+          .querySelector(".curso-periodo")
+          .value.trim();
+
+
+      if (
+        nome ||
+        instituicao ||
+        periodo
+      ) {
+
+        dados.cursos.push({
+
+          nome,
+          instituicao,
+          periodo
+
+        });
+
+      }
+
+    });
+
+
+  return dados;
+
+}
+
+
+/* ==========================================================
+   GERAR PDF
+   ========================================================== */
+
+async function gerarPDF() {
+
+  const { jsPDF } =
+    window.jspdf;
+
+
+  const dados =
+    obterDados();
+
+
+  if (!dados.nome) {
+
+    alert(
+      "Digite seu nome completo antes de gerar o currículo."
+    );
+
+    return;
+
+  }
+
+
+  const foto =
+    document
+      .getElementById("foto")
+      .files[0];
+
+
+  let imagemFoto = null;
+
+
+  if (foto) {
+
+    try {
+
+      imagemFoto =
+        await carregarImagem(foto);
+
+    } catch (e) {
+
+      console.log(
+        "Não foi possível carregar a foto."
+      );
+
+    }
+
+  }
+
+
+  const doc =
+    new jsPDF({
+
+      orientation: "portrait",
+
+      unit: "mm",
+
+      format: "a4"
+
+    });
+
+
+  montarPDF(
+    doc,
+    dados,
+    imagemFoto
+  );
+
+}
+
+
+/* ==========================================================
+   CARREGAR IMAGEM
+   ========================================================== */
+
+function carregarImagem(file) {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(event) {
+
+          resolve(
+            event.target.result
+          );
+
+        };
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(file);
+
+    }
+  );
+
+}
+
+
+/* ==========================================================
+   MONTAR PDF
+   ========================================================== */
+
+function montarPDF(
+  doc,
+  dados,
+  imagemFoto
+) {
+
+  const larguraPagina =
+    doc.internal.pageSize.getWidth();
+
+  const alturaPagina =
+    doc.internal.pageSize.getHeight();
+
+  const margem = 15;
+
+  const larguraTexto =
+    larguraPagina -
+    (margem * 2);
+
+  let y = 18;
+
+
+  /* ========================================================
+     CABEÇALHO
+     ======================================================== */
+
+  const possuiFoto = !!imagemFoto;
+
+  /*
+    Se houver foto, reservamos espaço
+    à direita para evitar que o nome
+    ou informações fiquem por baixo dela.
+  */
+
+  const larguraCabecalho =
+    possuiFoto
+      ? larguraPagina - margem - 38
+      : larguraPagina - margem;
+
+
+  if (imagemFoto) {
+
+    try {
+
+      doc.addImage(
+        imagemFoto,
+        "JPEG",
+        larguraPagina - margem - 30,
+        10,
+        30,
+        38
+      );
+
+    } catch (erro) {
+
+      console.log(
+        "Erro ao adicionar foto ao PDF.",
+        erro
+      );
+
+    }
+
+  }
+
+
+  doc.setFont(
+    "helvetica",
+    "bold"
+  );
+
+  doc.setFontSize(21);
+
+
+  /*
+    Nome quebrado automaticamente
+    caso seja muito grande.
+  */
+
+  const nomeLinhas =
+    doc.splitTextToSize(
+      dados.nome,
+      larguraCabecalho - margem
+    );
+
+
+  doc.text(
+    nomeLinhas,
+    margem,
+    y
+  );
+
+
+  y +=
+    (nomeLinhas.length * 8);
+
+
+  /* ==============================
+     OBJETIVO NO CABEÇALHO
+     ============================== */
+
+  if (dados.objetivo) {
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(12);
+
+
+    const objetivoLinhas =
+      doc.splitTextToSize(
+        dados.objetivo,
+        larguraCabecalho - margem
+      );
+
+
+    doc.text(
+      objetivoLinhas,
+      margem,
+      y
+    );
+
+
+    y +=
+      objetivoLinhas.length * 5;
+
+  }
+
+
+  /* ==============================
+     CONTATOS
+     ============================== */
+
+  doc.setFont(
+    "helvetica",
+    "normal"
+  );
+
+  doc.setFontSize(9.5);
+
+
+  let contato = [];
+
+
+  if (dados.telefone) {
+
+    contato.push(
+      dados.telefone
+    );
+
+  }
+
+
+  if (dados.email) {
+
+    contato.push(
+      dados.email
+    );
+
+  }
+
+
+  if (contato.length) {
+
+    const linhasContato =
+      doc.splitTextToSize(
+        contato.join(" • "),
+        larguraCabecalho - margem
+      );
+
+
+    doc.text(
+      linhasContato,
+      margem,
+      y
+    );
+
+
+    y +=
+      linhasContato.length * 4.5;
+
+  }
+
+
+  /* ==============================
+     ENDEREÇO
+     ORDEM:
+     RUA → NÚMERO → BAIRRO → CIDADE
+     ============================== */
+
+  const endereco =
+    montarEndereco(dados);
+
+
+  if (endereco) {
+
+    const linhasEndereco =
+      doc.splitTextToSize(
+        "Endereço: " + endereco,
+        larguraCabecalho - margem
+      );
+
+
+    doc.text(
+      linhasEndereco,
+      margem,
+      y
+    );
+
+
+    y +=
+      linhasEndereco.length * 4.5;
+
+  }
+
+
+  /* ==============================
+     NASCIMENTO + ESTADO CIVIL
+     ============================== */
+
+  let pessoais = [];
+
+
+  if (dados.nascimento) {
+
+    pessoais.push(
+      "Nascimento: " +
+      dados.nascimento
+    );
+
+  }
+
+
+  if (dados.estadoCivil) {
+
+    pessoais.push(
+      "Estado civil: " +
+      dados.estadoCivil
+    );
+
+  }
+
+
+  if (pessoais.length) {
+
+    const linhasPessoais =
+      doc.splitTextToSize(
+        pessoais.join(" • "),
+        larguraCabecalho - margem
+      );
+
+
+    doc.text(
+      linhasPessoais,
+      margem,
+      y
+    );
+
+
+    y +=
+      linhasPessoais.length * 4.5;
+
+  }
+
+
+  /* ==============================
+     LINKS
+     ============================== */
+
+  let links = [];
+
+
+  if (dados.linkedin) {
+
+    links.push(
+      dados.linkedin
+    );
+
+  }
+
+
+  if (dados.portfolio) {
+
+    links.push(
+      dados.portfolio
+    );
+
+  }
+
+
+  if (links.length) {
+
+    const linhasLinks =
+      doc.splitTextToSize(
+        links.join(" • "),
+        larguraCabecalho - margem
+      );
+
+
+    doc.text(
+      linhasLinks,
+      margem,
+      y
+    );
+
+
+    y +=
+      linhasLinks.length * 4.5;
+
+  }
+
+
+  y += 4;
+
+
+  /* ==============================
+     LINHA
+     ============================== */
+
+  doc.setDrawColor(
+    220,
+    220,
+    220
+  );
+
+
+  doc.line(
+    margem,
+    y,
+    larguraPagina - margem,
+    y
+  );
+
+
+  y += 9;
+
+
+  /* ========================================================
+     FUNÇÕES DO PDF
+     ======================================================== */
+
+  function verificarQuebra(
+    altura
+  ) {
+
+    if (
+      y + altura >
+      alturaPagina - 15
+    ) {
+
+      doc.addPage();
+
+      y = 18;
+
+    }
+
+  }
+
+
+  function adicionarTitulo(
+    titulo
+  ) {
+
+    verificarQuebra(14);
+
+
+    doc.setFont(
+      "helvetica",
+      "bold"
+    );
+
+    doc.setFontSize(13);
+
+
+    doc.setTextColor(
+      45,
+      137,
+      239
+    );
+
+
+    doc.text(
+      titulo,
+      margem,
+      y
+    );
+
+
+    y += 2;
+
+
+    doc.setDrawColor(
+      225,
+      225,
+      225
+    );
+
+
+    doc.line(
+      margem,
+      y,
+      larguraPagina - margem,
+      y
+    );
+
+
+    y += 7;
+
+
+    doc.setTextColor(
+      0,
+      0,
+      0
+    );
+
+  }
+
+
+  function adicionarTexto(
+    titulo,
+    texto
+  ) {
+
+    if (
+      !texto ||
+      !texto.trim()
+    ) {
+
+      return;
+
+    }
+
+
+    adicionarTitulo(
+      titulo
+    );
+
+
+    doc.setFont(
+      "helvetica",
+      "normal"
+    );
+
+    doc.setFontSize(10.5);
+
+
+    const linhas =
+      doc.splitTextToSize(
+        texto.trim(),
+        larguraTexto
+      );
+
+
+    linhas.forEach(
+      linha => {
+
+        verificarQuebra(5.5);
+
+
+        doc.text(
+          linha,
+          margem,
+          y
+        );
+
+
+        y += 5.5;
+
+      }
+    );
+
+
+    y += 5;
+
+  }
+
+
+  /* ========================================================
+     OBJETIVO
+     ======================================================== */
+
+  adicionarTexto(
+    "OBJETIVO PROFISSIONAL",
+    dados.objetivo
+  );
+
+
+  /* ========================================================
+     SOBRE VOCÊ
+     ======================================================== */
+
+  adicionarTexto(
+    "SOBRE VOCÊ",
+    dados.resumo
+  );
+
+
+  /* ========================================================
+     EXPERIÊNCIA
+     ======================================================== */
+
+  if (
+    dados.experiencias.length
+  ) {
+
+    adicionarTitulo(
+      "EXPERIÊNCIA PROFISSIONAL"
+    );
+
+
+    dados.experiencias.forEach(
+      exp => {
+
+        const titulo =
+          exp.cargo &&
+          exp.empresa
+            ? `${exp.cargo} — ${exp.empresa}`
+            : exp.cargo ||
+              exp.empresa;
+
+
+        const descricao =
+          exp.descricao
+            ? doc.splitTextToSize(
+                exp.descricao,
+                larguraTexto
+              )
+            : [];
+
+
+        const alturaEstimada =
+          10 +
+          (exp.periodo ? 5 : 0) +
+          (descricao.length * 5);
+
+
+        verificarQuebra(
+          Math.min(
+            35,
+            alturaEstimada
+          )
+        );
+
+
+        if (titulo) {
+
+          doc.setFont(
+            "helvetica",
+            "bold"
+          );
+
+          doc.setFontSize(10.5);
+
+
+          const tituloLinhas =
+            doc.splitTextToSize(
+              titulo,
+              larguraTexto
+            );
+
+
+          doc.text(
+            tituloLinhas,
+            margem,
+            y
+          );
+
+
+          y +=
+            tituloLinhas.length * 5;
+
         }
 
-        adicionarBloco("Resumo Profissional:", resumo);
-        adicionarBloco("Experiência Profissional:", experiencia);
-        adicionarBloco("Formação Acadêmica:", formacao);
-        adicionarBloco("Habilidades:", habilidades);
-        adicionarBloco("Idiomas:", idiomas);
 
-        doc.save("curriculo.pdf");
+        if (exp.periodo) {
+
+          doc.setFont(
+            "helvetica",
+            "italic"
+          );
+
+          doc.setFontSize(9);
+
+
+          doc.setTextColor(
+            100,
+            100,
+            100
+          );
+
+
+          doc.text(
+            exp.periodo,
+            margem,
+            y
+          );
+
+
+          y += 5;
+
+
+          doc.setTextColor(
+            0,
+            0,
+            0
+          );
+
+        }
+
+
+        if (descricao.length) {
+
+          doc.setFont(
+            "helvetica",
+            "normal"
+          );
+
+          doc.setFontSize(10);
+
+
+          descricao.forEach(
+            linha => {
+
+              verificarQuebra(5);
+
+
+              doc.text(
+                linha,
+                margem,
+                y
+              );
+
+
+              y += 5;
+
+            }
+          );
+
+        }
+
+
+        y += 5;
+
       }
-    }
-  </script>
+    );
+
+  }
+
+
+  /* ========================================================
+     FORMAÇÃO
+     ======================================================== */
+
+  if (
+    dados.formacoes.length
+  ) {
+
+    adicionarTitulo(
+      "FORMAÇÃO ACADÊMICA"
+    );
+
+
+    dados.formacoes.forEach(
+      formacao => {
+
+        verificarQuebra(
+          15
+        );
+
+
+        let titulo =
+          formacao.curso ||
+          formacao.instituicao;
+
+
+        if (
+          formacao.curso &&
+          formacao.instituicao
+        ) {
+
+          titulo =
+            `${formacao.curso} — ${formacao.instituicao}`;
+
+        }
+
+
+        if (titulo) {
+
+          doc.setFont(
+            "helvetica",
+            "bold"
+          );
+
+          doc.setFontSize(10.5);
+
+
+          const tituloLinhas =
+            doc.splitTextToSize(
+              titulo,
+              larguraTexto
+            );
+
+
+          doc.text(
+            tituloLinhas,
+            margem,
+            y
+          );
+
+
+          y +=
+            tituloLinhas.length * 5;
+
+        }
+
+
+        if (formacao.periodo) {
+
+          doc.setFont(
+            "helvetica",
+            "italic"
+          );
+
+          doc.setFontSize(9);
+
+
+          doc.setTextColor(
+            100,
+            100,
+            100
+          );
+
+
+          doc.text(
+            formacao.periodo,
+            margem,
+            y
+          );
+
+
+          y += 5;
+
+
+          doc.setTextColor(
+            0,
+            0,
+            0
+          );
+
+        }
+
+
+        y += 4;
+
+      }
+    );
+
+  }
+
+
+  /* ========================================================
+     CURSOS
+     ======================================================== */
+
+  if (
+    dados.cursos.length
+  ) {
+
+    adicionarTitulo(
+      "CURSOS E CERTIFICAÇÕES"
+    );
+
+
+    dados.cursos.forEach(
+      curso => {
+
+        verificarQuebra(
+          12
+        );
+
+
+        let titulo =
+          curso.nome ||
+          curso.instituicao;
+
+
+        if (
+          curso.nome &&
+          curso.instituicao
+        ) {
+
+          titulo =
+            `${curso.nome} — ${curso.instituicao}`;
+
+        }
+
+
+        if (titulo) {
+
+          doc.setFont(
+            "helvetica",
+            "normal"
+          );
+
+          doc.setFontSize(10);
+
+
+          const tituloLinhas =
+            doc.splitTextToSize(
+              "• " + titulo,
+              larguraTexto
+            );
+
+
+          doc.text(
+            tituloLinhas,
+            margem,
+            y
+          );
+
+
+          y +=
+            tituloLinhas.length * 5;
+
+        }
+
+
+        if (curso.periodo) {
+
+          doc.setFontSize(9);
+
+
+          doc.setTextColor(
+            100,
+            100,
+            100
+          );
+
+
+          doc.text(
+            curso.periodo,
+            margem + 4,
+            y
+          );
+
+
+          y += 5;
+
+
+          doc.setTextColor(
+            0,
+            0,
+            0
+          );
+
+        }
+
+      }
+    );
+
+
+    y += 4;
+
+  }
+
+
+  /* ========================================================
+     HABILIDADES
+     ======================================================== */
+
+  adicionarTexto(
+    "HABILIDADES",
+    dados.habilidades
+  );
+
+
+  /* ========================================================
+     IDIOMAS
+     ======================================================== */
+
+  adicionarTexto(
+    "IDIOMAS",
+    dados.idiomas
+  );
+
+
+  /* ========================================================
+     INFORMAÇÕES COMPLEMENTARES
+     ======================================================== */
+
+  let complementares = [];
+
+
+  if (
+    dados.cnh &&
+    dados.cnh !== "Não informar"
+  ) {
+
+    complementares.push(
+      "CNH: " +
+      dados.cnh
+    );
+
+  }
+
+
+  if (
+    dados.disponibilidade
+  ) {
+
+    complementares.push(
+      dados.disponibilidade
+    );
+
+  }
+
+
+  if (
+    complementares.length
+  ) {
+
+    adicionarTexto(
+      "INFORMAÇÕES COMPLEMENTARES",
+      complementares.join("\n")
+    );
+
+  }
+
+
+  /* ========================================================
+     NOME DO ARQUIVO
+     ======================================================== */
+
+  let nomeArquivo =
+    dados.nome
+      .replace(
+        /[\\/:*?"<>|]/g,
+        ""
+      )
+      .trim();
+
+
+  if (!nomeArquivo) {
+
+    nomeArquivo =
+      "curriculo";
+
+  }
+
+
+  doc.save(
+    `${nomeArquivo} - Currículo.pdf`
+  );
+
+}
+
+
+/* ==========================================================
+   INICIALIZAÇÃO
+   ========================================================== */
+
+atualizarPreview();
+
+</script>
+
+
+<a
+  href="https://mayconbrown.com.br/contato/"
+  class="opiniao-btn"
+  target="_blank"
+>
+  💬 O que podemos melhorar?
+</a>
+
 </body>
 </html>
+
