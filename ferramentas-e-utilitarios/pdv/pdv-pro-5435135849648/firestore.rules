@@ -30,7 +30,7 @@ service cloud.firestore {
       allow update, delete: if owner();
 
       match /app/{document=**} {
-        allow read, write: if activeSelf(uid);
+        allow read, write: if owner() || activeSelf(uid);
       }
     }
   }

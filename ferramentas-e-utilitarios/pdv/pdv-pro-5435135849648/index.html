@@ -61,7 +61,7 @@
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
-                    <button onclick="location.href='./admin.html'" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">Administração</button>
+                    <button onclick="acessarAdm()" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">ADM do PDV</button>
                 </div>
             </div>
         </header>
@@ -603,7 +603,7 @@
             <div class="space-y-4">
                 <div>
                     <label for="senha-adm" class="block text-sm font-medium text-gray-700 mb-1">Senha de Administrador</label>
-                    <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                    <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Senha padrão: 1234">
                 </div>
                 <div class="text-center mt-2">
     <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
@@ -2918,8 +2918,6 @@ function showInstallButton() {
 
         // Funções ADM
         function acessarAdm() {
-            location.href = './admin.html';
-            return;
             const modal = document.getElementById('modal-senha-adm');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -2937,7 +2935,7 @@ function showInstallButton() {
 
         function confirmarSenhaAdm() {
     const senhaDigitada = document.getElementById('senha-adm').value;
-    const senhaAdm = configSistema.senha || '1234';
+    const senhaAdm = localStorage.getItem('pdv_senha_adm_local') || '1234';
     if (senhaDigitada !== senhaAdm) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-adm').value = '';
@@ -3043,8 +3041,10 @@ function showInstallButton() {
                 return;
             }
             
-            // Atualizar configurações
-            // A senha é exclusivamente do Firebase Authentication e nunca é salva no PDV.
+            // Esta senha protege somente o ADM do PDV deste dispositivo; ela não é senha Firebase.
+            if (novaSenha) {
+                localStorage.setItem('pdv_senha_adm_local', novaSenha);
+            }
             
             if (nomeEmpresa) {
                 configSistema.nomeEmpresa = nomeEmpresa;
