@@ -2665,7 +2665,7 @@ function showInstallButton() {
 
         function confirmarSenhaAcao() {
     const senhaDigitada = document.getElementById('senha-exclusao').value;
-    const senhaAdm = configSistema.senha || '1234';
+    const senhaAdm = localStorage.getItem('pdv_senha_adm_local') || '1234';
     if (senhaDigitada !== senhaAdm) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-exclusao').value = '';
