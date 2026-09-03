@@ -11,10 +11,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="./pdv-cloud.js"></script>
+    <script type="module" src="./security.js"></script>
     <script src="./pwa-install.js"></script>
 
 
     <style>
+        body.tema-escuro { background:#090909 !important; color:#f5f5f5 !important; }
+        body.tema-escuro .bg-white, body.tema-escuro .bg-gray-50 { background:#171717 !important; color:#f5f5f5 !important; border-color:#4b4b4b !important; }
+        body.tema-escuro .text-gray-700, body.tema-escuro .text-gray-600, body.tema-escuro .text-gray-500, body.tema-escuro .text-slate-800, body.tema-escuro .text-slate-700, body.tema-escuro .text-slate-600 { color:#e5e5e5 !important; }
+        body.tema-escuro input, body.tema-escuro select, body.tema-escuro textarea { background:#252525 !important; color:#fff !important; border-color:#777 !important; }
+        body.tema-escuro #adm-section h2, body.tema-escuro #adm-section h3, body.tema-escuro #adm-section h4 { color:#f3d778 !important; }
         body {
             box-sizing: border-box;
             visibility: hidden;
@@ -66,6 +72,7 @@
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
+                    <button onclick="alternarTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">◐ Tema</button>
                     <button onclick="acessarAdm()" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">ADM do PDV</button>
                 </div>
             </div>
@@ -342,6 +349,8 @@
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                             <h3 class="font-semibold mb-2 text-base lg:text-lg">Saldo do Caixa</h3>
                             <div class="text-xl lg:text-2xl font-bold text-green-600" id="saldo-caixa">R$ 0,00</div>
+                            <p id="status-caixa-dia" class="mt-2 text-sm text-gray-600">Caixa não aberto.</p>
+                            <div class="mt-3 flex flex-wrap gap-2"><button onclick="abrirCaixaDia()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">Abrir caixa</button><button onclick="fecharCaixaDia()" class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Fechar e imprimir</button></div>
                         </div>
                     </div>
                     
@@ -440,6 +449,11 @@
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">➕ Código de barras no cadastro</h3><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar um produto pelo celular, toque no ícone de câmera ao lado de <strong>Código de Barras</strong>. A leitura preenche o campo automaticamente, sem precisar digitar.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">📦 Backup e funcionamento offline</h3><p class="mt-2 text-sm text-slate-700">O backup ficou compatível com mais navegadores e o PDV passou a usar cache para os recursos essenciais. Faça backups periódicos na área ADM.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">✨ Interface renovada</h3><p class="mt-2 text-sm text-slate-700">A tela recebeu visual mais moderno, melhor contraste, adaptação para celular e ajustes de segurança no acesso administrativo.</p></article>
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">☁️ Acesso individual e dados na nuvem</h3><p class="mt-2 text-sm text-slate-700">Cada conta usa acesso próprio e mantém produtos, vendas, configurações e clientes separados na nuvem. O sistema também verifica se o acesso está ativo antes de abrir o PDV.</p></article>
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">🧾 Clientes e vendas fiado</h3><p class="mt-2 text-sm text-slate-700">Cadastre clientes com limite, dia de pagamento ou compra sem limite. Na venda, escolha <strong>Fiado</strong>, selecione o cliente e acompanhe o saldo, pagamentos parciais e vencimento.</p></article>
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">📄 Fechamento de fiado com extrato</h3><p class="mt-2 text-sm text-slate-700">Em <strong>Clientes</strong>, use <strong>Receber / Fechamento</strong> para registrar pagamentos e <strong>Extrato PDF</strong> para gerar o histórico de compras, itens, datas, pagamentos e saldo pendente.</p></article>
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">✏️ Gestão de clientes fiado</h3><p class="mt-2 text-sm text-slate-700">Clientes podem ser editados a qualquer momento. A exclusão é permitida apenas quando o saldo está zerado, protegendo o histórico financeiro.</p></article>
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">📲 PDV instalável e menu móvel</h3><p class="mt-2 text-sm text-slate-700">Use <strong>Instalar PDV</strong> para adicionar o sistema ao computador ou celular. Em telas pequenas, os atalhos ficam organizados no menu ☰.</p></article>
                     </div>
                     <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Para próximas versões:</strong> esta página é o histórico do PDV. Ao adicionar uma melhoria, inclua aqui uma explicação curta do que mudou e de como usar.</div>
                 </div>
@@ -819,6 +833,7 @@ if ('serviceWorker' in navigator) {
         let produtos = JSON.parse(localStorage.getItem('pdv_produtos') || '[]');
         let vendas = JSON.parse(localStorage.getItem('pdv_vendas') || '[]');
         let movimentos = JSON.parse(localStorage.getItem('pdv_movimentos') || '[]');
+        let caixas = JSON.parse(localStorage.getItem('pdv_caixas') || '[]');
         let categoriasOcultas = JSON.parse(localStorage.getItem('pdv_categorias_ocultas') || '[]');
         let categorias = [...new Set([...CATEGORIAS_PADRAO, ...JSON.parse(localStorage.getItem('pdv_categorias') || '[]')])]
             .filter(categoria => !categoriasOcultas.includes(categoria));
@@ -833,10 +848,12 @@ if ('serviceWorker' in navigator) {
         let movimentoParaExcluir = null;
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
+        let clienteFiadoEditando = null;
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
             vendas: { get: () => vendas, set: v => { vendas = v; } },
             movimentos: { get: () => movimentos, set: v => { movimentos = v; } },
+            caixas: { get: () => caixas, set: v => { caixas = v; } },
             categorias: { get: () => categorias, set: v => { categorias = v; } },
             categoriasOcultas: { get: () => categoriasOcultas, set: v => { categoriasOcultas = v; } },
             configSistema: { get: () => configSistema, set: v => { configSistema = v; } },
@@ -849,6 +866,7 @@ if ('serviceWorker' in navigator) {
         document.addEventListener('DOMContentLoaded', function() {
             carregarDados();
             carregarConfigPix();
+            aplicarTema();
             restaurarRascunhoVenda();
             atualizarInterface();
             configurarAtalhos();
@@ -934,6 +952,7 @@ if ('serviceWorker' in navigator) {
             } else if (sectionName === 'caixa') {
                 atualizarHistoricoMovimentos();
                 calcularSaldoCaixa();
+                atualizarStatusCaixa();
             } else if (sectionName === 'vendas') {
                 atualizarListaProdutos();
                 focarBuscaProduto();
@@ -949,6 +968,8 @@ if ('serviceWorker' in navigator) {
             menu.classList.toggle('hidden');
             menu.classList.toggle('grid');
         }
+        function aplicarTema() { document.body.classList.toggle('tema-escuro', (configSistema.tema || 'claro') === 'escuro'); }
+        function alternarTema() { configSistema.tema = (configSistema.tema || 'claro') === 'escuro' ? 'claro' : 'escuro'; aplicarTema(); salvarDados(); }
 
         // Gerenciamento de produtos
         function mostrarFormProduto() {
@@ -1760,10 +1781,12 @@ function showInstallButton() {
             const total = subtotal - valorDesconto;
 
             // Dados PIX - usando configuração personalizada
+            const chavePix = normalizarChavePix(CONFIG_PIX.chavePix);
+            if (!chavePix) { mostrarMensagem('Configure uma chave PIX válida no ADM do PDV.', 'erro'); return; }
             const dadosPix = {
-                chavePix: CONFIG_PIX.chavePix,
-                nomeRecebedor: CONFIG_PIX.nomeRecebedor,
-                cidade: CONFIG_PIX.cidade,
+                chavePix,
+                nomeRecebedor: normalizarTextoPix(CONFIG_PIX.nomeRecebedor, 25),
+                cidade: normalizarTextoPix(CONFIG_PIX.cidade, 15),
                 valor: total.toFixed(2),
                 identificador: 'PDV' + Date.now().toString().slice(-8)
             };
@@ -1811,10 +1834,10 @@ function showInstallButton() {
                 
                 // Redimensionar para 200x200
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = finalCanvas.height = 200;
+                finalCanvas.width = finalCanvas.height = 320;
                 const finalCtx = finalCanvas.getContext('2d');
                 finalCtx.imageSmoothingEnabled = false;
-                finalCtx.drawImage(canvas, 0, 0, 200, 200);
+                finalCtx.drawImage(canvas, 0, 0, 320, 320);
                 
                 container.appendChild(finalCanvas);
                 
@@ -2571,6 +2594,27 @@ function showInstallButton() {
             });
         }
 
+        function chaveDia(data=new Date()) { return new Date(data).toISOString().slice(0,10); }
+        function caixaHoje() { return caixas.find(c => c.dia === chaveDia()); }
+        function resumoCaixaDia() {
+            const dia=chaveDia(), caixa=caixaHoje(), mov=movimentos.filter(m=>chaveDia(m.data)===dia), vendasDia=vendas.filter(v=>chaveDia(v.data)===dia);
+            const porTipo=t=>vendasDia.filter(v=>v.pagamento?.tipo===t).reduce((s,v)=>s+Number(v.total||0),0);
+            const entradas=mov.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+Number(m.valor||0),0), saidas=mov.filter(m=>m.tipo==='saida').reduce((s,m)=>s+Number(m.valor||0),0);
+            return {caixa,mov,vendasDia,dinheiro:porTipo('dinheiro'),pix:porTipo('pix'),cartao:porTipo('cartao'),fiado:porTipo('fiado'),entradas,saidas,esperado:(caixa?.abertura||0)+entradas-saidas};
+        }
+
+        function normalizarTextoPix(valor, limite) {
+            return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9 .-]/g, '').trim().slice(0, limite) || 'PDV PRO';
+        }
+        function normalizarChavePix(valor) {
+            const chave = String(valor || '').trim(); if (!chave) return '';
+            if (chave.includes('@')) return chave.toLowerCase();
+            if (/^[+()\s\d.-]+$/.test(chave)) { const n=chave.replace(/\D/g,''); if(n.length===11||n.length===14)return n; if(n.length>=12&&n.length<=13)return '+'+n; return ''; }
+            return chave.length>=20 && chave.length<=100 ? chave : '';
+        }
+        function atualizarStatusCaixa() { const e=document.getElementById('status-caixa-dia'); if(!e)return; const c=caixaHoje(); e.textContent=c?(c.fechado?`Fechado às ${new Date(c.fechadoEm).toLocaleTimeString('pt-BR')}`:`Aberto com R$ ${Number(c.abertura).toFixed(2)}`):'Caixa não aberto.'; }
+        function abrirCaixaDia() { if(caixaHoje()&&!caixaHoje().fechado){mostrarMensagem('O caixa de hoje já está aberto.', 'erro');return;} const v=prompt('Valor inicial em dinheiro no caixa:'); if(v===null)return; const abertura=Number(String(v).replace(',','.')); if(Number.isNaN(abertura)||abertura<0){mostrarMensagem('Valor inválido.', 'erro');return;} caixas=caixas.filter(c=>c.dia!==chaveDia()); caixas.push({id:'cx_'+Date.now(),dia:chaveDia(),abertura,abertoEm:new Date().toISOString(),fechado:false}); salvarDados(); atualizarStatusCaixa(); calcularSaldoCaixa(); }
+        function fecharCaixaDia() { const r=resumoCaixaDia(); if(!r.caixa||r.caixa.fechado){mostrarMensagem('Abra o caixa antes de fechar.', 'erro');return;} const informado=prompt(`Fechamento de hoje\nValor esperado: R$ ${r.esperado.toFixed(2)}\nInforme o valor contado:`); if(informado===null)return; const contado=Number(String(informado).replace(',','.')); if(Number.isNaN(contado)||contado<0){mostrarMensagem('Valor inválido.', 'erro');return;} r.caixa.fechado=true;r.caixa.fechadoEm=new Date().toISOString();r.caixa.contado=contado;r.caixa.diferenca=contado-r.esperado;r.caixa.resumo={dinheiro:r.dinheiro,pix:r.pix,cartao:r.cartao,fiado:r.fiado,entradas:r.entradas,saidas:r.saidas};salvarDados();atualizarStatusCaixa();const w=window.open('','_blank');w.document.write(`<pre style="font:12px monospace">${configSistema.nomeEmpresa||'PDV - Pro'}\nFECHAMENTO DE CAIXA — ${r.caixa.dia}\n\nAbertura: R$ ${r.caixa.abertura.toFixed(2)}\nDinheiro: R$ ${r.dinheiro.toFixed(2)}\nPIX: R$ ${r.pix.toFixed(2)}\nCartão: R$ ${r.cartao.toFixed(2)}\nFiado: R$ ${r.fiado.toFixed(2)}\nEntradas: R$ ${r.entradas.toFixed(2)}\nSaídas: R$ ${r.saidas.toFixed(2)}\nEsperado: R$ ${r.esperado.toFixed(2)}\nContado: R$ ${contado.toFixed(2)}\nDiferença: R$ ${(contado-r.esperado).toFixed(2)}</pre><script>print()<\/script>`);w.document.close(); }
         function calcularSaldoCaixa() {
             const saldo = movimentos.reduce((total, movimento) => {
                 return movimento.tipo === 'entrada' ? total + movimento.valor : total - movimento.valor;
@@ -3205,7 +3249,7 @@ function showInstallButton() {
 
         // Clientes fiado
         function mostrarFormClienteFiado() { document.getElementById('form-cliente-fiado').classList.remove('hidden'); }
-        function cancelarClienteFiado() { document.getElementById('form-cliente-fiado').classList.add('hidden'); ['cliente-fiado-nome','cliente-fiado-telefone','cliente-fiado-limite','cliente-fiado-dia'].forEach(id => document.getElementById(id).value=''); document.getElementById('cliente-fiado-sem-limite').checked=false; }
+        function cancelarClienteFiado() { document.getElementById('form-cliente-fiado').classList.add('hidden'); ['cliente-fiado-nome','cliente-fiado-telefone','cliente-fiado-limite','cliente-fiado-dia'].forEach(id => document.getElementById(id).value=''); document.getElementById('cliente-fiado-sem-limite').checked=false; clienteFiadoEditando=null; }
         function saldoClienteFiado(clienteId) {
             const compras = vendas.filter(v => v.pagamento?.tipo === 'fiado' && v.pagamento.clienteId === clienteId).reduce((s,v) => s + Number(v.total || 0), 0);
             const pagos = pagamentosFiado.filter(p => p.clienteId === clienteId).reduce((s,p) => s + Number(p.valor || 0), 0);
@@ -3216,8 +3260,9 @@ function showInstallButton() {
             const semLimite = document.getElementById('cliente-fiado-sem-limite').checked;
             const limite = Number(document.getElementById('cliente-fiado-limite').value || 0);
             if (!nome || (!semLimite && limite < 0)) { mostrarMensagem('Informe o nome e um limite válido.', 'erro'); return; }
-            clientesFiado.push({ id:'cf_'+Date.now(), nome, telefone:document.getElementById('cliente-fiado-telefone').value.trim(), limite, semLimite, diaPagamento:Number(document.getElementById('cliente-fiado-dia').value || 0), createdAt:new Date().toISOString() });
-            salvarDados(); cancelarClienteFiado(); atualizarClientesFiado(); mostrarMensagem('Cliente fiado cadastrado.', 'sucesso');
+            const dados={id:clienteFiadoEditando?.id||'cf_'+Date.now(),nome,telefone:document.getElementById('cliente-fiado-telefone').value.trim(),limite,semLimite,diaPagamento:Number(document.getElementById('cliente-fiado-dia').value||0),createdAt:clienteFiadoEditando?.createdAt||new Date().toISOString()};
+            if(clienteFiadoEditando) clientesFiado[clientesFiado.findIndex(c=>c.id===dados.id)]=dados; else clientesFiado.push(dados);
+            salvarDados(); cancelarClienteFiado(); atualizarClientesFiado(); mostrarMensagem('Cliente fiado salvo.', 'sucesso');
         }
         function atualizarSelectClientesFiado() {
             const select = document.getElementById('fiado-cliente'); if (!select) return;
@@ -3250,11 +3295,36 @@ function showInstallButton() {
             if(y>255){pdf.addPage();y=16;} pdf.setFont('helvetica','bold'); pdf.text('PAGAMENTOS',14,y); y+=6; pdf.setFont('helvetica','normal'); pagos.forEach(p=>{pdf.text(`${new Date(p.data).toLocaleString('pt-BR')} — R$ ${Number(p.valor).toFixed(2)}`,14,y);y+=6;}); y+=4; pdf.setFont('helvetica','bold'); pdf.text(`SALDO PENDENTE: R$ ${saldoClienteFiado(clienteId).toFixed(2)}`,14,y); pdf.save(`extrato-fiado-${cliente.nome.replace(/[^a-z0-9]/gi,'-')}.pdf`);
         }
 
+        function editarClienteFiado(id) {
+            const cliente = clientesFiado.find(c => c.id === id); if (!cliente) return;
+            clienteFiadoEditando = cliente; mostrarFormClienteFiado();
+            document.getElementById('cliente-fiado-nome').value = cliente.nome;
+            document.getElementById('cliente-fiado-telefone').value = cliente.telefone || '';
+            document.getElementById('cliente-fiado-limite').value = cliente.limite || '';
+            document.getElementById('cliente-fiado-dia').value = cliente.diaPagamento || '';
+            document.getElementById('cliente-fiado-sem-limite').checked = !!cliente.semLimite;
+        }
+        function excluirClienteFiado(id) {
+            const cliente = clientesFiado.find(c => c.id === id); if (!cliente) return;
+            if (saldoClienteFiado(id) > 0) { mostrarMensagem('Não é possível excluir cliente com saldo pendente.', 'erro'); return; }
+            if (!confirm(`Excluir ${cliente.nome} da lista de fiado?`)) return;
+            clientesFiado = clientesFiado.filter(c => c.id !== id); salvarDados(); atualizarClientesFiado();
+        }
+        const atualizarClientesFiadoBase = atualizarClientesFiado;
+        atualizarClientesFiado = function() {
+            atualizarClientesFiadoBase();
+            document.querySelectorAll('#lista-clientes-fiado article').forEach((card, index) => {
+                const acoes = card.querySelector('.mt-4'); const cliente = clientesFiado[index]; if (!acoes || !cliente) return;
+                acoes.insertAdjacentHTML('beforeend', `<button onclick="editarClienteFiado('${cliente.id}')" class="bg-slate-600 text-white px-3 py-2 rounded-lg text-sm">Editar</button><button onclick="excluirClienteFiado('${cliente.id}')" class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Excluir</button>`);
+            });
+        };
+
         // Persistência
         function salvarDados() {
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
             localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
             localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));
+            localStorage.setItem('pdv_caixas', JSON.stringify(caixas));
             localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
             localStorage.setItem('pdv_categorias_ocultas', JSON.stringify(categoriasOcultas));
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));

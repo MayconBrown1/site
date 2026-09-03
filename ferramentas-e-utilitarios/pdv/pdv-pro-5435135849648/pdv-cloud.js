@@ -10,7 +10,7 @@ function state() {
   const { senha, ...configSemSenha } = window.configSistema || {};
   return {
     ownerUid: uid,
-    produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [],
+    produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
     clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
     configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}, updatedAt: serverTimestamp()
@@ -26,7 +26,7 @@ async function salvarNuvem() {
 function iniciarContaVazia() {
   // Nunca reutiliza produtos, vendas, PIX ou empresa que estavam no navegador de outra conta.
   writing = true;
-  window.produtos = []; window.vendas = []; window.movimentos = [];
+  window.produtos = []; window.vendas = []; window.movimentos = []; window.caixas = [];
   window.clientesFiado = []; window.pagamentosFiado = [];
   window.categorias = []; window.categoriasOcultas = [];
   window.configSistema = { nomeEmpresa: 'PDV - Pro', cnpj: '' };
@@ -47,10 +47,11 @@ protegerPagina((user) => {
   onSnapshot(doc(db, 'users', uid, 'app', 'state'), snap => {
     if (!snap.exists()) { iniciarContaVazia(); return; }
     const d = snap.data(); writing = true;
-    window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || [];
+    window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
     window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
     window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
     window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
+    window.aplicarTema?.();
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
     window.atualizarInterface?.(); window.atualizarInfoPix?.(); writing = false;
   });
