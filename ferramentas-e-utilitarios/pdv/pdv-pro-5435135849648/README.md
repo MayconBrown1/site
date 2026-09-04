@@ -24,6 +24,7 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, criado/alterado apenas por Cloud Function administrativa.
-- `users/{uid}/app/state`: produtos, estoque, vendas, caixa, categorias, configurações e rascunho do PDV daquele cliente, sincronizados em tempo real.
+- `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
+- `users/{uid}/app/security`: hash PBKDF2 com salt da senha interna do ADM do PDV. A senha em texto puro nunca é enviada ao Firestore nem mantida no `localStorage`.
 
-As credenciais administrativas não existem no frontend. A conta aprovada recebe senha aleatória no backend e deve usar **Esqueci minha senha** para configurar a própria senha.
+As credenciais de login da conta continuam no Firebase Authentication. A senha interna do ADM do PDV é independente e serve como trava operacional dentro de uma conta já autenticada.

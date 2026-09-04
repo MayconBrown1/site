@@ -29,8 +29,29 @@ service cloud.firestore {
         && request.resource.data.role == 'client');
       allow update, delete: if owner();
 
-      match /app/{document=**} {
-        allow read, write: if owner() || activeSelf(uid);
+      match /app/state {
+        allow read, delete: if owner() || activeSelf(uid);
+        // Senhas, hashes e segredos administrativos nunca podem ser misturados ao estado geral do PDV.
+        allow create, update: if (owner() || activeSelf(uid))
+          && !request.resource.data.keys().hasAny(['senha', 'password', 'adminPassword', 'adminPasswordHash', 'senhaAdm']);
+      }
+
+      match /app/security {
+        allow read: if owner() || activeSelf(uid);
+        allow create, update: if (owner() || activeSelf(uid))
+          && request.resource.data.keys().hasOnly(['ownerUid', 'algorithm', 'iterations', 'salt', 'hash', 'updatedAt'])
+          && request.resource.data.ownerUid == uid
+          && request.resource.data.algorithm == 'PBKDF2-SHA-256'
+          && request.resource.data.iterations is int
+          && request.resource.data.iterations >= 100000
+          && request.resource.data.iterations <= 1000000
+          && request.resource.data.salt is string
+          && request.resource.data.salt.size() >= 20
+          && request.resource.data.salt.size() <= 128
+          && request.resource.data.hash is string
+          && request.resource.data.hash.size() >= 40
+          && request.resource.data.hash.size() <= 256;
+        allow delete: if owner();
       }
     }
   }

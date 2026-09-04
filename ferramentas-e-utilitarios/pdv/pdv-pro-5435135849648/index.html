@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="./pdv-cloud.js"></script>
-    <script type="module" src="./security.js"></script>
     <script src="./pwa-install.js"></script>
 
 
@@ -82,6 +81,9 @@
         <main class="flex-1 p-4">
             <!-- Seção Vendas -->
             <div id="vendas-section" class="section">
+                <div id="aviso-caixa-vendas" class="mb-4 hidden rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900">
+                    Abra o caixa para iniciar uma venda.
+                </div>
                 <div class="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6 h-full">
                     <!-- Busca e Produtos -->
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
@@ -89,7 +91,7 @@
                         <div class="mb-3 lg:mb-4">
                             <label for="busca-produto" class="block text-sm font-medium text-gray-700 mb-2">Buscar Produto</label>
                             <div class="flex gap-2">
-                                <input type="text" id="busca-produto" placeholder="Nome ou código..." 
+                                <input type="text" id="busca-produto" placeholder="Nome ou código..." autofocus autocomplete="off"
                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                                        onkeyup="buscarProduto(this.value)" onkeydown="handleProductSearch(event)">
                                 <button type="button" onclick="abrirLeitorCodigoBarras()" class="md:hidden shrink-0 rounded-lg bg-teal-600 px-4 text-xl text-white shadow-sm hover:bg-teal-700" aria-label="Ler código de barras com a câmera" title="Ler código de barras">📷</button>
@@ -150,32 +152,9 @@
                                 </div>
                             </div>
                             
-                            <div id="pix-form" class="hidden space-y-3">
-                                <div class="text-center">
-                                    <div class="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300 mb-3">
-                                        <div id="qr-code-container" class="flex justify-center mb-3">
-                                            <div class="text-gray-500">QR Code será gerado após confirmar o valor</div>
-                                        </div>
-                                        <div class="text-sm text-gray-600">
-                                            <p><strong>Recebedor:</strong> <span id="pix-nome-display"></span></p>
-                                            <p><strong>Chave:</strong> <span id="pix-chave-display"></span></p>
-                                            <p><strong>Banco:</strong> <span id="pix-banco-display"></span></p>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Status do PIX -->
-                                    <div id="pix-status" class="hidden mb-3 p-3 rounded-lg">
-                                        <div id="pix-status-content"></div>
-                                    </div>
-                                    
-                                    <button onclick="gerarQRCodePix()" id="btn-gerar-qr" class="w-full bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg transition-colors mb-3">
-                                        Gerar QR Code PIX
-                                    </button>
-                                </div>
-                                <div>
-                                    <label for="pix-id" class="block text-sm font-medium text-gray-700 mb-1">ID da Transação (opcional)</label>
-                                    <input type="text" id="pix-id" class="w-full p-3 border rounded-lg text-base" placeholder="ID do PIX" onchange="salvarRascunhoVenda()">
-                                </div>
+                            <div id="pix-form" class="hidden">
+                                <input type="hidden" id="pix-id">
+                                <p class="rounded-lg bg-purple-50 p-3 text-center text-sm text-purple-800">O QR Code PIX foi aberto em uma janela flutuante.</p>
                             </div>
                             
                             <div id="cartao-form" class="hidden space-y-3">
@@ -341,7 +320,7 @@
                                 <label for="movimento-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
                                 <input type="text" id="movimento-descricao" class="w-full p-3 border rounded-lg text-base" placeholder="Descrição do movimento">
                             </div>
-                            <button onclick="registrarMovimento()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors text-base">
+                            <button id="btn-registrar-movimento" onclick="registrarMovimento()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors text-base">
                                 Registrar Movimento
                             </button>
                         </div>
@@ -349,8 +328,12 @@
                         <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                             <h3 class="font-semibold mb-2 text-base lg:text-lg">Saldo do Caixa</h3>
                             <div class="text-xl lg:text-2xl font-bold text-green-600" id="saldo-caixa">R$ 0,00</div>
+                            <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
+                                <div class="rounded-lg bg-green-100 p-3"><span class="block text-green-800">Entradas</span><strong id="entradas-caixa" class="text-green-700">R$ 0,00</strong></div>
+                                <div class="rounded-lg bg-red-100 p-3"><span class="block text-red-800">Saídas</span><strong id="saidas-caixa" class="text-red-700">R$ 0,00</strong></div>
+                            </div>
                             <p id="status-caixa-dia" class="mt-2 text-sm text-gray-600">Caixa não aberto.</p>
-                            <div class="mt-3 flex flex-wrap gap-2"><button onclick="abrirCaixaDia()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">Abrir caixa</button><button onclick="fecharCaixaDia()" class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Fechar e imprimir</button></div>
+                            <div class="mt-3 flex flex-wrap gap-2"><button id="btn-abrir-caixa" onclick="abrirCaixaDia()" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">Abrir caixa</button><button id="btn-fechar-caixa" onclick="fecharCaixaDia()" class="bg-red-600 text-white px-3 py-2 rounded-lg text-sm">Fechar caixa e baixar PDF</button></div>
                         </div>
                     </div>
                     
@@ -359,6 +342,14 @@
                         <div class="max-h-64 lg:max-h-96 overflow-y-auto">
                             <div id="historico-movimentos" class="space-y-2"></div>
                         </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-3 lg:col-span-2">
+                        <div class="mb-4">
+                            <h2 class="text-lg lg:text-xl font-semibold">Histórico de Fechamentos</h2>
+                            <p class="text-sm text-gray-500">Os registros ficam salvos na nuvem e o PDF pode ser baixado novamente.</p>
+                        </div>
+                        <div id="historico-fechamentos" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
                     </div>
                 </div>
             </div>
@@ -527,10 +518,11 @@
                             <h3 class="text-lg font-semibold mb-4 text-green-700">⚙️ Configurações do Sistema</h3>
                             
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div>
-                                    <label for="adm-senha-sistema" class="block text-sm font-medium text-gray-700 mb-1">Senha do Sistema</label>
-                                    <input type="password" id="adm-senha-sistema" class="w-full p-3 border rounded-lg text-base" placeholder="Nova senha (deixe vazio para manter atual)">
-                                </div>
+                                 <div>
+                                     <label for="adm-senha-sistema" class="block text-sm font-medium text-gray-700 mb-1">Senha do Sistema</label>
+                                     <input type="password" id="adm-senha-sistema" class="w-full p-3 border rounded-lg text-base" placeholder="Nova senha (deixe vazio para manter atual)">
+                                     <p class="mt-1 text-xs text-gray-500">A senha é sincronizada entre seus dispositivos. Somente o hash protegido é salvo no Firestore.</p>
+                                 </div>
                                 
                                 <div>
                                     <label for="adm-nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
@@ -654,6 +646,36 @@
                 <button onclick="cancelarSenhaAdm()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
                     Cancelar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal flutuante do PIX -->
+    <div id="modal-pix" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/80 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-pix" onclick="fecharModalPixAoClicarFora(event)">
+        <div class="relative max-h-[96vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl lg:p-6">
+            <button type="button" onclick="fecharModalPix()" class="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-2xl font-bold text-gray-700 hover:bg-gray-200" aria-label="Fechar PIX">&times;</button>
+            <div class="pr-10 text-center">
+                <h2 id="titulo-modal-pix" class="text-xl font-bold text-purple-800">Pagamento via PIX</h2>
+                <p class="mt-1 text-sm text-gray-500">Escaneie o QR Code para realizar o pagamento</p>
+            </div>
+
+            <div class="mt-5 rounded-xl border-2 border-dashed border-purple-200 bg-white p-4 text-center">
+                <div id="qr-code-container" class="flex flex-col items-center justify-center"></div>
+                <div class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-purple-50 p-3 text-sm">
+                    <div><span class="block text-gray-500">Valor</span><strong id="pix-valor-display" class="text-lg text-purple-800">R$ 0,00</strong></div>
+                    <div><span class="block text-gray-500">ID</span><strong id="pix-id-display" class="break-all text-purple-800">—</strong></div>
+                </div>
+                <p id="pix-sucesso" class="mt-3 font-semibold text-green-600">✓ QR Code gerado com sucesso!</p>
+            </div>
+
+            <div class="mt-4 space-y-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
+                <p><strong>Recebedor:</strong> <span id="pix-nome-display"></span></p>
+                <p><strong>Chave PIX:</strong> <span id="pix-chave-display" class="break-all"></span></p>
+                <p><strong>Banco:</strong> <span id="pix-banco-display"></span></p>
+            </div>
+
+            <div id="pix-status" class="mt-4 hidden rounded-lg p-3">
+                <div id="pix-status-content"></div>
             </div>
         </div>
     </div>
@@ -872,6 +894,9 @@ if ('serviceWorker' in navigator) {
             configurarAtalhos();
             atualizarInfoPix();
             showSection('vendas');
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') fecharModalPix();
+            });
         });
 
         // Carregar configurações PIX salvas
@@ -933,10 +958,16 @@ if ('serviceWorker' in navigator) {
             const campo = document.getElementById('busca-produto');
             const secaoVendas = document.getElementById('vendas-section');
             if (!campo || secaoVendas.classList.contains('hidden')) return;
-            requestAnimationFrame(() => {
+            const aplicarFoco = () => {
+                if (getComputedStyle(document.body).visibility === 'hidden' || secaoVendas.classList.contains('hidden')) return;
+                const modalAberto = [...document.querySelectorAll('.fixed.inset-0')].some(modal => !modal.classList.contains('hidden'));
+                if (modalAberto) return;
                 campo.focus({ preventScroll: true });
                 campo.select();
-            });
+            };
+            requestAnimationFrame(aplicarFoco);
+            // Segunda tentativa curta para o primeiro carregamento, depois que o Firebase libera a tela.
+            setTimeout(aplicarFoco, 120);
         }
 
         function showSection(sectionName) {
@@ -953,6 +984,7 @@ if ('serviceWorker' in navigator) {
                 atualizarHistoricoMovimentos();
                 calcularSaldoCaixa();
                 atualizarStatusCaixa();
+                atualizarHistoricoFechamentos();
             } else if (sectionName === 'vendas') {
                 atualizarListaProdutos();
                 focarBuscaProduto();
@@ -1511,6 +1543,7 @@ function showInstallButton() {
         }
 
         function confirmarPesagem() {
+            if (!exigirCaixaAberto('Abra o caixa antes de adicionar itens à venda.')) return;
             if (!produtoParaPesagem) return;
             
             const pesoGramas = parseFloat(document.getElementById('peso-gramas').value);
@@ -1588,6 +1621,7 @@ function showInstallButton() {
 
         // Gerenciamento do carrinho
         function adicionarAoCarrinho(produtoId) {
+            if (!exigirCaixaAberto('Abra o caixa antes de iniciar uma venda.')) return false;
             const produto = produtos.find(p => p.id === produtoId);
             if (!produto) return false;
 
@@ -1748,6 +1782,7 @@ function showInstallButton() {
 
         // Pagamento
         function selecionarPagamento(tipo) {
+            if (!exigirCaixaAberto('Abra o caixa antes de selecionar o pagamento.')) return;
             vendaAtual = { tipo: tipo };
             
             document.getElementById('pagamento-detalhes').classList.remove('hidden');
@@ -1760,8 +1795,7 @@ function showInstallButton() {
             if (tipo === 'dinheiro') {
                 document.getElementById('valor-recebido').focus();
             } else if (tipo === 'pix') {
-                // Limpar QR Code anterior
-                document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
+                gerarQRCodePix();
             } else if (tipo === 'fiado') {
                 atualizarSelectClientesFiado();
                 atualizarInfoFiadoVenda();
@@ -1769,7 +1803,28 @@ function showInstallButton() {
             salvarRascunhoVenda();
         }
 
+        function abrirModalPix() {
+            const modal = document.getElementById('modal-pix');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            modal.querySelector('button')?.focus();
+        }
+
+        function fecharModalPix() {
+            const modal = document.getElementById('modal-pix');
+            if (!modal || modal.classList.contains('hidden')) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+
+        function fecharModalPixAoClicarFora(event) {
+            if (event.target === event.currentTarget) fecharModalPix();
+        }
+
         function gerarQRCodePix() {
+            if (!exigirCaixaAberto('Abra o caixa antes de gerar o PIX da venda.')) return;
             if (carrinho.length === 0) {
                 mostrarMensagem('Adicione produtos ao carrinho primeiro!', 'erro');
                 return;
@@ -1838,21 +1893,19 @@ function showInstallButton() {
                 const finalCtx = finalCanvas.getContext('2d');
                 finalCtx.imageSmoothingEnabled = false;
                 finalCtx.drawImage(canvas, 0, 0, 320, 320);
-                
+                finalCanvas.className = 'h-auto w-full max-w-[320px]';
+                 
                 container.appendChild(finalCanvas);
-                
-                // Adicionar informações do PIX
-                const info = document.createElement('div');
-                info.className = 'mt-2 text-xs text-gray-600';
-                info.innerHTML = `
-                    <p><strong>Valor:</strong> R$ ${total.toFixed(2)}</p>
-                    <p><strong>ID:</strong> ${dadosPix.identificador}</p>
-                    <p class="mt-2 text-green-600">✓ QR Code gerado com sucesso!</p>
-                `;
-                container.appendChild(info);
-                
+
+                document.getElementById('pix-id').value = dadosPix.identificador;
+                document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
+                document.getElementById('pix-id-display').textContent = dadosPix.identificador;
+                atualizarInfoPix();
+                 
                 // Mostrar status de aguardando pagamento
                 mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'Escaneie o QR Code com seu app do banco');
+                abrirModalPix();
+                salvarRascunhoVenda();
                 
                 // Iniciar verificação de pagamento
                 iniciarVerificacaoPagamentoPix(dadosPix.identificador);
@@ -1891,7 +1944,7 @@ function showInstallButton() {
                     icon = 'ℹ️';
             }
             
-            statusDiv.className = `mb-3 p-3 rounded-lg border-2 ${bgColor}`;
+            statusDiv.className = `mt-4 p-3 rounded-lg border-2 ${bgColor}`;
             contentDiv.innerHTML = `
                 <div class="flex items-center justify-center ${textColor}">
                     <span class="text-2xl mr-2">${icon}</span>
@@ -2007,6 +2060,8 @@ function showInstallButton() {
         }
 
         function finalizarVenda() {
+            const caixa = exigirCaixaAberto('Abra o caixa antes de finalizar uma venda.');
+            if (!caixa) return;
             if (carrinho.length === 0) {
                 mostrarMensagem('Carrinho vazio!', 'erro');
                 return;
@@ -2064,7 +2119,8 @@ function showInstallButton() {
                 desconto: desconto,
                 valorDesconto: valorDesconto,
                 total: total,
-                pagamento: vendaAtual
+                pagamento: vendaAtual,
+                caixaId: caixa.id
             };
 
             // Atualizar estoque
@@ -2083,7 +2139,8 @@ function showInstallButton() {
                 tipo: vendaAtual.tipo === 'fiado' ? 'fiado' : 'entrada',
                 valor: total,
                 descricao: `Venda #${venda.id} - ${vendaAtual.tipo}`,
-                vendaId: venda.id
+                vendaId: venda.id,
+                caixaId: caixa.id
             };
             movimentos.push(movimento);
 
@@ -2108,7 +2165,10 @@ function showInstallButton() {
             
             // Resetar status PIX
             document.getElementById('pix-status').classList.add('hidden');
-            document.getElementById('qr-code-container').innerHTML = '<div class="text-gray-500">QR Code será gerado após confirmar o valor</div>';
+            document.getElementById('qr-code-container').innerHTML = '';
+            document.getElementById('pix-valor-display').textContent = 'R$ 0,00';
+            document.getElementById('pix-id-display').textContent = '—';
+            fecharModalPix();
             
             // Resetar botão finalizar
             const btnFinalizar = document.querySelector('button[onclick="finalizarVenda()"]');
@@ -2212,6 +2272,7 @@ function showInstallButton() {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
             vendaParaComprovante = null;
+            focarBuscaProduto();
         }
 
         function imprimirOuPDF() {
@@ -2451,6 +2512,11 @@ function showInstallButton() {
         function editarMovimento(movimentoId) {
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
+            const caixa = exigirCaixaAberto('Abra o caixa para alterar uma movimentação.');
+            if (!caixa || !registroPertenceAoCaixa(movimento, caixa)) {
+                if (caixa) mostrarMensagem('Não é possível alterar uma movimentação de um caixa já fechado.', 'erro');
+                return;
+            }
             
             // Não permitir editar movimentos de vendas
             if (movimento.vendaId) {
@@ -2471,6 +2537,11 @@ function showInstallButton() {
 
         function salvarEdicaoMovimento() {
             if (!movimentoEditando) return;
+            const caixa = exigirCaixaAberto('Abra o caixa para alterar uma movimentação.');
+            if (!caixa || !registroPertenceAoCaixa(movimentoEditando, caixa)) {
+                if (caixa) mostrarMensagem('Não é possível alterar uma movimentação de um caixa já fechado.', 'erro');
+                return;
+            }
             
             const tipo = document.getElementById('edit-movimento-tipo').value;
             const valor = parseFloat(document.getElementById('edit-movimento-valor').value);
@@ -2511,6 +2582,11 @@ function showInstallButton() {
         function excluirMovimento(movimentoId) {
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
+            const caixa = exigirCaixaAberto('Abra o caixa para excluir uma movimentação.');
+            if (!caixa || !registroPertenceAoCaixa(movimento, caixa)) {
+                if (caixa) mostrarMensagem('Não é possível excluir uma movimentação de um caixa já fechado.', 'erro');
+                return;
+            }
             
             movimentoParaExcluir = movimento;
             acaoPendente = 'excluir_movimento';
@@ -2524,11 +2600,14 @@ function showInstallButton() {
 
         // Movimentação de caixa
         function registrarMovimento() {
+            if (!exigirCaixaAberto('Abra o caixa antes de registrar uma movimentação.')) return;
             acaoPendente = 'registrar_movimento';
             solicitarSenhaAcao('Digite a senha para registrar este movimento:');
         }
 
         function executarRegistroMovimento() {
+            const caixa = exigirCaixaAberto('O caixa foi fechado. Abra um caixa para registrar a movimentação.');
+            if (!caixa) return;
             const tipo = document.getElementById('movimento-tipo').value;
             const valor = parseFloat(document.getElementById('movimento-valor').value);
             const descricao = document.getElementById('movimento-descricao').value.trim();
@@ -2548,7 +2627,8 @@ function showInstallButton() {
                 data: new Date().toISOString(),
                 tipo: tipo,
                 valor: valor,
-                descricao: descricao
+                descricao: descricao,
+                caixaId: caixa.id
             };
 
             movimentos.push(movimento);
@@ -2566,7 +2646,12 @@ function showInstallButton() {
             const container = document.getElementById('historico-movimentos');
             container.innerHTML = '';
 
-            const movimentosOrdenados = [...movimentos].sort((a, b) => new Date(b.data) - new Date(a.data));
+            const caixa = caixaAtualAberto();
+            if (!caixa) {
+                container.innerHTML = '<div class="py-6 text-center text-sm text-gray-500">Abra o caixa para ver as movimentações da sessão atual.</div>';
+                return;
+            }
+            const movimentosOrdenados = movimentos.filter(movimento => registroPertenceAoCaixa(movimento, caixa)).sort((a, b) => new Date(b.data) - new Date(a.data));
             
             movimentosOrdenados.slice(0, 20).forEach(movimento => {
                 const div = document.createElement('div');
@@ -2592,15 +2677,40 @@ function showInstallButton() {
                 `;
                 container.appendChild(div);
             });
+            if (!movimentosOrdenados.length) container.innerHTML = '<div class="py-6 text-center text-sm text-gray-500">Nenhuma movimentação neste caixa.</div>';
         }
 
-        function chaveDia(data=new Date()) { return new Date(data).toISOString().slice(0,10); }
-        function caixaHoje() { return caixas.find(c => c.dia === chaveDia()); }
-        function resumoCaixaDia() {
-            const dia=chaveDia(), caixa=caixaHoje(), mov=movimentos.filter(m=>chaveDia(m.data)===dia), vendasDia=vendas.filter(v=>chaveDia(v.data)===dia);
-            const porTipo=t=>vendasDia.filter(v=>v.pagamento?.tipo===t).reduce((s,v)=>s+Number(v.total||0),0);
-            const entradas=mov.filter(m=>m.tipo==='entrada').reduce((s,m)=>s+Number(m.valor||0),0), saidas=mov.filter(m=>m.tipo==='saida').reduce((s,m)=>s+Number(m.valor||0),0);
-            return {caixa,mov,vendasDia,dinheiro:porTipo('dinheiro'),pix:porTipo('pix'),cartao:porTipo('cartao'),fiado:porTipo('fiado'),entradas,saidas,esperado:(caixa?.abertura||0)+entradas-saidas};
+        function chaveDia(data = new Date()) {
+            const d = new Date(data);
+            const parte = valor => String(valor).padStart(2, '0');
+            return `${d.getFullYear()}-${parte(d.getMonth() + 1)}-${parte(d.getDate())}`;
+        }
+        function ordenarCaixasMaisRecentes(lista = caixas) {
+            return [...lista].sort((a, b) => new Date(b.abertoEm || b.fechadoEm || 0) - new Date(a.abertoEm || a.fechadoEm || 0));
+        }
+        function caixaHoje() { return ordenarCaixasMaisRecentes().find(c => c.dia === chaveDia()); }
+        function caixaAtualAberto() { return ordenarCaixasMaisRecentes().find(c => !c.fechado) || null; }
+        function registroPertenceAoCaixa(registro, caixa) {
+            if (!registro || !caixa) return false;
+            if (registro.caixaId) return registro.caixaId === caixa.id;
+            const instante = new Date(registro.data).getTime();
+            const inicio = new Date(caixa.abertoEm).getTime();
+            const fim = caixa.fechadoEm ? new Date(caixa.fechadoEm).getTime() : Date.now();
+            return Number.isFinite(instante) && instante >= inicio && instante <= fim;
+        }
+        function exigirCaixaAberto(mensagem = 'Abra o caixa antes de continuar.') {
+            const caixa = caixaAtualAberto();
+            if (!caixa) mostrarMensagem(mensagem, 'erro');
+            return caixa;
+        }
+        function resumoCaixaDia(caixa = caixaAtualAberto() || caixaHoje()) {
+            if (!caixa) return { caixa: null, mov: [], vendasDia: [], dinheiro: 0, pix: 0, cartao: 0, fiado: 0, entradas: 0, saidas: 0, esperado: 0 };
+            const mov = movimentos.filter(m => registroPertenceAoCaixa(m, caixa));
+            const vendasDia = vendas.filter(v => registroPertenceAoCaixa(v, caixa));
+            const porTipo = tipo => vendasDia.filter(v => v.pagamento?.tipo === tipo).reduce((s, v) => s + Number(v.total || 0), 0);
+            const entradas = mov.filter(m => m.tipo === 'entrada').reduce((s, m) => s + Number(m.valor || 0), 0);
+            const saidas = mov.filter(m => m.tipo === 'saida').reduce((s, m) => s + Number(m.valor || 0), 0);
+            return { caixa, mov, vendasDia, dinheiro: porTipo('dinheiro'), pix: porTipo('pix'), cartao: porTipo('cartao'), fiado: porTipo('fiado'), entradas, saidas, esperado: Number(caixa.abertura || 0) + entradas - saidas };
         }
 
         function normalizarTextoPix(valor, limite) {
@@ -2612,16 +2722,118 @@ function showInstallButton() {
             if (/^[+()\s\d.-]+$/.test(chave)) { const n=chave.replace(/\D/g,''); if(n.length===11||n.length===14)return n; if(n.length>=12&&n.length<=13)return '+'+n; return ''; }
             return chave.length>=20 && chave.length<=100 ? chave : '';
         }
-        function atualizarStatusCaixa() { const e=document.getElementById('status-caixa-dia'); if(!e)return; const c=caixaHoje(); e.textContent=c?(c.fechado?`Fechado às ${new Date(c.fechadoEm).toLocaleTimeString('pt-BR')}`:`Aberto com R$ ${Number(c.abertura).toFixed(2)}`):'Caixa não aberto.'; }
-        function abrirCaixaDia() { if(caixaHoje()&&!caixaHoje().fechado){mostrarMensagem('O caixa de hoje já está aberto.', 'erro');return;} const v=prompt('Valor inicial em dinheiro no caixa:'); if(v===null)return; const abertura=Number(String(v).replace(',','.')); if(Number.isNaN(abertura)||abertura<0){mostrarMensagem('Valor inválido.', 'erro');return;} caixas=caixas.filter(c=>c.dia!==chaveDia()); caixas.push({id:'cx_'+Date.now(),dia:chaveDia(),abertura,abertoEm:new Date().toISOString(),fechado:false}); salvarDados(); atualizarStatusCaixa(); calcularSaldoCaixa(); }
-        function fecharCaixaDia() { const r=resumoCaixaDia(); if(!r.caixa||r.caixa.fechado){mostrarMensagem('Abra o caixa antes de fechar.', 'erro');return;} const informado=prompt(`Fechamento de hoje\nValor esperado: R$ ${r.esperado.toFixed(2)}\nInforme o valor contado:`); if(informado===null)return; const contado=Number(String(informado).replace(',','.')); if(Number.isNaN(contado)||contado<0){mostrarMensagem('Valor inválido.', 'erro');return;} r.caixa.fechado=true;r.caixa.fechadoEm=new Date().toISOString();r.caixa.contado=contado;r.caixa.diferenca=contado-r.esperado;r.caixa.resumo={dinheiro:r.dinheiro,pix:r.pix,cartao:r.cartao,fiado:r.fiado,entradas:r.entradas,saidas:r.saidas};salvarDados();atualizarStatusCaixa();const w=window.open('','_blank');w.document.write(`<pre style="font:12px monospace">${configSistema.nomeEmpresa||'PDV - Pro'}\nFECHAMENTO DE CAIXA — ${r.caixa.dia}\n\nAbertura: R$ ${r.caixa.abertura.toFixed(2)}\nDinheiro: R$ ${r.dinheiro.toFixed(2)}\nPIX: R$ ${r.pix.toFixed(2)}\nCartão: R$ ${r.cartao.toFixed(2)}\nFiado: R$ ${r.fiado.toFixed(2)}\nEntradas: R$ ${r.entradas.toFixed(2)}\nSaídas: R$ ${r.saidas.toFixed(2)}\nEsperado: R$ ${r.esperado.toFixed(2)}\nContado: R$ ${contado.toFixed(2)}\nDiferença: R$ ${(contado-r.esperado).toFixed(2)}</pre><script>print()<\/script>`);w.document.close(); }
+        function atualizarStatusCaixa() {
+            const elemento = document.getElementById('status-caixa-dia');
+            if (!elemento) return;
+            const caixa = caixaAtualAberto();
+            elemento.textContent = caixa ? `Caixa aberto desde ${new Date(caixa.abertoEm).toLocaleString('pt-BR')} com R$ ${Number(caixa.abertura).toFixed(2)}` : 'Caixa fechado. Vendas e movimentações estão bloqueadas.';
+            document.getElementById('btn-abrir-caixa').disabled = !!caixa;
+            document.getElementById('btn-fechar-caixa').disabled = !caixa;
+            document.getElementById('btn-registrar-movimento').disabled = !caixa;
+            ['movimento-tipo', 'movimento-valor', 'movimento-descricao'].forEach(id => { document.getElementById(id).disabled = !caixa; });
+            document.getElementById('btn-abrir-caixa').classList.toggle('opacity-50', !!caixa);
+            document.getElementById('btn-fechar-caixa').classList.toggle('opacity-50', !caixa);
+            document.getElementById('btn-registrar-movimento').classList.toggle('opacity-50', !caixa);
+            document.getElementById('aviso-caixa-vendas')?.classList.toggle('hidden', !!caixa);
+        }
+        function abrirCaixaDia() {
+            if (caixaAtualAberto()) { mostrarMensagem('Já existe um caixa aberto.', 'erro'); return; }
+            const valorInformado = prompt('Valor inicial em dinheiro no caixa:');
+            if (valorInformado === null) return;
+            const abertura = Number(String(valorInformado).replace(',', '.'));
+            if (Number.isNaN(abertura) || abertura < 0) { mostrarMensagem('Valor inválido.', 'erro'); return; }
+            const agora = new Date();
+            caixas.push({ id: 'cx_' + Date.now(), dia: chaveDia(agora), abertura, abertoEm: agora.toISOString(), fechado: false });
+            salvarDados();
+            atualizarStatusCaixa(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); atualizarHistoricoFechamentos();
+            mostrarMensagem('Caixa aberto. Vendas e movimentações liberadas.', 'sucesso');
+        }
+        function fecharCaixaDia() {
+            const caixa = caixaAtualAberto();
+            if (!caixa) { mostrarMensagem('Abra o caixa antes de fechar.', 'erro'); return; }
+            const resumo = resumoCaixaDia(caixa);
+            const informado = prompt(`Fechamento do caixa\nValor esperado: R$ ${resumo.esperado.toFixed(2)}\nInforme o valor contado:`);
+            if (informado === null) return;
+            const contado = Number(String(informado).replace(',', '.'));
+            if (Number.isNaN(contado) || contado < 0) { mostrarMensagem('Valor inválido.', 'erro'); return; }
+            caixa.fechado = true;
+            caixa.fechadoEm = new Date().toISOString();
+            caixa.contado = contado;
+            caixa.diferenca = contado - resumo.esperado;
+            caixa.resumo = {
+                dinheiro: resumo.dinheiro, pix: resumo.pix, cartao: resumo.cartao, fiado: resumo.fiado,
+                entradas: resumo.entradas, saidas: resumo.saidas, esperado: resumo.esperado,
+                quantidadeVendas: resumo.vendasDia.length, quantidadeMovimentos: resumo.mov.length
+            };
+            salvarDados();
+            limparVenda();
+            document.getElementById('movimento-valor').value = '';
+            document.getElementById('movimento-descricao').value = '';
+            atualizarStatusCaixa(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); atualizarHistoricoFechamentos();
+            gerarPdfFechamento(caixa);
+            mostrarMensagem('Caixa fechado e registrado no histórico. Entradas e saídas foram zeradas.', 'sucesso');
+        }
         function calcularSaldoCaixa() {
-            const saldo = movimentos.reduce((total, movimento) => {
-                return movimento.tipo === 'entrada' ? total + movimento.valor : total - movimento.valor;
-            }, 0);
-            
+            const caixa = caixaAtualAberto();
+            const resumo = caixa ? resumoCaixaDia(caixa) : { esperado: 0, entradas: 0, saidas: 0 };
+            const saldo = resumo.esperado;
             document.getElementById('saldo-caixa').textContent = `R$ ${saldo.toFixed(2)}`;
             document.getElementById('saldo-caixa').className = saldo >= 0 ? 'text-2xl font-bold text-green-600' : 'text-2xl font-bold text-red-600';
+            document.getElementById('entradas-caixa').textContent = `R$ ${resumo.entradas.toFixed(2)}`;
+            document.getElementById('saidas-caixa').textContent = `R$ ${resumo.saidas.toFixed(2)}`;
+            atualizarStatusCaixa();
+        }
+
+        function gerarPdfFechamento(caixa) {
+            if (!caixa?.fechado) { mostrarMensagem('Fechamento não encontrado.', 'erro'); return; }
+            try {
+                const resumo = caixa.resumo || {};
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                let y = 18;
+                const moeda = valor => `R$ ${Number(valor || 0).toFixed(2)}`;
+                pdf.setFontSize(18); pdf.text(configSistema.nomeEmpresa || 'PDV - Pro', 14, y); y += 10;
+                pdf.setFontSize(14); pdf.text('FECHAMENTO DE CAIXA', 14, y); y += 9;
+                pdf.setFontSize(10);
+                pdf.text(`Registro: ${caixa.id}`, 14, y); y += 6;
+                pdf.text(`Abertura: ${new Date(caixa.abertoEm).toLocaleString('pt-BR')}`, 14, y); y += 6;
+                pdf.text(`Fechamento: ${new Date(caixa.fechadoEm).toLocaleString('pt-BR')}`, 14, y); y += 10;
+                const linhas = [
+                    ['Valor de abertura', caixa.abertura], ['Vendas em dinheiro', resumo.dinheiro], ['Vendas em PIX', resumo.pix],
+                    ['Vendas em cartao', resumo.cartao], ['Vendas fiado', resumo.fiado], ['Entradas', resumo.entradas],
+                    ['Saidas', resumo.saidas], ['Valor esperado', resumo.esperado], ['Valor contado', caixa.contado], ['Diferenca', caixa.diferenca]
+                ];
+                linhas.forEach(([rotulo, valor]) => { pdf.text(rotulo, 14, y); pdf.text(moeda(valor), 120, y); y += 7; });
+                y += 3;
+                pdf.text(`Quantidade de vendas: ${Number(resumo.quantidadeVendas || 0)}`, 14, y); y += 6;
+                pdf.text(`Movimentos registrados: ${Number(resumo.quantidadeMovimentos || 0)}`, 14, y);
+                pdf.save(`fechamento-caixa-${caixa.dia}-${caixa.id}.pdf`);
+            } catch (erro) {
+                console.error('Erro ao gerar PDF do fechamento:', erro);
+                mostrarMensagem('Não foi possível gerar o PDF do fechamento.', 'erro');
+            }
+        }
+
+        function atualizarHistoricoFechamentos() {
+            const container = document.getElementById('historico-fechamentos');
+            if (!container) return;
+            const fechamentos = ordenarCaixasMaisRecentes(caixas.filter(c => c.fechado));
+            container.innerHTML = fechamentos.map(caixa => {
+                const resumo = caixa.resumo || {};
+                const diferenca = Number(caixa.diferenca || 0);
+                return `<article class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div><h3 class="font-semibold">${new Date(caixa.fechadoEm).toLocaleString('pt-BR')}</h3><p class="text-xs text-gray-500">${caixa.id}</p></div>
+                        <button onclick="baixarPdfFechamento('${caixa.id}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">Baixar PDF</button>
+                    </div>
+                    <div class="mt-3 grid grid-cols-2 gap-2 text-sm"><span>Entradas: <strong>R$ ${Number(resumo.entradas || 0).toFixed(2)}</strong></span><span>Saídas: <strong>R$ ${Number(resumo.saidas || 0).toFixed(2)}</strong></span><span>Esperado: <strong>R$ ${Number(resumo.esperado || 0).toFixed(2)}</strong></span><span>Contado: <strong>R$ ${Number(caixa.contado || 0).toFixed(2)}</strong></span></div>
+                    <p class="mt-2 text-sm font-semibold ${diferenca === 0 ? 'text-green-700' : 'text-amber-700'}">Diferença: R$ ${diferenca.toFixed(2)}</p>
+                </article>`;
+            }).join('') || '<p class="text-sm text-gray-500">Nenhum fechamento de caixa registrado.</p>';
+        }
+        function baixarPdfFechamento(caixaId) {
+            const caixa = caixas.find(item => item.id === caixaId && item.fechado);
+            gerarPdfFechamento(caixa);
         }
 
         // Relatórios
@@ -2725,6 +2937,11 @@ function showInstallButton() {
         function excluirVenda(vendaId) {
             const venda = vendas.find(v => v.id === vendaId);
             if (!venda) return;
+            const caixa = exigirCaixaAberto('Abra o caixa para excluir uma venda.');
+            if (!caixa || !registroPertenceAoCaixa(venda, caixa)) {
+                if (caixa) mostrarMensagem('Não é possível excluir uma venda de um caixa já fechado.', 'erro');
+                return;
+            }
             
             vendaParaExcluir = venda;
             acaoPendente = 'excluir_venda';
@@ -2752,10 +2969,16 @@ function showInstallButton() {
             };
         }
 
-        function confirmarSenhaAcao() {
+        async function confirmarSenhaAcao() {
     const senhaDigitada = document.getElementById('senha-exclusao').value;
-    const senhaAdm = localStorage.getItem('pdv_senha_adm_local') || '1234';
-    if (senhaDigitada !== senhaAdm) {
+    if (!window.validarSenhaAdm) {
+        mostrarMensagem('A senha administrativa ainda está sendo carregada. Tente novamente.', 'erro');
+        return;
+    }
+    let senhaValida = false;
+    try { senhaValida = await window.validarSenhaAdm(senhaDigitada); }
+    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível validar a senha na nuvem.', 'erro'); return; }
+    if (!senhaValida) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-exclusao').value = '';
         document.getElementById('senha-exclusao').focus();
@@ -2796,6 +3019,8 @@ function showInstallButton() {
 
         function executarExclusaoVenda() {
             if (!vendaParaExcluir) return;
+            const caixa = caixaAtualAberto();
+            if (!caixa || !registroPertenceAoCaixa(vendaParaExcluir, caixa)) { mostrarMensagem('O caixa desta venda não está aberto.', 'erro'); return; }
             
             // Restaurar estoque dos produtos
             vendaParaExcluir.itens.forEach(item => {
@@ -2823,6 +3048,8 @@ function showInstallButton() {
 
         function executarExclusaoMovimento() {
             if (!movimentoParaExcluir) return;
+            const caixa = caixaAtualAberto();
+            if (!caixa || !registroPertenceAoCaixa(movimentoParaExcluir, caixa)) { mostrarMensagem('O caixa desta movimentação não está aberto.', 'erro'); return; }
             
             // Se for movimento de venda, também restaurar o estoque
             if (movimentoParaExcluir.vendaId) {
@@ -2900,6 +3127,9 @@ function showInstallButton() {
         produtos: produtos,
         vendas: vendas,
         movimentos: movimentos,
+        caixas: caixas,
+        clientesFiado: clientesFiado,
+        pagamentosFiado: pagamentosFiado,
         configSistema: configSistema,
         configPix: CONFIG_PIX,
         categorias: categorias,
@@ -3022,10 +3252,16 @@ function showInstallButton() {
             };
         }
 
-        function confirmarSenhaAdm() {
+        async function confirmarSenhaAdm() {
     const senhaDigitada = document.getElementById('senha-adm').value;
-    const senhaAdm = localStorage.getItem('pdv_senha_adm_local') || '1234';
-    if (senhaDigitada !== senhaAdm) {
+    if (!window.validarSenhaAdm) {
+        mostrarMensagem('A senha administrativa ainda está sendo carregada. Tente novamente.', 'erro');
+        return;
+    }
+    let senhaValida = false;
+    try { senhaValida = await window.validarSenhaAdm(senhaDigitada); }
+    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível validar a senha na nuvem.', 'erro'); return; }
+    if (!senhaValida) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-adm').value = '';
         document.getElementById('senha-adm').focus();
@@ -3120,7 +3356,7 @@ function showInstallButton() {
             }, 1000);
         }
 
-        function salvarConfigSistema() {
+        async function salvarConfigSistema() {
             const novaSenha = document.getElementById('adm-senha-sistema').value.trim();
             const nomeEmpresa = document.getElementById('adm-nome-empresa').value.trim();
             const cnpj = document.getElementById('adm-cnpj-empresa').value.replace(/\D/g, '');
@@ -3130,18 +3366,19 @@ function showInstallButton() {
                 return;
             }
             
-            // Esta senha protege somente o ADM do PDV deste dispositivo; ela não é senha Firebase.
-            if (novaSenha) {
-                localStorage.setItem('pdv_senha_adm_local', novaSenha);
-            }
-            
-            if (nomeEmpresa) {
-                configSistema.nomeEmpresa = nomeEmpresa;
-            }
-
             if (cnpj && !validarCNPJ(cnpj)) {
                 mostrarMensagem('Informe um CNPJ válido ou deixe o campo vazio.', 'erro');
                 return false;
+            }
+
+            if (novaSenha) {
+                if (!window.configurarSenhaAdm) { mostrarMensagem('A conexão com a senha na nuvem ainda não está pronta.', 'erro'); return; }
+                try { await window.configurarSenhaAdm(novaSenha); }
+                catch (erro) { console.error(erro); mostrarMensagem('Não foi possível salvar a senha no Firestore.', 'erro'); return; }
+            }
+
+            if (nomeEmpresa) {
+                configSistema.nomeEmpresa = nomeEmpresa;
             }
             configSistema.cnpj = cnpj;
             
@@ -3152,7 +3389,7 @@ function showInstallButton() {
             // Limpar campo de senha
             document.getElementById('adm-senha-sistema').value = '';
             
-            mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
+            mostrarMensagem(novaSenha ? 'Configurações e senha sincronizada salvas com sucesso!' : 'Configurações do sistema salvas com sucesso!', 'sucesso');
         }
 
         function resetarSistema() {
@@ -3168,6 +3405,7 @@ function showInstallButton() {
             localStorage.removeItem('pdv_produtos');
             localStorage.removeItem('pdv_vendas');
             localStorage.removeItem('pdv_movimentos');
+            localStorage.removeItem('pdv_caixas');
             localStorage.removeItem('pdv_categorias');
             localStorage.removeItem('pdv_categorias_ocultas');
             localStorage.removeItem('pdv_config_sistema');
@@ -3210,6 +3448,9 @@ function showInstallButton() {
                     produtos = backup.produtos || [];
                     vendas = backup.vendas || [];
                     movimentos = backup.movimentos || [];
+                    caixas = backup.caixas || [];
+                    clientesFiado = backup.clientesFiado || [];
+                    pagamentosFiado = backup.pagamentosFiado || [];
                     categoriasOcultas = Array.isArray(backup.categoriasOcultas) ? backup.categoriasOcultas : [];
                     categorias = [...new Set([...CATEGORIAS_PADRAO, ...(Array.isArray(backup.categorias) ? backup.categorias : [])])]
                         .filter(categoria => !categoriasOcultas.includes(categoria));
@@ -3281,10 +3522,15 @@ function showInstallButton() {
             lista.innerHTML = clientesFiado.map(c => { const saldo=saldoClienteFiado(c.id), limite=c.semLimite?'Sem limite':`R$ ${Number(c.limite||0).toFixed(2)}`; return `<article class="border rounded-xl p-4 bg-gray-50"><div class="flex justify-between gap-3"><div><h3 class="font-bold text-lg">${c.nome}</h3><p class="text-sm text-gray-600">${c.telefone||'Sem telefone'} · Pagamento: ${c.diaPagamento ? 'dia '+c.diaPagamento : 'não definido'}</p></div><div class="text-right"><div class="text-sm">Limite: ${limite}</div><div class="font-bold ${saldo>0?'text-red-600':'text-green-600'}">Saldo: R$ ${saldo.toFixed(2)}</div></div></div><div class="mt-4 flex flex-wrap gap-2"><button onclick="registrarPagamentoFiado('${c.id}')" class="bg-green-600 text-white px-3 py-2 rounded-lg text-sm">Receber / Fechamento</button><button onclick="gerarExtratoFiado('${c.id}')" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">Extrato PDF</button></div></article>`; }).join('') || '<p class="text-gray-500">Nenhum cliente fiado cadastrado.</p>';
         }
         function registrarPagamentoFiado(clienteId) {
+            const caixa = exigirCaixaAberto('Abra o caixa antes de receber um pagamento de fiado.');
+            if (!caixa) return;
             const cliente=clientesFiado.find(c=>c.id===clienteId), saldo=saldoClienteFiado(clienteId); if(!cliente || saldo<=0){ mostrarMensagem('Este cliente não possui saldo pendente.', 'erro'); return; }
             const texto=prompt(`Fechamento de ${cliente.nome}\nSaldo atual: R$ ${saldo.toFixed(2)}\nInforme o valor recebido:`); if(texto===null) return;
             const valor=Number(String(texto).replace(',','.')); if(!valor || valor<=0 || valor>saldo){ mostrarMensagem('Informe um valor entre R$ 0,01 e R$ '+saldo.toFixed(2)+'.', 'erro'); return; }
-            pagamentosFiado.push({id:'pf_'+Date.now(),clienteId,valor,data:new Date().toISOString()}); movimentos.push({id:'m_'+Date.now(),data:new Date().toISOString(),tipo:'entrada',valor,descricao:`Pagamento fiado — ${cliente.nome}`}); salvarDados(); atualizarClientesFiado(); calcularSaldoCaixa(); mostrarMensagem(`Pagamento registrado. Restante: R$ ${(saldo-valor).toFixed(2)}.`, 'sucesso');
+            const agora = new Date().toISOString();
+            pagamentosFiado.push({id:'pf_'+Date.now(),clienteId,valor,data:agora,caixaId:caixa.id});
+            movimentos.push({id:'m_'+Date.now(),data:agora,tipo:'entrada',valor,descricao:`Pagamento fiado — ${cliente.nome}`,caixaId:caixa.id});
+            salvarDados(); atualizarClientesFiado(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); mostrarMensagem(`Pagamento registrado. Restante: R$ ${(saldo-valor).toFixed(2)}.`, 'sucesso');
         }
         function gerarExtratoFiado(clienteId) {
             const cliente=clientesFiado.find(c=>c.id===clienteId); if(!cliente) return;
@@ -3425,5 +3671,7 @@ function showInstallButton() {
             atualizarListaProdutos();
             atualizarCarrinho();
             calcularSaldoCaixa();
+            atualizarHistoricoMovimentos();
+            atualizarHistoricoFechamentos();
         }
     </script>
