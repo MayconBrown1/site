@@ -513,18 +513,54 @@
                             </div>
                         </div>
 
+                        <!-- Integração PIX automática -->
+                        <div class="border-2 border-emerald-200 rounded-lg p-4 bg-emerald-50/40">
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-emerald-800">⚡ Aprovação automática do PIX</h3>
+                                    <p class="mt-1 text-sm text-gray-700">Cria uma cobrança real, acompanha o pagamento e finaliza a venda sozinha quando o provedor confirmar o valor.</p>
+                                </div>
+                                <span id="pix-integracao-status" class="self-start rounded-full bg-gray-200 px-3 py-1 text-xs font-bold text-gray-700">Carregando...</span>
+                            </div>
+
+                            <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                <div>
+                                    <label for="adm-pix-provedor" class="block text-sm font-medium text-gray-700 mb-1">Provedor com aprovação automática</label>
+                                    <select id="adm-pix-provedor" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposProvedorPix()">
+                                        <option value="manual">PIX manual — qualquer banco</option>
+                                        <option value="mercado_pago">Mercado Pago — automático</option>
+                                    </select>
+                                </div>
+                                <div id="campo-token-mercado-pago" class="hidden">
+                                    <label for="adm-mp-access-token" class="block text-sm font-medium text-gray-700 mb-1">Access Token de produção</label>
+                                    <input type="password" id="adm-mp-access-token" autocomplete="new-password" class="w-full p-3 border rounded-lg text-base" placeholder="APP_USR-...">
+                                    <p class="mt-1 text-xs text-gray-600">O token é enviado diretamente ao Firebase, criptografado e nunca salvo neste navegador.</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 flex flex-wrap gap-3">
+                                <button type="button" onclick="salvarIntegracaoPix()" class="rounded-lg bg-emerald-600 px-4 py-3 text-white hover:bg-emerald-700">🔒 Salvar e validar conexão</button>
+                                <button type="button" onclick="testarIntegracaoPix()" class="rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700">🧪 Testar conexão salva</button>
+                                <button type="button" onclick="removerIntegracaoPix()" class="rounded-lg bg-gray-600 px-4 py-3 text-white hover:bg-gray-700">Usar somente PIX manual</button>
+                                <a href="guia-pix.html" target="_blank" class="rounded-lg border border-emerald-700 bg-white px-4 py-3 font-semibold text-emerald-800 hover:bg-emerald-100">📖 Abrir guia completo</a>
+                            </div>
+
+                            <details class="mt-4 rounded-lg border bg-white p-3 text-sm text-gray-700">
+                                <summary class="cursor-pointer font-semibold text-gray-900">Quais bancos funcionam?</summary>
+                                <div class="mt-3 space-y-2">
+                                    <p><strong>Mercado Pago:</strong> já está implementado com QR Code e confirmação automática.</p>
+                                    <p><strong>RecargaPay:</strong> o QR comum funciona no modo manual. A confirmação automática depende de uma API empresarial oficial com webhook fornecida pela própria instituição.</p>
+                                    <p><strong>Efí, Asaas, PagBank e bancos:</strong> cada empresa exige contrato, credenciais e formato próprios. Não envie senha da conta nem certificado pelo formulário do navegador; um conector específico precisa ser desenvolvido no backend.</p>
+                                </div>
+                            </details>
+                        </div>
+
                         <!-- Configurações do Sistema -->
                         <div class="border rounded-lg p-4">
                             <h3 class="text-lg font-semibold mb-4 text-green-700">⚙️ Configurações do Sistema</h3>
                             
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                  <div>
-                                     <label for="adm-senha-sistema" class="block text-sm font-medium text-gray-700 mb-1">Senha do Sistema</label>
-                                     <input type="password" id="adm-senha-sistema" class="w-full p-3 border rounded-lg text-base" placeholder="Nova senha (deixe vazio para manter atual)">
-                                     <p class="mt-1 text-xs text-gray-500">A senha é sincronizada entre seus dispositivos. Somente o hash protegido é salvo no Firestore.</p>
-                                 </div>
-                                
-                                <div>
                                     <label for="adm-nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
                                     <input type="text" id="adm-nome-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="Nome que aparece no comprovante">
                                 </div>
@@ -596,23 +632,22 @@
     <div id="modal-senha" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
             <h3 class="text-lg font-semibold mb-4">🔒 Confirmação Necessária</h3>
-            <p class="text-gray-600 mb-4">Digite a senha para excluir esta venda:</p>
+            <p class="text-gray-600 mb-4">Digite a mesma senha usada para entrar no PDV:</p>
             <div class="space-y-4">
                 <div>
                     <label for="senha-exclusao" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                    <input type="password" id="senha-exclusao" class="w-full p-3 border rounded-lg text-base" placeholder="Digite a senha">
+                    <input type="password" id="senha-exclusao" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
-       target="_blank"
+    <a href="./login.html"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
-        Esqueci a senha
+        Recuperar senha de login
     </a>
 </div>
             </div>
             <div class="flex gap-3 mt-6">
                 <button onclick="confirmarExclusaoVenda()" class="flex-1 bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg transition-colors text-base">
-                    Confirmar Exclusão
+                    Confirmar
                 </button>
                 <button onclick="cancelarExclusaoVenda()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white p-3 rounded-lg transition-colors text-base">
                     Cancelar
@@ -625,17 +660,16 @@
     <div id="modal-senha-adm" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
         <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
             <h3 class="text-lg font-semibold mb-4">🔐 Acesso Administrativo</h3>
-            <p class="text-gray-600 mb-4">Digite a senha de administrador para acessar as configurações:</p>
+            <p class="text-gray-600 mb-4">Digite a mesma senha usada para entrar no PDV:</p>
             <div class="space-y-4">
                 <div>
                     <label for="senha-adm" class="block text-sm font-medium text-gray-700 mb-1">Senha de Administrador</label>
-                    <input type="password" id="senha-adm" class="w-full p-3 border rounded-lg text-base" placeholder="Senha padrão: 1234">
+                    <input type="password" id="senha-adm" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="https://wa.me/+5584981770146?text=Esqueci%20a%20senha%20do%20sistema%20PDV%2C%20poderia%20me%20ajudar%20a%20recuperar%20a%20senha%3F"
-       target="_blank"
+    <a href="./login.html"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
-        Esqueci a senha
+        Recuperar senha de login
     </a>
 </div>
             </div>
@@ -666,6 +700,7 @@
                     <div><span class="block text-gray-500">ID</span><strong id="pix-id-display" class="break-all text-purple-800">—</strong></div>
                 </div>
                 <p id="pix-sucesso" class="mt-3 font-semibold text-green-600">✓ QR Code gerado com sucesso!</p>
+                <button id="btn-copiar-pix" type="button" onclick="copiarCodigoPix()" class="mt-3 hidden w-full rounded-lg bg-purple-600 px-4 py-3 font-semibold text-white hover:bg-purple-700">Copiar código PIX</button>
             </div>
 
             <div class="mt-4 space-y-2 rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
@@ -862,6 +897,12 @@ if ('serviceWorker' in navigator) {
         let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"nomeEmpresa": "PDV - Pro", "cnpj": ""}');
         let carrinho = [];
         let vendaAtual = null;
+        let pixPagamentoAtual = null;
+        let cancelarObservacaoPix = null;
+        let temporizadorConsultaPix = null;
+        let pixFinalizandoAutomaticamente = false;
+        let codigoPixAtual = '';
+        let criandoCobrancaPix = false;
         const CHAVE_RASCUNHO_VENDA = 'pdv_rascunho_venda';
         let produtoEditando = null;
         let movimentoEditando = null;
@@ -1783,6 +1824,16 @@ function showInstallButton() {
         // Pagamento
         function selecionarPagamento(tipo) {
             if (!exigirCaixaAberto('Abra o caixa antes de selecionar o pagamento.')) return;
+            if (criandoCobrancaPix) {
+                mostrarMensagem('Aguarde a criação da cobrança PIX.', 'erro');
+                return;
+            }
+            if (tipo === 'pix' && vendaAtual?.pixChargeId && pixPagamentoAtual?.status === 'pending'
+                && Math.abs(Number(pixPagamentoAtual.amount) - totalAtualDaVenda()) < 0.001) {
+                abrirModalPix();
+                return;
+            }
+            if (tipo !== 'pix') cancelarMonitoramentoPix();
             vendaAtual = { tipo: tipo };
             
             document.getElementById('pagamento-detalhes').classList.remove('hidden');
@@ -1823,19 +1874,136 @@ function showInstallButton() {
             if (event.target === event.currentTarget) fecharModalPix();
         }
 
-        function gerarQRCodePix() {
-            if (!exigirCaixaAberto('Abra o caixa antes de gerar o PIX da venda.')) return;
+        function totalAtualDaVenda() {
+            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            return Math.round((subtotal - subtotal * (desconto / 100)) * 100) / 100;
+        }
+
+        function integracaoPixAutomaticaAtiva() {
+            return window.pixIntegration?.provider === 'mercado_pago' && window.pixIntegration?.status === 'active';
+        }
+
+        function cancelarMonitoramentoPix() {
+            if (cancelarObservacaoPix) cancelarObservacaoPix();
+            cancelarObservacaoPix = null;
+            if (temporizadorConsultaPix) clearInterval(temporizadorConsultaPix);
+            temporizadorConsultaPix = null;
+        }
+
+        function desenharQrCode(payload) {
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            const qr = qrcode(0, 'M');
+            qr.addData(payload);
+            qr.make();
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const moduleCount = qr.getModuleCount();
+            const cellSize = 4;
+            const margin = 4;
+            canvas.width = canvas.height = moduleCount * cellSize + margin * 2;
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#000000';
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    if (qr.isDark(row, col)) ctx.fillRect(col * cellSize + margin, row * cellSize + margin, cellSize, cellSize);
+                }
+            }
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = finalCanvas.height = 320;
+            const finalCtx = finalCanvas.getContext('2d');
+            finalCtx.imageSmoothingEnabled = false;
+            finalCtx.drawImage(canvas, 0, 0, 320, 320);
+            finalCanvas.className = 'h-auto w-full max-w-[320px]';
+            container.appendChild(finalCanvas);
+        }
+
+        function mostrarCobrancaPix(cobranca, total) {
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            if (cobranca.qrCodeBase64) {
+                const imagem = document.createElement('img');
+                imagem.src = `data:image/png;base64,${cobranca.qrCodeBase64}`;
+                imagem.alt = 'QR Code PIX';
+                imagem.className = 'h-auto w-full max-w-[320px]';
+                container.appendChild(imagem);
+            } else {
+                desenharQrCode(cobranca.qrCode);
+            }
+            codigoPixAtual = cobranca.qrCode || '';
+            document.getElementById('btn-copiar-pix').classList.toggle('hidden', !codigoPixAtual);
+            document.getElementById('pix-id').value = cobranca.id;
+            document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
+            document.getElementById('pix-id-display').textContent = cobranca.providerPaymentId || cobranca.id;
+            atualizarInfoPix();
+        }
+
+        async function copiarCodigoPix() {
+            if (!codigoPixAtual) return;
+            try {
+                await navigator.clipboard.writeText(codigoPixAtual);
+                mostrarMensagem('Código PIX copiado!', 'sucesso');
+            } catch (_) {
+                mostrarMensagem('Não foi possível copiar automaticamente neste navegador.', 'erro');
+            }
+        }
+
+        async function gerarQRCodePix() {
+            const caixa = exigirCaixaAberto('Abra o caixa antes de gerar o PIX da venda.');
+            if (!caixa || criandoCobrancaPix) return;
             if (carrinho.length === 0) {
                 mostrarMensagem('Adicione produtos ao carrinho primeiro!', 'erro');
                 return;
             }
+            const total = totalAtualDaVenda();
+            if (total <= 0) { mostrarMensagem('O total da venda precisa ser maior que zero.', 'erro'); return; }
+            cancelarMonitoramentoPix();
+            pixPagamentoAtual = null;
+            codigoPixAtual = '';
+            document.getElementById('btn-copiar-pix').classList.add('hidden');
 
-            const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-            const valorDesconto = subtotal * (desconto / 100);
-            const total = subtotal - valorDesconto;
+            if (!integracaoPixAutomaticaAtiva()) {
+                gerarQRCodePixManual(total);
+                return;
+            }
 
-            // Dados PIX - usando configuração personalizada
+            if (typeof window.criarCobrancaPix !== 'function') {
+                mostrarMensagem('A conexão segura com o Firebase ainda está carregando. Tente novamente em alguns segundos.', 'erro');
+                return;
+            }
+
+            criandoCobrancaPix = true;
+            abrirModalPix();
+            document.getElementById('qr-code-container').innerHTML = '<div class="p-10 text-lg font-semibold text-purple-700">Gerando cobrança segura...</div>';
+            document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
+            document.getElementById('pix-id-display').textContent = 'Gerando...';
+            mostrarStatusPix('aguardando', 'Criando cobrança...', 'Conectando com o Mercado Pago');
+            try {
+                const cobranca = await window.criarCobrancaPix({
+                    amount: total,
+                    caixaId: caixa.id,
+                    description: `Venda PDV Pro - ${carrinho.length} item(ns)`
+                });
+                pixPagamentoAtual = { ...cobranca, amount: total, mode: 'automatic' };
+                vendaAtual = { ...vendaAtual, tipo: 'pix', pixChargeId: cobranca.id, pixProvider: 'mercado_pago', pixStatus: cobranca.status };
+                mostrarCobrancaPix(cobranca, total);
+                mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'A venda será finalizada automaticamente após a confirmação');
+                salvarRascunhoVenda();
+                monitorarPagamentoPix(cobranca.id);
+                mostrarMensagem('Cobrança PIX criada. Aguardando confirmação do pagamento.', 'sucesso');
+            } catch (error) {
+                console.error('Erro ao criar cobrança PIX:', error);
+                document.getElementById('qr-code-container').innerHTML = '<div class="p-6 text-red-600">Não foi possível gerar a cobrança automática.</div>';
+                mostrarStatusPix('erro', 'Falha ao gerar cobrança', mensagemErroFirebase(error));
+                mostrarMensagem(mensagemErroFirebase(error), 'erro');
+            } finally {
+                criandoCobrancaPix = false;
+            }
+        }
+
+        function gerarQRCodePixManual(total) {
             const chavePix = normalizarChavePix(CONFIG_PIX.chavePix);
             if (!chavePix) { mostrarMensagem('Configure uma chave PIX válida no ADM do PDV.', 'erro'); return; }
             const dadosPix = {
@@ -1845,73 +2013,23 @@ function showInstallButton() {
                 valor: total.toFixed(2),
                 identificador: 'PDV' + Date.now().toString().slice(-8)
             };
-
-            // Gerar payload PIX (EMV)
-            const payloadPix = gerarPayloadPix(dadosPix);
-            
-            // Gerar QR Code
-            const container = document.getElementById('qr-code-container');
-            container.innerHTML = '';
-            
             try {
-                // Criar QR Code usando qrcode-generator
-                const qr = qrcode(0, 'M');
-                qr.addData(payloadPix);
-                qr.make();
-                
-                // Criar elemento canvas
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const moduleCount = qr.getModuleCount();
-                const cellSize = 4;
-                const margin = 4;
-                
-                canvas.width = canvas.height = moduleCount * cellSize + margin * 2;
-                
-                // Desenhar fundo branco
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Desenhar módulos pretos
-                ctx.fillStyle = '#000000';
-                for (let row = 0; row < moduleCount; row++) {
-                    for (let col = 0; col < moduleCount; col++) {
-                        if (qr.isDark(row, col)) {
-                            ctx.fillRect(
-                                col * cellSize + margin,
-                                row * cellSize + margin,
-                                cellSize,
-                                cellSize
-                            );
-                        }
-                    }
-                }
-                
-                // Redimensionar para 200x200
-                const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = finalCanvas.height = 320;
-                const finalCtx = finalCanvas.getContext('2d');
-                finalCtx.imageSmoothingEnabled = false;
-                finalCtx.drawImage(canvas, 0, 0, 320, 320);
-                finalCanvas.className = 'h-auto w-full max-w-[320px]';
-                 
-                container.appendChild(finalCanvas);
-
+                const payloadPix = gerarPayloadPix(dadosPix);
+                desenharQrCode(payloadPix);
+                codigoPixAtual = payloadPix;
+                pixPagamentoAtual = { id: dadosPix.identificador, amount: total, mode: 'manual', status: 'manual' };
+                vendaAtual = { ...vendaAtual, tipo: 'pix', pixId: dadosPix.identificador, pixStatus: 'manual' };
+                document.getElementById('btn-copiar-pix').classList.remove('hidden');
                 document.getElementById('pix-id').value = dadosPix.identificador;
                 document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
                 document.getElementById('pix-id-display').textContent = dadosPix.identificador;
                 atualizarInfoPix();
-                 
-                // Mostrar status de aguardando pagamento
-                mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'Escaneie o QR Code com seu app do banco');
+                mostrarStatusPix('aguardando', 'Aguardando conferência manual...', 'Este banco não está conectado; confira o recebimento antes de finalizar');
                 abrirModalPix();
                 salvarRascunhoVenda();
-                
-                // Iniciar verificação de pagamento
-                iniciarVerificacaoPagamentoPix(dadosPix.identificador);
-                
+                mostrarMensagem('QR Code PIX manual gerado.', 'sucesso');
             } catch (error) {
-                container.innerHTML = '<div class="text-red-500">Erro ao gerar QR Code: ' + error.message + '</div>';
+                document.getElementById('qr-code-container').innerHTML = `<div class="text-red-500">Erro ao gerar QR Code: ${error.message}</div>`;
                 console.error('Erro QR Code:', error);
             }
         }
@@ -1949,8 +2067,8 @@ function showInstallButton() {
                 <div class="flex items-center justify-center ${textColor}">
                     <span class="text-2xl mr-2">${icon}</span>
                     <div class="text-center">
-                        <div class="font-semibold">${titulo}</div>
-                        <div class="text-sm mt-1">${descricao}</div>
+                        <div class="font-semibold">${textoSeguro(titulo)}</div>
+                        <div class="text-sm mt-1">${textoSeguro(descricao)}</div>
                     </div>
                 </div>
             `;
@@ -1958,14 +2076,72 @@ function showInstallButton() {
             statusDiv.classList.remove('hidden');
         }
 
-        function iniciarVerificacaoPagamentoPix(identificador) {
-            // IMPORTANTE: Esta é uma simulação para demonstração
-            // Em um sistema real, você precisaria:
-            // 1. Integrar com a API do seu banco ou provedor PIX
-            // 2. Fazer polling para verificar o status do pagamento
-            // 3. Ou usar webhooks para receber notificações em tempo real
-            
-            mostrarMensagem('QR Code PIX gerado! Aguardando pagamento...', 'sucesso');
+        function textoSeguro(valor) {
+            return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[caractere]));
+        }
+
+        function mensagemErroFirebase(error) {
+            const mensagem = String(error?.message || 'Não foi possível concluir a operação.');
+            return mensagem.replace(/^Firebase:\s*/i, '').replace(/^\w+\/[\w-]+:\s*/i, '').slice(0, 240);
+        }
+
+        function tratarAtualizacaoPagamentoPix(cobranca) {
+            if (!vendaAtual || vendaAtual.tipo !== 'pix' || vendaAtual.pixChargeId !== cobranca.id) return;
+            pixPagamentoAtual = { ...(pixPagamentoAtual || {}), ...cobranca, mode: 'automatic' };
+            vendaAtual.pixStatus = cobranca.status;
+            vendaAtual.pixProviderPaymentId = cobranca.providerPaymentId || vendaAtual.pixProviderPaymentId || '';
+            salvarRascunhoVenda();
+
+            if (cobranca.status === 'approved') {
+                if (Math.abs(Number(cobranca.amount) - totalAtualDaVenda()) > 0.001) {
+                    cancelarMonitoramentoPix();
+                    mostrarStatusPix('erro', 'Valor divergente', 'O carrinho mudou depois da criação do PIX. Gere uma nova cobrança.');
+                    mostrarMensagem('O pagamento foi identificado, mas o valor não corresponde ao carrinho atual. Não finalize esta venda automaticamente.', 'erro');
+                    return;
+                }
+                if (pixFinalizandoAutomaticamente) return;
+                pixFinalizandoAutomaticamente = true;
+                cancelarMonitoramentoPix();
+                mostrarStatusPix('confirmado', 'Pagamento confirmado!', 'Finalizando a venda automaticamente...');
+                mostrarMensagem('PIX confirmado pelo Mercado Pago!', 'sucesso');
+                setTimeout(() => {
+                    finalizarVenda(true);
+                    pixFinalizandoAutomaticamente = false;
+                }, 700);
+                return;
+            }
+
+            if (['rejected', 'cancelled', 'refunded', 'charged_back', 'review'].includes(cobranca.status)) {
+                cancelarMonitoramentoPix();
+                const detalhe = cobranca.status === 'review' ? 'O valor recebido diverge da cobrança.' : 'Gere outro PIX ou escolha outra forma de pagamento.';
+                mostrarStatusPix('erro', 'Pagamento não aprovado', detalhe);
+                return;
+            }
+            mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'A venda será finalizada automaticamente após a confirmação');
+        }
+
+        function monitorarPagamentoPix(chargeId) {
+            cancelarMonitoramentoPix();
+            if (!chargeId || typeof window.observarCobrancaPix !== 'function') return;
+            cancelarObservacaoPix = window.observarCobrancaPix(
+                chargeId,
+                tratarAtualizacaoPagamentoPix,
+                error => console.error('Erro ao acompanhar cobrança PIX:', error)
+            );
+            temporizadorConsultaPix = setInterval(async () => {
+                try {
+                    if (typeof window.atualizarCobrancaPix === 'function') await window.atualizarCobrancaPix(chargeId);
+                } catch (error) {
+                    console.warn('Consulta temporária do PIX falhou; o webhook continuará ativo:', error);
+                }
+            }, 5000);
+        }
+
+        function retomarMonitoramentoPix() {
+            const chargeId = vendaAtual?.tipo === 'pix' ? vendaAtual.pixChargeId : '';
+            if (!chargeId || !integracaoPixAutomaticaAtiva() || cancelarObservacaoPix) return;
+            pixPagamentoAtual = { id: chargeId, amount: totalAtualDaVenda(), status: vendaAtual.pixStatus || 'pending', mode: 'automatic' };
+            monitorarPagamentoPix(chargeId);
         }
 
 
@@ -2059,7 +2235,7 @@ function showInstallButton() {
             salvarRascunhoVenda();
         }
 
-        function finalizarVenda() {
+        function finalizarVenda(automaticoPix = false) {
             const caixa = exigirCaixaAberto('Abra o caixa antes de finalizar uma venda.');
             if (!caixa) return;
             if (carrinho.length === 0) {
@@ -2088,6 +2264,20 @@ function showInstallButton() {
                 vendaAtual.troco = valorRecebido - total;
             } else if (vendaAtual.tipo === 'pix') {
                 vendaAtual.pixId = document.getElementById('pix-id').value;
+                if (vendaAtual.pixChargeId) {
+                    if (pixPagamentoAtual?.status !== 'approved') {
+                        mostrarMensagem('Aguarde a confirmação automática do PIX antes de finalizar.', 'erro');
+                        return;
+                    }
+                    if (Math.abs(Number(pixPagamentoAtual.amount) - total) > 0.001) {
+                        mostrarMensagem('O valor do carrinho mudou. Gere uma nova cobrança PIX.', 'erro');
+                        return;
+                    }
+                    vendaAtual.pixStatus = 'approved';
+                    vendaAtual.pixProvider = 'mercado_pago';
+                    vendaAtual.pixProviderPaymentId = pixPagamentoAtual.providerPaymentId || vendaAtual.pixProviderPaymentId || '';
+                    vendaAtual.finalizadaAutomaticamente = Boolean(automaticoPix);
+                }
             } else if (vendaAtual.tipo === 'cartao') {
                 vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
                 vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
@@ -2151,8 +2341,12 @@ function showInstallButton() {
         }
 
         function limparVenda() {
+            cancelarMonitoramentoPix();
             carrinho = [];
             vendaAtual = null;
+            pixPagamentoAtual = null;
+            pixFinalizandoAutomaticamente = false;
+            codigoPixAtual = '';
             localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
             document.getElementById('desconto').value = '0';
             document.getElementById('valor-recebido').value = '';
@@ -2168,6 +2362,7 @@ function showInstallButton() {
             document.getElementById('qr-code-container').innerHTML = '';
             document.getElementById('pix-valor-display').textContent = 'R$ 0,00';
             document.getElementById('pix-id-display').textContent = '—';
+            document.getElementById('btn-copiar-pix').classList.add('hidden');
             fecharModalPix();
             
             // Resetar botão finalizar
@@ -2956,7 +3151,7 @@ function showInstallButton() {
             
             // Alterar o texto do modal
             modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
-            modal.querySelector('p').textContent = mensagem;
+            modal.querySelector('p').textContent = `${mensagem} Use a mesma senha utilizada no login do PDV.`;
             
             // Focar no campo de senha
             document.getElementById('senha-exclusao').focus();
@@ -2977,7 +3172,7 @@ function showInstallButton() {
     }
     let senhaValida = false;
     try { senhaValida = await window.validarSenhaAdm(senhaDigitada); }
-    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível validar a senha na nuvem.', 'erro'); return; }
+    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível confirmar a senha de login. Verifique sua conexão.', 'erro'); return; }
     if (!senhaValida) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-exclusao').value = '';
@@ -3260,7 +3455,7 @@ function showInstallButton() {
     }
     let senhaValida = false;
     try { senhaValida = await window.validarSenhaAdm(senhaDigitada); }
-    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível validar a senha na nuvem.', 'erro'); return; }
+    catch (erro) { console.error(erro); mostrarMensagem('Não foi possível confirmar a senha de login. Verifique sua conexão.', 'erro'); return; }
     if (!senhaValida) {
         mostrarMensagem('Senha incorreta!', 'erro');
         document.getElementById('senha-adm').value = '';
@@ -3291,6 +3486,73 @@ function showInstallButton() {
             // Carregar configurações do sistema
             document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Pro';
             document.getElementById('adm-cnpj-empresa').value = formatarCNPJ(configSistema.cnpj || '');
+            atualizarStatusIntegracaoPix();
+        }
+
+        function atualizarCamposProvedorPix() {
+            const automatico = document.getElementById('adm-pix-provedor')?.value === 'mercado_pago';
+            document.getElementById('campo-token-mercado-pago')?.classList.toggle('hidden', !automatico);
+        }
+
+        function atualizarStatusIntegracaoPix() {
+            const integracao = window.pixIntegration || { provider: 'manual', status: 'inactive' };
+            const ativa = integracao.provider === 'mercado_pago' && integracao.status === 'active';
+            const seletor = document.getElementById('adm-pix-provedor');
+            const status = document.getElementById('pix-integracao-status');
+            if (seletor) seletor.value = ativa ? 'mercado_pago' : 'manual';
+            if (status) {
+                status.textContent = ativa ? `Ativa: ${integracao.accountLabel || 'Mercado Pago'}` : 'Modo manual';
+                status.className = ativa
+                    ? 'self-start rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white'
+                    : 'self-start rounded-full bg-gray-200 px-3 py-1 text-xs font-bold text-gray-700';
+            }
+            atualizarCamposProvedorPix();
+        }
+
+        async function salvarIntegracaoPix() {
+            const provider = document.getElementById('adm-pix-provedor').value;
+            if (typeof window.salvarIntegracaoPixAutomatica !== 'function') {
+                mostrarMensagem('A conexão com o Firebase ainda está carregando.', 'erro');
+                return;
+            }
+            if (provider === 'manual') { await removerIntegracaoPix(); return; }
+            const accessToken = document.getElementById('adm-mp-access-token').value.trim();
+            if (!accessToken) { mostrarMensagem('Cole o Access Token de produção do Mercado Pago.', 'erro'); return; }
+            mostrarMensagem('Validando a conta no Mercado Pago...', 'sucesso');
+            try {
+                const resultado = await window.salvarIntegracaoPixAutomatica({ provider, accessToken });
+                document.getElementById('adm-mp-access-token').value = '';
+                mostrarMensagem(`Integração ativada para ${resultado.accountLabel}.`, 'sucesso');
+            } catch (error) {
+                console.error(error);
+                mostrarMensagem(mensagemErroFirebase(error), 'erro');
+            }
+        }
+
+        async function testarIntegracaoPix() {
+            if (!integracaoPixAutomaticaAtiva()) { mostrarMensagem('Primeiro salve uma integração automática.', 'erro'); return; }
+            try {
+                const resultado = await window.testarIntegracaoPixAutomatica();
+                mostrarMensagem(`Conexão funcionando: ${resultado.accountLabel}.`, 'sucesso');
+            } catch (error) {
+                console.error(error);
+                mostrarMensagem(mensagemErroFirebase(error), 'erro');
+            }
+        }
+
+        async function removerIntegracaoPix() {
+            if (typeof window.removerIntegracaoPixAutomatica !== 'function') {
+                mostrarMensagem('A conexão com o Firebase ainda está carregando.', 'erro');
+                return;
+            }
+            try {
+                await window.removerIntegracaoPixAutomatica();
+                document.getElementById('adm-mp-access-token').value = '';
+                mostrarMensagem('PIX manual ativado. A confirmação agora deve ser conferida pelo operador.', 'sucesso');
+            } catch (error) {
+                console.error(error);
+                mostrarMensagem(mensagemErroFirebase(error), 'erro');
+            }
         }
 
         function salvarConfigPix() {
@@ -3339,8 +3601,7 @@ function showInstallButton() {
                 return;
             }
             
-            // Simular teste PIX
-            mostrarMensagem('Teste PIX: Configurações válidas! ✓', 'sucesso');
+            mostrarMensagem('Configuração do QR Code manual válida! ✓', 'sucesso');
             
             // Mostrar preview das informações
             const preview = `
@@ -3356,25 +3617,13 @@ function showInstallButton() {
             }, 1000);
         }
 
-        async function salvarConfigSistema() {
-            const novaSenha = document.getElementById('adm-senha-sistema').value.trim();
+        function salvarConfigSistema() {
             const nomeEmpresa = document.getElementById('adm-nome-empresa').value.trim();
             const cnpj = document.getElementById('adm-cnpj-empresa').value.replace(/\D/g, '');
-            
-            if (novaSenha && novaSenha.length < 4) {
-                mostrarMensagem('Senha deve ter pelo menos 4 caracteres!', 'erro');
-                return;
-            }
             
             if (cnpj && !validarCNPJ(cnpj)) {
                 mostrarMensagem('Informe um CNPJ válido ou deixe o campo vazio.', 'erro');
                 return false;
-            }
-
-            if (novaSenha) {
-                if (!window.configurarSenhaAdm) { mostrarMensagem('A conexão com a senha na nuvem ainda não está pronta.', 'erro'); return; }
-                try { await window.configurarSenhaAdm(novaSenha); }
-                catch (erro) { console.error(erro); mostrarMensagem('Não foi possível salvar a senha no Firestore.', 'erro'); return; }
             }
 
             if (nomeEmpresa) {
@@ -3386,10 +3635,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
             salvarDados();
             
-            // Limpar campo de senha
-            document.getElementById('adm-senha-sistema').value = '';
-            
-            mostrarMensagem(novaSenha ? 'Configurações e senha sincronizada salvas com sucesso!' : 'Configurações do sistema salvas com sucesso!', 'sucesso');
+            mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
         }
 
         function resetarSistema() {

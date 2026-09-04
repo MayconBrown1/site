@@ -1,68 +1,18 @@
-import { db } from './firebase-config.js';
-import { protegerPagina, sair } from './auth.js';
-import { doc, getDoc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { app, db } from './firebase-config.js';
+import { protegerPagina, sair, validarSenhaAtual } from './auth.js';
+import { deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-functions.js';
 
-let uid, writing = false, credencialAdm = null, segurancaPronta = null;
-const ITERACOES_SENHA = 210000;
-const ALGORITMO_SENHA = 'PBKDF2-SHA-256';
+let uid, writing = false;
+const functions = getFunctions(app, 'southamerica-east1');
+const callSavePixProvider = httpsCallable(functions, 'savePixProviderCredentials');
+const callTestPixProvider = httpsCallable(functions, 'testPixProviderConnection');
+const callRemovePixProvider = httpsCallable(functions, 'removePixProviderCredentials');
+const callCreatePixCharge = httpsCallable(functions, 'createPixCharge');
+const callRefreshPixCharge = httpsCallable(functions, 'refreshPixCharge');
+window.pixIntegration = { provider: 'manual', status: 'inactive', accountLabel: '' };
 // Captura a configuração padrão antes que qualquer armazenamento local de outra conta seja usado.
 const pixPadrao = { ...(window.CONFIG_PIX || {}) };
-
-function bytesParaBase64(bytes) {
-  let texto = '';
-  bytes.forEach(byte => { texto += String.fromCharCode(byte); });
-  return btoa(texto);
-}
-
-function base64ParaBytes(valor) {
-  const texto = atob(valor);
-  return Uint8Array.from(texto, caractere => caractere.charCodeAt(0));
-}
-
-async function derivarSenha(senha, salt, iteracoes = ITERACOES_SENHA) {
-  const material = await crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: iteracoes, hash: 'SHA-256' }, material, 256);
-  return new Uint8Array(bits);
-}
-
-async function criarCredencialAdm(senha) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const hash = await derivarSenha(senha, salt);
-  return { ownerUid: uid, algorithm: ALGORITMO_SENHA, iterations: ITERACOES_SENHA, salt: bytesParaBase64(salt), hash: bytesParaBase64(hash) };
-}
-
-async function salvarCredencialAdm(senha) {
-  if (!uid) throw new Error('Usuário ainda não carregado.');
-  if (typeof senha !== 'string' || senha.length < 4) throw new Error('A senha deve ter pelo menos 4 caracteres.');
-  const novaCredencial = await criarCredencialAdm(senha);
-  await setDoc(doc(db, 'users', uid, 'app', 'security'), { ...novaCredencial, updatedAt: serverTimestamp() });
-  credencialAdm = novaCredencial;
-}
-
-async function carregarCredencialAdm() {
-  const referencia = doc(db, 'users', uid, 'app', 'security');
-  const snapshot = await getDoc(referencia);
-  if (snapshot.exists()) {
-    credencialAdm = snapshot.data();
-    localStorage.removeItem('pdv_senha_adm_local');
-    return;
-  }
-  // Migra uma eventual senha da versão anterior uma única vez; somente o hash segue para o Firestore.
-  const senhaAnterior = localStorage.getItem('pdv_senha_adm_local') || '1234';
-  await salvarCredencialAdm(senhaAnterior);
-  localStorage.removeItem('pdv_senha_adm_local');
-}
-
-async function validarCredencialAdm(senha) {
-  await segurancaPronta;
-  if (!credencialAdm || credencialAdm.algorithm !== ALGORITMO_SENHA) return false;
-  const esperado = base64ParaBytes(credencialAdm.hash);
-  const calculado = await derivarSenha(String(senha || ''), base64ParaBytes(credencialAdm.salt), credencialAdm.iterations);
-  if (esperado.length !== calculado.length) return false;
-  let diferenca = 0;
-  for (let i = 0; i < esperado.length; i += 1) diferenca |= esperado[i] ^ calculado[i];
-  return diferenca === 0;
-}
 
 function state() {
   const { senha, ...configSemSenha } = window.configSistema || {};
@@ -96,20 +46,10 @@ function iniciarContaVazia() {
 
 protegerPagina((user) => {
   uid = user.uid;
-  segurancaPronta = carregarCredencialAdm().catch(erro => {
-    console.error('Erro ao carregar senha administrativa:', erro);
-    throw erro;
-  });
-  window.validarSenhaAdm = validarCredencialAdm;
-  window.configurarSenhaAdm = async senha => {
-    await segurancaPronta;
-    await salvarCredencialAdm(senha);
-  };
-  segurancaPronta.then(() => {
-    onSnapshot(doc(db, 'users', uid, 'app', 'security'), snapshot => {
-      if (snapshot.exists()) credencialAdm = snapshot.data();
-    }, erro => console.error('Erro ao sincronizar senha administrativa:', erro));
-  }).catch(() => {});
+  window.validarSenhaAdm = validarSenhaAtual;
+  localStorage.removeItem('pdv_senha_adm_local');
+  // Remove o hash legado: a senha administrativa agora é sempre validada pelo Firebase Authentication.
+  deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
   document.body.style.visibility = 'visible';
   setTimeout(() => window.focarBuscaProduto?.(), 0);
   document.title = 'PDV - Pro';
@@ -128,6 +68,28 @@ protegerPagina((user) => {
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
     window.atualizarInterface?.(); window.atualizarInfoPix?.(); writing = false;
   });
+
+  onSnapshot(doc(db, 'users', uid, 'app', 'pixIntegration'), snap => {
+    window.pixIntegration = snap.exists()
+      ? { provider: 'manual', status: 'inactive', accountLabel: '', ...snap.data() }
+      : { provider: 'manual', status: 'inactive', accountLabel: '' };
+    window.atualizarStatusIntegracaoPix?.();
+    window.retomarMonitoramentoPix?.();
+  });
+
+  window.salvarIntegracaoPixAutomatica = async ({ provider, accessToken }) => {
+    const result = await callSavePixProvider({ provider, accessToken });
+    return result.data;
+  };
+  window.testarIntegracaoPixAutomatica = async () => (await callTestPixProvider()).data;
+  window.removerIntegracaoPixAutomatica = async () => (await callRemovePixProvider()).data;
+  window.criarCobrancaPix = async dados => (await callCreatePixCharge(dados)).data;
+  window.atualizarCobrancaPix = async chargeId => (await callRefreshPixCharge({ chargeId })).data;
+  window.observarCobrancaPix = (chargeId, callback, onError) => onSnapshot(
+    doc(db, 'users', uid, 'pixPayments', chargeId),
+    snap => { if (snap.exists()) callback({ id: snap.id, ...snap.data() }); },
+    onError
+  );
 
   const original = window.salvarDados;
   window.salvarDados = () => { original?.(); salvarNuvem(); };

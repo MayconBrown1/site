@@ -25,6 +25,12 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, criado/alterado apenas por Cloud Function administrativa.
 - `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
-- `users/{uid}/app/security`: hash PBKDF2 com salt da senha interna do ADM do PDV. A senha em texto puro nunca é enviada ao Firestore nem mantida no `localStorage`.
+- `users/{uid}/app/pixIntegration`: estado público da integração PIX, sem credenciais.
+- `users/{uid}/private/pixCredentials`: credencial do provedor criptografada no backend e bloqueada pelas regras do Firestore.
+- `users/{uid}/pixPayments/{id}`: cobranças PIX e status confirmados pelo provedor.
 
-As credenciais de login da conta continuam no Firebase Authentication. A senha interna do ADM do PDV é independente e serve como trava operacional dentro de uma conta já autenticada.
+A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.
+
+## Aprovação automática do PIX
+
+O conector automático do Mercado Pago cria a cobrança no backend, recebe o webhook e consulta o pagamento diretamente na API antes de liberar a venda. Antes da primeira publicação, configure o segredo `PIX_CREDENTIALS_KEY` no Firebase Secret Manager. O passo a passo completo para o dono do sistema e para cada lojista está em [GUIA-INTEGRACAO-PIX.md](GUIA-INTEGRACAO-PIX.md).

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia PIX automático — PDV Pro</title>
+  <style>
+    :root { color-scheme: light; --green:#047857; --ink:#172033; --soft:#ecfdf5; --line:#cbd5e1; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f8fafc; color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(900px,calc(100% - 28px)); margin:28px auto 60px; }
+    header,.card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:clamp(20px,4vw,34px); margin-bottom:18px; box-shadow:0 8px 25px #0f172a0d; }
+    header { background:linear-gradient(135deg,#064e3b,#059669); color:#fff; }
+    h1 { margin:0; font-size:clamp(28px,5vw,44px); line-height:1.12; } h2 { color:var(--green); margin-top:0; } h3 { margin-bottom:4px; }
+    .lead { font-size:18px; max-width:720px; } .alert { padding:14px 16px; border-left:5px solid #d97706; background:#fffbeb; border-radius:8px; }
+    .ok { padding:14px 16px; border-left:5px solid #059669; background:var(--soft); border-radius:8px; }
+    code,pre { font-family:Consolas,monospace; } pre { overflow:auto; background:#0f172a; color:#e2e8f0; border-radius:10px; padding:15px; }
+    li { margin:7px 0; } a { color:#0369a1; } .badge { display:inline-block; padding:4px 10px; border-radius:999px; background:#d1fae5; color:#065f46; font-weight:700; }
+    nav a { display:inline-block; margin:4px 12px 4px 0; font-weight:650; } footer { text-align:center; color:#64748b; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="badge">PDV Pro</span>
+    <h1>Guia do PIX automático</h1>
+    <p class="lead">Configuração segura do Firebase e instruções para o lojista conectar a conta que receberá os pagamentos.</p>
+  </header>
+
+  <nav class="card">
+    <a href="#funciona">Como funciona</a><a href="#firebase">Configurar Firebase</a><a href="#mercadopago">Mercado Pago</a><a href="#outros">Outros bancos</a><a href="#teste">Testar</a>
+  </nav>
+
+  <section id="funciona" class="card">
+    <h2>Como funciona</h2>
+    <ol>
+      <li>O caixa toca em <strong>PIX</strong> e o PDV pede uma cobrança real ao provedor.</li>
+      <li>O QR Code aparece na janela flutuante. A credencial bancária permanece criptografada no servidor.</li>
+      <li>Depois do pagamento, o Firebase consulta a API oficial e confere o ID e o valor.</li>
+      <li>Somente com estado <code>approved</code> o estoque baixa, a entrada é registrada e a venda termina sozinha.</li>
+    </ol>
+    <p class="ok"><strong>Conector pronto:</strong> Mercado Pago. O modo manual continua disponível para qualquer chave PIX.</p>
+  </section>
+
+  <section id="firebase" class="card">
+    <h2>1. Configuração do Firebase — feita uma vez</h2>
+    <p class="alert"><strong>Plano:</strong> Cloud Functions exige o plano Blaze com faturamento vinculado. Existem franquias gratuitas, mas Firebase e provedor podem gerar custos conforme o uso.</p>
+    <ol>
+      <li>Instale Node.js LTS e Firebase CLI.</li>
+      <li>Abra o PowerShell dentro da pasta do PDV e execute:</li>
+    </ol>
+    <pre>npm install -g firebase-tools
+firebase login
+firebase use pdv-brown
+npm --prefix functions install</pre>
+    <p>Crie uma chave aleatória de 32 bytes:</p>
+    <pre>$pixBytes = New-Object byte[] 32
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($pixBytes)
+[Convert]::ToBase64String($pixBytes)</pre>
+    <p>Copie o resultado e cadastre o segredo:</p>
+    <pre>firebase functions:secrets:set PIX_CREDENTIALS_KEY</pre>
+    <p>Por fim, publique:</p>
+    <pre>firebase deploy --only functions,firestore:rules,hosting</pre>
+    <p>Nunca coloque <code>PIX_CREDENTIALS_KEY</code>, Access Token ou JSON de conta de serviço no HTML ou em um repositório público.</p>
+  </section>
+
+  <section id="mercadopago" class="card">
+    <h2>2. Conectar o Mercado Pago — cada lojista</h2>
+    <ol>
+      <li>Tenha uma conta Mercado Pago apta a receber PIX e uma chave PIX cadastrada.</li>
+      <li>Entre em <a href="https://www.mercadopago.com.br/developers/panel/app" target="_blank" rel="noopener">Suas integrações</a> e crie uma aplicação de Checkout Transparente.</li>
+      <li>Abra <strong>Credenciais de produção</strong> e copie o <strong>Access Token</strong>, normalmente iniciado por <code>APP_USR-</code>.</li>
+      <li>No PDV, entre em <strong>ADM → Aprovação automática do PIX</strong>.</li>
+      <li>Escolha <strong>Mercado Pago — automático</strong>, cole o token e clique em <strong>Salvar e validar conexão</strong>.</li>
+    </ol>
+    <p>O campo fica vazio depois de salvar porque o token foi enviado ao backend e criptografado. O PDV nunca deve pedir senha da conta, código SMS ou senha do e-mail.</p>
+    <h3>Webhook usado pelo sistema</h3>
+    <pre>https://southamerica-east1-pdv-brown.cloudfunctions.net/mercadoPagoWebhook</pre>
+    <p>A cobrança já envia essa URL. Se o painel permitir configurar notificações, use-a no ambiente de produção para eventos de pagamento.</p>
+  </section>
+
+  <section id="outros" class="card">
+    <h2>3. RecargaPay e outros bancos</h2>
+    <h3>RecargaPay</h3>
+    <p>Use o modo manual com a chave PIX. Para automatizar, peça ao atendimento/comercial uma <strong>API empresarial Pix Cob</strong>, credenciais de servidor, webhook, método de assinatura, homologação e tabela de tarifas. Sem API oficial liberada para a conta, um comprovante ou QR estático não confirma o pagamento com segurança.</p>
+    <h3>Efí, Asaas, PagBank e bancos tradicionais</h3>
+    <p>Cada instituição usa autenticação e campos diferentes. Solicite documentação oficial, endpoints de homologação/produção, <code>client_id</code>, <code>client_secret</code>, webhook e certificado mTLS quando exigido. Um novo conector precisa ser programado nas Cloud Functions antes de aparecer nesta tela.</p>
+    <p class="alert">Não cole certificado, senha bancária ou segredo de outro banco no campo Mercado Pago. Arquivos <code>.p12</code>/<code>.pem</code> pertencem ao backend/Secret Manager, nunca ao navegador.</p>
+  </section>
+
+  <section id="teste" class="card">
+    <h2>4. Teste final</h2>
+    <ol>
+      <li>Abra o caixa e faça uma venda pequena, por exemplo R$ 1,00.</li>
+      <li>Selecione PIX e pague usando uma conta diferente da conta recebedora.</li>
+      <li>Não clique em finalizar. Aguarde a confirmação automática.</li>
+      <li>Confira venda, estoque, entrada no caixa e extrato do Mercado Pago.</li>
+    </ol>
+    <p>Credencial de produção movimenta dinheiro real. Se ficar aguardando, verifique a internet, use <strong>Testar conexão salva</strong> e consulte os logs das Functions no Firebase.</p>
+    <p><strong>Regra importante:</strong> não altere o carrinho depois de gerar o QR. Se o valor divergir, o sistema bloqueia a finalização automática e exige conciliação manual.</p>
+  </section>
+
+  <footer>Detalhes técnicos adicionais: <a href="GUIA-INTEGRACAO-PIX.md">GUIA-INTEGRACAO-PIX.md</a></footer>
+</main>
+</body>
+</html>
