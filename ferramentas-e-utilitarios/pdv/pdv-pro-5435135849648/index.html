@@ -513,48 +513,6 @@
                             </div>
                         </div>
 
-                        <!-- Integração PIX automática -->
-                        <div class="border-2 border-emerald-200 rounded-lg p-4 bg-emerald-50/40">
-                            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                                <div>
-                                    <h3 class="text-lg font-semibold text-emerald-800">⚡ Aprovação automática do PIX</h3>
-                                    <p class="mt-1 text-sm text-gray-700">Cria uma cobrança real, acompanha o pagamento e finaliza a venda sozinha quando o provedor confirmar o valor.</p>
-                                </div>
-                                <span id="pix-integracao-status" class="self-start rounded-full bg-gray-200 px-3 py-1 text-xs font-bold text-gray-700">Carregando...</span>
-                            </div>
-
-                            <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                                <div>
-                                    <label for="adm-pix-provedor" class="block text-sm font-medium text-gray-700 mb-1">Provedor com aprovação automática</label>
-                                    <select id="adm-pix-provedor" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposProvedorPix()">
-                                        <option value="manual">PIX manual — qualquer banco</option>
-                                        <option value="mercado_pago">Mercado Pago — automático</option>
-                                    </select>
-                                </div>
-                                <div id="campo-token-mercado-pago" class="hidden">
-                                    <label for="adm-mp-access-token" class="block text-sm font-medium text-gray-700 mb-1">Access Token de produção</label>
-                                    <input type="password" id="adm-mp-access-token" autocomplete="new-password" class="w-full p-3 border rounded-lg text-base" placeholder="APP_USR-...">
-                                    <p class="mt-1 text-xs text-gray-600">O token é enviado diretamente ao Firebase, criptografado e nunca salvo neste navegador.</p>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 flex flex-wrap gap-3">
-                                <button type="button" onclick="salvarIntegracaoPix()" class="rounded-lg bg-emerald-600 px-4 py-3 text-white hover:bg-emerald-700">🔒 Salvar e validar conexão</button>
-                                <button type="button" onclick="testarIntegracaoPix()" class="rounded-lg bg-blue-600 px-4 py-3 text-white hover:bg-blue-700">🧪 Testar conexão salva</button>
-                                <button type="button" onclick="removerIntegracaoPix()" class="rounded-lg bg-gray-600 px-4 py-3 text-white hover:bg-gray-700">Usar somente PIX manual</button>
-                                <a href="guia-pix.html" target="_blank" class="rounded-lg border border-emerald-700 bg-white px-4 py-3 font-semibold text-emerald-800 hover:bg-emerald-100">📖 Abrir guia completo</a>
-                            </div>
-
-                            <details class="mt-4 rounded-lg border bg-white p-3 text-sm text-gray-700">
-                                <summary class="cursor-pointer font-semibold text-gray-900">Quais bancos funcionam?</summary>
-                                <div class="mt-3 space-y-2">
-                                    <p><strong>Mercado Pago:</strong> já está implementado com QR Code e confirmação automática.</p>
-                                    <p><strong>RecargaPay:</strong> o QR comum funciona no modo manual. A confirmação automática depende de uma API empresarial oficial com webhook fornecida pela própria instituição.</p>
-                                    <p><strong>Efí, Asaas, PagBank e bancos:</strong> cada empresa exige contrato, credenciais e formato próprios. Não envie senha da conta nem certificado pelo formulário do navegador; um conector específico precisa ser desenvolvido no backend.</p>
-                                </div>
-                            </details>
-                        </div>
-
                         <!-- Configurações do Sistema -->
                         <div class="border rounded-lg p-4">
                             <h3 class="text-lg font-semibold mb-4 text-green-700">⚙️ Configurações do Sistema</h3>
@@ -897,12 +855,7 @@ if ('serviceWorker' in navigator) {
         let configSistema = JSON.parse(localStorage.getItem('pdv_config_sistema') || '{"nomeEmpresa": "PDV - Pro", "cnpj": ""}');
         let carrinho = [];
         let vendaAtual = null;
-        let pixPagamentoAtual = null;
-        let cancelarObservacaoPix = null;
-        let temporizadorConsultaPix = null;
-        let pixFinalizandoAutomaticamente = false;
         let codigoPixAtual = '';
-        let criandoCobrancaPix = false;
         const CHAVE_RASCUNHO_VENDA = 'pdv_rascunho_venda';
         let produtoEditando = null;
         let movimentoEditando = null;
@@ -1824,16 +1777,6 @@ function showInstallButton() {
         // Pagamento
         function selecionarPagamento(tipo) {
             if (!exigirCaixaAberto('Abra o caixa antes de selecionar o pagamento.')) return;
-            if (criandoCobrancaPix) {
-                mostrarMensagem('Aguarde a criação da cobrança PIX.', 'erro');
-                return;
-            }
-            if (tipo === 'pix' && vendaAtual?.pixChargeId && pixPagamentoAtual?.status === 'pending'
-                && Math.abs(Number(pixPagamentoAtual.amount) - totalAtualDaVenda()) < 0.001) {
-                abrirModalPix();
-                return;
-            }
-            if (tipo !== 'pix') cancelarMonitoramentoPix();
             vendaAtual = { tipo: tipo };
             
             document.getElementById('pagamento-detalhes').classList.remove('hidden');
@@ -1880,17 +1823,6 @@ function showInstallButton() {
             return Math.round((subtotal - subtotal * (desconto / 100)) * 100) / 100;
         }
 
-        function integracaoPixAutomaticaAtiva() {
-            return window.pixIntegration?.provider === 'mercado_pago' && window.pixIntegration?.status === 'active';
-        }
-
-        function cancelarMonitoramentoPix() {
-            if (cancelarObservacaoPix) cancelarObservacaoPix();
-            cancelarObservacaoPix = null;
-            if (temporizadorConsultaPix) clearInterval(temporizadorConsultaPix);
-            temporizadorConsultaPix = null;
-        }
-
         function desenharQrCode(payload) {
             const container = document.getElementById('qr-code-container');
             container.innerHTML = '';
@@ -1920,26 +1852,6 @@ function showInstallButton() {
             container.appendChild(finalCanvas);
         }
 
-        function mostrarCobrancaPix(cobranca, total) {
-            const container = document.getElementById('qr-code-container');
-            container.innerHTML = '';
-            if (cobranca.qrCodeBase64) {
-                const imagem = document.createElement('img');
-                imagem.src = `data:image/png;base64,${cobranca.qrCodeBase64}`;
-                imagem.alt = 'QR Code PIX';
-                imagem.className = 'h-auto w-full max-w-[320px]';
-                container.appendChild(imagem);
-            } else {
-                desenharQrCode(cobranca.qrCode);
-            }
-            codigoPixAtual = cobranca.qrCode || '';
-            document.getElementById('btn-copiar-pix').classList.toggle('hidden', !codigoPixAtual);
-            document.getElementById('pix-id').value = cobranca.id;
-            document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
-            document.getElementById('pix-id-display').textContent = cobranca.providerPaymentId || cobranca.id;
-            atualizarInfoPix();
-        }
-
         async function copiarCodigoPix() {
             if (!codigoPixAtual) return;
             try {
@@ -1950,57 +1862,18 @@ function showInstallButton() {
             }
         }
 
-        async function gerarQRCodePix() {
+        function gerarQRCodePix() {
             const caixa = exigirCaixaAberto('Abra o caixa antes de gerar o PIX da venda.');
-            if (!caixa || criandoCobrancaPix) return;
+            if (!caixa) return;
             if (carrinho.length === 0) {
                 mostrarMensagem('Adicione produtos ao carrinho primeiro!', 'erro');
                 return;
             }
             const total = totalAtualDaVenda();
             if (total <= 0) { mostrarMensagem('O total da venda precisa ser maior que zero.', 'erro'); return; }
-            cancelarMonitoramentoPix();
-            pixPagamentoAtual = null;
             codigoPixAtual = '';
             document.getElementById('btn-copiar-pix').classList.add('hidden');
-
-            if (!integracaoPixAutomaticaAtiva()) {
-                gerarQRCodePixManual(total);
-                return;
-            }
-
-            if (typeof window.criarCobrancaPix !== 'function') {
-                mostrarMensagem('A conexão segura com o Firebase ainda está carregando. Tente novamente em alguns segundos.', 'erro');
-                return;
-            }
-
-            criandoCobrancaPix = true;
-            abrirModalPix();
-            document.getElementById('qr-code-container').innerHTML = '<div class="p-10 text-lg font-semibold text-purple-700">Gerando cobrança segura...</div>';
-            document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
-            document.getElementById('pix-id-display').textContent = 'Gerando...';
-            mostrarStatusPix('aguardando', 'Criando cobrança...', 'Conectando com o Mercado Pago');
-            try {
-                const cobranca = await window.criarCobrancaPix({
-                    amount: total,
-                    caixaId: caixa.id,
-                    description: `Venda PDV Pro - ${carrinho.length} item(ns)`
-                });
-                pixPagamentoAtual = { ...cobranca, amount: total, mode: 'automatic' };
-                vendaAtual = { ...vendaAtual, tipo: 'pix', pixChargeId: cobranca.id, pixProvider: 'mercado_pago', pixStatus: cobranca.status };
-                mostrarCobrancaPix(cobranca, total);
-                mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'A venda será finalizada automaticamente após a confirmação');
-                salvarRascunhoVenda();
-                monitorarPagamentoPix(cobranca.id);
-                mostrarMensagem('Cobrança PIX criada. Aguardando confirmação do pagamento.', 'sucesso');
-            } catch (error) {
-                console.error('Erro ao criar cobrança PIX:', error);
-                document.getElementById('qr-code-container').innerHTML = '<div class="p-6 text-red-600">Não foi possível gerar a cobrança automática.</div>';
-                mostrarStatusPix('erro', 'Falha ao gerar cobrança', mensagemErroFirebase(error));
-                mostrarMensagem(mensagemErroFirebase(error), 'erro');
-            } finally {
-                criandoCobrancaPix = false;
-            }
+            gerarQRCodePixManual(total);
         }
 
         function gerarQRCodePixManual(total) {
@@ -2017,14 +1890,13 @@ function showInstallButton() {
                 const payloadPix = gerarPayloadPix(dadosPix);
                 desenharQrCode(payloadPix);
                 codigoPixAtual = payloadPix;
-                pixPagamentoAtual = { id: dadosPix.identificador, amount: total, mode: 'manual', status: 'manual' };
-                vendaAtual = { ...vendaAtual, tipo: 'pix', pixId: dadosPix.identificador, pixStatus: 'manual' };
+                vendaAtual = { ...vendaAtual, tipo: 'pix', pixId: dadosPix.identificador };
                 document.getElementById('btn-copiar-pix').classList.remove('hidden');
                 document.getElementById('pix-id').value = dadosPix.identificador;
                 document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
                 document.getElementById('pix-id-display').textContent = dadosPix.identificador;
                 atualizarInfoPix();
-                mostrarStatusPix('aguardando', 'Aguardando conferência manual...', 'Este banco não está conectado; confira o recebimento antes de finalizar');
+                mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'Confira o recebimento no banco e depois finalize a venda');
                 abrirModalPix();
                 salvarRascunhoVenda();
                 mostrarMensagem('QR Code PIX manual gerado.', 'sucesso');
@@ -2078,70 +1950,6 @@ function showInstallButton() {
 
         function textoSeguro(valor) {
             return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[caractere]));
-        }
-
-        function mensagemErroFirebase(error) {
-            const mensagem = String(error?.message || 'Não foi possível concluir a operação.');
-            return mensagem.replace(/^Firebase:\s*/i, '').replace(/^\w+\/[\w-]+:\s*/i, '').slice(0, 240);
-        }
-
-        function tratarAtualizacaoPagamentoPix(cobranca) {
-            if (!vendaAtual || vendaAtual.tipo !== 'pix' || vendaAtual.pixChargeId !== cobranca.id) return;
-            pixPagamentoAtual = { ...(pixPagamentoAtual || {}), ...cobranca, mode: 'automatic' };
-            vendaAtual.pixStatus = cobranca.status;
-            vendaAtual.pixProviderPaymentId = cobranca.providerPaymentId || vendaAtual.pixProviderPaymentId || '';
-            salvarRascunhoVenda();
-
-            if (cobranca.status === 'approved') {
-                if (Math.abs(Number(cobranca.amount) - totalAtualDaVenda()) > 0.001) {
-                    cancelarMonitoramentoPix();
-                    mostrarStatusPix('erro', 'Valor divergente', 'O carrinho mudou depois da criação do PIX. Gere uma nova cobrança.');
-                    mostrarMensagem('O pagamento foi identificado, mas o valor não corresponde ao carrinho atual. Não finalize esta venda automaticamente.', 'erro');
-                    return;
-                }
-                if (pixFinalizandoAutomaticamente) return;
-                pixFinalizandoAutomaticamente = true;
-                cancelarMonitoramentoPix();
-                mostrarStatusPix('confirmado', 'Pagamento confirmado!', 'Finalizando a venda automaticamente...');
-                mostrarMensagem('PIX confirmado pelo Mercado Pago!', 'sucesso');
-                setTimeout(() => {
-                    finalizarVenda(true);
-                    pixFinalizandoAutomaticamente = false;
-                }, 700);
-                return;
-            }
-
-            if (['rejected', 'cancelled', 'refunded', 'charged_back', 'review'].includes(cobranca.status)) {
-                cancelarMonitoramentoPix();
-                const detalhe = cobranca.status === 'review' ? 'O valor recebido diverge da cobrança.' : 'Gere outro PIX ou escolha outra forma de pagamento.';
-                mostrarStatusPix('erro', 'Pagamento não aprovado', detalhe);
-                return;
-            }
-            mostrarStatusPix('aguardando', 'Aguardando pagamento...', 'A venda será finalizada automaticamente após a confirmação');
-        }
-
-        function monitorarPagamentoPix(chargeId) {
-            cancelarMonitoramentoPix();
-            if (!chargeId || typeof window.observarCobrancaPix !== 'function') return;
-            cancelarObservacaoPix = window.observarCobrancaPix(
-                chargeId,
-                tratarAtualizacaoPagamentoPix,
-                error => console.error('Erro ao acompanhar cobrança PIX:', error)
-            );
-            temporizadorConsultaPix = setInterval(async () => {
-                try {
-                    if (typeof window.atualizarCobrancaPix === 'function') await window.atualizarCobrancaPix(chargeId);
-                } catch (error) {
-                    console.warn('Consulta temporária do PIX falhou; o webhook continuará ativo:', error);
-                }
-            }, 5000);
-        }
-
-        function retomarMonitoramentoPix() {
-            const chargeId = vendaAtual?.tipo === 'pix' ? vendaAtual.pixChargeId : '';
-            if (!chargeId || !integracaoPixAutomaticaAtiva() || cancelarObservacaoPix) return;
-            pixPagamentoAtual = { id: chargeId, amount: totalAtualDaVenda(), status: vendaAtual.pixStatus || 'pending', mode: 'automatic' };
-            monitorarPagamentoPix(chargeId);
         }
 
 
@@ -2235,7 +2043,7 @@ function showInstallButton() {
             salvarRascunhoVenda();
         }
 
-        function finalizarVenda(automaticoPix = false) {
+        function finalizarVenda() {
             const caixa = exigirCaixaAberto('Abra o caixa antes de finalizar uma venda.');
             if (!caixa) return;
             if (carrinho.length === 0) {
@@ -2264,20 +2072,6 @@ function showInstallButton() {
                 vendaAtual.troco = valorRecebido - total;
             } else if (vendaAtual.tipo === 'pix') {
                 vendaAtual.pixId = document.getElementById('pix-id').value;
-                if (vendaAtual.pixChargeId) {
-                    if (pixPagamentoAtual?.status !== 'approved') {
-                        mostrarMensagem('Aguarde a confirmação automática do PIX antes de finalizar.', 'erro');
-                        return;
-                    }
-                    if (Math.abs(Number(pixPagamentoAtual.amount) - total) > 0.001) {
-                        mostrarMensagem('O valor do carrinho mudou. Gere uma nova cobrança PIX.', 'erro');
-                        return;
-                    }
-                    vendaAtual.pixStatus = 'approved';
-                    vendaAtual.pixProvider = 'mercado_pago';
-                    vendaAtual.pixProviderPaymentId = pixPagamentoAtual.providerPaymentId || vendaAtual.pixProviderPaymentId || '';
-                    vendaAtual.finalizadaAutomaticamente = Boolean(automaticoPix);
-                }
             } else if (vendaAtual.tipo === 'cartao') {
                 vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
                 vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
@@ -2341,11 +2135,8 @@ function showInstallButton() {
         }
 
         function limparVenda() {
-            cancelarMonitoramentoPix();
             carrinho = [];
             vendaAtual = null;
-            pixPagamentoAtual = null;
-            pixFinalizandoAutomaticamente = false;
             codigoPixAtual = '';
             localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
             document.getElementById('desconto').value = '0';
@@ -3486,73 +3277,6 @@ function showInstallButton() {
             // Carregar configurações do sistema
             document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Pro';
             document.getElementById('adm-cnpj-empresa').value = formatarCNPJ(configSistema.cnpj || '');
-            atualizarStatusIntegracaoPix();
-        }
-
-        function atualizarCamposProvedorPix() {
-            const automatico = document.getElementById('adm-pix-provedor')?.value === 'mercado_pago';
-            document.getElementById('campo-token-mercado-pago')?.classList.toggle('hidden', !automatico);
-        }
-
-        function atualizarStatusIntegracaoPix() {
-            const integracao = window.pixIntegration || { provider: 'manual', status: 'inactive' };
-            const ativa = integracao.provider === 'mercado_pago' && integracao.status === 'active';
-            const seletor = document.getElementById('adm-pix-provedor');
-            const status = document.getElementById('pix-integracao-status');
-            if (seletor) seletor.value = ativa ? 'mercado_pago' : 'manual';
-            if (status) {
-                status.textContent = ativa ? `Ativa: ${integracao.accountLabel || 'Mercado Pago'}` : 'Modo manual';
-                status.className = ativa
-                    ? 'self-start rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white'
-                    : 'self-start rounded-full bg-gray-200 px-3 py-1 text-xs font-bold text-gray-700';
-            }
-            atualizarCamposProvedorPix();
-        }
-
-        async function salvarIntegracaoPix() {
-            const provider = document.getElementById('adm-pix-provedor').value;
-            if (typeof window.salvarIntegracaoPixAutomatica !== 'function') {
-                mostrarMensagem('A conexão com o Firebase ainda está carregando.', 'erro');
-                return;
-            }
-            if (provider === 'manual') { await removerIntegracaoPix(); return; }
-            const accessToken = document.getElementById('adm-mp-access-token').value.trim();
-            if (!accessToken) { mostrarMensagem('Cole o Access Token de produção do Mercado Pago.', 'erro'); return; }
-            mostrarMensagem('Validando a conta no Mercado Pago...', 'sucesso');
-            try {
-                const resultado = await window.salvarIntegracaoPixAutomatica({ provider, accessToken });
-                document.getElementById('adm-mp-access-token').value = '';
-                mostrarMensagem(`Integração ativada para ${resultado.accountLabel}.`, 'sucesso');
-            } catch (error) {
-                console.error(error);
-                mostrarMensagem(mensagemErroFirebase(error), 'erro');
-            }
-        }
-
-        async function testarIntegracaoPix() {
-            if (!integracaoPixAutomaticaAtiva()) { mostrarMensagem('Primeiro salve uma integração automática.', 'erro'); return; }
-            try {
-                const resultado = await window.testarIntegracaoPixAutomatica();
-                mostrarMensagem(`Conexão funcionando: ${resultado.accountLabel}.`, 'sucesso');
-            } catch (error) {
-                console.error(error);
-                mostrarMensagem(mensagemErroFirebase(error), 'erro');
-            }
-        }
-
-        async function removerIntegracaoPix() {
-            if (typeof window.removerIntegracaoPixAutomatica !== 'function') {
-                mostrarMensagem('A conexão com o Firebase ainda está carregando.', 'erro');
-                return;
-            }
-            try {
-                await window.removerIntegracaoPixAutomatica();
-                document.getElementById('adm-mp-access-token').value = '';
-                mostrarMensagem('PIX manual ativado. A confirmação agora deve ser conferida pelo operador.', 'sucesso');
-            } catch (error) {
-                console.error(error);
-                mostrarMensagem(mensagemErroFirebase(error), 'erro');
-            }
         }
 
         function salvarConfigPix() {

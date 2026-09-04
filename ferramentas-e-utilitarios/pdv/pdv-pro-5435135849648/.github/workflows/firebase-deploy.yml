@@ -25,6 +25,11 @@ jobs:
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT_PDV_BROWN" > "$RUNNER_TEMP/firebase-service-account.json"
       - name: Instalar dependências das Functions
         run: npm install --prefix functions
+      - name: Remover funções antigas da integração PIX
+        continue-on-error: true
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+        run: npx firebase-tools@latest functions:delete savePixProviderCredentials testPixProviderConnection removePixProviderCredentials createPixCharge refreshPixCharge mercadoPagoWebhook --region southamerica-east1 --project pdv-brown --force
       - name: Publicar Hosting, Rules e Functions
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json

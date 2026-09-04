@@ -1,16 +1,8 @@
-import { app, db } from './firebase-config.js';
+import { db } from './firebase-config.js';
 import { protegerPagina, sair, validarSenhaAtual } from './auth.js';
 import { deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
-import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-functions.js';
 
 let uid, writing = false;
-const functions = getFunctions(app, 'southamerica-east1');
-const callSavePixProvider = httpsCallable(functions, 'savePixProviderCredentials');
-const callTestPixProvider = httpsCallable(functions, 'testPixProviderConnection');
-const callRemovePixProvider = httpsCallable(functions, 'removePixProviderCredentials');
-const callCreatePixCharge = httpsCallable(functions, 'createPixCharge');
-const callRefreshPixCharge = httpsCallable(functions, 'refreshPixCharge');
-window.pixIntegration = { provider: 'manual', status: 'inactive', accountLabel: '' };
 // Captura a configuração padrão antes que qualquer armazenamento local de outra conta seja usado.
 const pixPadrao = { ...(window.CONFIG_PIX || {}) };
 
@@ -68,28 +60,6 @@ protegerPagina((user) => {
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
     window.atualizarInterface?.(); window.atualizarInfoPix?.(); writing = false;
   });
-
-  onSnapshot(doc(db, 'users', uid, 'app', 'pixIntegration'), snap => {
-    window.pixIntegration = snap.exists()
-      ? { provider: 'manual', status: 'inactive', accountLabel: '', ...snap.data() }
-      : { provider: 'manual', status: 'inactive', accountLabel: '' };
-    window.atualizarStatusIntegracaoPix?.();
-    window.retomarMonitoramentoPix?.();
-  });
-
-  window.salvarIntegracaoPixAutomatica = async ({ provider, accessToken }) => {
-    const result = await callSavePixProvider({ provider, accessToken });
-    return result.data;
-  };
-  window.testarIntegracaoPixAutomatica = async () => (await callTestPixProvider()).data;
-  window.removerIntegracaoPixAutomatica = async () => (await callRemovePixProvider()).data;
-  window.criarCobrancaPix = async dados => (await callCreatePixCharge(dados)).data;
-  window.atualizarCobrancaPix = async chargeId => (await callRefreshPixCharge({ chargeId })).data;
-  window.observarCobrancaPix = (chargeId, callback, onError) => onSnapshot(
-    doc(db, 'users', uid, 'pixPayments', chargeId),
-    snap => { if (snap.exists()) callback({ id: snap.id, ...snap.data() }); },
-    onError
-  );
 
   const original = window.salvarDados;
   window.salvarDados = () => { original?.(); salvarNuvem(); };
