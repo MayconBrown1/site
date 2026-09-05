@@ -15,7 +15,7 @@ import {
   writeBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-const VERSAO_TERMOS = "1.0";
+const VERSAO_TERMOS = "1.1";
 
 /**
  * Cadastra uma nova LOJA.
@@ -154,7 +154,7 @@ export async function cadastrarEntregador(formData) {
       ultimoPagamento: null
     },
     avaliacao: { media: 0, total: 0 },
-    estatisticas: { entregasRealizadas: 0, cancelamentos: 0 },
+    estatisticas: { entregasRealizadas: 0, devolucoes: 0, cancelamentos: 0 },
     cidadeId: CIDADE_MVP.toLowerCase(),
     criadoEm: agora
   });

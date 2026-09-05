@@ -4,7 +4,7 @@ import {
   query, runTransaction, serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
-export const STATUS_FINAIS = ["entregue", "cancelado"];
+export const STATUS_FINAIS = ["entregue", "devolvido", "cancelado"];
 
 export function assinaturaValida(perfil) {
   const status = perfil?.assinatura?.status;
@@ -34,6 +34,8 @@ export async function criarEntrega(storeId, dados) {
   if (!storeSnap.exists() || !assinaturaValida(storeSnap.data())) throw new Error("PERFIL_INATIVO");
   const valor = Number(dados.valor);
   if (!Number.isFinite(valor) || valor <= 0) throw new Error("VALOR_INVALIDO");
+  const formaPagamentoEntrega = String(dados.formaPagamentoEntrega || "");
+  if (!["pix", "online"].includes(formaPagamentoEntrega)) throw new Error("FORMA_PAGAMENTO_INVALIDA");
   return addDoc(collection(db, "deliveries"), {
     storeId,
     storeNome: storeSnap.data().nomeComercial,
@@ -46,13 +48,15 @@ export async function criarEntrega(storeId, dados) {
     destino: dados.destino,
     valor,
     observacoes: dados.observacoes || "",
-    formaPagamentoEntrega: dados.formaPagamentoEntrega || "combinar",
+    formaPagamentoEntrega,
     status: "disponivel",
     courierId: null,
     courierNome: null,
     confirmacoes: {
       retiradaLoja: false, retiradaEntregador: false,
-      entregaLoja: false, entregaEntregador: false
+      entregaLoja: false, entregaEntregador: false,
+      devolucaoLoja: false, devolucaoEntregador: false,
+      pagamentoEntregador: false
     },
     criadoEm: serverTimestamp(), atualizadoEm: serverTimestamp()
   });
@@ -131,26 +135,66 @@ export async function confirmarEtapa(deliveryId, papel, etapa, userId) {
     const ehEntregador = papel === "entregador" && dados.courierId === userId;
     if (!ehLoja && !ehEntregador) throw new Error("NAO_PERMITIDO");
     if (STATUS_FINAIS.includes(dados.status)) throw new Error("NAO_PERMITIDO");
-    const campo = etapa === "retirada"
-      ? (ehLoja ? "retiradaLoja" : "retiradaEntregador")
-      : (ehLoja ? "entregaLoja" : "entregaEntregador");
-    const confirmacoes = { ...dados.confirmacoes, [campo]: true };
+    if (!["retirada", "entrega", "devolucao"].includes(etapa)) throw new Error("NAO_PERMITIDO");
+    const statusPorEtapa = { retirada:"aceito", entrega:"retirado", devolucao:"devolucao" };
+    if (dados.status !== statusPorEtapa[etapa]) throw new Error("NAO_PERMITIDO");
+    const campos = {
+      retirada: ehLoja ? "retiradaLoja" : "retiradaEntregador",
+      entrega: ehLoja ? "entregaLoja" : "entregaEntregador",
+      devolucao: ehLoja ? "devolucaoLoja" : "devolucaoEntregador"
+    };
+    const campo = campos[etapa];
+    const confirmacoes = {
+      retiradaLoja: false, retiradaEntregador: false,
+      entregaLoja: false, entregaEntregador: false,
+      devolucaoLoja: false, devolucaoEntregador: false,
+      pagamentoEntregador: false,
+      ...dados.confirmacoes,
+      [campo]: true
+    };
+    if (etapa === "retirada" && ehLoja) confirmacoes.pagamentoEntregador = true;
     let status = dados.status;
-    if (confirmacoes.retiradaLoja && confirmacoes.retiradaEntregador) status = "retirado";
-    if (confirmacoes.entregaLoja && confirmacoes.entregaEntregador) status = "entregue";
+    if (dados.status === "devolucao") {
+      if (confirmacoes.devolucaoLoja && confirmacoes.devolucaoEntregador) status = "devolvido";
+    } else {
+      if (confirmacoes.retiradaLoja && confirmacoes.retiradaEntregador && confirmacoes.pagamentoEntregador) status = "retirado";
+      if (confirmacoes.entregaLoja && confirmacoes.entregaEntregador) status = "entregue";
+    }
     transaction.update(deliveryRef, {
       confirmacoes, status, atualizadoEm: serverTimestamp(),
       ...(status === "retirado" ? { retiradoEm: serverTimestamp() } : {}),
-      ...(status === "entregue" ? { entregueEm: serverTimestamp() } : {})
+      ...(status === "entregue" ? { entregueEm: serverTimestamp() } : {}),
+      ...(status === "devolvido" ? { devolvidoEm: serverTimestamp() } : {})
     });
-    if (status === "entregue" && dados.status !== "entregue" && dados.courierId) {
+    if (["entregue", "devolvido"].includes(status) && status !== dados.status && dados.courierId) {
       transaction.update(doc(db, "couriers", dados.courierId), {
-        entregasAtivas: increment(-1), "estatisticas.entregasRealizadas": increment(1)
+        entregasAtivas: increment(-1),
+        "estatisticas.entregasRealizadas": increment(1),
+        ...(status === "devolvido" ? { "estatisticas.devolucoes": increment(1) } : {})
       });
     }
   });
 }
 
+export async function iniciarDevolucao(deliveryId, courierId, motivo, observacoes = "") {
+  const motivosValidos = ["cliente_recusou", "cliente_ausente", "endereco_incorreto", "outro"];
+  if (!motivosValidos.includes(motivo)) throw new Error("MOTIVO_INVALIDO");
+  const ref = doc(db, "deliveries", deliveryId);
+  await runTransaction(db, async transaction => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists()) throw new Error("CORRIDA_INDISPONIVEL");
+    const dados = snap.data();
+    if (dados.courierId !== courierId || dados.status !== "retirado") throw new Error("NAO_PERMITIDO");
+    transaction.update(ref, {
+      status: "devolucao",
+      motivoDevolucao: motivo,
+      observacaoDevolucao: String(observacoes || "").trim().slice(0, 300),
+      devolucaoIniciadaEm: serverTimestamp(),
+      atualizadoEm: serverTimestamp()
+    });
+  });
+}
+
 export function nomeStatus(status) {
-  return ({ disponivel:"Disponível", aceito:"A caminho da retirada", retirado:"Em rota", entregue:"Entregue", cancelado:"Cancelada" })[status] || status;
+  return ({ disponivel:"Disponível", aceito:"A caminho da retirada", retirado:"Em rota", devolucao:"Retornando ao estabelecimento", devolvido:"Produto devolvido", entregue:"Entregue", cancelado:"Cancelada" })[status] || status;
 }

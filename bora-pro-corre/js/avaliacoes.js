@@ -17,7 +17,7 @@ export async function avaliar({ deliveryId, autorId, autorNome, autorPapel, alvo
       transaction.get(ratingRef), transaction.get(deliveryRef), transaction.get(alvoRef)
     ]);
     if (ratingSnap.exists()) throw new Error("JA_AVALIADO");
-    if (!deliverySnap.exists() || deliverySnap.data().status !== "entregue") throw new Error("ENTREGA_NAO_FINALIZADA");
+    if (!deliverySnap.exists() || !["entregue", "devolvido"].includes(deliverySnap.data().status)) throw new Error("ENTREGA_NAO_FINALIZADA");
     const entrega = deliverySnap.data();
     if (![entrega.storeId, entrega.courierId].includes(autorId) || ![entrega.storeId, entrega.courierId].includes(alvoId)) throw new Error("NAO_PERMITIDO");
     const atual = alvoSnap.data().avaliacao || { media: 0, total: 0 };

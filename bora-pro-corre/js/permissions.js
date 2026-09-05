@@ -40,7 +40,10 @@ export function obterSessao() {
       try {
         const userSnap = await getDoc(doc(db, "users", user.uid));
         if (!userSnap.exists()) {
-          resolve({ user, role: null, dados: null, isSuperAdmin: false });
+          // Um perfil excluído pela administração não mantém sessão aberta,
+          // mesmo que a credencial ainda exista no Firebase Authentication.
+          await signOut(auth);
+          resolve({ user: null, role: null, dados: null, isSuperAdmin: false });
           return;
         }
         const dados = userSnap.data();
