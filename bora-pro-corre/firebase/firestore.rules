@@ -2,228 +2,80 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // =====================================================
-    // FUNÇÕES AUXILIARES
-    // =====================================================
-
-    function isSignedIn() {
-      return request.auth != null;
+    function signed() { return request.auth != null; }
+    function owner(uid) { return signed() && request.auth.uid == uid; }
+    function superAdmin() { return signed() && request.auth.token.email == 'mayconbrown083@gmail.com' && request.auth.token.email_verified == true; }
+    function admin() { return superAdmin() || (signed() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true); }
+    function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function activeSubscription(role) {
+      return role == 'loja'
+        ? get(/databases/$(database)/documents/stores/$(request.auth.uid)).data.assinatura.status in ['ativo', 'trial']
+        : get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.assinatura.status in ['ativo', 'trial'];
+    }
+    function canOperate() {
+      return admin() || (signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && userData().aprovado == true && userData().bloqueado == false && activeSubscription(userData().role));
+    }
+    function involved(d) { return signed() && (d.storeId == request.auth.uid || d.courierId == request.auth.uid); }
+    function immutableDeliveryFields() {
+      return request.resource.data.storeId == resource.data.storeId && request.resource.data.categoriaProduto == resource.data.categoriaProduto && request.resource.data.descricaoProduto == resource.data.descricaoProduto && request.resource.data.retirada == resource.data.retirada && request.resource.data.destino == resource.data.destino && request.resource.data.destinatario == resource.data.destinatario;
+    }
+    function flagsNeverRegress() {
+      return (!resource.data.confirmacoes.retiradaLoja || request.resource.data.confirmacoes.retiradaLoja) && (!resource.data.confirmacoes.retiradaEntregador || request.resource.data.confirmacoes.retiradaEntregador) && (!resource.data.confirmacoes.entregaLoja || request.resource.data.confirmacoes.entregaLoja) && (!resource.data.confirmacoes.entregaEntregador || request.resource.data.confirmacoes.entregaEntregador);
+    }
+    function onlyOwnConfirmation() {
+      return (resource.data.storeId == request.auth.uid && request.resource.data.confirmacoes.retiradaEntregador == resource.data.confirmacoes.retiradaEntregador && request.resource.data.confirmacoes.entregaEntregador == resource.data.confirmacoes.entregaEntregador) || (resource.data.courierId == request.auth.uid && request.resource.data.confirmacoes.retiradaLoja == resource.data.confirmacoes.retiradaLoja && request.resource.data.confirmacoes.entregaLoja == resource.data.confirmacoes.entregaLoja && (request.resource.data.confirmacoes.entregaEntregador == resource.data.confirmacoes.entregaEntregador || resource.data.confirmacoes.entregaLoja == true));
+    }
+    function validProgressStatus() {
+      return request.resource.data.confirmacoes.entregaLoja && request.resource.data.confirmacoes.entregaEntregador
+        ? request.resource.data.status == 'entregue'
+        : (request.resource.data.confirmacoes.retiradaLoja && request.resource.data.confirmacoes.retiradaEntregador ? request.resource.data.status == 'retirado' : request.resource.data.status == resource.data.status);
     }
 
-    // O ÚNICO super-admin "de fábrica" da plataforma.
-    // O e-mail vem do token do Firebase Auth (não pode ser
-    // falsificado pelo cliente — é assinado pelo Google).
-    // Esse é o gatilho raiz de toda a hierarquia de admin.
-    function isSuperAdmin() {
-      return isSignedIn() &&
-        request.auth.token.email == 'mayconbrown083@gmail.com' &&
-        request.auth.token.email_verified == true;
-    }
+    match /admins/{uid} { allow read: if admin(); allow write: if superAdmin(); }
 
-    // Qualquer admin "comum" precisa ter um documento
-    // correspondente na coleção /admins/{uid}, criado
-    // exclusivamente pelo super-admin (ver regras da coleção admins).
-    function isAdmin() {
-      return isSuperAdmin() ||
-        (isSignedIn() &&
-         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true);
-    }
-
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
-    }
-
-    // =====================================================
-    // COLEÇÃO: admins
-    // Documento ID = UID do usuário promovido a admin.
-    // Só o super-admin pode criar, editar ou remover.
-    // =====================================================
-    match /admins/{uid} {
-      allow read: if isAdmin();
-      allow write: if isSuperAdmin(); // create, update, delete — só o dono do e-mail raiz
-    }
-
-    // =====================================================
-    // COLEÇÃO: users (perfil geral / role / status)
-    // O campo "role" NUNCA pode ser alterado pelo próprio usuário.
-    // =====================================================
     match /users/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-
-      // Criação: o usuário só pode criar o próprio documento,
-      // e obrigatoriamente com role = "loja" ou "entregador".
-      // "admin" nunca pode ser setado pelo cliente na criação.
-      allow create: if isOwner(uid) &&
-        request.resource.data.role in ['loja', 'entregador'] &&
-        request.resource.data.uid == uid;
-
-      // Atualização: o dono pode editar dados do próprio perfil,
-      // mas NUNCA os campos sensíveis (role, aprovado, bloqueado, assinatura).
-      allow update: if (
-          isOwner(uid) &&
-          request.resource.data.role == resource.data.role &&
-          request.resource.data.aprovado == resource.data.aprovado &&
-          request.resource.data.bloqueado == resource.data.bloqueado &&
-          request.resource.data.get('assinatura', null) == resource.data.get('assinatura', null)
-        ) || isAdmin();
-
-      allow delete: if isSuperAdmin();
+      allow read: if owner(uid) || admin();
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.role in ['loja','entregador'] && request.resource.data.aprovado == false && request.resource.data.bloqueado == false;
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','consentimento']));
+      allow delete: if superAdmin();
     }
 
-    // =====================================================
-    // COLEÇÃO: stores (lojas)
-    // =====================================================
-    match /stores/{storeId} {
-      allow read: if isSignedIn(); // pedidos precisam mostrar nome/bairro da loja
-      allow create: if isOwner(storeId) &&
-        request.resource.data.status == 'pendente';
-      // status/assinatura/verificacao só o admin altera
-      // (verificacao é preenchida manualmente pelo admin após contato via WhatsApp)
-      allow update: if (
-          isOwner(storeId) &&
-          request.resource.data.status == resource.data.status &&
-          request.resource.data.get('assinatura', null) == resource.data.get('assinatura', null) &&
-          request.resource.data.get('verificacao', null) == resource.data.get('verificacao', null)
-        ) || isAdmin();
-      allow delete: if isAdmin();
+    match /stores/{uid} {
+      allow read: if owner(uid) || admin() || (canOperate() && userData().role == 'entregador' && resource.data.status == 'aprovado');
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pendente' && request.resource.data.assinatura.status == 'pendente';
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nomeComercial','responsavel','telefone','whatsapp','endereco','horarioFuncionamento'])) || (canOperate() && userData().role == 'entregador' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['avaliacao']) && request.resource.data.avaliacao.total == resource.data.avaliacao.total + 1 && request.resource.data.avaliacao.media >= 1 && request.resource.data.avaliacao.media <= 5);
+      allow delete: if admin();
     }
 
-    // =====================================================
-    // COLEÇÃO: couriers (entregadores)
-    // =====================================================
-    match /couriers/{courierId} {
-      allow read: if isOwner(courierId) || isAdmin() ||
-        (isSignedIn() && resource.data.status == 'aprovado'); // lojas podem ver quem aceitou
-      allow create: if isOwner(courierId) &&
-        request.resource.data.status == 'pendente';
-      allow update: if (
-          isOwner(courierId) &&
-          request.resource.data.status == resource.data.status &&
-          request.resource.data.get('assinatura', null) == resource.data.get('assinatura', null) &&
-          request.resource.data.get('entregasAtivas', 0) == resource.data.get('entregasAtivas', 0) &&
-          request.resource.data.get('verificacao', null) == resource.data.get('verificacao', null)
-        ) || isAdmin();
-      allow delete: if isAdmin();
+    match /couriers/{uid} {
+      allow read: if owner(uid) || admin() || (canOperate() && resource.data.status == 'aprovado');
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pendente' && request.resource.data.assinatura.status == 'pendente';
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nomeCompleto','telefone','whatsapp','endereco','veiculo','online'])) || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['entregasAtivas']) && request.resource.data.entregasAtivas == resource.data.entregasAtivas + 1 && request.resource.data.entregasAtivas <= 2) || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['entregasAtivas','estatisticas']) && request.resource.data.entregasAtivas == resource.data.entregasAtivas - 1 && request.resource.data.entregasAtivas >= 0 && request.resource.data.estatisticas.entregasRealizadas == resource.data.estatisticas.entregasRealizadas + 1) || (canOperate() && userData().role == 'loja' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['avaliacao']) && request.resource.data.avaliacao.total == resource.data.avaliacao.total + 1 && request.resource.data.avaliacao.media >= 1 && request.resource.data.avaliacao.media <= 5);
+      allow delete: if admin();
     }
 
-    // =====================================================
-    // COLEÇÃO: deliveries (corridas/pedidos)
-    // Regra crítica: aceite deve ser transação atômica,
-    // feita pelo client via runTransaction(), e a regra
-    // só permite a transição se o pedido ainda estiver
-    // "disponivel" e o entregador tiver < 2 entregas ativas.
-    // =====================================================
     match /deliveries/{deliveryId} {
-      allow read: if isSignedIn();
-
-      allow create: if isSignedIn() &&
-        request.resource.data.storeId == request.auth.uid &&
-        request.resource.data.status == 'disponivel';
-
-      // ACEITE DA CORRIDA (a regra mais importante do projeto)
-      allow update: if isSignedIn() && (
-        // Caso 1: loja edita valor/observações enquanto ainda disponível
-        (
-          resource.data.storeId == request.auth.uid &&
-          resource.data.status == 'disponivel' &&
-          request.resource.data.status == 'disponivel'
-        )
-        ||
-        // Caso 2: entregador aceita a corrida
-        (
-          resource.data.status == 'disponivel' &&
-          request.resource.data.status == 'aceito' &&
-          request.resource.data.courierId == request.auth.uid &&
-          exists(/databases/$(database)/documents/couriers/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.status == 'aprovado' &&
-          get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas < 2
-        )
-        ||
-        // Caso 3: confirmações de retirada/entrega pelo dono da corrida
-        (
-          (resource.data.courierId == request.auth.uid || resource.data.storeId == request.auth.uid) &&
-          resource.data.status != 'disponivel'
-        )
-        || isAdmin()
-      );
-
-      allow delete: if isAdmin();
+      allow read: if admin() || involved(resource.data) || (canOperate() && userData().role == 'entregador' && resource.data.status == 'disponivel');
+      allow create: if canOperate() && userData().role == 'loja' && request.resource.data.storeId == request.auth.uid && request.resource.data.status == 'disponivel' && request.resource.data.valor > 0 && request.resource.data.categoriaProduto is string && request.resource.data.descricaoProduto is string;
+      allow update: if admin() ||
+        (canOperate() && resource.data.storeId == request.auth.uid && resource.data.status == 'disponivel' && request.resource.data.status == 'disponivel' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['valor','observacoes','atualizadoEm']) && request.resource.data.valor > 0) ||
+        (canOperate() && resource.data.storeId == request.auth.uid && resource.data.status == 'disponivel' && request.resource.data.status == 'cancelado' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','canceladoEm','atualizadoEm'])) ||
+        (canOperate() && userData().role == 'entregador' && resource.data.status == 'disponivel' && request.resource.data.status == 'aceito' && request.resource.data.courierId == request.auth.uid && immutableDeliveryFields() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','courierId','courierNome','courierAvaliacao','aceitoEm','atualizadoEm']) && getAfter(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas == get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas + 1 && getAfter(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas <= 2) ||
+        (canOperate() && involved(resource.data) && resource.data.status in ['aceito','retirado'] && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmacoes','status','atualizadoEm','retiradoEm','entregueEm']) && immutableDeliveryFields() && flagsNeverRegress() && onlyOwnConfirmation() && validProgressStatus());
+      allow delete: if admin();
     }
 
-    // =====================================================
-    // COLEÇÃO: delivery_history (auditoria por pedido)
-    // Somente leitura pelas partes envolvidas; escrita só
-    // via lógica já validada acima (idealmente Cloud Function).
-    // =====================================================
-    match /delivery_history/{historyId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if false; // histórico é imutável
-    }
-
-    // =====================================================
-    // COLEÇÃO: ratings
-    // =====================================================
     match /ratings/{ratingId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() &&
-        request.resource.data.autorId == request.auth.uid;
-      allow update, delete: if isAdmin();
+      allow read: if canOperate();
+      allow create: if canOperate() && request.resource.data.autorId == request.auth.uid && request.resource.data.alvoId != request.auth.uid && request.resource.data.nota >= 1 && request.resource.data.nota <= 5 && get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.status == 'entregue' && (get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.storeId == request.auth.uid || get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.courierId == request.auth.uid);
+      allow update, delete: if admin();
     }
 
-    // Não há coleção "documents" — este projeto não usa Firebase Storage.
-    // Documento pessoal, foto do veículo etc. são conferidos manualmente
-    // pelo admin via WhatsApp e o resultado fica anotado em texto no
-    // campo "verificacao" dentro de stores/{uid} e couriers/{uid} acima.
-
-    // =====================================================
-    // COLEÇÃO: subscriptions / payments
-    // Nunca confiar em status enviado pelo cliente.
-    // Idealmente só Cloud Functions (webhook da Cacto) escreve aqui.
-    // =====================================================
-    match /subscriptions/{uid} {
-      allow read: if isOwner(uid) || isAdmin();
-      allow write: if isAdmin(); // ou removido totalmente se usar Cloud Function
-    }
-
-    match /payments/{paymentId} {
-      allow read: if isAdmin() ||
-        (isSignedIn() && resource.data.uid == request.auth.uid);
-      allow write: if isAdmin(); // idealmente só Cloud Function (webhook)
-    }
-
-    // =====================================================
-    // COLEÇÃO: audit_logs
-    // =====================================================
-    match /audit_logs/{logId} {
-      allow read: if isAdmin();
-      allow create: if isSignedIn();
-      allow update, delete: if false;
-    }
-
-    // =====================================================
-    // COLEÇÃO: support_tickets
-    // =====================================================
-    match /support_tickets/{ticketId} {
-      allow read: if isAdmin() ||
-        (isSignedIn() && resource.data.uid == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow update: if isAdmin();
-    }
-
-    // =====================================================
-    // COLEÇÃO: settings (config geral da plataforma)
-    // =====================================================
-    match /settings/{settingId} {
-      allow read: if isSignedIn();
-      allow write: if isSuperAdmin();
-    }
-
-    // Bloqueia qualquer coleção não prevista explicitamente
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /subscriptions/{uid} { allow read: if owner(uid) || admin(); allow write: if admin(); }
+    match /payments/{id} { allow read: if admin() || (signed() && resource.data.uid == request.auth.uid); allow write: if admin(); }
+    match /support_tickets/{id} { allow read: if admin() || (signed() && resource.data.uid == request.auth.uid); allow create: if signed() && request.resource.data.uid == request.auth.uid; allow update: if admin(); }
+    match /audit_logs/{id} { allow read: if admin(); allow create: if signed() && request.resource.data.actorId == request.auth.uid; allow update, delete: if false; }
+    match /settings/{id} { allow read: if signed(); allow write: if superAdmin(); }
+    match /{document=**} { allow read, write: if false; }
   }
 }

@@ -5,20 +5,34 @@
 // cacheados aqui — eles sempre vêm em tempo real da rede.
 // =====================================================
 
-const CACHE_NOME = "bpc-shell-v1";
+const CACHE_NOME = "bpc-shell-v2";
 
 const ARQUIVOS_SHELL = [
-  "/bora-pro-corre/index.html",
-  "/bora-pro-corre/login.html",
-  "/bora-pro-corre/cadastro-loja.html",
-  "/bora-pro-corre/cadastro-entregador.html",
-  "/bora-pro-corre/manifest.json",
-  "/bora-pro-corre/css/style.css",
-  "/bora-pro-corre/css/responsive.css",
-  "/bora-pro-corre/js/firebase-config.js",
-  "/bora-pro-corre/js/auth.js",
-  "/bora-pro-corre/js/permissions.js",
-  "/bora-pro-corre/js/utils.js"
+  "/index.html",
+  "/login.html",
+  "/cadastro-loja.html",
+  "/cadastro-entregador.html",
+  "/loja/dashboard.html",
+  "/entregador/dashboard.html",
+  "/admin/dashboard.html",
+  "/termos.html",
+  "/privacidade.html",
+  "/suporte.html",
+  "/manifest.json",
+  "/css/style.css",
+  "/css/responsive.css",
+  "/css/dashboard.css",
+  "/js/firebase-config.js",
+  "/js/auth.js",
+  "/js/permissions.js",
+  "/js/utils.js",
+  "/js/pedidos.js",
+  "/js/avaliacoes.js",
+  "/js/dashboard-ui.js",
+  "/js/loja.js",
+  "/js/entregador.js",
+  "/js/admin.js",
+  "/icons/icon.svg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -67,8 +81,9 @@ self.addEventListener("fetch", (event) => {
             caches.open(CACHE_NOME).then((cache) => cache.put(event.request, clone));
             return respostaRede;
           })
-          .catch(() => caches.match("/bora-pro-corre/index.html"))
+          .catch(() => caches.match("/index.html"))
       );
     })
   );
 });
+

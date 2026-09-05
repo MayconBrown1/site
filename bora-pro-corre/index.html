@@ -4,17 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BORA PRO CORRE — Conectando quem precisa entregar com quem tá no corre</title>
-<meta name="description" content="Plataforma que conecta lojas e entregadores em Parnamirim/RN. A loja publica a corrida, o entregador escolhe se aceita. Simples, rápido e justo.">
+<meta name="description" content="Plataforma que conecta estabelecimentos e entregadores. O negócio publica o produto, a rota e o valor; o entregador escolhe se aceita.">
 <meta name="theme-color" content="#0F1115">
-<link rel="manifest" href="/bora-pro-corre/manifest.json">
-<link rel="icon" href="/bora-pro-corre/icons/icon-192.png">
-<link rel="apple-touch-icon" href="/bora-pro-corre/icons/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/bora-pro-corre/css/style.css">
-<link rel="stylesheet" href="/bora-pro-corre/css/responsive.css">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/responsive.css">
 
 <script>
   tailwind.config = {
@@ -51,7 +50,7 @@
       <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
       <span class="font-display text-sm tracking-tight">BORA PRO CORRE</span>
     </div>
-    <a href="/bora-pro-corre/login.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-borda hover:border-mare transition-colors">
+    <a href="/login.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-borda hover:border-mare transition-colors">
       Entrar
     </a>
   </div>
@@ -69,14 +68,14 @@
       quem <span class="text-rota">tá no corre.</span>
     </h1>
     <p class="text-[#9AA1AC] text-lg mb-8 max-w-md">
-      A loja publica a corrida e diz quanto paga. O entregador que quiser, cai na rota.
+      Seu negócio publica a corrida e diz quanto paga. O entregador que quiser, cai na rota.
       Sem intermediário complicando o que já era simples.
     </p>
     <div class="flex flex-wrap gap-3">
-      <a href="/bora-pro-corre/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">
-        🏪 Sou Loja
+      <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">
+        🏪 Sou Estabelecimento
       </a>
-      <a href="/bora-pro-corre/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">
+      <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">
         🛵 Sou Entregador
       </a>
     </div>
@@ -90,8 +89,8 @@
     </div>
     <div class="space-y-2 text-sm mb-4">
       <div class="flex justify-between">
-        <span class="text-[#9AA1AC]">Loja</span>
-        <span class="font-medium">Hamburgueria X</span>
+        <span class="text-[#9AA1AC]">Estabelecimento</span>
+        <span class="font-medium">Gráfica Express</span>
       </div>
       <div class="flex justify-between">
         <span class="text-[#9AA1AC]">Retirada</span>
@@ -119,8 +118,8 @@
     <div class="relative grid sm:grid-cols-3 gap-8">
       <div class="text-center">
         <div class="w-12 h-12 rounded-xl bg-superficie border border-borda flex items-center justify-center text-xl mx-auto mb-4">🏪</div>
-        <h3 class="font-semibold mb-2">A loja publica</h3>
-        <p class="text-sm text-[#9AA1AC]">Endereço de retirada, destino e quanto está disposta a pagar pela entrega.</p>
+        <h3 class="font-semibold mb-2">O negócio publica</h3>
+        <p class="text-sm text-[#9AA1AC]">Informa o produto, retirada, destino e quanto está disposto a pagar.</p>
       </div>
       <div class="text-center">
         <div class="w-12 h-12 rounded-xl bg-superficie border border-borda flex items-center justify-center text-xl mx-auto mb-4">📡</div>
@@ -139,7 +138,7 @@
 <!-- ============ BENEFÍCIOS ============ -->
 <section class="max-w-6xl mx-auto px-5 py-16 grid md:grid-cols-2 gap-8">
   <div class="bg-superficie border border-borda rounded-2xl p-6">
-    <h3 class="font-display text-lg mb-4 text-mare">Para lojas</h3>
+    <h3 class="font-display text-lg mb-4 text-mare">Para estabelecimentos</h3>
     <ul class="space-y-3 text-sm text-[#D9D6CE]">
       <li>✔️ Você define quanto quer pagar por cada entrega</li>
       <li>✔️ Sem taxa por corrida — só a mensalidade fixa</li>
@@ -152,7 +151,7 @@
     <ul class="space-y-3 text-sm text-[#D9D6CE]">
       <li>✔️ Escolha as corridas que quiser aceitar</li>
       <li>✔️ Fique online só quando quiser trabalhar</li>
-      <li>✔️ Receba direto da loja, sem repasse escondido</li>
+      <li>✔️ Receba direto do estabelecimento, sem repasse escondido</li>
       <li>✔️ Avaliações constroem sua reputação</li>
     </ul>
   </div>
@@ -164,7 +163,7 @@
     <div>
       <h3 class="font-display text-lg mb-3">🔒 Segurança</h3>
       <p class="text-sm text-[#9AA1AC] leading-relaxed">
-        Lojas e entregadores passam por aprovação manual antes de operar.
+        Estabelecimentos e entregadores passam por aprovação manual antes de operar.
         Documentos pessoais nunca ficam públicos — só a administração
         autorizada tem acesso, e apenas para fins de verificação.
       </p>
@@ -172,7 +171,7 @@
     <div>
       <h3 class="font-display text-lg mb-3">💳 Mensalidade</h3>
       <p class="text-sm text-[#9AA1AC] leading-relaxed">
-        R$ 20/mês para lojas e R$ 20/mês para entregadores. Sem comissão
+        R$ 29,99/mês para estabelecimentos e entregadores. Sem comissão
         sobre cada corrida — o valor combinado vai inteiro para quem entrega.
       </p>
     </div>
@@ -183,8 +182,8 @@
 <section class="max-w-6xl mx-auto px-5 py-16 text-center">
   <h2 class="font-display text-2xl sm:text-3xl mb-6">Bora pro corre?</h2>
   <div class="flex flex-wrap justify-center gap-3">
-    <a href="/bora-pro-corre/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">Cadastrar minha loja</a>
-    <a href="/bora-pro-corre/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">Cadastrar como entregador</a>
+    <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">Cadastrar meu estabelecimento</a>
+    <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">Cadastrar como entregador</a>
   </div>
 </section>
 
@@ -193,9 +192,9 @@
   <div class="max-w-6xl mx-auto px-5 py-10 flex flex-wrap gap-x-8 gap-y-3 justify-between text-sm text-[#9AA1AC]">
     <span>© <span id="ano"></span> Bora Pro Corre — Parnamirim/RN</span>
     <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <a href="/bora-pro-corre/termos.html" class="hover:text-mare transition-colors">Termos de Uso</a>
-      <a href="/bora-pro-corre/privacidade.html" class="hover:text-mare transition-colors">Política de Privacidade</a>
-      <a href="/bora-pro-corre/suporte.html" class="hover:text-mare transition-colors">Suporte</a>
+      <a href="/termos.html" class="hover:text-mare transition-colors">Termos de Uso</a>
+      <a href="/privacidade.html" class="hover:text-mare transition-colors">Política de Privacidade</a>
+      <a href="/suporte.html" class="hover:text-mare transition-colors">Suporte</a>
     </div>
   </div>
 </footer>
@@ -223,9 +222,10 @@
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/bora-pro-corre/service-worker.js').catch(console.error);
+      navigator.serviceWorker.register('/service-worker.js').catch(console.error);
     });
   }
 </script>
 </body>
 </html>
+

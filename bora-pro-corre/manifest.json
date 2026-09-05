@@ -2,17 +2,13 @@
   "name": "Bora Pro Corre",
   "short_name": "Bora Pro Corre",
   "description": "Conectando quem precisa entregar com quem tá no corre. Parnamirim/RN.",
-  "start_url": "/bora-pro-corre/index.html",
-  "scope": "/bora-pro-corre/",
+  "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0F1115",
   "theme_color": "#0F1115",
   "lang": "pt-BR",
-  "icons": [
-    { "src": "/bora-pro-corre/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/bora-pro-corre/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/bora-pro-corre/icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/bora-pro-corre/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }
+

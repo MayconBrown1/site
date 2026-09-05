@@ -11,8 +11,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   doc,
-  setDoc,
-  serverTimestamp
+  serverTimestamp,
+  writeBatch
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const VERSAO_TERMOS = "1.0";
@@ -30,7 +30,8 @@ export async function cadastrarLoja(formData) {
 
   const agora = serverTimestamp();
 
-  await setDoc(doc(db, "users", uid), {
+  const batch = writeBatch(db);
+  batch.set(doc(db, "users", uid), {
     uid,
     role: "loja",
     email: formData.email,
@@ -44,9 +45,10 @@ export async function cadastrarLoja(formData) {
     }
   });
 
-  await setDoc(doc(db, "stores", uid), {
+  batch.set(doc(db, "stores", uid), {
     uid,
     nomeComercial: formData.nomeComercial,
+    tipoEstabelecimento: formData.tipoEstabelecimento || "outro",
     razaoSocial: formData.razaoSocial || "",
     cnpjCpf: formData.cnpjCpf,
     responsavel: formData.responsavel,
@@ -71,7 +73,7 @@ export async function cadastrarLoja(formData) {
       notasAdmin: ""
     },
     assinatura: {
-      status: "trial",
+      status: "pendente",
       inicioEm: agora,
       proximaCobranca: null,
       ultimoPagamento: null
@@ -80,6 +82,7 @@ export async function cadastrarLoja(formData) {
     cidadeId: CIDADE_MVP.toLowerCase(),
     criadoEm: agora
   });
+  await batch.commit();
 
   return uid;
 }
@@ -96,7 +99,8 @@ export async function cadastrarEntregador(formData) {
 
   const agora = serverTimestamp();
 
-  await setDoc(doc(db, "users", uid), {
+  const batch = writeBatch(db);
+  batch.set(doc(db, "users", uid), {
     uid,
     role: "entregador",
     email: formData.email,
@@ -110,7 +114,7 @@ export async function cadastrarEntregador(formData) {
     }
   });
 
-  await setDoc(doc(db, "couriers", uid), {
+  batch.set(doc(db, "couriers", uid), {
     uid,
     nomeCompleto: formData.nomeCompleto,
     cpf: formData.cpf,
@@ -144,7 +148,7 @@ export async function cadastrarEntregador(formData) {
     online: false,
     entregasAtivas: 0,
     assinatura: {
-      status: "trial",
+      status: "pendente",
       inicioEm: agora,
       proximaCobranca: null,
       ultimoPagamento: null
@@ -154,6 +158,7 @@ export async function cadastrarEntregador(formData) {
     cidadeId: CIDADE_MVP.toLowerCase(),
     criadoEm: agora
   });
+  await batch.commit();
 
   return uid;
 }
