@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function owner(uid) { return signed() && request.auth.uid == uid; }
+    // Somente este e-mail autenticado pode administrar a plataforma.
+    // Não existem administradores promovidos por documento do Firestore.
+    function superAdmin() { return signed() && request.auth.token.email == 'mayconbrown083@gmail.com'; }
+    function admin() { return superAdmin(); }
+    function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function subscriptionIsCurrent(profile) {
+      return (profile.assinatura.status == 'trial' && (profile.assinatura.proximaCobranca == null || profile.assinatura.proximaCobranca > request.time)) ||
+        (profile.assinatura.status == 'ativo' && profile.assinatura.proximaCobranca > request.time);
+    }
+    function activeSubscription(role) {
+      return role == 'loja'
+        ? subscriptionIsCurrent(get(/databases/$(database)/documents/stores/$(request.auth.uid)).data)
+        : subscriptionIsCurrent(get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data);
+    }
+    function canOperate() {
+      return admin() || (signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && userData().aprovado == true && userData().bloqueado == false && activeSubscription(userData().role));
+    }
+    function involved(d) { return signed() && (d.storeId == request.auth.uid || d.courierId == request.auth.uid); }
+    function immutableDeliveryFields() {
+      return request.resource.data.storeId == resource.data.storeId && request.resource.data.categoriaProduto == resource.data.categoriaProduto && request.resource.data.descricaoProduto == resource.data.descricaoProduto && request.resource.data.retirada == resource.data.retirada && request.resource.data.destino == resource.data.destino && request.resource.data.destinatario == resource.data.destinatario;
+    }
+    function flagsNeverRegress() {
+      return (!resource.data.confirmacoes.retiradaLoja || request.resource.data.confirmacoes.retiradaLoja) && (!resource.data.confirmacoes.retiradaEntregador || request.resource.data.confirmacoes.retiradaEntregador) && (!resource.data.confirmacoes.entregaLoja || request.resource.data.confirmacoes.entregaLoja) && (!resource.data.confirmacoes.entregaEntregador || request.resource.data.confirmacoes.entregaEntregador);
+    }
+    function onlyOwnConfirmation() {
+      return (resource.data.storeId == request.auth.uid && request.resource.data.confirmacoes.retiradaEntregador == resource.data.confirmacoes.retiradaEntregador && request.resource.data.confirmacoes.entregaEntregador == resource.data.confirmacoes.entregaEntregador) || (resource.data.courierId == request.auth.uid && request.resource.data.confirmacoes.retiradaLoja == resource.data.confirmacoes.retiradaLoja && request.resource.data.confirmacoes.entregaLoja == resource.data.confirmacoes.entregaLoja && (request.resource.data.confirmacoes.entregaEntregador == resource.data.confirmacoes.entregaEntregador || resource.data.confirmacoes.entregaLoja == true));
+    }
+    function validProgressStatus() {
+      return request.resource.data.confirmacoes.entregaLoja && request.resource.data.confirmacoes.entregaEntregador
+        ? request.resource.data.status == 'entregue'
+        : (request.resource.data.confirmacoes.retiradaLoja && request.resource.data.confirmacoes.retiradaEntregador ? request.resource.data.status == 'retirado' : request.resource.data.status == resource.data.status);
+    }
+
+    match /users/{uid} {
+      allow read: if owner(uid) || admin();
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.role in ['loja','entregador'] && request.resource.data.aprovado == false && request.resource.data.bloqueado == false;
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nome','consentimento']));
+      allow delete: if superAdmin();
+    }
+
+    match /stores/{uid} {
+      allow read: if owner(uid) || admin() || (canOperate() && userData().role == 'entregador' && resource.data.status == 'aprovado');
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pendente' && request.resource.data.assinatura.status == 'pendente';
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nomeComercial','responsavel','telefone','whatsapp','endereco','horarioFuncionamento'])) || (canOperate() && userData().role == 'entregador' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['avaliacao']) && request.resource.data.avaliacao.total == resource.data.avaliacao.total + 1 && request.resource.data.avaliacao.media >= 1 && request.resource.data.avaliacao.media <= 5);
+      allow delete: if admin();
+    }
+
+    match /couriers/{uid} {
+      allow read: if owner(uid) || admin() || (canOperate() && resource.data.status == 'aprovado');
+      allow create: if owner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pendente' && request.resource.data.assinatura.status == 'pendente';
+      allow update: if admin() || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nomeCompleto','telefone','whatsapp','endereco','veiculo','online'])) || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['entregasAtivas']) && request.resource.data.entregasAtivas == resource.data.entregasAtivas + 1 && request.resource.data.entregasAtivas <= 2) || (owner(uid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['entregasAtivas','estatisticas']) && request.resource.data.entregasAtivas == resource.data.entregasAtivas - 1 && request.resource.data.entregasAtivas >= 0 && request.resource.data.estatisticas.entregasRealizadas == resource.data.estatisticas.entregasRealizadas + 1) || (canOperate() && userData().role == 'loja' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['avaliacao']) && request.resource.data.avaliacao.total == resource.data.avaliacao.total + 1 && request.resource.data.avaliacao.media >= 1 && request.resource.data.avaliacao.media <= 5);
+      allow delete: if admin();
+    }
+
+    match /deliveries/{deliveryId} {
+      allow read: if admin() || involved(resource.data) || (canOperate() && userData().role == 'entregador' && resource.data.status == 'disponivel');
+      allow create: if canOperate() && userData().role == 'loja' && request.resource.data.storeId == request.auth.uid && request.resource.data.status == 'disponivel' && request.resource.data.valor > 0 && request.resource.data.categoriaProduto is string && request.resource.data.descricaoProduto is string;
+      allow update: if admin() ||
+        (canOperate() && resource.data.storeId == request.auth.uid && resource.data.status == 'disponivel' && request.resource.data.status == 'disponivel' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['valor','observacoes','atualizadoEm']) && request.resource.data.valor > 0) ||
+        (canOperate() && resource.data.storeId == request.auth.uid && resource.data.status == 'disponivel' && request.resource.data.status == 'cancelado' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','canceladoEm','atualizadoEm'])) ||
+        (canOperate() && userData().role == 'entregador' && resource.data.status == 'disponivel' && request.resource.data.status == 'aceito' && request.resource.data.courierId == request.auth.uid && immutableDeliveryFields() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','courierId','courierNome','courierAvaliacao','aceitoEm','atualizadoEm']) && getAfter(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas == get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas + 1 && getAfter(/databases/$(database)/documents/couriers/$(request.auth.uid)).data.entregasAtivas <= 2) ||
+        (canOperate() && involved(resource.data) && resource.data.status in ['aceito','retirado'] && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['confirmacoes','status','atualizadoEm','retiradoEm','entregueEm']) && immutableDeliveryFields() && flagsNeverRegress() && onlyOwnConfirmation() && validProgressStatus());
+      allow delete: if admin();
+    }
+
+    match /ratings/{ratingId} {
+      allow read: if canOperate();
+      allow create: if canOperate() && request.resource.data.autorId == request.auth.uid && request.resource.data.alvoId != request.auth.uid && request.resource.data.nota >= 1 && request.resource.data.nota <= 5 && get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.status == 'entregue' && (get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.storeId == request.auth.uid || get(/databases/$(database)/documents/deliveries/$(request.resource.data.deliveryId)).data.courierId == request.auth.uid);
+      allow update, delete: if admin();
+    }
+
+    match /subscriptions/{uid} { allow read: if owner(uid) || admin(); allow write: if admin(); }
+    match /payments/{id} { allow read: if admin() || (signed() && resource.data.uid == request.auth.uid); allow write: if admin(); }
+    match /support_tickets/{id} { allow read: if admin() || (signed() && resource.data.uid == request.auth.uid); allow create: if signed() && request.resource.data.uid == request.auth.uid; allow update: if admin(); }
+    match /audit_logs/{id} { allow read: if admin(); allow create: if signed() && request.resource.data.actorId == request.auth.uid; allow update, delete: if false; }
+    match /settings/{id} { allow read: if signed(); allow write: if superAdmin(); }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

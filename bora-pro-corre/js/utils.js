@@ -128,12 +128,28 @@ export function monitorarConexao() {
 
 export function validarCPF(cpf) {
   const digitos = cpf.replace(/\D/g, "");
-  return digitos.length === 11;
+  if (digitos.length !== 11 || /^(\d)\1{10}$/.test(digitos)) return false;
+  const calcular = (tamanho) => {
+    let soma = 0;
+    for (let i = 0; i < tamanho; i++) soma += Number(digitos[i]) * (tamanho + 1 - i);
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+  return calcular(9) === Number(digitos[9]) && calcular(10) === Number(digitos[10]);
 }
 
 export function validarCNPJ(cnpj) {
   const digitos = cnpj.replace(/\D/g, "");
-  return digitos.length === 14;
+  if (digitos.length !== 14 || /^(\d)\1{13}$/.test(digitos)) return false;
+  const calcular = (base) => {
+    const pesos = base.length === 12 ? [5,4,3,2,9,8,7,6,5,4,3,2] : [6,5,4,3,2,9,8,7,6,5,4,3,2];
+    const soma = [...base].reduce((total, digito, i) => total + Number(digito) * pesos[i], 0);
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
+  };
+  const primeiro = calcular(digitos.slice(0, 12));
+  const segundo = calcular(`${digitos.slice(0, 12)}${primeiro}`);
+  return primeiro === Number(digitos[12]) && segundo === Number(digitos[13]);
 }
 
 export function validarTelefone(tel) {

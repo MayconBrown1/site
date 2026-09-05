@@ -8,14 +8,24 @@ export const STATUS_FINAIS = ["entregue", "cancelado"];
 
 export function assinaturaValida(perfil) {
   const status = perfil?.assinatura?.status;
-  return ["ativo", "trial"].includes(status) && perfil?.status === "aprovado";
+  if (perfil?.status !== "aprovado" || !["ativo", "trial"].includes(status)) return false;
+  const vencimento = perfil?.assinatura?.proximaCobranca;
+  if (!vencimento) return status === "trial";
+  const data = vencimento.toDate ? vencimento.toDate() : new Date(vencimento);
+  return Number.isFinite(data.getTime()) && data.getTime() > Date.now();
 }
 
 export function motivoBloqueio(perfil) {
   if (!perfil) return "Perfil não encontrado.";
   if (perfil.status === "bloqueado") return "Acesso bloqueado pela administração.";
   if (perfil.status !== "aprovado") return "Seu cadastro ainda está em análise.";
-  if (!["ativo", "trial"].includes(perfil.assinatura?.status)) return "Mensalidade pendente. Regularize para usar a plataforma.";
+  if (!assinaturaValida(perfil)) {
+    const vencimento = perfil.assinatura?.proximaCobranca;
+    const data = vencimento?.toDate ? vencimento.toDate() : vencimento ? new Date(vencimento) : null;
+    return data && Number.isFinite(data.getTime()) && data.getTime() <= Date.now()
+      ? "Mensalidade vencida. Regularize para usar a plataforma."
+      : "Mensalidade pendente. Regularize para usar a plataforma.";
+  }
   return "";
 }
 

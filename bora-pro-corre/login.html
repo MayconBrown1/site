@@ -85,6 +85,12 @@
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     erroBox.classList.add('hidden');
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     btnEntrar.disabled = true;
     btnEntrar.textContent = 'Entrando...';
 

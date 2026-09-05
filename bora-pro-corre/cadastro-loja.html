@@ -157,13 +157,17 @@
 <script type="module">
   import { cadastrarLoja } from './js/auth.js';
   import { redirecionarPorPerfil } from './js/permissions.js';
-  import { formatarTelefone, formatarCEP, mensagemErroAmigavel, monitorarConexao } from './js/utils.js';
+  import { formatarTelefone, formatarCPF, formatarCNPJ, formatarCEP, validarCPF, validarCNPJ, validarTelefone, mensagemErroAmigavel, monitorarConexao } from './js/utils.js';
 
   monitorarConexao();
 
   document.getElementById('telefone').addEventListener('input', (e) => e.target.value = formatarTelefone(e.target.value));
   document.getElementById('whatsapp').addEventListener('input', (e) => e.target.value = formatarTelefone(e.target.value));
   document.getElementById('cep').addEventListener('input', (e) => e.target.value = formatarCEP(e.target.value));
+  document.getElementById('cnpjCpf').addEventListener('input', (e) => {
+    const digitos = e.target.value.replace(/\D/g, '');
+    e.target.value = digitos.length <= 11 ? formatarCPF(digitos) : formatarCNPJ(digitos);
+  });
 
   const form = document.getElementById('form-loja');
   const btn = document.getElementById('btn-cadastrar');
@@ -173,14 +177,16 @@
     e.preventDefault();
     erroBox.classList.add('hidden');
 
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
     if (!document.getElementById('aceiteTermos').checked) {
       erroBox.textContent = 'Você precisa aceitar os Termos de Uso e a Política de Privacidade.';
       erroBox.classList.remove('hidden');
       return;
     }
-
-    btn.disabled = true;
-    btn.textContent = 'Cadastrando...';
 
     const dados = {
       nomeComercial: document.getElementById('nomeComercial').value.trim(),
@@ -200,6 +206,20 @@
       email: document.getElementById('email').value.trim(),
       senha: document.getElementById('senha').value,
     };
+
+    const documentoValido = validarCPF(dados.cnpjCpf) || validarCNPJ(dados.cnpjCpf);
+    if (!documentoValido || !validarTelefone(dados.telefone) || !validarTelefone(dados.whatsapp) || dados.cep.replace(/\D/g, '').length !== 8) {
+      erroBox.textContent = !documentoValido
+        ? 'Informe um CPF ou CNPJ válido.'
+        : (!validarTelefone(dados.telefone) || !validarTelefone(dados.whatsapp))
+          ? 'Informe um telefone e WhatsApp válidos, com DDD.'
+          : 'Informe um CEP válido com 8 números.';
+      erroBox.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
 
     try {
       await cadastrarLoja(dados);

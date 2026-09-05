@@ -7,7 +7,12 @@ import { dataCurta, escapar, iniciarShell } from "./dashboard-ui.js";
 let perfis = [], entregas = [], filtro = "todos";
 
 function todosPerfis() { return perfis.slice().sort((a,b) => (a.nome || "").localeCompare(b.nome || "")); }
-function statusAssinatura(p) { return p.assinatura?.status || "pendente"; }
+function statusAssinatura(p) {
+  const assinatura = p.assinatura || {};
+  const vencimento = assinatura.proximaCobranca?.toDate ? assinatura.proximaCobranca.toDate() : assinatura.proximaCobranca ? new Date(assinatura.proximaCobranca) : null;
+  if (["ativo","trial"].includes(assinatura.status) && vencimento && vencimento.getTime() <= Date.now()) return "vencido";
+  return assinatura.status || "pendente";
+}
 function statusClasse(status) { return ["ativo","trial","aprovado","entregue"].includes(status) ? "status-ok" : ["pendente","em_analise","disponivel","aceito","retirado"].includes(status) ? "status-warn" : "status-bad"; }
 
 function renderPerfis() {

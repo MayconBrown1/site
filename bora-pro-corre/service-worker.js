@@ -5,7 +5,7 @@
 // cacheados aqui — eles sempre vêm em tempo real da rede.
 // =====================================================
 
-const CACHE_NOME = "bpc-shell-v4";
+const CACHE_NOME = "bpc-shell-v5";
 const BASE_PATH = new URL("./", self.location.href).pathname.replace(/\/$/, "");
 
 const ARQUIVOS_SHELL = [
