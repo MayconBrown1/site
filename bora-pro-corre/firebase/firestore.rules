@@ -4,8 +4,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signed() { return request.auth != null; }
     function owner(uid) { return signed() && request.auth.uid == uid; }
-    function superAdmin() { return signed() && request.auth.token.email == 'mayconbrown083@gmail.com' && request.auth.token.email_verified == true; }
-    function admin() { return superAdmin() || (signed() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.ativo == true); }
+    // Somente este e-mail autenticado pode administrar a plataforma.
+    // Não existem administradores promovidos por documento do Firestore.
+    function superAdmin() { return signed() && request.auth.token.email == 'mayconbrown083@gmail.com'; }
+    function admin() { return superAdmin(); }
     function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function activeSubscription(role) {
       return role == 'loja'
@@ -30,8 +32,6 @@ service cloud.firestore {
         ? request.resource.data.status == 'entregue'
         : (request.resource.data.confirmacoes.retiradaLoja && request.resource.data.confirmacoes.retiradaEntregador ? request.resource.data.status == 'retirado' : request.resource.data.status == resource.data.status);
     }
-
-    match /admins/{uid} { allow read: if admin(); allow write: if superAdmin(); }
 
     match /users/{uid} {
       allow read: if owner(uid) || admin();

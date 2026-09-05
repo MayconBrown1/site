@@ -29,7 +29,7 @@ Plataforma de intermediação entre estabelecimentos e entregadores, inicialment
 1. Ative **Authentication → E-mail/senha** no projeto `bora-pro-corre`.
 2. Crie o Firestore em modo produção na região desejada.
 3. Publique `firebase/firestore.rules` e `firebase/firestore.indexes.json`.
-4. Cadastre `mayconbrown083@gmail.com` no Authentication e confirme o e-mail. Esse é o superadministrador configurado nas regras.
+4. Cadastre `mayconbrown083@gmail.com` no Authentication. Esse é o único administrador aceito pela aplicação e pelas regras.
 5. Adicione o domínio publicado em **Authentication → Settings → Authorized domains**.
 
 As fotos de documentos não são enviadas ao site. A conferência ocorre pelo atendimento e o administrador registra apenas o resultado da verificação.

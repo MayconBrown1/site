@@ -38,9 +38,9 @@ setPersistence(auth, browserLocalPersistence).catch((err) => {
   console.error("Erro ao configurar persistência de sessão:", err);
 });
 
-// E-mail do super-admin nato da plataforma.
+// Único e-mail administrador da plataforma.
 // Espelha exatamente a regra hardcoded em firebase/firestore.rules.
-// Usado só para exibições de UI — a segurança real está nas Rules.
+// A segurança real repete esta restrição nas Firestore Rules.
 export const SUPER_ADMIN_EMAIL = "mayconbrown083@gmail.com";
 
 // Cidade única do MVP — trava operacional no cadastro (item 51 do prompt mestre)

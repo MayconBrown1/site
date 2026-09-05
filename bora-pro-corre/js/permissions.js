@@ -27,20 +27,11 @@ export function obterSessao() {
         return;
       }
 
-      const isSuperAdmin = user.email === SUPER_ADMIN_EMAIL && user.emailVerified;
+      // Este e somente este e-mail autenticado controla a administração.
+      // A comparação não depende do campo emailVerified do Firebase.
+      const isSuperAdmin = user.email?.trim().toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
 
-      // Verifica se é admin promovido (coleção /admins/{uid})
-      let isAdmin = isSuperAdmin;
-      if (!isAdmin) {
-        try {
-          const adminSnap = await getDoc(doc(db, "admins", user.uid));
-          isAdmin = adminSnap.exists() && adminSnap.data().ativo === true;
-        } catch (e) {
-          isAdmin = false;
-        }
-      }
-
-      if (isAdmin) {
+      if (isSuperAdmin) {
         resolve({ user, role: "admin", dados: null, isSuperAdmin });
         return;
       }
