@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Cadastro de Entregador — BORA PRO CORRE</title>
 <meta name="theme-color" content="#0F1115">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="./css/responsive.css">
 <script>
   tailwind.config = { theme: { extend: {
     colors: { asfalto:'#0F1115', superficie:'#171A20', borda:'#262B33', rota:'#FF6B35', 'rota-escuro':'#E0551F', mare:'#00C2B8', perigo:'#FF4D4F' },
@@ -22,7 +22,7 @@
 <body class="bg-asfalto text-[#F5F3EE] antialiased min-h-screen">
 
 <header class="px-5 py-4 border-b border-borda">
-  <a href="/index.html" class="inline-flex items-center gap-2">
+  <a href="./index.html" class="inline-flex items-center gap-2">
     <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
     <span class="font-display text-sm">BORA PRO CORRE</span>
   </a>
@@ -142,7 +142,7 @@
 
     <label class="flex items-start gap-2.5 text-sm text-[#9AA1AC]">
       <input type="checkbox" id="aceiteTermos" required class="mt-1 accent-rota">
-      <span>Li e aceito os <a href="/termos.html" target="_blank" class="text-mare hover:underline">Termos de Uso</a> e a <a href="/privacidade.html" target="_blank" class="text-mare hover:underline">Política de Privacidade</a>.</span>
+      <span>Li e aceito os <a href="./termos.html" target="_blank" class="text-mare hover:underline">Termos de Uso</a> e a <a href="./privacidade.html" target="_blank" class="text-mare hover:underline">Política de Privacidade</a>.</span>
     </label>
 
     <div id="erro-cadastro" class="hidden text-sm text-perigo bg-perigo/10 border border-perigo/30 rounded-xl px-4 py-3"></div>
@@ -152,7 +152,7 @@
     </button>
 
     <p class="text-xs text-center text-[#9AA1AC]">
-      Já tem conta? <a href="/login.html" class="text-mare hover:underline">Entrar</a>
+      Já tem conta? <a href="./login.html" class="text-mare hover:underline">Entrar</a>
     </p>
   </form>
 </main>
@@ -172,9 +172,9 @@
 </style>
 
 <script type="module">
-  import { cadastrarEntregador } from '/js/auth.js';
-  import { redirecionarPorPerfil } from '/js/permissions.js';
-  import { formatarTelefone, formatarCEP, mensagemErroAmigavel, monitorarConexao } from '/js/utils.js';
+  import { cadastrarEntregador } from './js/auth.js';
+  import { redirecionarPorPerfil } from './js/permissions.js';
+  import { formatarTelefone, formatarCEP, mensagemErroAmigavel, monitorarConexao } from './js/utils.js';
 
   monitorarConexao();
 
@@ -237,4 +237,5 @@
 </script>
 </body>
 </html>
+
 

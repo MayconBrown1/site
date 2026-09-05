@@ -9,6 +9,11 @@ import { auth, db, SUPER_ADMIN_EMAIL } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
+// A raiz é calculada pelo endereço deste módulo. Assim, os redirecionamentos
+// funcionam tanto dentro da subpasta da aplicação quanto na raiz do domínio.
+const APP_ROOT = new URL("../", import.meta.url);
+const appUrl = (path) => new URL(path, APP_ROOT).href;
+
 /**
  * Retorna o perfil completo do usuário logado:
  * { user, role, dados, isSuperAdmin }
@@ -65,7 +70,7 @@ export async function exigirPerfil(perfisPermitidos = []) {
   const sessao = await obterSessao();
 
   if (!sessao.user) {
-    window.location.href = "/login.html";
+    window.location.href = appUrl("login.html");
     return null;
   }
 
@@ -80,20 +85,20 @@ export async function exigirPerfil(perfisPermitidos = []) {
 export function redirecionarPorPerfil(role) {
   switch (role) {
     case "admin":
-      window.location.href = "/admin/dashboard.html";
+      window.location.href = appUrl("admin/dashboard.html");
       break;
     case "loja":
-      window.location.href = "/loja/dashboard.html";
+      window.location.href = appUrl("loja/dashboard.html");
       break;
     case "entregador":
-      window.location.href = "/entregador/dashboard.html";
+      window.location.href = appUrl("entregador/dashboard.html");
       break;
     default:
-      window.location.href = "/login.html";
+      window.location.href = appUrl("login.html");
   }
 }
 
 export async function sair() {
   await signOut(auth);
-  window.location.href = "/index.html";
+  window.location.href = appUrl("index.html");
 }

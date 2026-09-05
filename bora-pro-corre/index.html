@@ -6,14 +6,14 @@
 <title>BORA PRO CORRE — Conectando quem precisa entregar com quem tá no corre</title>
 <meta name="description" content="Plataforma que conecta estabelecimentos e entregadores. O negócio publica o produto, a rota e o valor; o entregador escolhe se aceita.">
 <meta name="theme-color" content="#0F1115">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/responsive.css">
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="./css/responsive.css">
 
 <script>
   tailwind.config = {
@@ -50,7 +50,7 @@
       <div class="w-8 h-8 rounded-lg bg-rota flex items-center justify-center font-display text-asfalto text-sm">B</div>
       <span class="font-display text-sm tracking-tight">BORA PRO CORRE</span>
     </div>
-    <a href="/login.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-borda hover:border-mare transition-colors">
+    <a href="./login.html" class="text-sm font-semibold px-4 py-2 rounded-lg border border-borda hover:border-mare transition-colors">
       Entrar
     </a>
   </div>
@@ -72,10 +72,10 @@
       Sem intermediário complicando o que já era simples.
     </p>
     <div class="flex flex-wrap gap-3">
-      <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">
+      <a href="./cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">
         🏪 Sou Estabelecimento
       </a>
-      <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">
+      <a href="./cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">
         🛵 Sou Entregador
       </a>
     </div>
@@ -182,8 +182,8 @@
 <section class="max-w-6xl mx-auto px-5 py-16 text-center">
   <h2 class="font-display text-2xl sm:text-3xl mb-6">Bora pro corre?</h2>
   <div class="flex flex-wrap justify-center gap-3">
-    <a href="/cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">Cadastrar meu estabelecimento</a>
-    <a href="/cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">Cadastrar como entregador</a>
+    <a href="./cadastro-loja.html" class="btn-rota rounded-xl px-6 py-3.5 font-semibold text-sm">Cadastrar meu estabelecimento</a>
+    <a href="./cadastro-entregador.html" class="rounded-xl px-6 py-3.5 font-semibold text-sm border border-borda hover:border-mare transition-colors">Cadastrar como entregador</a>
   </div>
 </section>
 
@@ -192,9 +192,9 @@
   <div class="max-w-6xl mx-auto px-5 py-10 flex flex-wrap gap-x-8 gap-y-3 justify-between text-sm text-[#9AA1AC]">
     <span>© <span id="ano"></span> Bora Pro Corre — Parnamirim/RN</span>
     <div class="flex flex-wrap gap-x-6 gap-y-2">
-      <a href="/termos.html" class="hover:text-mare transition-colors">Termos de Uso</a>
-      <a href="/privacidade.html" class="hover:text-mare transition-colors">Política de Privacidade</a>
-      <a href="/suporte.html" class="hover:text-mare transition-colors">Suporte</a>
+      <a href="./termos.html" class="hover:text-mare transition-colors">Termos de Uso</a>
+      <a href="./privacidade.html" class="hover:text-mare transition-colors">Política de Privacidade</a>
+      <a href="./suporte.html" class="hover:text-mare transition-colors">Suporte</a>
     </div>
   </div>
 </footer>
@@ -222,10 +222,11 @@
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js').catch(console.error);
+      navigator.serviceWorker.register('./service-worker.js').catch(console.error);
     });
   }
 </script>
 </body>
 </html>
+
 

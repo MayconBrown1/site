@@ -41,7 +41,7 @@ npm run check
 npm run build
 ```
 
-Sirva a raiz do projeto por HTTP para desenvolvimento. Os caminhos públicos partem de `/`, portanto o site pode ser publicado em domínio próprio sem renomear o repositório.
+Sirva a raiz do projeto por HTTP para desenvolvimento. Os caminhos são relativos à pasta da aplicação, portanto funcionam na raiz do domínio ou dentro de `/bora-pro-corre/`.
 
 ## Coleções principais
 
