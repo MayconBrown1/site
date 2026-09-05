@@ -54,7 +54,11 @@ async function alterarPerfil(id, role, action) {
   }
   if (action === "pagou") {
     const prox = new Date(); prox.setDate(prox.getDate() + 30); const assinatura = { ...(p.assinatura || {}), status:"ativo", ultimoPagamento:Timestamp.now(), proximaCobranca:Timestamp.fromDate(prox), valor:29.99 };
-    batch.update(perfilRef, { assinatura }); batch.set(doc(db,"subscriptions",id), { uid:id, role, status:"ativo", valor:29.99, ultimoPagamento:Timestamp.now(), proximaCobranca:Timestamp.fromDate(prox), atualizadoEm:serverTimestamp() }, { merge:true });
+    // Confirmar o pagamento também deixa as duas fontes de autorização
+    // consistentes. Assim não existe perfil pago com /users ainda bloqueado.
+    batch.update(perfilRef, { assinatura, status:"aprovado" });
+    batch.update(userRef, { aprovado:true, bloqueado:false });
+    batch.set(doc(db,"subscriptions",id), { uid:id, role, status:"ativo", valor:29.99, ultimoPagamento:Timestamp.now(), proximaCobranca:Timestamp.fromDate(prox), atualizadoEm:serverTimestamp() }, { merge:true });
     const pagamentoRef = doc(collection(db,"payments")); batch.set(pagamentoRef, { uid:id, role, nome:p.nome, valor:29.99, status:"confirmado", origem:"manual_admin", pagoEm:serverTimestamp() });
   }
   if (action === "bloquear") {

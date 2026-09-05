@@ -1,6 +1,6 @@
 import { db } from "./firebase-config.js";
 import {
-  addDoc, collection, doc, getDoc, increment, limit, onSnapshot, orderBy,
+  addDoc, collection, doc, getDoc, increment, limit, onSnapshot,
   query, runTransaction, serverTimestamp, updateDoc, where
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
@@ -58,19 +58,33 @@ export async function criarEntrega(storeId, dados) {
   });
 }
 
+function ordenarMaisRecentes(snap) {
+  const millis = (valor) => {
+    if (valor?.toMillis) return valor.toMillis();
+    if (typeof valor?.seconds === "number") return valor.seconds * 1000;
+    const data = valor ? new Date(valor) : null;
+    return data && Number.isFinite(data.getTime()) ? data.getTime() : 0;
+  };
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => millis(b.criadoEm) - millis(a.criadoEm));
+}
+
 export function observarEntregasDisponiveis(callback, onError) {
-  const q = query(collection(db, "deliveries"), where("status", "==", "disponivel"), orderBy("criadoEm", "desc"), limit(50));
-  return onSnapshot(q, snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))), onError);
+  // A ordenação é feita no navegador para não depender da publicação de um
+  // índice composto no Firebase. O filtro por status usa o índice automático.
+  const q = query(collection(db, "deliveries"), where("status", "==", "disponivel"), limit(100));
+  return onSnapshot(q, snap => callback(ordenarMaisRecentes(snap)), onError);
 }
 
 export function observarEntregasDaLoja(storeId, callback, onError) {
-  const q = query(collection(db, "deliveries"), where("storeId", "==", storeId), orderBy("criadoEm", "desc"), limit(50));
-  return onSnapshot(q, snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))), onError);
+  const q = query(collection(db, "deliveries"), where("storeId", "==", storeId), limit(100));
+  return onSnapshot(q, snap => callback(ordenarMaisRecentes(snap)), onError);
 }
 
 export function observarEntregasDoEntregador(courierId, callback, onError) {
-  const q = query(collection(db, "deliveries"), where("courierId", "==", courierId), orderBy("criadoEm", "desc"), limit(50));
-  return onSnapshot(q, snap => callback(snap.docs.map(d => ({ id: d.id, ...d.data() }))), onError);
+  const q = query(collection(db, "deliveries"), where("courierId", "==", courierId), limit(100));
+  return onSnapshot(q, snap => callback(ordenarMaisRecentes(snap)), onError);
 }
 
 export async function aceitarEntrega(deliveryId, courierId) {

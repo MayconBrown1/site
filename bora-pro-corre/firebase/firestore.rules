@@ -10,8 +10,10 @@ service cloud.firestore {
     function admin() { return superAdmin(); }
     function userData() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
     function subscriptionIsCurrent(profile) {
-      return (profile.assinatura.status == 'trial' && (profile.assinatura.proximaCobranca == null || profile.assinatura.proximaCobranca > request.time)) ||
-        (profile.assinatura.status == 'ativo' && profile.assinatura.proximaCobranca > request.time);
+      return profile.status == 'aprovado' && (
+        (profile.assinatura.status == 'trial' && (profile.assinatura.proximaCobranca == null || profile.assinatura.proximaCobranca > request.time)) ||
+        (profile.assinatura.status == 'ativo' && profile.assinatura.proximaCobranca > request.time)
+      );
     }
     function activeSubscription(role) {
       return role == 'loja'
@@ -19,7 +21,9 @@ service cloud.firestore {
         : subscriptionIsCurrent(get(/databases/$(database)/documents/couriers/$(request.auth.uid)).data);
     }
     function canOperate() {
-      return admin() || (signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && userData().aprovado == true && userData().bloqueado == false && activeSubscription(userData().role));
+      // O perfil operacional é a fonte de verdade para aprovação, bloqueio e
+      // mensalidade. Isso evita negar acesso quando /users ficou desatualizado.
+      return admin() || (signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && activeSubscription(userData().role));
     }
     function involved(d) { return signed() && (d.storeId == request.auth.uid || d.courierId == request.auth.uid); }
     function immutableDeliveryFields() {

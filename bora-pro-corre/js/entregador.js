@@ -3,7 +3,7 @@ import { exigirPerfil } from "./permissions.js";
 import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 import { aceitarEntrega, confirmarEtapa, motivoBloqueio, observarEntregasDisponiveis, observarEntregasDoEntregador } from "./pedidos.js";
 import { avaliar } from "./avaliacoes.js";
-import { mostrarToast, monitorarConexao } from "./utils.js";
+import { mostrarToast, mensagemErroAmigavel, monitorarConexao } from "./utils.js";
 import { abrirModal, cardEntrega, estadoVazio, fecharModal, iniciarShell } from "./dashboard-ui.js";
 
 let sessao, perfil, disponiveis = [], minhas = [], filtro = "disponiveis", entregaAvaliacao = null, nota = 0;
@@ -55,8 +55,8 @@ async function init() {
   const atualizarAcesso = () => { const motivo = motivoBloqueio(perfil); document.getElementById("gate").classList.toggle("show", !!motivo); document.getElementById("gate-texto").textContent = motivo; };
   atualizarAcesso();
   onSnapshot(ref, s => { if (s.exists()) { perfil = s.data(); document.getElementById("switch-online").classList.toggle("on", !!perfil.online); document.getElementById("texto-online").textContent = perfil.online ? "Online" : "Offline"; atualizarAcesso(); render(); } });
-  observarEntregasDisponiveis(d => { disponiveis = d; render(); }, () => mostrarToast("Não foi possível carregar as corridas.", "erro"));
-  observarEntregasDoEntregador(sessao.user.uid, d => { minhas = d; render(); }, () => {});
+  observarEntregasDisponiveis(d => { disponiveis = d; render(); }, err => mostrarToast(mensagemErroAmigavel(err), "erro"));
+  observarEntregasDoEntregador(sessao.user.uid, d => { minhas = d; render(); }, err => mostrarToast(mensagemErroAmigavel(err), "erro"));
   document.getElementById("switch-online").addEventListener("click", async () => { if (motivoBloqueio(perfil)) return mostrarToast(motivoBloqueio(perfil), "aviso"); await updateDoc(ref, { online: !perfil.online }); });
   document.getElementById("lista-entregas").addEventListener("click", agir);
   document.querySelectorAll("[data-filtro]").forEach(btn => btn.addEventListener("click", () => { filtro = btn.dataset.filtro; ativarAba(); }));

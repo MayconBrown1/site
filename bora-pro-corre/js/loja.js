@@ -1,7 +1,7 @@
 import { db } from "./firebase-config.js";
 import { exigirPerfil } from "./permissions.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
-import { criarEntrega, observarEntregasDaLoja, atualizarValor, cancelarEntrega, confirmarEtapa, motivoBloqueio } from "./pedidos.js";
+import { doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { assinaturaValida, criarEntrega, observarEntregasDaLoja, atualizarValor, cancelarEntrega, confirmarEtapa, motivoBloqueio } from "./pedidos.js";
 import { avaliar } from "./avaliacoes.js";
 import { mostrarToast, mensagemErroAmigavel, monitorarConexao } from "./utils.js";
 import { abrirModal, cardEntrega, estadoVazio, fecharModal, iniciarShell } from "./dashboard-ui.js";
@@ -48,17 +48,29 @@ async function agir(e) {
 
 async function init() {
   iniciarShell(); monitorarConexao(); sessao = await exigirPerfil(["loja"]); if (!sessao) return;
-  const snap = await getDoc(doc(db, "stores", sessao.user.uid)); if (!snap.exists()) return;
-  loja = snap.data(); document.getElementById("nome-perfil").textContent = loja.nomeComercial; document.getElementById("saudacao").textContent = `Olá, ${loja.nomeComercial}`;
-  document.getElementById("plano-status").textContent = loja.assinatura?.status === "ativo" ? "Mensalidade em dia" : loja.assinatura?.status === "trial" ? "Período de teste" : "Mensalidade pendente";
-  const motivo = motivoBloqueio(loja); if (motivo) { document.getElementById("gate").classList.add("show"); document.getElementById("gate-texto").textContent = motivo; document.getElementById("btn-nova").disabled = true; }
-  observarEntregasDaLoja(sessao.user.uid, dados => { entregas = dados; render(); }, () => mostrarToast("Não foi possível carregar as entregas.", "erro"));
+  const ref = doc(db, "stores", sessao.user.uid); const snap = await getDoc(ref); if (!snap.exists()) return;
+  const atualizarPerfil = (dados) => {
+    loja = dados;
+    document.getElementById("nome-perfil").textContent = loja.nomeComercial;
+    document.getElementById("saudacao").textContent = `Olá, ${loja.nomeComercial}`;
+    const motivo = motivoBloqueio(loja);
+    const vencida = motivo.startsWith("Mensalidade vencida");
+    document.getElementById("plano-status").textContent = assinaturaValida(loja) ? (loja.assinatura?.status === "trial" ? "Período de teste" : "Mensalidade em dia") : vencida ? "Mensalidade vencida" : "Mensalidade pendente";
+    document.getElementById("gate").classList.toggle("show", !!motivo);
+    document.getElementById("gate-texto").textContent = motivo;
+    document.getElementById("btn-nova").disabled = !!motivo;
+    document.getElementById("nav-nova").disabled = !!motivo;
+    render();
+  };
+  atualizarPerfil(snap.data());
+  onSnapshot(ref, s => { if (s.exists()) atualizarPerfil(s.data()); }, () => mostrarToast("Não foi possível atualizar o status do cadastro.", "erro"));
+  observarEntregasDaLoja(sessao.user.uid, dados => { entregas = dados; render(); }, err => mostrarToast(mensagemErroAmigavel(err), "erro"));
   document.getElementById("btn-nova").addEventListener("click", () => abrirModal("modal-nova"));
   document.getElementById("lista-entregas").addEventListener("click", agir);
   document.querySelectorAll("[data-filtro]").forEach(btn => btn.addEventListener("click", () => { filtro = btn.dataset.filtro; document.querySelectorAll("[data-filtro]").forEach(b => b.classList.toggle("btn-primary", b === btn)); render(); }));
   document.getElementById("form-nova").addEventListener("submit", async e => {
     e.preventDefault(); const btn = e.submitter; btn.disabled = true;
-    const fd = new FormData(e.target); try { await criarEntrega(sessao.user.uid, Object.fromEntries(fd)); e.target.reset(); fecharModal("modal-nova"); mostrarToast("Corrida publicada para os entregadores.", "sucesso"); } catch (err) { mostrarToast(err.message === "PERFIL_INATIVO" ? motivoBloqueio(loja) : "Confira os campos da corrida.", "erro"); } finally { btn.disabled = false; }
+    const fd = new FormData(e.target); try { await criarEntrega(sessao.user.uid, Object.fromEntries(fd)); e.target.reset(); fecharModal("modal-nova"); mostrarToast("Corrida publicada para os entregadores.", "sucesso"); } catch (err) { mostrarToast(err.message === "PERFIL_INATIVO" ? motivoBloqueio(loja) : mensagemErroAmigavel(err), "erro"); } finally { btn.disabled = false; }
   });
   document.querySelectorAll(".star").forEach(star => star.addEventListener("click", () => { nota = Number(star.dataset.nota); document.querySelectorAll(".star").forEach(s => s.classList.toggle("selected", Number(s.dataset.nota) <= nota)); }));
   document.getElementById("form-avaliacao").addEventListener("submit", async e => {
