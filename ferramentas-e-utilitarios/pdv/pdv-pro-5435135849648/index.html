@@ -66,6 +66,7 @@
                 </div>
                 <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
                     <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
+                    <button onclick="showSection('orcamentos')" class="bg-emerald-500 hover:bg-emerald-700 px-3 py-2 rounded transition-colors text-sm">Orçamentos</button>
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
@@ -286,6 +287,127 @@
                             <tbody id="tabela-produtos">
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Orçamentos -->
+            <div id="orcamentos-section" class="section hidden">
+                <div class="space-y-5">
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 class="text-xl lg:text-2xl font-semibold">Orçamentos</h2>
+                                <p class="text-sm text-gray-500">Crie propostas com produtos e serviços cadastrados, sem alterar o estoque ou o caixa.</p>
+                            </div>
+                            <button type="button" onclick="novoOrcamento()" class="rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700">+ Novo orçamento</button>
+                        </div>
+                    </div>
+
+                    <div id="editor-orcamento" class="hidden bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <div class="mb-5 flex flex-wrap items-start justify-between gap-3 border-b pb-4">
+                            <div>
+                                <p id="orcamento-numero" class="text-sm font-bold uppercase tracking-wide text-emerald-700">Novo orçamento</p>
+                                <h3 class="text-xl font-semibold">Dados da proposta</h3>
+                            </div>
+                            <button type="button" onclick="cancelarEdicaoOrcamento()" class="rounded-lg bg-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-300">Fechar</button>
+                        </div>
+
+                        <div id="orcamento-emitente" class="mb-5 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950"></div>
+
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                            <div>
+                                <label for="orcamento-cliente-nome" class="mb-1 block text-sm font-medium text-gray-700">Cliente / Empresa *</label>
+                                <input id="orcamento-cliente-nome" class="w-full rounded-lg border p-3" placeholder="Nome completo ou razão social">
+                            </div>
+                            <div>
+                                <label for="orcamento-cliente-documento" class="mb-1 block text-sm font-medium text-gray-700">CPF / CNPJ</label>
+                                <input id="orcamento-cliente-documento" class="w-full rounded-lg border p-3" inputmode="numeric" maxlength="18" placeholder="Documento do cliente" oninput="formatarDocumentoOrcamento(this)">
+                            </div>
+                            <div>
+                                <label for="orcamento-cliente-contato" class="mb-1 block text-sm font-medium text-gray-700">Pessoa de contato</label>
+                                <input id="orcamento-cliente-contato" class="w-full rounded-lg border p-3" placeholder="Responsável pela aprovação">
+                            </div>
+                            <div>
+                                <label for="orcamento-cliente-telefone" class="mb-1 block text-sm font-medium text-gray-700">Telefone / WhatsApp</label>
+                                <input id="orcamento-cliente-telefone" class="w-full rounded-lg border p-3" placeholder="(00) 00000-0000">
+                            </div>
+                            <div>
+                                <label for="orcamento-cliente-email" class="mb-1 block text-sm font-medium text-gray-700">E-mail</label>
+                                <input id="orcamento-cliente-email" type="email" class="w-full rounded-lg border p-3" placeholder="cliente@empresa.com">
+                            </div>
+                            <div>
+                                <label for="orcamento-validade" class="mb-1 block text-sm font-medium text-gray-700">Válido até *</label>
+                                <input id="orcamento-validade" type="date" class="w-full rounded-lg border p-3">
+                            </div>
+                            <div class="lg:col-span-3">
+                                <label for="orcamento-cliente-endereco" class="mb-1 block text-sm font-medium text-gray-700">Endereço do cliente</label>
+                                <input id="orcamento-cliente-endereco" class="w-full rounded-lg border p-3" placeholder="Rua, número, bairro, cidade/UF e CEP">
+                            </div>
+                        </div>
+
+                        <div class="mt-6 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4">
+                            <label for="busca-item-orcamento" class="mb-2 block text-sm font-semibold text-emerald-900">Adicionar produto ou serviço cadastrado</label>
+                            <div class="flex flex-col gap-2 sm:flex-row">
+                                <input id="busca-item-orcamento" class="min-w-0 flex-1 rounded-lg border p-3" placeholder="Digite o nome, código ou categoria..." autocomplete="off" oninput="atualizarBuscaItensOrcamento()">
+                                <select id="select-item-orcamento" class="min-w-0 flex-1 rounded-lg border p-3"></select>
+                                <button type="button" onclick="adicionarItemOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700">Adicionar</button>
+                            </div>
+                            <p class="mt-2 text-xs text-emerald-800">Os valores podem ser ajustados apenas neste orçamento. O cadastro original não é alterado.</p>
+                        </div>
+
+                        <div class="mt-5 overflow-x-auto rounded-xl border">
+                            <table class="w-full min-w-[720px] table-auto">
+                                <thead class="bg-gray-50 text-sm text-gray-700">
+                                    <tr>
+                                        <th class="px-3 py-3 text-left">Item</th>
+                                        <th class="px-3 py-3 text-center">Qtd.</th>
+                                        <th class="px-3 py-3 text-right">Valor unitário</th>
+                                        <th class="px-3 py-3 text-right">Total</th>
+                                        <th class="px-3 py-3 text-center">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itens-orcamento"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+                            <div class="space-y-4 lg:col-span-2">
+                                <div>
+                                    <label for="orcamento-condicoes" class="mb-1 block text-sm font-medium text-gray-700">Condições de pagamento</label>
+                                    <input id="orcamento-condicoes" class="w-full rounded-lg border p-3" placeholder="Ex.: 50% na aprovação e 50% na entrega">
+                                </div>
+                                <div>
+                                    <label for="orcamento-prazo-entrega" class="mb-1 block text-sm font-medium text-gray-700">Prazo de entrega / execução</label>
+                                    <input id="orcamento-prazo-entrega" class="w-full rounded-lg border p-3" placeholder="Ex.: até 10 dias úteis após a aprovação">
+                                </div>
+                                <div>
+                                    <label for="orcamento-observacoes" class="mb-1 block text-sm font-medium text-gray-700">Observações</label>
+                                    <textarea id="orcamento-observacoes" rows="4" class="w-full rounded-lg border p-3" placeholder="Garantias, escopo, informações adicionais..."></textarea>
+                                </div>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 p-4">
+                                <div class="flex items-center justify-between py-2"><span>Subtotal</span><strong id="orcamento-subtotal">R$ 0,00</strong></div>
+                                <label for="orcamento-desconto" class="mt-2 block text-sm font-medium text-gray-700">Desconto (%)</label>
+                                <input id="orcamento-desconto" type="number" min="0" max="100" step="0.01" value="0" class="mt-1 w-full rounded-lg border p-3" oninput="atualizarTotaisOrcamento()">
+                                <label for="orcamento-acrescimo" class="mt-3 block text-sm font-medium text-gray-700">Frete / acréscimo (R$)</label>
+                                <input id="orcamento-acrescimo" type="number" min="0" step="0.01" value="0" class="mt-1 w-full rounded-lg border p-3" oninput="atualizarTotaisOrcamento()">
+                                <div class="mt-4 flex items-center justify-between border-t pt-4 text-lg"><span class="font-semibold">Total</span><strong id="orcamento-total" class="text-2xl text-emerald-700">R$ 0,00</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                            <button type="button" onclick="salvarOrcamento('rascunho')" class="rounded-lg bg-slate-600 px-5 py-3 font-semibold text-white hover:bg-slate-700">Salvar rascunho</button>
+                            <button type="button" onclick="finalizarOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700">Finalizar e gerar PDF</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div><h3 class="text-lg font-semibold">Histórico de orçamentos</h3><p class="text-sm text-gray-500">Consulte, edite, duplique ou gere novamente o PDF.</p></div>
+                            <input id="busca-orcamentos" class="rounded-lg border p-3 sm:w-80" placeholder="Buscar cliente ou número..." oninput="atualizarListaOrcamentos()">
+                        </div>
+                        <div id="lista-orcamentos" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
@@ -525,7 +647,27 @@
                                 <div>
                                     <label for="adm-cnpj-empresa" class="block text-sm font-medium text-gray-700 mb-1">CNPJ da Empresa</label>
                                     <input type="text" id="adm-cnpj-empresa" inputmode="numeric" maxlength="18" class="w-full p-3 border rounded-lg text-base" placeholder="00.000.000/0000-00" oninput="formatarCampoCNPJ(this)">
-                                    <p class="pdv-cnpj-hint">Opcional. Será exibido no comprovante e no cupom térmico.</p>
+                                    <p class="pdv-cnpj-hint">Será usado automaticamente nos comprovantes e orçamentos.</p>
+                                </div>
+                                <div>
+                                    <label for="adm-razao-social" class="block text-sm font-medium text-gray-700 mb-1">Razão Social</label>
+                                    <input type="text" id="adm-razao-social" class="w-full p-3 border rounded-lg text-base" placeholder="Razão social da empresa">
+                                </div>
+                                <div>
+                                    <label for="adm-inscricao-estadual" class="block text-sm font-medium text-gray-700 mb-1">Inscrição Estadual</label>
+                                    <input type="text" id="adm-inscricao-estadual" class="w-full p-3 border rounded-lg text-base" placeholder="IE ou Isento">
+                                </div>
+                                <div>
+                                    <label for="adm-telefone-empresa" class="block text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp</label>
+                                    <input type="text" id="adm-telefone-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="(00) 00000-0000">
+                                </div>
+                                <div>
+                                    <label for="adm-email-empresa" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                                    <input type="email" id="adm-email-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="contato@empresa.com">
+                                </div>
+                                <div class="lg:col-span-2">
+                                    <label for="adm-endereco-empresa" class="block text-sm font-medium text-gray-700 mb-1">Endereço completo</label>
+                                    <input type="text" id="adm-endereco-empresa" class="w-full p-3 border rounded-lg text-base" placeholder="Rua, número, bairro, cidade/UF e CEP">
                                 </div>
                             </div>
                             
@@ -864,6 +1006,9 @@ if ('serviceWorker' in navigator) {
         let movimentoParaExcluir = null;
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
+        let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
+        let itensOrcamento = [];
+        let orcamentoEditando = null;
         let clienteFiadoEditando = null;
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
@@ -875,6 +1020,7 @@ if ('serviceWorker' in navigator) {
             configSistema: { get: () => configSistema, set: v => { configSistema = v; } },
             clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
             pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
+            orcamentos: { get: () => orcamentos, set: v => { orcamentos = v; } },
             CONFIG_PIX: { get: () => CONFIG_PIX }
         });
 
@@ -974,6 +1120,10 @@ if ('serviceWorker' in navigator) {
                 atualizarRelatorios();
             } else if (sectionName === 'produtos') {
                 atualizarTabelaProdutos();
+            } else if (sectionName === 'orcamentos') {
+                atualizarBuscaItensOrcamento();
+                atualizarListaOrcamentos();
+                atualizarDadosEmitenteOrcamento();
             } else if (sectionName === 'caixa') {
                 atualizarHistoricoMovimentos();
                 calcularSaldoCaixa();
@@ -3116,6 +3266,7 @@ function showInstallButton() {
         caixas: caixas,
         clientesFiado: clientesFiado,
         pagamentosFiado: pagamentosFiado,
+        orcamentos: orcamentos,
         configSistema: configSistema,
         configPix: CONFIG_PIX,
         categorias: categorias,
@@ -3277,6 +3428,11 @@ function showInstallButton() {
             // Carregar configurações do sistema
             document.getElementById('adm-nome-empresa').value = configSistema.nomeEmpresa || 'PDV - Pro';
             document.getElementById('adm-cnpj-empresa').value = formatarCNPJ(configSistema.cnpj || '');
+            document.getElementById('adm-razao-social').value = configSistema.razaoSocial || '';
+            document.getElementById('adm-inscricao-estadual').value = configSistema.inscricaoEstadual || '';
+            document.getElementById('adm-telefone-empresa').value = configSistema.telefone || '';
+            document.getElementById('adm-email-empresa').value = configSistema.email || '';
+            document.getElementById('adm-endereco-empresa').value = configSistema.endereco || '';
         }
 
         function salvarConfigPix() {
@@ -3354,16 +3510,22 @@ function showInstallButton() {
                 configSistema.nomeEmpresa = nomeEmpresa;
             }
             configSistema.cnpj = cnpj;
+            configSistema.razaoSocial = document.getElementById('adm-razao-social').value.trim();
+            configSistema.inscricaoEstadual = document.getElementById('adm-inscricao-estadual').value.trim();
+            configSistema.telefone = document.getElementById('adm-telefone-empresa').value.trim();
+            configSistema.email = document.getElementById('adm-email-empresa').value.trim();
+            configSistema.endereco = document.getElementById('adm-endereco-empresa').value.trim();
             
             // Salvar no localStorage
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
             salvarDados();
+            atualizarDadosEmitenteOrcamento();
             
             mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
         }
 
         function resetarSistema() {
-            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, vendas, movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, vendas, orçamentos e movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
                 return;
             }
             
@@ -3378,6 +3540,7 @@ function showInstallButton() {
             localStorage.removeItem('pdv_caixas');
             localStorage.removeItem('pdv_categorias');
             localStorage.removeItem('pdv_categorias_ocultas');
+            localStorage.removeItem('pdv_orcamentos');
             localStorage.removeItem('pdv_config_sistema');
             localStorage.removeItem('pdv_config_pix');
             
@@ -3421,6 +3584,7 @@ function showInstallButton() {
                     caixas = backup.caixas || [];
                     clientesFiado = backup.clientesFiado || [];
                     pagamentosFiado = backup.pagamentosFiado || [];
+                    orcamentos = backup.orcamentos || [];
                     categoriasOcultas = Array.isArray(backup.categoriasOcultas) ? backup.categoriasOcultas : [];
                     categorias = [...new Set([...CATEGORIAS_PADRAO, ...(Array.isArray(backup.categorias) ? backup.categorias : [])])]
                         .filter(categoria => !categoriasOcultas.includes(categoria));
@@ -3535,6 +3699,415 @@ function showInstallButton() {
             });
         };
 
+        // Orçamentos
+        function escaparHTMLOrcamento(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[caractere]));
+        }
+
+        function moedaOrcamento(valor) {
+            return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function dataOrcamentoBR(valor) {
+            if (!valor) return '—';
+            const partes = String(valor).slice(0, 10).split('-');
+            if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            return new Date(valor).toLocaleDateString('pt-BR');
+        }
+
+        function formatarDocumentoOrcamento(campo) {
+            const numeros = campo.value.replace(/\D/g, '').slice(0, 14);
+            if (numeros.length <= 11) {
+                campo.value = numeros.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                campo.value = numeros.replace(/(\d{2})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+            }
+        }
+
+        function proximoNumeroOrcamento() {
+            const ano = new Date().getFullYear();
+            const maior = orcamentos.reduce((numero, orcamento) => {
+                const correspondencia = String(orcamento.numero || '').match(/ORC-(\d{4})-(\d+)/);
+                return correspondencia && Number(correspondencia[1]) === ano ? Math.max(numero, Number(correspondencia[2])) : numero;
+            }, 0);
+            return `ORC-${ano}-${String(maior + 1).padStart(4, '0')}`;
+        }
+
+        function atualizarDadosEmitenteOrcamento() {
+            const emitente = document.getElementById('orcamento-emitente');
+            if (!emitente) return;
+            const cnpj = configSistema.cnpj ? formatarCNPJ(configSistema.cnpj) : '';
+            emitente.innerHTML = `<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><strong class="block text-blue-900">Emitente: ${escaparHTMLOrcamento(configSistema.nomeEmpresa || 'PDV - Pro')}</strong><span>${cnpj ? `CNPJ ${escaparHTMLOrcamento(cnpj)}` : 'CNPJ ainda não cadastrado'}${configSistema.telefone ? ` · ${escaparHTMLOrcamento(configSistema.telefone)}` : ''}${configSistema.email ? ` · ${escaparHTMLOrcamento(configSistema.email)}` : ''}</span></div>${cnpj ? '' : '<button type="button" onclick="acessarAdm()" class="rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white">Cadastrar no ADM</button>'}</div>`;
+        }
+
+        function novoOrcamento() {
+            orcamentoEditando = null;
+            itensOrcamento = [];
+            const validade = new Date();
+            validade.setDate(validade.getDate() + 7);
+            ['orcamento-cliente-nome', 'orcamento-cliente-documento', 'orcamento-cliente-contato', 'orcamento-cliente-telefone',
+             'orcamento-cliente-email', 'orcamento-cliente-endereco', 'orcamento-condicoes', 'orcamento-prazo-entrega',
+             'orcamento-observacoes', 'busca-item-orcamento'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('orcamento-validade').value = validade.toISOString().slice(0, 10);
+            document.getElementById('orcamento-desconto').value = '0';
+            document.getElementById('orcamento-acrescimo').value = '0';
+            document.getElementById('orcamento-numero').textContent = proximoNumeroOrcamento();
+            document.getElementById('editor-orcamento').classList.remove('hidden');
+            atualizarDadosEmitenteOrcamento();
+            atualizarBuscaItensOrcamento();
+            atualizarItensOrcamento();
+            document.getElementById('orcamento-cliente-nome').focus();
+            document.getElementById('editor-orcamento').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function cancelarEdicaoOrcamento() {
+            orcamentoEditando = null;
+            itensOrcamento = [];
+            document.getElementById('editor-orcamento').classList.add('hidden');
+        }
+
+        function atualizarBuscaItensOrcamento() {
+            const select = document.getElementById('select-item-orcamento');
+            if (!select) return;
+            const termo = (document.getElementById('busca-item-orcamento')?.value || '').trim().toLocaleLowerCase('pt-BR');
+            const filtrados = produtos.filter(produto => [produto.nome, produto.codigo, produto.categoria, produto.tipo]
+                .join(' ').toLocaleLowerCase('pt-BR').includes(termo));
+            select.innerHTML = filtrados.map(produto => `<option value="${escaparHTMLOrcamento(produto.id)}">${produto.tipo === 'servico' ? 'Serviço' : 'Produto'} · ${escaparHTMLOrcamento(produto.nome)} · ${moedaOrcamento(produto.preco)}</option>`).join('');
+            if (!filtrados.length) select.innerHTML = '<option value="">Nenhum item encontrado</option>';
+        }
+
+        function adicionarItemOrcamento() {
+            const produtoId = document.getElementById('select-item-orcamento').value;
+            const produto = produtos.find(item => item.id === produtoId);
+            if (!produto) { mostrarMensagem('Selecione um produto ou serviço cadastrado.', 'erro'); return; }
+            const existente = itensOrcamento.find(item => item.produtoId === produto.id);
+            if (existente) existente.quantidade = Number(existente.quantidade || 0) + 1;
+            else itensOrcamento.push({
+                id: `oi_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                produtoId: produto.id,
+                tipo: produto.tipo || 'produto',
+                nome: produto.nome,
+                codigo: produto.codigo || '',
+                unidade: produto.tipo === 'servico' ? 'serviço' : (produto.unidade || 'un'),
+                quantidade: 1,
+                preco: Number(produto.preco || 0)
+            });
+            document.getElementById('busca-item-orcamento').value = '';
+            atualizarBuscaItensOrcamento();
+            atualizarItensOrcamento();
+        }
+
+        function alterarItemOrcamento(itemId, campo, valor) {
+            const item = itensOrcamento.find(registro => registro.id === itemId);
+            if (!item) return;
+            const numero = Number(valor);
+            if (!Number.isFinite(numero) || numero < 0 || (campo === 'quantidade' && numero <= 0)) {
+                mostrarMensagem('Informe quantidade e valor válidos.', 'erro');
+                atualizarItensOrcamento();
+                return;
+            }
+            item[campo] = numero;
+            atualizarItensOrcamento();
+        }
+
+        function removerItemOrcamento(itemId) {
+            itensOrcamento = itensOrcamento.filter(item => item.id !== itemId);
+            atualizarItensOrcamento();
+        }
+
+        function atualizarItensOrcamento() {
+            const corpo = document.getElementById('itens-orcamento');
+            if (!corpo) return;
+            corpo.innerHTML = itensOrcamento.map(item => `<tr class="border-t">
+                <td class="px-3 py-3"><strong>${escaparHTMLOrcamento(item.nome)}</strong><div class="text-xs text-gray-500">${item.tipo === 'servico' ? 'Serviço' : `Produto${item.codigo ? ` · ${escaparHTMLOrcamento(item.codigo)}` : ''}`} · ${escaparHTMLOrcamento(item.unidade || 'un')}</div></td>
+                <td class="px-3 py-3 text-center"><input type="number" min="0.001" step="0.001" value="${Number(item.quantidade)}" onchange="alterarItemOrcamento('${item.id}', 'quantidade', this.value)" class="w-24 rounded border p-2 text-center"></td>
+                <td class="px-3 py-3 text-right"><input type="number" min="0" step="0.01" value="${Number(item.preco).toFixed(2)}" onchange="alterarItemOrcamento('${item.id}', 'preco', this.value)" class="w-32 rounded border p-2 text-right"></td>
+                <td class="px-3 py-3 text-right font-semibold">${moedaOrcamento(Number(item.quantidade) * Number(item.preco))}</td>
+                <td class="px-3 py-3 text-center"><button type="button" onclick="removerItemOrcamento('${item.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200">Remover</button></td>
+            </tr>`).join('') || '<tr><td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">Adicione produtos ou serviços cadastrados ao orçamento.</td></tr>';
+            atualizarTotaisOrcamento();
+        }
+
+        function calcularTotaisOrcamento() {
+            const subtotal = itensOrcamento.reduce((soma, item) => soma + Number(item.quantidade || 0) * Number(item.preco || 0), 0);
+            const descontoPercentual = Math.min(100, Math.max(0, Number(document.getElementById('orcamento-desconto')?.value || 0)));
+            const valorDesconto = subtotal * descontoPercentual / 100;
+            const acrescimo = Math.max(0, Number(document.getElementById('orcamento-acrescimo')?.value || 0));
+            return { subtotal, descontoPercentual, valorDesconto, acrescimo, total: subtotal - valorDesconto + acrescimo };
+        }
+
+        function atualizarTotaisOrcamento() {
+            const totais = calcularTotaisOrcamento();
+            document.getElementById('orcamento-subtotal').textContent = moedaOrcamento(totais.subtotal);
+            document.getElementById('orcamento-total').textContent = moedaOrcamento(totais.total);
+        }
+
+        function dadosFormularioOrcamento(status) {
+            const agora = new Date().toISOString();
+            const totais = calcularTotaisOrcamento();
+            return {
+                id: orcamentoEditando?.id || `orc_${Date.now()}`,
+                numero: orcamentoEditando?.numero || proximoNumeroOrcamento(),
+                criadoEm: orcamentoEditando?.criadoEm || agora,
+                atualizadoEm: agora,
+                emitidoEm: orcamentoEditando?.emitidoEm || agora,
+                status,
+                validade: document.getElementById('orcamento-validade').value,
+                cliente: {
+                    nome: document.getElementById('orcamento-cliente-nome').value.trim(),
+                    documento: document.getElementById('orcamento-cliente-documento').value.replace(/\D/g, ''),
+                    contato: document.getElementById('orcamento-cliente-contato').value.trim(),
+                    telefone: document.getElementById('orcamento-cliente-telefone').value.trim(),
+                    email: document.getElementById('orcamento-cliente-email').value.trim(),
+                    endereco: document.getElementById('orcamento-cliente-endereco').value.trim()
+                },
+                empresa: {
+                    nomeEmpresa: configSistema.nomeEmpresa || 'PDV - Pro',
+                    razaoSocial: configSistema.razaoSocial || '',
+                    cnpj: configSistema.cnpj || '',
+                    inscricaoEstadual: configSistema.inscricaoEstadual || '',
+                    telefone: configSistema.telefone || '',
+                    email: configSistema.email || '',
+                    endereco: configSistema.endereco || ''
+                },
+                itens: itensOrcamento.map(item => ({ ...item, quantidade: Number(item.quantidade), preco: Number(item.preco) })),
+                ...totais,
+                condicoes: document.getElementById('orcamento-condicoes').value.trim(),
+                prazoEntrega: document.getElementById('orcamento-prazo-entrega').value.trim(),
+                observacoes: document.getElementById('orcamento-observacoes').value.trim()
+            };
+        }
+
+        function validarOrcamento(orcamento, finalizando) {
+            if (!orcamento.cliente.nome) { mostrarMensagem('Informe o nome do cliente ou da empresa.', 'erro'); return false; }
+            if (!orcamento.validade) { mostrarMensagem('Informe a data de validade do orçamento.', 'erro'); return false; }
+            if (!orcamento.itens.length) { mostrarMensagem('Adicione ao menos um produto ou serviço.', 'erro'); return false; }
+            if (orcamento.cliente.email && !document.getElementById('orcamento-cliente-email').checkValidity()) { mostrarMensagem('Informe um e-mail válido para o cliente.', 'erro'); return false; }
+            if (orcamento.cliente.documento.length === 14 && !validarCNPJ(orcamento.cliente.documento)) { mostrarMensagem('O CNPJ do cliente é inválido.', 'erro'); return false; }
+            if (finalizando && !orcamento.empresa.cnpj) { mostrarMensagem('Cadastre o CNPJ da empresa em ADM do PDV → Configurações do Sistema antes de finalizar.', 'erro'); return false; }
+            if (finalizando && !validarCNPJ(orcamento.empresa.cnpj)) { mostrarMensagem('O CNPJ da empresa salvo no ADM é inválido.', 'erro'); return false; }
+            if (finalizando && orcamento.total <= 0) { mostrarMensagem('O total do orçamento precisa ser maior que zero.', 'erro'); return false; }
+            return true;
+        }
+
+        function salvarOrcamento(status = 'rascunho', silencioso = false) {
+            const orcamento = dadosFormularioOrcamento(status);
+            if (!validarOrcamento(orcamento, status === 'finalizado')) return null;
+            const indice = orcamentos.findIndex(item => item.id === orcamento.id);
+            if (indice >= 0) orcamentos[indice] = orcamento;
+            else orcamentos.push(orcamento);
+            orcamentoEditando = orcamento;
+            salvarDados();
+            atualizarListaOrcamentos();
+            document.getElementById('orcamento-numero').textContent = orcamento.numero;
+            if (!silencioso) mostrarMensagem(status === 'finalizado' ? 'Orçamento finalizado com sucesso.' : 'Rascunho do orçamento salvo.', 'sucesso');
+            return orcamento;
+        }
+
+        function finalizarOrcamento() {
+            const orcamento = salvarOrcamento('finalizado', true);
+            if (!orcamento) return;
+            gerarPDFOrcamento(orcamento.id);
+            document.getElementById('editor-orcamento').classList.add('hidden');
+            mostrarMensagem('Orçamento finalizado e PDF gerado.', 'sucesso');
+        }
+
+        function editarOrcamento(id) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento) return;
+            orcamentoEditando = orcamento;
+            itensOrcamento = (orcamento.itens || []).map(item => ({ ...item, id: item.id || `oi_${Date.now()}_${Math.random().toString(36).slice(2, 7)}` }));
+            const campos = {
+                'orcamento-cliente-nome': orcamento.cliente?.nome,
+                'orcamento-cliente-documento': orcamento.cliente?.documento,
+                'orcamento-cliente-contato': orcamento.cliente?.contato,
+                'orcamento-cliente-telefone': orcamento.cliente?.telefone,
+                'orcamento-cliente-email': orcamento.cliente?.email,
+                'orcamento-cliente-endereco': orcamento.cliente?.endereco,
+                'orcamento-validade': orcamento.validade,
+                'orcamento-condicoes': orcamento.condicoes,
+                'orcamento-prazo-entrega': orcamento.prazoEntrega,
+                'orcamento-observacoes': orcamento.observacoes,
+                'orcamento-desconto': orcamento.descontoPercentual,
+                'orcamento-acrescimo': orcamento.acrescimo
+            };
+            Object.entries(campos).forEach(([idCampo, valor]) => { document.getElementById(idCampo).value = valor ?? ''; });
+            const campoDocumento = document.getElementById('orcamento-cliente-documento');
+            formatarDocumentoOrcamento(campoDocumento);
+            document.getElementById('orcamento-numero').textContent = orcamento.numero;
+            document.getElementById('editor-orcamento').classList.remove('hidden');
+            atualizarDadosEmitenteOrcamento();
+            atualizarBuscaItensOrcamento();
+            atualizarItensOrcamento();
+            document.getElementById('editor-orcamento').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function duplicarOrcamento(id) {
+            const original = orcamentos.find(item => item.id === id);
+            if (!original) return;
+            editarOrcamento(id);
+            orcamentoEditando = null;
+            document.getElementById('orcamento-numero').textContent = proximoNumeroOrcamento();
+            const validade = new Date(); validade.setDate(validade.getDate() + 7);
+            document.getElementById('orcamento-validade').value = validade.toISOString().slice(0, 10);
+            mostrarMensagem('Cópia criada. Revise os dados e salve o novo orçamento.', 'sucesso');
+        }
+
+        function excluirOrcamento(id) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento || !confirm(`Excluir o orçamento ${orcamento.numero}?`)) return;
+            orcamentos = orcamentos.filter(item => item.id !== id);
+            if (orcamentoEditando?.id === id) cancelarEdicaoOrcamento();
+            salvarDados();
+            atualizarListaOrcamentos();
+            mostrarMensagem('Orçamento excluído.', 'sucesso');
+        }
+
+        function statusOrcamento(orcamento) {
+            if (orcamento.status === 'rascunho') return { texto: 'Rascunho', classe: 'bg-slate-100 text-slate-700' };
+            const hoje = new Date().toISOString().slice(0, 10);
+            if (orcamento.validade && orcamento.validade < hoje) return { texto: 'Expirado', classe: 'bg-red-100 text-red-700' };
+            return { texto: 'Finalizado', classe: 'bg-emerald-100 text-emerald-700' };
+        }
+
+        function atualizarListaOrcamentos() {
+            const lista = document.getElementById('lista-orcamentos');
+            if (!lista) return;
+            const termo = (document.getElementById('busca-orcamentos')?.value || '').trim().toLocaleLowerCase('pt-BR');
+            const filtrados = [...orcamentos].filter(orcamento => [orcamento.numero, orcamento.cliente?.nome, orcamento.cliente?.documento]
+                .join(' ').toLocaleLowerCase('pt-BR').includes(termo)).sort((a, b) => new Date(b.atualizadoEm || b.criadoEm) - new Date(a.atualizadoEm || a.criadoEm));
+            lista.innerHTML = filtrados.map(orcamento => {
+                const status = statusOrcamento(orcamento);
+                const botaoPdf = orcamento.status === 'finalizado' ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">PDF</button>` : '';
+                return `<article class="rounded-xl border border-gray-200 p-4">
+                    <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p></div>
+                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end"><button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button><button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botaoPdf}<button onclick="excluirOrcamento('${orcamento.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button></div></div>
+                    </div>
+                </article>`;
+            }).join('') || '<div class="rounded-xl border border-dashed p-8 text-center text-gray-500">Nenhum orçamento encontrado. Clique em “Novo orçamento” para começar.</div>';
+        }
+
+        function gerarPDFOrcamento(id) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento) { mostrarMensagem('Orçamento não encontrado.', 'erro'); return; }
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+                const empresa = orcamento.empresa || configSistema;
+                const cliente = orcamento.cliente || {};
+                const margem = 15, larguraPagina = 210, larguraUtil = 180;
+                let y = 16;
+
+                const textoSeguro = valor => String(valor || '').replace(/[\r\n]+/g, ' ').trim();
+                const linha = (rotulo, valor) => valor ? `${rotulo}: ${textoSeguro(valor)}` : '';
+                const verificarPagina = altura => {
+                    if (y + altura <= 282) return;
+                    pdf.addPage();
+                    y = 16;
+                    pdf.setDrawColor(209, 213, 219);
+                };
+                const textoQuebrado = (texto, x, largura, tamanho = 9, espacamento = 4.5) => {
+                    if (!texto) return;
+                    pdf.setFontSize(tamanho);
+                    const linhas = pdf.splitTextToSize(textoSeguro(texto), largura);
+                    verificarPagina(linhas.length * espacamento + 2);
+                    pdf.text(linhas, x, y);
+                    y += linhas.length * espacamento;
+                };
+
+                pdf.setFillColor(5, 150, 105);
+                pdf.rect(0, 0, larguraPagina, 7, 'F');
+                pdf.setTextColor(15, 23, 42);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(20);
+                pdf.text(textoSeguro(empresa.nomeEmpresa || 'PDV - Pro'), margem, y);
+                pdf.setFontSize(17);
+                pdf.setTextColor(5, 150, 105);
+                pdf.text('ORÇAMENTO', larguraPagina - margem, y, { align: 'right' });
+                y += 7;
+
+                pdf.setTextColor(71, 85, 105);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setFontSize(8.5);
+                const dadosEmpresa = [empresa.razaoSocial && empresa.razaoSocial !== empresa.nomeEmpresa ? empresa.razaoSocial : '', linha('CNPJ', formatarCNPJ(empresa.cnpj || '')), linha('IE', empresa.inscricaoEstadual), empresa.endereco, [empresa.telefone, empresa.email].filter(Boolean).join(' · ')].filter(Boolean);
+                dadosEmpresa.forEach(texto => { pdf.text(textoSeguro(texto), margem, y); y += 4; });
+                y += 3;
+
+                pdf.setDrawColor(203, 213, 225);
+                pdf.line(margem, y, larguraPagina - margem, y); y += 8;
+                pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(15, 23, 42);
+                pdf.text(`Nº ${textoSeguro(orcamento.numero)}`, margem, y);
+                pdf.text(`Emissão: ${dataOrcamentoBR(orcamento.emitidoEm)}`, 90, y);
+                pdf.text(`Validade: ${dataOrcamentoBR(orcamento.validade)}`, larguraPagina - margem, y, { align: 'right' });
+                y += 9;
+
+                pdf.setFillColor(241, 245, 249); pdf.roundedRect(margem, y - 4, larguraUtil, 29, 2, 2, 'F');
+                pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.text('CLIENTE', margem + 4, y + 2); y += 8;
+                pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9);
+                pdf.text(textoSeguro(cliente.nome), margem + 4, y); y += 5;
+                const docCliente = cliente.documento ? (cliente.documento.length === 14 ? formatarCNPJ(cliente.documento) : cliente.documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')) : '';
+                const contatoCliente = [linha(cliente.documento?.length === 14 ? 'CNPJ' : 'CPF', docCliente), linha('Contato', cliente.contato), cliente.telefone, cliente.email].filter(Boolean).join(' · ');
+                if (contatoCliente) { pdf.text(pdf.splitTextToSize(textoSeguro(contatoCliente), 170), margem + 4, y); y += 5; }
+                if (cliente.endereco) pdf.text(pdf.splitTextToSize(textoSeguro(cliente.endereco), 170), margem + 4, y);
+                y = Math.max(y + 9, 72);
+
+                const colunas = { item: margem, qtd: 122, unitario: 151, total: 195 };
+                pdf.setFillColor(5, 150, 105); pdf.rect(margem, y, larguraUtil, 8, 'F');
+                pdf.setTextColor(255, 255, 255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.5);
+                pdf.text('ITEM / DESCRIÇÃO', colunas.item + 2, y + 5.3); pdf.text('QTD.', colunas.qtd, y + 5.3, { align: 'right' }); pdf.text('UNITÁRIO', colunas.unitario, y + 5.3, { align: 'right' }); pdf.text('TOTAL', colunas.total - 2, y + 5.3, { align: 'right' }); y += 8;
+
+                pdf.setTextColor(15, 23, 42); pdf.setFont('helvetica', 'normal');
+                (orcamento.itens || []).forEach((item, indice) => {
+                    const descricao = `${indice + 1}. ${textoSeguro(item.nome)}${item.tipo === 'servico' ? ' (Serviço)' : ''}`;
+                    const linhasNome = pdf.splitTextToSize(descricao, 100);
+                    const altura = Math.max(10, linhasNome.length * 4 + 4);
+                    verificarPagina(altura + 10);
+                    if (y === 16) {
+                        pdf.setFillColor(5, 150, 105); pdf.rect(margem, y, larguraUtil, 8, 'F');
+                        pdf.setTextColor(255,255,255); pdf.setFont('helvetica','bold'); pdf.text('ITEM / DESCRIÇÃO', colunas.item + 2, y + 5.3); pdf.text('QTD.', colunas.qtd, y + 5.3, {align:'right'}); pdf.text('UNITÁRIO', colunas.unitario, y + 5.3, {align:'right'}); pdf.text('TOTAL', colunas.total - 2, y + 5.3, {align:'right'}); y += 8; pdf.setTextColor(15,23,42); pdf.setFont('helvetica','normal');
+                    }
+                    if (indice % 2 === 1) { pdf.setFillColor(248, 250, 252); pdf.rect(margem, y, larguraUtil, altura, 'F'); }
+                    pdf.setFontSize(8.5); pdf.text(linhasNome, colunas.item + 2, y + 5);
+                    pdf.text(`${Number(item.quantidade).toLocaleString('pt-BR', { maximumFractionDigits: 3 })} ${textoSeguro(item.unidade || '')}`, colunas.qtd, y + 5, { align: 'right' });
+                    pdf.text(moedaOrcamento(item.preco), colunas.unitario, y + 5, { align: 'right' });
+                    pdf.text(moedaOrcamento(Number(item.quantidade) * Number(item.preco)), colunas.total - 2, y + 5, { align: 'right' });
+                    y += altura;
+                });
+
+                verificarPagina(39);
+                y += 5; pdf.setDrawColor(203, 213, 225); pdf.line(118, y, larguraPagina - margem, y); y += 6;
+                pdf.setFontSize(9); pdf.text('Subtotal', 145, y, { align: 'right' }); pdf.text(moedaOrcamento(orcamento.subtotal), larguraPagina - margem, y, { align: 'right' }); y += 6;
+                if (Number(orcamento.valorDesconto) > 0) { pdf.text(`Desconto (${Number(orcamento.descontoPercentual).toLocaleString('pt-BR')}%)`, 145, y, { align: 'right' }); pdf.text(`- ${moedaOrcamento(orcamento.valorDesconto)}`, larguraPagina - margem, y, { align: 'right' }); y += 6; }
+                if (Number(orcamento.acrescimo) > 0) { pdf.text('Frete / acréscimo', 145, y, { align: 'right' }); pdf.text(moedaOrcamento(orcamento.acrescimo), larguraPagina - margem, y, { align: 'right' }); y += 6; }
+                pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(5, 150, 105); pdf.text('TOTAL', 145, y, { align: 'right' }); pdf.text(moedaOrcamento(orcamento.total), larguraPagina - margem, y, { align: 'right' }); y += 11;
+
+                pdf.setTextColor(15, 23, 42); pdf.setFontSize(10);
+                const secoes = [['CONDIÇÕES DE PAGAMENTO', orcamento.condicoes], ['PRAZO DE ENTREGA / EXECUÇÃO', orcamento.prazoEntrega], ['OBSERVAÇÕES', orcamento.observacoes]];
+                secoes.forEach(([titulo, conteudo]) => {
+                    if (!conteudo) return;
+                    verificarPagina(16);
+                    pdf.setFont('helvetica', 'bold'); pdf.text(titulo, margem, y); y += 5;
+                    pdf.setFont('helvetica', 'normal'); textoQuebrado(conteudo, margem, larguraUtil, 9, 4.5); y += 4;
+                });
+
+                verificarPagina(35);
+                y += 8; pdf.setDrawColor(148, 163, 184); pdf.line(margem, y, 88, y); pdf.line(122, y, larguraPagina - margem, y); y += 5;
+                pdf.setFontSize(8); pdf.setTextColor(71, 85, 105); pdf.text('Responsável pela empresa', 51, y, { align: 'center' }); pdf.text('Aceite do cliente', 158, y, { align: 'center' });
+                const paginas = pdf.getNumberOfPages();
+                for (let pagina = 1; pagina <= paginas; pagina++) {
+                    pdf.setPage(pagina); pdf.setFontSize(7.5); pdf.setTextColor(100, 116, 139);
+                    pdf.text(`${textoSeguro(orcamento.numero)} · Página ${pagina} de ${paginas}`, larguraPagina / 2, 292, { align: 'center' });
+                }
+                pdf.save(`orcamento-${String(orcamento.numero).toLowerCase()}-${textoSeguro(cliente.nome).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'cliente'}.pdf`);
+            } catch (erro) {
+                console.error('Erro ao gerar PDF do orçamento:', erro);
+                mostrarMensagem('Não foi possível gerar o PDF do orçamento.', 'erro');
+            }
+        }
+
         // Persistência
         function salvarDados() {
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
@@ -3546,6 +4119,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
+            localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
         }
 
         function salvarRascunhoVenda() {
@@ -3643,5 +4217,7 @@ function showInstallButton() {
             calcularSaldoCaixa();
             atualizarHistoricoMovimentos();
             atualizarHistoricoFechamentos();
+            atualizarListaOrcamentos();
+            atualizarDadosEmitenteOrcamento();
         }
     </script>

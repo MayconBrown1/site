@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Como abrir o PDV Pro</title>
+    <style>
+        :root { color-scheme: light; --preto:#080808; --ouro:#d4af37; --fundo:#f3f4f6; --texto:#172033; --verde:#087f5b; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:var(--fundo); color:var(--texto); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+        header { background:linear-gradient(120deg,#050505,#202020); color:white; padding:34px 20px; border-bottom:4px solid var(--ouro); }
+        header div, main { max-width:900px; margin:auto; }
+        h1 { margin:0 0 6px; font-size:clamp(28px,5vw,44px); }
+        header p { margin:0; color:#d1d5db; }
+        main { padding:28px 18px 48px; }
+        section { background:white; border:1px solid #e2e8f0; border-radius:16px; padding:22px; margin-bottom:18px; box-shadow:0 10px 28px rgba(15,23,42,.07); }
+        h2 { margin:0 0 14px; font-size:22px; }
+        .passo { display:grid; grid-template-columns:42px 1fr; gap:12px; margin:18px 0; align-items:start; }
+        .numero { display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:var(--ouro); color:#111; font-weight:800; }
+        .passo p { margin:3px 0; }
+        code { font-family:Consolas,"Courier New",monospace; }
+        .comando { display:block; overflow:auto; padding:16px; margin:10px 0; border-radius:10px; background:#111827; color:#f9fafb; border-left:5px solid var(--ouro); white-space:nowrap; }
+        .url { color:var(--verde); font-weight:800; }
+        .aviso { background:#fffbeb; border-color:#fde68a; }
+        .publicar { background:#ecfdf5; border-color:#a7f3d0; }
+        ul { padding-left:22px; }
+        footer { text-align:center; color:#64748b; font-size:13px; padding-top:8px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>Como abrir o PDV Pro</h1>
+            <p>Guia rápido para executar o sistema pelo PowerShell.</p>
+        </div>
+    </header>
+    <main>
+        <section>
+            <h2>Abrir no seu computador</h2>
+
+            <div class="passo">
+                <span class="numero">1</span>
+                <p>Abra no Explorador de Arquivos a pasta <strong>pdv - pro</strong>.</p>
+            </div>
+            <div class="passo">
+                <span class="numero">2</span>
+                <p>Clique na barra de endereço da pasta, apague o endereço, digite <code>powershell</code> e pressione <strong>Enter</strong>.</p>
+            </div>
+            <div class="passo">
+                <span class="numero">3</span>
+                <div>
+                    <p>Na janela azul do PowerShell, cole este comando e pressione <strong>Enter</strong>:</p>
+                    <code class="comando">powershell -ExecutionPolicy Bypass -File .\iniciar-pdv.ps1</code>
+                </div>
+            </div>
+            <div class="passo">
+                <span class="numero">4</span>
+                <p>O navegador abrirá automaticamente. Se não abrir, acesse <span class="url">http://localhost:8000</span>.</p>
+            </div>
+            <div class="passo">
+                <span class="numero">5</span>
+                <p>Para desligar o servidor, volte ao PowerShell e pressione <strong>Ctrl+C</strong>.</p>
+            </div>
+        </section>
+
+        <section class="aviso">
+            <h2>Importante</h2>
+            <p>O endereço <strong>localhost</strong> funciona somente neste computador enquanto a janela do PowerShell estiver aberta. Ele não publica o sistema na internet.</p>
+            <p>Se aparecer uma mensagem dizendo que a porta 8000 está ocupada, use:</p>
+            <code class="comando">powershell -ExecutionPolicy Bypass -File .\iniciar-pdv.ps1 -Porta 8080</code>
+            <p>Nesse caso, acesse <span class="url">http://localhost:8080</span>.</p>
+        </section>
+
+        <section class="publicar">
+            <h2>Publicar na internet de verdade</h2>
+            <p>Este projeto já está configurado para o Firebase. Depois de instalar e conectar o Firebase CLI, o comando de publicação da parte visual é:</p>
+            <code class="comando">firebase deploy --only hosting</code>
+            <p>O endereço configurado no projeto é <strong>https://pdv-brown.web.app/login.html</strong>. Para a configuração completa, consulte o arquivo <strong>README.md</strong> desta mesma pasta.</p>
+        </section>
+
+        <footer>Guia salvo junto ao PDV Pro.</footer>
+    </main>
+</body>
+</html>

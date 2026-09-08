@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdv-pro-v8';
+const CACHE_NAME = 'pdv-pro-v9';
 const APP_SHELL = [
   './', './index.html', './login.html', './cadastro.html', './admin.html', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
   'https://cdn.tailwindcss.com',

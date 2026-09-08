@@ -25,5 +25,6 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, criado/alterado apenas por Cloud Function administrativa.
 - `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
+- O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
 
 A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.

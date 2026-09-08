@@ -12,6 +12,7 @@ function state() {
     ownerUid: uid,
     produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
     clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [],
+    orcamentos: window.orcamentos || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
     configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}, updatedAt: serverTimestamp()
   };
@@ -28,6 +29,7 @@ function iniciarContaVazia() {
   writing = true;
   window.produtos = []; window.vendas = []; window.movimentos = []; window.caixas = [];
   window.clientesFiado = []; window.pagamentosFiado = [];
+  window.orcamentos = [];
   window.categorias = []; window.categoriasOcultas = [];
   window.configSistema = { nomeEmpresa: 'PDV - Pro', cnpj: '' };
   Object.assign(window.CONFIG_PIX, pixPadrao);
@@ -54,6 +56,7 @@ protegerPagina((user) => {
     const d = snap.data(); writing = true;
     window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
     window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
+    window.orcamentos = d.orcamentos || [];
     window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
     window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
     window.aplicarTema?.();
