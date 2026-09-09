@@ -30,7 +30,7 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; letter-s
 .status { min-height: 190px; display: grid; place-items: center; align-content: center; gap: 14px; color: var(--texto-suave); text-align: center; font-size: 1rem; }
 .status[hidden] { display: none; }
 .status.erro { color: #9b2424; }
-.grade-produtos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.grade-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
 .produto { min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: white; border: 1px solid var(--borda); border-radius: 18px; box-shadow: 0 8px 24px rgba(20,46,76,.08); transition: transform .18s ease, box-shadow .18s ease; }
 .produto:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(20,46,76,.14); }
 .produto-imagem { position: relative; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; background: linear-gradient(145deg, #e8eef5, #f9fbfd); overflow: hidden; display: grid; place-items: center; cursor: pointer; }
@@ -73,10 +73,6 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; letter-s
 body.modal-aberto { overflow: hidden; }
 footer { border-top: 1px solid var(--borda); color: var(--texto-suave); text-align: center; padding: 24px 16px 34px; font-size: .88rem; }
 
-@media (max-width: 900px) {
-  .grade-produtos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
 @media (max-width: 600px) {
   .cabecalho-conteudo { width: min(100% - 28px, 1180px); min-height: 160px; align-items: flex-start; gap: 15px; padding: 25px 0; }
   .logo-wrap { width: 72px; height: 72px; flex-basis: 72px; border-radius: 16px; }
@@ -84,9 +80,16 @@ footer { border-top: 1px solid var(--borda); color: var(--texto-suave); text-ali
   .descricao-loja { font-size: .94rem; }
   .conteudo { width: min(100% - 24px, 1180px); padding-top: 22px; }
   .categorias { margin: -5px -12px 20px; padding-right: 12px; padding-left: 12px; }
-  .grade-produtos { grid-template-columns: 1fr; gap: 15px; }
-  .produto { border-radius: 15px; }
+  .grade-produtos { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .produto { border-radius: 10px; }
   .produto:hover { transform: none; }
+  .produto-inicial { font-size: 2rem; }
+  .estoque-selo { top: 5px; left: 5px; max-width: calc(100% - 10px); padding: 3px 5px; font-size: .58rem; line-height: 1.15; }
+  .produto-resumo { padding: 7px; }
+  .produto .produto-nome { font-size: .72rem; line-height: 1.25; }
+  .produto-preco { margin: 4px 0 7px; font-size: .78rem; }
+  .produto .whatsapp { min-height: 34px; padding: 5px 3px; gap: 2px; border-radius: 7px; font-size: .68rem; line-height: 1.1; text-align: center; }
+  .produto .whatsapp::before { display: none; }
   .modal { padding: 10px; place-items: end center; }
   .modal-painel { width: 100%; max-height: 92vh; border-radius: 20px 20px 12px 12px; }
   .modal-grid { grid-template-columns: 1fr; }
