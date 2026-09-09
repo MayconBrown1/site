@@ -511,7 +511,7 @@
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-3 lg:col-span-2">
                         <div class="mb-4">
                             <h2 class="text-lg lg:text-xl font-semibold">Histórico de Fechamentos</h2>
-                            <p class="text-sm text-gray-500">Os registros ficam salvos na nuvem e o PDF pode ser baixado novamente.</p>
+                            <p id="descricao-historico-fechamentos" class="text-sm text-gray-500">Os registros ficam salvos na nuvem e o PDF pode ser baixado novamente.</p>
                         </div>
                         <div id="historico-fechamentos" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
                     </div>
@@ -3179,6 +3179,13 @@ function showInstallButton() {
         function ordenarCaixasMaisRecentes(lista = caixas) {
             return [...lista].sort((a, b) => new Date(b.abertoEm || b.fechadoEm || 0) - new Date(a.abertoEm || a.fechadoEm || 0));
         }
+        function caixaVisivelNoHistorico(caixa) {
+            if (!ehOperadorAtual()) return true;
+            const ontem = new Date();
+            ontem.setDate(ontem.getDate() - 1);
+            const diaDoCaixa = caixa?.dia || (caixa?.fechadoEm ? chaveDia(caixa.fechadoEm) : '');
+            return diaDoCaixa === chaveDia(ontem);
+        }
         function caixaHoje() { return ordenarCaixasMaisRecentes().find(c => c.dia === chaveDia()); }
         function caixaAtualAberto() { return ordenarCaixasMaisRecentes().find(c => !c.fechado) || null; }
         function registroPertenceAoCaixa(registro, caixa) {
@@ -3220,11 +3227,11 @@ function showInstallButton() {
             elemento.textContent = caixa ? `Caixa aberto desde ${new Date(caixa.abertoEm).toLocaleString('pt-BR')} com R$ ${Number(caixa.abertura).toFixed(2)}` : 'Caixa fechado. Vendas e movimentações estão bloqueadas.';
             document.getElementById('btn-abrir-caixa').disabled = !!caixa;
             document.getElementById('btn-fechar-caixa').disabled = !caixa;
-            document.getElementById('btn-registrar-movimento').disabled = !caixa || ehOperadorAtual();
-            ['movimento-tipo', 'movimento-valor', 'movimento-descricao'].forEach(id => { document.getElementById(id).disabled = !caixa || ehOperadorAtual(); });
+            document.getElementById('btn-registrar-movimento').disabled = !caixa;
+            ['movimento-tipo', 'movimento-valor', 'movimento-descricao'].forEach(id => { document.getElementById(id).disabled = !caixa; });
             document.getElementById('btn-abrir-caixa').classList.toggle('opacity-50', !!caixa);
             document.getElementById('btn-fechar-caixa').classList.toggle('opacity-50', !caixa);
-            document.getElementById('btn-registrar-movimento').classList.toggle('opacity-50', !caixa || ehOperadorAtual());
+            document.getElementById('btn-registrar-movimento').classList.toggle('opacity-50', !caixa);
             document.getElementById('aviso-caixa-vendas')?.classList.toggle('hidden', !!caixa);
         }
         function abrirCaixaDia() {
@@ -3311,7 +3318,11 @@ function showInstallButton() {
         function atualizarHistoricoFechamentos() {
             const container = document.getElementById('historico-fechamentos');
             if (!container) return;
-            const fechamentos = ordenarCaixasMaisRecentes(caixas.filter(c => c.fechado));
+            const descricao = document.getElementById('descricao-historico-fechamentos');
+            if (descricao) descricao.textContent = ehOperadorAtual()
+                ? 'Como operador, você pode consultar somente o fechamento do dia anterior.'
+                : 'Os registros ficam salvos na nuvem e o PDF pode ser baixado novamente.';
+            const fechamentos = ordenarCaixasMaisRecentes(caixas.filter(c => c.fechado && caixaVisivelNoHistorico(c)));
             container.innerHTML = fechamentos.map(caixa => {
                 const resumo = caixa.resumo || {};
                 const diferenca = Number(caixa.diferenca || 0);
@@ -3323,10 +3334,14 @@ function showInstallButton() {
                     <div class="mt-3 grid grid-cols-2 gap-2 text-sm"><span>Entradas: <strong>R$ ${Number(resumo.entradas || 0).toFixed(2)}</strong></span><span>Saídas: <strong>R$ ${Number(resumo.saidas || 0).toFixed(2)}</strong></span><span>Esperado: <strong>R$ ${Number(resumo.esperado || 0).toFixed(2)}</strong></span><span>Contado: <strong>R$ ${Number(caixa.contado || 0).toFixed(2)}</strong></span></div>
                     <p class="mt-2 text-sm font-semibold ${diferenca === 0 ? 'text-green-700' : 'text-amber-700'}">Diferença: R$ ${diferenca.toFixed(2)}</p>
                 </article>`;
-            }).join('') || '<p class="text-sm text-gray-500">Nenhum fechamento de caixa registrado.</p>';
+            }).join('') || `<p class="text-sm text-gray-500">${ehOperadorAtual() ? 'Nenhum fechamento registrado no dia anterior.' : 'Nenhum fechamento de caixa registrado.'}</p>`;
         }
         function baixarPdfFechamento(caixaId) {
-            const caixa = caixas.find(item => item.id === caixaId && item.fechado);
+            const caixa = caixas.find(item => item.id === caixaId && item.fechado && caixaVisivelNoHistorico(item));
+            if (!caixa) {
+                mostrarMensagem('Este fechamento está disponível somente para o proprietário.', 'erro');
+                return;
+            }
             gerarPdfFechamento(caixa);
         }
 

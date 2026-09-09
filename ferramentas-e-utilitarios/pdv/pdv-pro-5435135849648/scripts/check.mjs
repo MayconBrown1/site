@@ -25,7 +25,9 @@ for (const marker of [
   'function restaurarEstoqueDosItens',
   'vendedor: vendedorAtual()',
   'function aplicarPermissoesUsuario',
-  'filtro-vendedor-relatorio'
+  'filtro-vendedor-relatorio',
+  'function caixaVisivelNoHistorico',
+  'somente o fechamento do dia anterior'
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
@@ -79,6 +81,10 @@ if (!firestoreRules.includes("request.resource.data.role == 'operator'")) throw 
 
 if (html.includes("getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador)")) {
   throw new Error('O formulário de movimentação não pode ser ocultado do operador.');
+}
+if (html.includes("document.getElementById('btn-registrar-movimento').disabled = !caixa || ehOperadorAtual()")
+  || html.includes("document.getElementById(id).disabled = !caixa || ehOperadorAtual()")) {
+  throw new Error('Os campos de movimentação precisam permanecer habilitados para o operador quando o caixa estiver aberto.');
 }
 for (const marker of ['movimentoAutorizadoPorSenha', 'A senha do operador não autoriza esta movimentação.']) {
   if (!html.includes(marker)) throw new Error(`Proteção da movimentação do operador ausente: ${marker}`);
