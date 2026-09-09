@@ -3,7 +3,7 @@
  * Hotmart, Stripe etc.). Configure esse checkout para redirecionar pagamentos
  * aprovados para: https://SEU-DOMINIO/obrigado.html
  */
-const CHECKOUT_URL = "";
+const CHECKOUT_URL = "https://pay.cakto.com.br/p3x5th8_1095311";
 
 const checkoutButton = document.getElementById("checkoutButton");
 const checkoutDialog = document.getElementById("checkoutDialog");
