@@ -15,6 +15,9 @@ const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
 if (duplicateIds.length) throw new Error(`IDs HTML duplicados: ${duplicateIds.join(', ')}`);
 
+const cloudinaryButtons = html.match(/href="https:\/\/console\.cloudinary\.com\/app\/"/g) || [];
+if (cloudinaryButtons.length !== 2) throw new Error('Os campos de imagem e logo precisam oferecer acesso ao Cloudinary.');
+
 for (const marker of [
   'produto-estoque-vinculo',
   'function produtoRaizEstoque',
