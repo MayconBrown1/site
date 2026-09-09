@@ -28,9 +28,8 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; letter-s
 .categoria-botao:focus-visible { outline: 3px solid #82bdec; outline-offset: 2px; }
 .titulo-categoria { margin: 0 0 18px; color: var(--azul-escuro); font-size: 1.35rem; }
 .status { min-height: 190px; display: grid; place-items: center; align-content: center; gap: 14px; color: var(--texto-suave); text-align: center; font-size: 1rem; }
+.status[hidden] { display: none; }
 .status.erro { color: #9b2424; }
-.carregando { width: 34px; height: 34px; border: 3px solid #cbd8e5; border-top-color: var(--azul); border-radius: 50%; animation: girar .75s linear infinite; }
-@keyframes girar { to { transform: rotate(360deg); } }
 .grade-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px; }
 .produto { min-width: 0; display: flex; flex-direction: column; overflow: hidden; background: white; border: 1px solid var(--borda); border-radius: 18px; box-shadow: 0 8px 24px rgba(20,46,76,.08); transition: transform .18s ease, box-shadow .18s ease; }
 .produto:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(20,46,76,.14); }
