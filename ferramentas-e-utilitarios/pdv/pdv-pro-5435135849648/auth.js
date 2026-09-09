@@ -15,12 +15,20 @@ export async function entrar(email, senha) {
     return;
   }
   const perfil = await getDoc(doc(db, 'users', cred.user.uid));
-  const status = perfil.exists() ? perfil.data().status : 'pendente';
+  const dadosPerfil = perfil.exists() ? perfil.data() : {};
+  const status = dadosPerfil.status || 'pendente';
   if (status !== 'ativo') {
     await signOut(auth);
     if (status === 'bloqueado') throw new Error('Seu acesso está bloqueado. Entre em contato com o administrador.');
     if (status === 'pendente') throw new Error('Seu acesso ainda está aguardando confirmação do pagamento.');
     throw new Error('Seu acesso não está ativo. Entre em contato com o administrador.');
+  }
+  if (dadosPerfil.role === 'operator') {
+    const titular = dadosPerfil.ownerUid ? await getDoc(doc(db, 'users', dadosPerfil.ownerUid)) : null;
+    if (!titular?.exists() || titular.data().status !== 'ativo') {
+      await signOut(auth);
+      throw new Error('O acesso da empresa está indisponível. Entre em contato com o titular.');
+    }
   }
   location.replace('./index.html');
 }
@@ -43,6 +51,11 @@ export function protegerPagina(callback) {
     if (!user) return location.replace('./login.html');
     const perfil = await getDoc(doc(db, 'users', user.uid));
     if (!perfil.exists() || perfil.data().status !== 'ativo') { await signOut(auth); return location.replace('./login.html?status=restrito'); }
-    callback(user, perfil.data());
+    const dadosPerfil = perfil.data();
+    if (dadosPerfil.role === 'operator') {
+      const titular = dadosPerfil.ownerUid ? await getDoc(doc(db, 'users', dadosPerfil.ownerUid)) : null;
+      if (!titular?.exists() || titular.data().status !== 'ativo') { await signOut(auth); return location.replace('./login.html?status=restrito'); }
+    }
+    callback(user, dadosPerfil);
   });
 }

@@ -35,7 +35,9 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .slide-up { animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }`r`n/* Identidade visual do PDV */
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Identidade visual do PDV */
         :root { --pdv-primary: #050505; --pdv-primary-dark: #171717; --pdv-accent: #d4af37; --pdv-ink: #172033; }
         body { background: #f1f5f9; color: var(--pdv-ink); }
         header { background: linear-gradient(120deg, #050505 0%, #121212 100%) !important; border-bottom: 1px solid rgba(255,255,255,.14); }
@@ -51,7 +53,20 @@
         #total-venda, #comprovante-total-final { letter-spacing: -.025em; }
         .pdv-cnpj-hint { font-size: .75rem; color: #64748b; margin-top: .35rem; }
         @media print { .print-area { width: 72mm; font-family: monospace; } }
-        @media (max-width: 640px) { main { padding: .75rem !important; } header { position: sticky; top: 0; z-index: 40; } .opiniao-btn { bottom: 12px; left: 12px; padding: 10px 13px; } }
+        @media (max-width: 640px) {
+            main { padding: .625rem !important; }
+            header { position: sticky; top: 0; z-index: 40; padding: .65rem !important; }
+            #menu-pdv { max-height: calc(100dvh - 68px); overflow-y: auto; padding-top: .25rem; }
+            #menu-pdv button { min-height: 44px; border-radius: .7rem; }
+            #vendas-section > div { gap: .625rem !important; }
+            #vendas-section .bg-white.rounded-lg.shadow-md { padding: .85rem !important; }
+            #produtos-lista, #carrinho-items { max-height: 34dvh; }
+            #pagamentos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #pagamentos-grid button { min-height: 48px; }
+            .fixed.inset-0 > .bg-white { max-height: calc(100dvh - 1rem); overflow-y: auto; }
+            input, select, textarea { font-size: 16px !important; }
+            .opiniao-btn { bottom: 12px; left: 12px; padding: 10px 13px; }
+        }
 
     </style>
 </head>
@@ -61,20 +76,20 @@
         <header class="bg-blue-600 text-white p-3 md:p-4 shadow-lg">
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex w-full items-center justify-between sm:w-auto">
-                    <h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1>
+                    <div><h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1><p id="usuario-pdv-atual" class="hidden text-xs text-zinc-300"></p></div>
                     <button type="button" onclick="alternarMenuPdv()" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xl sm:hidden" aria-label="Abrir menu" aria-controls="menu-pdv">☰</button>
                 </div>
                 <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:flex-wrap sm:w-auto">
-                    <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
-                    <button onclick="showSection('orcamentos')" class="bg-emerald-500 hover:bg-emerald-700 px-3 py-2 rounded transition-colors text-sm">Orçamentos</button>
-                    <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
-                    <button onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
-                    <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
-                    <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
-                    <button onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
-                    <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
-                    <button onclick="alternarTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">◐ Tema</button>
-                    <button onclick="acessarAdm()" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">ADM do PDV</button>
+                    <button data-section="vendas" onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
+                    <button data-section="orcamentos" onclick="showSection('orcamentos')" class="bg-emerald-500 hover:bg-emerald-700 px-3 py-2 rounded transition-colors text-sm">Orçamentos</button>
+                    <button data-section="produtos" onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
+                    <button data-section="clientes" onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
+                    <button data-section="caixa" onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
+                    <button data-section="relatorios" onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
+                    <button data-section="catalogo" onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
+                    <button data-section="novidades" onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
+                    <button data-owner-only onclick="alternarTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">◐ Tema</button>
+                    <button data-owner-only onclick="acessarAdm()" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">ADM do PDV</button>
                 </div>
             </div>
         </header>
@@ -126,7 +141,7 @@
                     <!-- Pagamento -->
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-3">
                         <h2 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">Pagamento</h2>
-                        <div class="grid grid-cols-1 gap-2 lg:space-y-3 mb-3 lg:mb-4">
+                        <div id="pagamentos-grid" class="grid grid-cols-1 gap-2 lg:space-y-3 mb-3 lg:mb-4">
                             <button onclick="selecionarPagamento('dinheiro')" 
                                     class="w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm lg:text-base">
                                 💵 Dinheiro
@@ -245,6 +260,13 @@
                             <div id="campo-produto-estoque">
                                 <label for="produto-estoque" class="block text-sm font-medium text-gray-700 mb-1">Estoque Inicial</label>
                                 <input type="number" id="produto-estoque" step="0.01" min="0" value="0" class="w-full p-3 border rounded-lg text-base">
+                            </div>
+                            <div id="campo-produto-vinculo" class="sm:col-span-2 lg:col-span-1">
+                                <label for="produto-estoque-vinculo" class="block text-sm font-medium text-gray-700 mb-1">Estoque compartilhado</label>
+                                <select id="produto-estoque-vinculo" class="w-full p-3 border rounded-lg text-base" onchange="atualizarVinculoEstoqueForm()">
+                                    <option value="">Estoque próprio</option>
+                                </select>
+                                <p id="produto-estoque-vinculo-ajuda" class="mt-1 text-xs text-gray-500">Use estoque próprio ou vincule este item ao saldo de outro produto.</p>
                             </div>
                             <div class="sm:col-span-2 lg:col-span-1">
                                 <label for="produto-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
@@ -440,8 +462,9 @@
             <div id="caixa-section" class="section hidden">
                 <div class="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
-                        <h2 class="text-lg lg:text-xl font-semibold mb-4">Movimentação de Caixa</h2>
-                        <div class="space-y-4">
+                        <div id="aviso-caixa-operador" class="mb-4 hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">Como operador, você pode abrir e fechar o caixa e acompanhar entradas e saídas. Movimentações manuais e sangrias ficam disponíveis somente para o titular.</div>
+                        <h2 id="titulo-movimentacao-caixa" class="text-lg lg:text-xl font-semibold mb-4">Movimentação de Caixa</h2>
+                        <div id="form-movimentacao-caixa" class="space-y-4">
                             <div>
                                 <label for="movimento-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                                 <select id="movimento-tipo" class="w-full p-3 border rounded-lg text-base">
@@ -515,6 +538,12 @@
                                 <div class="text-xl lg:text-2xl font-bold text-red-600" id="estoque-baixo">0</div>
                             </div>
                         </div>
+
+                        <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <label for="filtro-vendedor-relatorio" class="block text-sm font-semibold text-slate-700">Vendas por operador</label>
+                            <select id="filtro-vendedor-relatorio" class="mt-2 w-full rounded-lg border p-3 sm:max-w-sm" onchange="atualizarRelatorios()"><option value="">Todos os vendedores</option></select>
+                            <div id="resumo-vendedores" class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></div>
+                        </div>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                             <button 
@@ -546,6 +575,7 @@
                                         <th class="px-4 py-2 text-left">Itens</th>
                                         <th class="px-4 py-2 text-right">Total</th>
                                         <th class="px-4 py-2 text-left">Pagamento</th>
+                                        <th class="px-4 py-2 text-left">Vendedor</th>
                                         <th class="px-4 py-2 text-center">Ações</th>
                                     </tr>
                                 </thead>
@@ -569,6 +599,8 @@
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Versão atual</span>
                     </div>
                     <div class="grid gap-4 lg:grid-cols-2">
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🔗 Estoque compartilhado</h3><p class="mt-2 text-sm text-slate-700">Produtos diferentes podem consumir o mesmo saldo. No cadastro, escolha outro produto em <strong>Estoque compartilhado</strong>; vendas de qualquer item vinculado baixam o mesmo estoque.</p></article>
+                        <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">👤 Acesso de operadores</h3><p class="mt-2 text-sm text-slate-700">O titular pode criar acessos individuais no ADM. Cada venda registra o vendedor; operadores acessam vendas, orçamentos, clientes e abertura/fechamento do caixa, sem relatórios, cadastros administrativos ou sangrias.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🧾 Dados da empresa no cupom</h3><p class="mt-2 text-sm text-slate-700">Cadastre o CNPJ em <strong>ADM → Configurações do Sistema</strong>. Ele aparece no comprovante e no PDF térmico, com validação automática.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🛠️ Produtos e serviços</h3><p class="mt-2 text-sm text-slate-700">No cadastro, escolha <strong>Produto</strong> ou <strong>Serviço</strong>. Serviços não controlam estoque e o valor unitário pode ser alterado no carrinho antes de concluir a venda.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🏷️ Categorias reutilizáveis</h3><p class="mt-2 text-sm text-slate-700">Há categorias padrão e você pode criar outras no cadastro usando <strong>+ Nova</strong>. Em <strong>Gerenciar</strong>, use o botão <strong>×</strong> para excluir uma categoria que não deseja mais.</p></article>
@@ -649,6 +681,20 @@
                     </div>
 
                     <div class="space-y-6">
+                        <div class="border rounded-lg p-4">
+                            <div class="mb-4">
+                                <h3 class="text-lg font-semibold text-blue-700">👥 Operadores</h3>
+                                <p class="mt-1 text-sm text-gray-600">Crie um login individual para cada funcionário. As vendas sairão com o nome do operador.</p>
+                            </div>
+                            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                                <div><label for="operador-nome" class="mb-1 block text-sm font-medium text-gray-700">Nome *</label><input id="operador-nome" maxlength="80" class="w-full rounded-lg border p-3" placeholder="Nome do funcionário"></div>
+                                <div><label for="operador-email" class="mb-1 block text-sm font-medium text-gray-700">E-mail de acesso *</label><input id="operador-email" type="email" maxlength="160" autocapitalize="none" autocomplete="off" class="w-full rounded-lg border p-3" placeholder="operador@empresa.com"></div>
+                                <div><label for="operador-senha" class="mb-1 block text-sm font-medium text-gray-700">Senha inicial *</label><input id="operador-senha" type="password" minlength="6" autocomplete="new-password" class="w-full rounded-lg border p-3" placeholder="Mínimo de 6 caracteres"></div>
+                            </div>
+                            <button id="btn-salvar-operador" type="button" onclick="salvarOperador()" class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto">Adicionar operador</button>
+                            <p id="operadores-status" class="mt-3 text-sm text-slate-600" role="status"></p>
+                            <div id="lista-operadores" class="mt-4 grid gap-3 lg:grid-cols-2"></div>
+                        </div>
                         <!-- Configurações PIX -->
                         <div class="border rounded-lg p-4">
                             <h3 class="text-lg font-semibold mb-4 text-purple-700">📱 Configurações PIX</h3>
@@ -1085,6 +1131,45 @@ if ('serviceWorker' in navigator) {
             CONFIG_PIX: { get: () => CONFIG_PIX }
         });
 
+        function ehOperadorAtual() { return window.usuarioPdv?.role === 'operator'; }
+        function vendedorAtual() {
+            const usuario = window.usuarioPdv || {};
+            return {
+                id: usuario.uid || 'titular',
+                nome: usuario.nome || 'Titular',
+                email: usuario.email || '',
+                tipo: ehOperadorAtual() ? 'operador' : 'titular'
+            };
+        }
+
+        function exigirTitular(mensagem = 'Esta ação está disponível somente para o titular da empresa.') {
+            if (!ehOperadorAtual()) return true;
+            mostrarMensagem(mensagem, 'erro');
+            return false;
+        }
+
+        function aplicarPermissoesUsuario() {
+            const operador = ehOperadorAtual();
+            const permitidas = new Set(['vendas', 'orcamentos', 'clientes', 'caixa']);
+            document.querySelectorAll('#menu-pdv [data-section]').forEach(botao => {
+                botao.classList.toggle('hidden', operador && !permitidas.has(botao.dataset.section));
+            });
+            document.querySelectorAll('#menu-pdv [data-owner-only]').forEach(botao => botao.classList.toggle('hidden', operador));
+            document.getElementById('titulo-movimentacao-caixa')?.classList.toggle('hidden', operador);
+            document.getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador);
+            document.getElementById('aviso-caixa-operador')?.classList.toggle('hidden', !operador);
+            const identificacao = document.getElementById('usuario-pdv-atual');
+            if (identificacao && window.usuarioPdv) {
+                identificacao.textContent = operador ? `Operador: ${window.usuarioPdv.nome}` : `Titular: ${window.usuarioPdv.nome}`;
+                identificacao.classList.remove('hidden');
+            }
+            if (operador) {
+                const visivel = document.querySelector('.section:not(.hidden)')?.id?.replace('-section', '');
+                if (visivel && !permitidas.has(visivel)) showSection('vendas');
+            }
+        }
+        window.aplicarPermissoesUsuario = aplicarPermissoesUsuario;
+
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarDados();
@@ -1143,6 +1228,7 @@ if ('serviceWorker' in navigator) {
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'F2') {
                     e.preventDefault();
+                    if (ehOperadorAtual()) return mostrarMensagem('Cadastro de produtos disponível somente para o titular.', 'erro');
                     showSection('produtos');
                     mostrarFormProduto();
                 } else if (e.key === 'F4') {
@@ -1172,6 +1258,10 @@ if ('serviceWorker' in navigator) {
         }
 
         function showSection(sectionName) {
+            if (ehOperadorAtual() && !['vendas', 'orcamentos', 'clientes', 'caixa'].includes(sectionName)) {
+                mostrarMensagem('Esta área está disponível somente para o titular da empresa.', 'erro');
+                sectionName = 'vendas';
+            }
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('hidden');
             });
@@ -1199,6 +1289,12 @@ if ('serviceWorker' in navigator) {
                 window.carregarMeuCatalogo?.();
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
+                window.carregarOperadores?.();
+            }
+            if (window.innerWidth < 640) {
+                const menu = document.getElementById('menu-pdv');
+                menu.classList.add('hidden');
+                menu.classList.remove('grid');
             }
         }
 
@@ -1210,8 +1306,113 @@ if ('serviceWorker' in navigator) {
         function aplicarTema() { document.body.classList.toggle('tema-escuro', (configSistema.tema || 'claro') === 'escuro'); }
         function alternarTema() { configSistema.tema = (configSistema.tema || 'claro') === 'escuro' ? 'claro' : 'escuro'; aplicarTema(); salvarDados(); }
 
+        function produtoRaizEstoque(produto, visitados = new Set()) {
+            if (!produto || produto.tipo === 'servico' || !produto.estoqueVinculadoId) return produto;
+            if (visitados.has(produto.id)) return produto;
+            visitados.add(produto.id);
+            const vinculado = produtos.find(item => item.id === produto.estoqueVinculadoId && item.tipo !== 'servico');
+            if (!vinculado || vinculado.id === produto.id) return produto;
+            return produtoRaizEstoque(vinculado, visitados);
+        }
+
+        function estoqueDisponivel(produto) {
+            return Number(produtoRaizEstoque(produto)?.estoque || 0);
+        }
+
+        function chaveEstoque(produto) {
+            return produtoRaizEstoque(produto)?.id || produto?.id || '';
+        }
+
+        function normalizarEstoquesVinculados() {
+            produtos.forEach(produto => {
+                if (produto.tipo === 'servico' || !produto.estoqueVinculadoId) return;
+                const raiz = produtoRaizEstoque(produto);
+                if (!raiz || raiz.id === produto.id || raiz.tipo === 'servico') {
+                    delete produto.estoqueVinculadoId;
+                    return;
+                }
+                produto.estoqueVinculadoId = raiz.id;
+                produto.estoque = Number(raiz.estoque || 0);
+                produto.unidade = raiz.unidade || produto.unidade || 'un';
+            });
+        }
+        window.normalizarEstoquesVinculados = normalizarEstoquesVinculados;
+
+        function totalReservadoNoEstoque(produto, ignorarProdutoId = '') {
+            const chave = chaveEstoque(produto);
+            return carrinho.reduce((total, item) => {
+                if (item.produtoId === ignorarProdutoId) return total;
+                const itemProduto = produtos.find(produtoAtual => produtoAtual.id === item.produtoId);
+                return itemProduto && chaveEstoque(itemProduto) === chave ? total + Number(item.quantidade || 0) : total;
+            }, 0);
+        }
+
+        function restaurarEstoqueDosItens(itens = []) {
+            const totais = new Map();
+            itens.forEach(item => {
+                const produto = produtos.find(produtoAtual => produtoAtual.id === item.produtoId);
+                if (!produto || produto.tipo === 'servico') return;
+                const estoqueId = item.estoqueOrigemId || chaveEstoque(produto);
+                totais.set(estoqueId, (totais.get(estoqueId) || 0) + Number(item.quantidade || 0));
+            });
+            totais.forEach((quantidade, estoqueId) => {
+                const raiz = produtos.find(produto => produto.id === estoqueId);
+                if (raiz) raiz.estoque = Number(raiz.estoque || 0) + quantidade;
+            });
+            normalizarEstoquesVinculados();
+        }
+
+        function atualizarOpcoesVinculoEstoque(valorSelecionado = '') {
+            const select = document.getElementById('produto-estoque-vinculo');
+            if (!select) return;
+            const atual = produtoEditando;
+            const raizes = [];
+            const vistos = new Set();
+            produtos.filter(produto => produto.tipo !== 'servico').forEach(produto => {
+                const raiz = produtoRaizEstoque(produto);
+                if (!raiz || vistos.has(raiz.id) || raiz.id === atual?.id) return;
+                if (atual && produtoRaizEstoque(raiz)?.id === atual.id) return;
+                vistos.add(raiz.id);
+                raizes.push(raiz);
+            });
+            select.innerHTML = '<option value="">Estoque próprio</option>';
+            raizes.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = `${produto.nome} — ${estoqueDisponivel(produto)} ${produto.unidade || 'un'}`;
+                select.appendChild(option);
+            });
+            select.value = valorSelecionado && [...select.options].some(option => option.value === valorSelecionado) ? valorSelecionado : '';
+            atualizarVinculoEstoqueForm();
+        }
+
+        function atualizarVinculoEstoqueForm() {
+            const select = document.getElementById('produto-estoque-vinculo');
+            const estoque = document.getElementById('produto-estoque');
+            const unidade = document.getElementById('produto-unidade');
+            const ajuda = document.getElementById('produto-estoque-vinculo-ajuda');
+            if (!select || !estoque || !unidade) return;
+            const raiz = produtos.find(produto => produto.id === select.value);
+            const vinculado = !!raiz;
+            estoque.disabled = vinculado;
+            unidade.disabled = vinculado;
+            estoque.classList.toggle('bg-slate-100', vinculado);
+            unidade.classList.toggle('bg-slate-100', vinculado);
+            if (vinculado) {
+                estoque.value = estoqueDisponivel(raiz);
+                unidade.value = raiz.unidade || 'un';
+                ajuda.textContent = `Mesmo saldo de “${raiz.nome}”. Qualquer venda baixa os dois produtos.`;
+                ajuda.className = 'mt-1 text-xs font-semibold text-blue-700';
+            } else {
+                ajuda.textContent = 'Use estoque próprio ou vincule este item ao saldo de outro produto.';
+                ajuda.className = 'mt-1 text-xs text-gray-500';
+            }
+        }
+
         // Gerenciamento de produtos
         function mostrarFormProduto() {
+            if (!exigirTitular('Cadastro de produtos disponível somente para o titular.')) return;
+            atualizarOpcoesVinculoEstoque(produtoEditando?.estoqueVinculadoId || '');
             document.getElementById('form-produto').classList.remove('hidden');
             document.getElementById('produto-nome').focus();
         }
@@ -1230,6 +1431,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-custo').value = '';
             document.getElementById('produto-unidade').value = 'un';
             document.getElementById('produto-estoque').value = '0';
+            document.getElementById('produto-estoque-vinculo').value = '';
             document.getElementById('produto-categoria').value = '';
             document.getElementById('produto-descricao').value = '';
             document.getElementById('produto-imagem').value = '';
@@ -1242,6 +1444,8 @@ if ('serviceWorker' in navigator) {
             document.getElementById('campo-produto-custo').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-unidade').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-estoque').classList.toggle('hidden', ehServico);
+            document.getElementById('campo-produto-vinculo').classList.toggle('hidden', ehServico);
+            if (ehServico) document.getElementById('produto-estoque-vinculo').value = '';
             document.getElementById('produto-codigo').closest('div').classList.toggle('hidden', ehServico);
             const campoCatalogo = document.getElementById('campo-visivel-catalogo');
             const visivelCatalogo = document.getElementById('produto-visivel-catalogo');
@@ -1249,9 +1453,11 @@ if ('serviceWorker' in navigator) {
             visivelCatalogo.disabled = false;
             document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
             document.getElementById('produto-preco').required = !ehServico;
+            atualizarVinculoEstoqueForm();
         }
 
         function salvarProduto() {
+            if (!exigirTitular('Cadastro de produtos disponível somente para o titular.')) return;
             const nome = document.getElementById('produto-nome').value.trim();
             const preco = parseFloat(document.getElementById('produto-preco').value);
             const tipo = document.getElementById('produto-tipo').value;
@@ -1271,6 +1477,9 @@ if ('serviceWorker' in navigator) {
                 }
             }
 
+            const raizSelecionada = tipo === 'produto'
+                ? produtoRaizEstoque(produtos.find(item => item.id === document.getElementById('produto-estoque-vinculo').value))
+                : null;
             const produto = {
                 id: produtoEditando ? produtoEditando.id : 'p_' + Date.now(),
                 tipo: tipo,
@@ -1278,12 +1487,13 @@ if ('serviceWorker' in navigator) {
                 codigo: tipo === 'servico' ? '' : document.getElementById('produto-codigo').value.trim(),
                 preco: preco,
                 custo: tipo === 'servico' ? 0 : (parseFloat(document.getElementById('produto-custo').value) || 0),
-                unidade: tipo === 'servico' ? 'serviço' : document.getElementById('produto-unidade').value,
-                estoque: tipo === 'servico' ? null : (parseFloat(document.getElementById('produto-estoque').value) || 0),
+                unidade: tipo === 'servico' ? 'serviço' : (raizSelecionada?.unidade || document.getElementById('produto-unidade').value),
+                estoque: tipo === 'servico' ? null : (raizSelecionada ? estoqueDisponivel(raizSelecionada) : (parseFloat(document.getElementById('produto-estoque').value) || 0)),
                 categoria: document.getElementById('produto-categoria').value.trim(),
                 descricao: document.getElementById('produto-descricao').value.trim(),
                 imagem: imagem,
-                visivelCatalogo: document.getElementById('produto-visivel-catalogo').checked
+                visivelCatalogo: document.getElementById('produto-visivel-catalogo').checked,
+                ...(raizSelecionada ? { estoqueVinculadoId: raizSelecionada.id } : {})
             };
 
             if (produtoEditando) {
@@ -1292,6 +1502,8 @@ if ('serviceWorker' in navigator) {
             } else {
                 produtos.push(produto);
             }
+
+            normalizarEstoquesVinculados();
 
             registrarCategoria(produto.categoria);
 
@@ -1405,12 +1617,14 @@ if ('serviceWorker' in navigator) {
         let produtoParaAcao = null;
 
         function editarProduto(id) {
+            if (!exigirTitular('Edição de produtos disponível somente para o titular.')) return;
             produtoParaAcao = id;
             acaoPendente = 'editar_produto';
             solicitarSenhaAcao('Digite a senha para editar este produto:');
         }
 
         function removerProduto(id) {
+            if (!exigirTitular('Remoção de produtos disponível somente para o titular.')) return;
             produtoParaAcao = id;
             acaoPendente = 'remover_produto';
             solicitarSenhaAcao('Digite a senha para remover este produto:');
@@ -1433,11 +1647,18 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-imagem').value = produto.imagem || '';
             document.getElementById('produto-visivel-catalogo').checked = produto.visivelCatalogo === true;
             atualizarCamposTipoItem();
+            atualizarOpcoesVinculoEstoque(produto.estoqueVinculadoId || '');
             
             mostrarFormProduto();
         }
 
         function executarRemocaoProduto(id) {
+            const produto = produtos.find(item => item.id === id);
+            const vinculados = produtos.filter(item => item.id !== id && item.tipo !== 'servico' && chaveEstoque(item) === id);
+            if (produto && vinculados.length) {
+                mostrarMensagem(`Desvincule primeiro: ${vinculados.map(item => item.nome).join(', ')}.`, 'erro');
+                return;
+            }
             produtos = produtos.filter(p => p.id !== id);
             salvarDados();
             atualizarTabelaProdutos();
@@ -1456,17 +1677,21 @@ if ('serviceWorker' in navigator) {
 
             produtos.forEach(produto => {
                 const ehServico = produto.tipo === 'servico';
-                const estoqueClass = !ehServico && produto.estoque <= 5 ? 'text-red-600 font-semibold' : '';
+                const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
+                const raizEstoque = ehServico ? null : produtoRaizEstoque(produto);
+                const estoqueClass = !ehServico && saldoEstoque <= 5 ? 'text-red-600 font-semibold' : '';
+                const indicacaoVinculo = produto.estoqueVinculadoId && raizEstoque?.id !== produto.id
+                    ? `<div class="mt-1 text-xs font-semibold text-blue-700">🔗 Mesmo estoque de ${raizEstoque.nome}</div>` : '';
                 
                 // Tabela desktop
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-gray-50';
                 
                 tr.innerHTML = `
-                    <td class="px-4 py-2">${produto.nome}</td>
+                    <td class="px-4 py-2">${produto.nome}${indicacaoVinculo}</td>
                     <td class="px-4 py-2">${ehServico ? '<span class="text-teal-700 font-semibold">Serviço</span>' : (produto.codigo || '-')}</td>
                     <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
-                    <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${produto.estoque} ${produto.unidade}`}</td>
+                    <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${saldoEstoque} ${produto.unidade}`}</td>
                     <td class="px-4 py-2">${produto.categoria || '-'}</td>
                     <td class="px-4 py-2 text-center">${produto.visivelCatalogo === true ? '<span class="rounded-full bg-teal-100 px-2 py-1 text-xs font-semibold text-teal-800">Visível</span>' : '<span class="text-xs text-gray-500">Oculto</span>'}</td>
                     <td class="px-4 py-2 text-center">
@@ -1490,11 +1715,12 @@ if ('serviceWorker' in navigator) {
                             <h4 class="font-semibold text-base">${produto.nome}</h4>
                             <p class="text-sm text-gray-600">${ehServico ? 'Serviço' : (produto.codigo || 'Sem código')}</p>
                             <p class="text-sm text-gray-600">${produto.categoria || 'Sem categoria'}</p>
+                            ${indicacaoVinculo}
                             <p class="mt-1 text-xs font-semibold ${produto.visivelCatalogo === true ? 'text-teal-700' : 'text-gray-500'}">Catálogo: ${produto.visivelCatalogo === true ? 'visível' : 'oculto'}</p>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>
-                            <div class="text-sm ${estoqueClass}">${ehServico ? 'Valor ajustável na venda' : `Estoque: ${produto.estoque} ${produto.unidade}`}</div>
+                            <div class="text-sm ${estoqueClass}">${ehServico ? 'Valor ajustável na venda' : `Estoque: ${saldoEstoque} ${produto.unidade}`}</div>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-3">
@@ -1695,11 +1921,12 @@ function showInstallButton() {
                 div.onclick = () => adicionarAoCarrinho(produto.id);
                 
                 const ehServico = produto.tipo === 'servico';
-                const estoqueClass = !ehServico && (produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600');
+                const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
+                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= 5 ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
                     <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
-                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span>`}</div>
+                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${saldoEstoque} ${produto.unidade}</span>`}</div>
                 `;
                 lista.appendChild(div);
             });
@@ -1715,11 +1942,12 @@ function showInstallButton() {
                 div.onclick = () => adicionarAoCarrinho(produto.id);
                 
                 const ehServico = produto.tipo === 'servico';
-                const estoqueClass = !ehServico && (produto.estoque <= 0 ? 'text-red-600' : produto.estoque <= 5 ? 'text-orange-600' : 'text-green-600');
+                const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
+                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= 5 ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
                     <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
-                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${produto.estoque} ${produto.unidade}</span>`}</div>
+                    <div class="text-sm text-gray-600">${ehServico ? `Serviço — valor-base: R$ ${produto.preco.toFixed(2)} (ajustável na venda)` : `R$ ${produto.preco.toFixed(2)} - Estoque: <span class="${estoqueClass}">${saldoEstoque} ${produto.unidade}</span>`}</div>
                 `;
                 lista.appendChild(div);
             });
@@ -1788,10 +2016,11 @@ function showInstallButton() {
             
             const pesoKg = pesoGramas / 1000;
             const precoUnitario = produtoParaPesagem.preco; // Preço por kg
+            const saldoDisponivel = estoqueDisponivel(produtoParaPesagem);
             
             // Verificar se há estoque suficiente
-            if (pesoKg > produtoParaPesagem.estoque) {
-                mostrarMensagem(`Estoque insuficiente! Disponível: ${produtoParaPesagem.estoque}kg`, 'erro');
+            if (totalReservadoNoEstoque(produtoParaPesagem) + pesoKg > saldoDisponivel) {
+                mostrarMensagem(`Estoque compartilhado insuficiente! Disponível: ${saldoDisponivel}kg`, 'erro');
                 return;
             }
             
@@ -1802,7 +2031,7 @@ function showInstallButton() {
                 // Somar o peso ao item existente
                 const novaQuantidade = itemExistente.quantidade + pesoKg;
                 
-                if (novaQuantidade > produtoParaPesagem.estoque) {
+                if (totalReservadoNoEstoque(produtoParaPesagem, produtoParaPesagem.id) + novaQuantidade > saldoDisponivel) {
                     mostrarMensagem('Quantidade total excede o estoque disponível!', 'erro');
                     return;
                 }
@@ -1816,7 +2045,8 @@ function showInstallButton() {
                     preco: precoUnitario,
                     quantidade: pesoKg,
                     unidade: produtoParaPesagem.unidade,
-                    pesoGramas: pesoGramas // Guardar peso original em gramas para exibição
+                    pesoGramas: pesoGramas,
+                    estoqueOrigemId: chaveEstoque(produtoParaPesagem)
                 });
             }
             
@@ -1858,7 +2088,8 @@ function showInstallButton() {
             if (!produto) return false;
 
             const ehServico = produto.tipo === 'servico';
-            if (!ehServico && produto.estoque <= 0) {
+            const saldoDisponivel = ehServico ? null : estoqueDisponivel(produto);
+            if (!ehServico && saldoDisponivel <= 0) {
                 mostrarMensagem('Produto sem estoque!', 'erro');
                 return false;
             }
@@ -1869,10 +2100,15 @@ function showInstallButton() {
                 return false;
             }
 
+            if (!ehServico && totalReservadoNoEstoque(produto) + 1 > saldoDisponivel) {
+                mostrarMensagem('Quantidade não disponível no estoque compartilhado!', 'erro');
+                return false;
+            }
+
             const itemExistente = carrinho.find(item => item.produtoId === produtoId);
             
             if (itemExistente) {
-                if (!ehServico && itemExistente.quantidade >= produto.estoque) {
+                if (!ehServico && totalReservadoNoEstoque(produto) + 1 > saldoDisponivel) {
                     mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
                     return false;
                 }
@@ -1884,7 +2120,8 @@ function showInstallButton() {
                     preco: produto.preco,
                     quantidade: 1,
                     unidade: produto.unidade,
-                    tipo: produto.tipo || 'produto'
+                    tipo: produto.tipo || 'produto',
+                    ...(ehServico ? {} : { estoqueOrigemId: chaveEstoque(produto) })
                 });
             }
 
@@ -1905,7 +2142,7 @@ function showInstallButton() {
                 return;
             }
 
-            if (produto.tipo !== 'servico' && novaQuantidade > produto.estoque) {
+            if (produto.tipo !== 'servico' && totalReservadoNoEstoque(produto, produtoId) + novaQuantidade > estoqueDisponivel(produto)) {
                 mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
                 return;
             }
@@ -2323,11 +2560,18 @@ function showInstallButton() {
                 vendaAtual.vencimento = document.getElementById('fiado-vencimento').value || '';
             }
 
-            // Verificar estoque antes de finalizar
-            for (let item of carrinho) {
+            // Soma todos os itens que consomem o mesmo estoque antes de baixar o saldo.
+            const consumoPorEstoque = new Map();
+            for (const item of carrinho) {
                 const produto = produtos.find(p => p.id === item.produtoId);
-                if (produto.tipo !== 'servico' && produto.estoque < item.quantidade) {
-                    mostrarMensagem(`Estoque insuficiente para ${produto.nome}!`, 'erro');
+                if (!produto) { mostrarMensagem(`O item ${item.nome} não está mais cadastrado.`, 'erro'); return; }
+                if (produto.tipo === 'servico') continue;
+                const raiz = produtoRaizEstoque(produto);
+                item.estoqueOrigemId = raiz.id;
+                const consumo = (consumoPorEstoque.get(raiz.id) || 0) + Number(item.quantidade || 0);
+                consumoPorEstoque.set(raiz.id, consumo);
+                if (estoqueDisponivel(raiz) < consumo) {
+                    mostrarMensagem(`Estoque compartilhado insuficiente para ${produto.nome}!`, 'erro');
                     return;
                 }
             }
@@ -2342,14 +2586,16 @@ function showInstallButton() {
                 valorDesconto: valorDesconto,
                 total: total,
                 pagamento: vendaAtual,
-                caixaId: caixa.id
+                caixaId: caixa.id,
+                vendedor: vendedorAtual()
             };
 
             // Atualizar estoque
-            carrinho.forEach(item => {
-                const produto = produtos.find(p => p.id === item.produtoId);
-                if (produto.tipo !== 'servico') produto.estoque -= item.quantidade;
+            consumoPorEstoque.forEach((quantidade, estoqueId) => {
+                const raiz = produtos.find(produto => produto.id === estoqueId);
+                if (raiz) raiz.estoque = Number(raiz.estoque || 0) - quantidade;
             });
+            normalizarEstoquesVinculados();
 
             // Salvar venda
             vendas.push(venda);
@@ -2362,7 +2608,8 @@ function showInstallButton() {
                 valor: total,
                 descricao: `Venda #${venda.id} - ${vendaAtual.tipo}`,
                 vendaId: venda.id,
-                caixaId: caixa.id
+                caixaId: caixa.id,
+                vendedor: venda.vendedor
             };
             movimentos.push(movimento);
 
@@ -2417,6 +2664,7 @@ function showInstallButton() {
                 <div><strong>Data:</strong> ${data.toLocaleDateString('pt-BR')} - <strong>Hora:</strong> ${data.toLocaleTimeString('pt-BR')}</div>
                 <div><strong>Estabelecimento:</strong> ${configSistema.nomeEmpresa || 'PDV - Pro'}</div>
                 ${configSistema.cnpj ? `<div><strong>CNPJ:</strong> ${formatarCNPJ(configSistema.cnpj)}</div>` : ''}
+                <div><strong>Vendedor:</strong> ${venda.vendedor?.nome || 'Titular'}</div>
             `;
             
             // Criar HTML dos itens com mais detalhes
@@ -2553,7 +2801,7 @@ function showInstallButton() {
         // ===============================
         let yPos = 8;
             const calcAltura = () => {
-            yPos += 8 + (configSistema.cnpj ? 4 : 0) + 8 + 5 + 4 + 8; // cabeçalho
+            yPos += 8 + (configSistema.cnpj ? 4 : 0) + 8 + 5 + 4 + 4 + 8; // cabeçalho
             yPos += 6 + 5 + 5; // separadores e cabeçalhos
 
             // itens
@@ -2614,6 +2862,8 @@ function showInstallButton() {
         doc.text(`Data: ${data.toLocaleDateString('pt-BR')}`, largura / 2, y, { align: 'center' });
         y += 4;
         doc.text(`Hora: ${data.toLocaleTimeString('pt-BR')}`, largura / 2, y, { align: 'center' });
+        y += 4;
+        doc.text(`Vendedor: ${String(venda.vendedor?.nome || 'Titular').slice(0, 32)}`, largura / 2, y, { align: 'center' });
         y += 8;
 
         // Separadores
@@ -2734,6 +2984,7 @@ function showInstallButton() {
 
         // Funções para editar e excluir movimentos
         function editarMovimento(movimentoId) {
+            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
             const caixa = exigirCaixaAberto('Abra o caixa para alterar uma movimentação.');
@@ -2760,6 +3011,7 @@ function showInstallButton() {
         }
 
         function salvarEdicaoMovimento() {
+            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             if (!movimentoEditando) return;
             const caixa = exigirCaixaAberto('Abra o caixa para alterar uma movimentação.');
             if (!caixa || !registroPertenceAoCaixa(movimentoEditando, caixa)) {
@@ -2804,6 +3056,7 @@ function showInstallButton() {
         }
 
         function excluirMovimento(movimentoId) {
+            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
             const caixa = exigirCaixaAberto('Abra o caixa para excluir uma movimentação.');
@@ -2824,12 +3077,14 @@ function showInstallButton() {
 
         // Movimentação de caixa
         function registrarMovimento() {
+            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             if (!exigirCaixaAberto('Abra o caixa antes de registrar uma movimentação.')) return;
             acaoPendente = 'registrar_movimento';
             solicitarSenhaAcao('Digite a senha para registrar este movimento:');
         }
 
         function executarRegistroMovimento() {
+            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             const caixa = exigirCaixaAberto('O caixa foi fechado. Abra um caixa para registrar a movimentação.');
             if (!caixa) return;
             const tipo = document.getElementById('movimento-tipo').value;
@@ -2890,10 +3145,11 @@ function showInstallButton() {
                         <div class="flex-1">
                             <div class="font-medium">${movimento.descricao}</div>
                             <div class="text-sm text-gray-600">${data.toLocaleDateString('pt-BR')} ${data.toLocaleTimeString('pt-BR')}</div>
+                            ${movimento.vendedor?.nome ? `<div class="text-xs font-semibold text-gray-600">Vendedor: ${movimento.vendedor.nome}</div>` : ''}
                         </div>
                         <div class="font-semibold ${cor}">${sinal}R$ ${movimento.valor.toFixed(2)}</div>
                     </div>
-                    <div class="flex gap-2 mt-2">
+                    <div class="${ehOperadorAtual() ? 'hidden' : 'flex'} gap-2 mt-2">
                         <button onclick="excluirMovimento('${movimento.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors">
                             🗑️ Excluir
                         </button>
@@ -2953,11 +3209,11 @@ function showInstallButton() {
             elemento.textContent = caixa ? `Caixa aberto desde ${new Date(caixa.abertoEm).toLocaleString('pt-BR')} com R$ ${Number(caixa.abertura).toFixed(2)}` : 'Caixa fechado. Vendas e movimentações estão bloqueadas.';
             document.getElementById('btn-abrir-caixa').disabled = !!caixa;
             document.getElementById('btn-fechar-caixa').disabled = !caixa;
-            document.getElementById('btn-registrar-movimento').disabled = !caixa;
-            ['movimento-tipo', 'movimento-valor', 'movimento-descricao'].forEach(id => { document.getElementById(id).disabled = !caixa; });
+            document.getElementById('btn-registrar-movimento').disabled = !caixa || ehOperadorAtual();
+            ['movimento-tipo', 'movimento-valor', 'movimento-descricao'].forEach(id => { document.getElementById(id).disabled = !caixa || ehOperadorAtual(); });
             document.getElementById('btn-abrir-caixa').classList.toggle('opacity-50', !!caixa);
             document.getElementById('btn-fechar-caixa').classList.toggle('opacity-50', !caixa);
-            document.getElementById('btn-registrar-movimento').classList.toggle('opacity-50', !caixa);
+            document.getElementById('btn-registrar-movimento').classList.toggle('opacity-50', !caixa || ehOperadorAtual());
             document.getElementById('aviso-caixa-vendas')?.classList.toggle('hidden', !!caixa);
         }
         function abrirCaixaDia() {
@@ -2967,10 +3223,10 @@ function showInstallButton() {
             const abertura = Number(String(valorInformado).replace(',', '.'));
             if (Number.isNaN(abertura) || abertura < 0) { mostrarMensagem('Valor inválido.', 'erro'); return; }
             const agora = new Date();
-            caixas.push({ id: 'cx_' + Date.now(), dia: chaveDia(agora), abertura, abertoEm: agora.toISOString(), fechado: false });
+            caixas.push({ id: 'cx_' + Date.now(), dia: chaveDia(agora), abertura, abertoEm: agora.toISOString(), abertoPor: vendedorAtual(), fechado: false });
             salvarDados();
             atualizarStatusCaixa(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); atualizarHistoricoFechamentos();
-            mostrarMensagem('Caixa aberto. Vendas e movimentações liberadas.', 'sucesso');
+            mostrarMensagem(ehOperadorAtual() ? 'Caixa aberto. Vendas liberadas.' : 'Caixa aberto. Vendas e movimentações liberadas.', 'sucesso');
         }
         function fecharCaixaDia() {
             const caixa = caixaAtualAberto();
@@ -2982,6 +3238,7 @@ function showInstallButton() {
             if (Number.isNaN(contado) || contado < 0) { mostrarMensagem('Valor inválido.', 'erro'); return; }
             caixa.fechado = true;
             caixa.fechadoEm = new Date().toISOString();
+            caixa.fechadoPor = vendedorAtual();
             caixa.contado = contado;
             caixa.diferenca = contado - resumo.esperado;
             caixa.resumo = {
@@ -3022,6 +3279,8 @@ function showInstallButton() {
                 pdf.text(`Registro: ${caixa.id}`, 14, y); y += 6;
                 pdf.text(`Abertura: ${new Date(caixa.abertoEm).toLocaleString('pt-BR')}`, 14, y); y += 6;
                 pdf.text(`Fechamento: ${new Date(caixa.fechadoEm).toLocaleString('pt-BR')}`, 14, y); y += 10;
+                if (caixa.abertoPor?.nome) { pdf.text(`Aberto por: ${caixa.abertoPor.nome}`, 14, y); y += 6; }
+                if (caixa.fechadoPor?.nome) { pdf.text(`Fechado por: ${caixa.fechadoPor.nome}`, 14, y); y += 8; }
                 const linhas = [
                     ['Valor de abertura', caixa.abertura], ['Vendas em dinheiro', resumo.dinheiro], ['Vendas em PIX', resumo.pix],
                     ['Vendas em cartao', resumo.cartao], ['Vendas fiado', resumo.fiado], ['Entradas', resumo.entradas],
@@ -3047,7 +3306,7 @@ function showInstallButton() {
                 const diferenca = Number(caixa.diferenca || 0);
                 return `<article class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                     <div class="flex flex-wrap items-start justify-between gap-3">
-                        <div><h3 class="font-semibold">${new Date(caixa.fechadoEm).toLocaleString('pt-BR')}</h3><p class="text-xs text-gray-500">${caixa.id}</p></div>
+                        <div><h3 class="font-semibold">${new Date(caixa.fechadoEm).toLocaleString('pt-BR')}</h3><p class="text-xs text-gray-500">${caixa.id}</p>${caixa.abertoPor?.nome ? `<p class="mt-1 text-xs text-gray-600">Aberto por ${caixa.abertoPor.nome}${caixa.fechadoPor?.nome ? ` · fechado por ${caixa.fechadoPor.nome}` : ''}</p>` : ''}</div>
                         <button onclick="baixarPdfFechamento('${caixa.id}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">Baixar PDF</button>
                     </div>
                     <div class="mt-3 grid grid-cols-2 gap-2 text-sm"><span>Entradas: <strong>R$ ${Number(resumo.entradas || 0).toFixed(2)}</strong></span><span>Saídas: <strong>R$ ${Number(resumo.saidas || 0).toFixed(2)}</strong></span><span>Esperado: <strong>R$ ${Number(resumo.esperado || 0).toFixed(2)}</strong></span><span>Contado: <strong>R$ ${Number(caixa.contado || 0).toFixed(2)}</strong></span></div>
@@ -3061,9 +3320,45 @@ function showInstallButton() {
         }
 
         // Relatórios
+        function chaveVendedorVenda(venda) { return venda.vendedor?.id || venda.vendedor?.nome || 'titular'; }
+        function nomeVendedorVenda(venda) { return venda.vendedor?.nome || 'Titular'; }
+
+        function atualizarFiltroVendedores(vendasHoje) {
+            const filtro = document.getElementById('filtro-vendedor-relatorio');
+            const resumo = document.getElementById('resumo-vendedores');
+            if (!filtro || !resumo) return '';
+            const selecionado = filtro.value;
+            const grupos = new Map();
+            vendasHoje.forEach(venda => {
+                const chave = chaveVendedorVenda(venda);
+                const grupo = grupos.get(chave) || { nome: nomeVendedorVenda(venda), quantidade: 0, total: 0 };
+                grupo.quantidade += 1;
+                grupo.total += Number(venda.total || 0);
+                grupos.set(chave, grupo);
+            });
+            filtro.replaceChildren(new Option('Todos os vendedores', ''));
+            [...grupos.entries()].sort((a, b) => a[1].nome.localeCompare(b[1].nome, 'pt-BR')).forEach(([chave, grupo]) => filtro.add(new Option(grupo.nome, chave)));
+            filtro.value = [...filtro.options].some(option => option.value === selecionado) ? selecionado : '';
+            resumo.replaceChildren(...[...grupos.values()].map(grupo => {
+                const card = document.createElement('div');
+                card.className = 'rounded-lg bg-white px-3 py-2 text-sm shadow-sm';
+                const nome = document.createElement('strong');
+                nome.className = 'block text-slate-800';
+                nome.textContent = grupo.nome;
+                const total = document.createElement('span');
+                total.className = 'text-slate-600';
+                total.textContent = `${grupo.quantidade} venda(s) · R$ ${grupo.total.toFixed(2)}`;
+                card.append(nome, total);
+                return card;
+            }));
+            return filtro.value;
+        }
+
         function atualizarRelatorios() {
             const hoje = new Date().toDateString();
-            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+            const todasVendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+            const vendedorSelecionado = atualizarFiltroVendedores(todasVendasHoje);
+            const vendasHoje = vendedorSelecionado ? todasVendasHoje.filter(venda => chaveVendedorVenda(venda) === vendedorSelecionado) : todasVendasHoje;
             
             document.getElementById('vendas-hoje').textContent = vendasHoje.length;
             
@@ -3088,7 +3383,8 @@ function showInstallButton() {
             cardsContainer.innerHTML = '';
 
             const hoje = new Date().toDateString();
-            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
+            const vendedorSelecionado = document.getElementById('filtro-vendedor-relatorio')?.value || '';
+            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje && (!vendedorSelecionado || chaveVendedorVenda(v) === vendedorSelecionado));
 
             vendasHoje.reverse().forEach(venda => {
                 const data = new Date(venda.data);
@@ -3103,6 +3399,7 @@ function showInstallButton() {
                     <td class="px-4 py-2">${itensResumo}</td>
                     <td class="px-4 py-2 text-right">R$ ${venda.total.toFixed(2)}</td>
                     <td class="px-4 py-2">${venda.pagamento.tipo}</td>
+                    <td class="px-4 py-2">${nomeVendedorVenda(venda)}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="mostrarComprovanteVenda('${venda.id}')" 
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
@@ -3126,6 +3423,7 @@ function showInstallButton() {
                             <div class="font-semibold text-base">${data.toLocaleTimeString('pt-BR')}</div>
                             <div class="text-sm text-gray-600 mt-1">${itensResumo}</div>
                             <div class="text-sm text-gray-600 mt-1">Pagamento: ${venda.pagamento.tipo}</div>
+                            <div class="text-sm font-medium text-gray-700 mt-1">Vendedor: ${nomeVendedorVenda(venda)}</div>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-green-600 text-lg">R$ ${venda.total.toFixed(2)}</div>
@@ -3159,6 +3457,7 @@ function showInstallButton() {
 
         // Funções para excluir vendas com senha
         function excluirVenda(vendaId) {
+            if (!exigirTitular('Exclusão de vendas disponível somente para o titular.')) return;
             const venda = vendas.find(v => v.id === vendaId);
             if (!venda) return;
             const caixa = exigirCaixaAberto('Abra o caixa para excluir uma venda.');
@@ -3242,17 +3541,12 @@ function showInstallButton() {
         }
 
         function executarExclusaoVenda() {
+            if (!exigirTitular('Exclusão de vendas disponível somente para o titular.')) return;
             if (!vendaParaExcluir) return;
             const caixa = caixaAtualAberto();
             if (!caixa || !registroPertenceAoCaixa(vendaParaExcluir, caixa)) { mostrarMensagem('O caixa desta venda não está aberto.', 'erro'); return; }
             
-            // Restaurar estoque dos produtos
-            vendaParaExcluir.itens.forEach(item => {
-                const produto = produtos.find(p => p.id === item.produtoId);
-                if (produto && produto.tipo !== 'servico') {
-                    produto.estoque += item.quantidade;
-                }
-            });
+            restaurarEstoqueDosItens(vendaParaExcluir.itens);
             
             // Remover movimento de caixa relacionado
             movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
@@ -3271,6 +3565,7 @@ function showInstallButton() {
         }
 
         function executarExclusaoMovimento() {
+            if (!exigirTitular('Exclusão de movimentações disponível somente para o titular.')) return;
             if (!movimentoParaExcluir) return;
             const caixa = caixaAtualAberto();
             if (!caixa || !registroPertenceAoCaixa(movimentoParaExcluir, caixa)) { mostrarMensagem('O caixa desta movimentação não está aberto.', 'erro'); return; }
@@ -3279,13 +3574,7 @@ function showInstallButton() {
             if (movimentoParaExcluir.vendaId) {
                 const venda = vendas.find(v => v.id === movimentoParaExcluir.vendaId);
                 if (venda) {
-                    // Restaurar estoque dos produtos
-                    venda.itens.forEach(item => {
-                        const produto = produtos.find(p => p.id === item.produtoId);
-                        if (produto && produto.tipo !== 'servico') {
-                            produto.estoque += item.quantidade;
-                        }
-                    });
+                    restaurarEstoqueDosItens(venda.itens);
                     
                     // Remover a venda também
                     vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
@@ -3323,12 +3612,13 @@ function showInstallButton() {
 
         // Exportações
         function exportarVendas() {
-            const csv = ['Data,Hora,Total,Pagamento,Itens'];
+            const csv = ['Data,Hora,Total,Pagamento,Vendedor,Itens'];
             
             vendas.forEach(venda => {
                 const data = new Date(venda.data);
                 const itens = venda.itens.map(item => `${item.nome}(${item.quantidade})`).join(';');
-                csv.push(`${data.toLocaleDateString('pt-BR')},${data.toLocaleTimeString('pt-BR')},${venda.total.toFixed(2)},${venda.pagamento.tipo},"${itens}"`);
+                const vendedor = nomeVendedorVenda(venda).replace(/"/g, '""');
+                csv.push(`${data.toLocaleDateString('pt-BR')},${data.toLocaleTimeString('pt-BR')},${venda.total.toFixed(2)},${venda.pagamento.tipo},"${vendedor}","${itens}"`);
             });
             
             baixarCSV(csv.join('\n'), 'vendas.csv');
@@ -3462,6 +3752,7 @@ function showInstallButton() {
 
         // Funções ADM
         function acessarAdm() {
+            if (!exigirTitular('O ADM do PDV está disponível somente para o titular da empresa.')) return;
             const modal = document.getElementById('modal-senha-adm');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -3478,6 +3769,7 @@ function showInstallButton() {
         }
 
         async function confirmarSenhaAdm() {
+    if (!exigirTitular('O ADM do PDV está disponível somente para o titular da empresa.')) return;
     const senhaDigitada = document.getElementById('senha-adm').value;
     if (!window.validarSenhaAdm) {
         mostrarMensagem('A senha administrativa ainda está sendo carregada. Tente novamente.', 'erro');
@@ -4198,6 +4490,7 @@ function showInstallButton() {
 
         // Persistência
         function salvarDados() {
+            normalizarEstoquesVinculados();
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
             localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
             localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));

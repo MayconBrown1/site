@@ -25,6 +25,8 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, criado/alterado apenas por Cloud Function administrativa.
 - `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
+- Operadores usam `users/{operatorUid}` com `role: operator` e `ownerUid` apontando para o titular; as credenciais são criadas e administradas somente pelas Cloud Functions.
+- Produtos que compartilham saldo guardam `estoqueVinculadoId`; o produto de origem mantém a quantidade e todos os itens vinculados são sincronizados após vendas e ajustes.
 - `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
 - `publicCatalogs/{slug}`: somente nome, logo, WhatsApp e descrição pública da loja.
 - `publicCatalogs/{slug}/products/{id}`: projeção pública dos produtos visíveis com estoque positivo e dos serviços marcados como visíveis. Custos, vendas, clientes e demais dados internos nunca são copiados.
@@ -40,3 +42,5 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 O arquivo `catalogo/catalogo.js` contém a constante `LIMITE_ESTOQUE_BAIXO`, inicialmente definida como `5`. Produtos antigos sem `visivelCatalogo` permanecem ocultos até que sejam editados e marcados. Imagens e logo usam URLs públicas HTTPS para não aumentar o documento privado do Firestore nem exigir Firebase Storage.
 
 A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.
+
+No ADM do PDV, o titular pode adicionar, pausar, reativar e trocar a senha dos operadores. Ao publicar esta versão, envie em conjunto `firestore:rules`, `functions` e `hosting`, porque o cadastro seguro de operadores depende das novas Functions e regras.

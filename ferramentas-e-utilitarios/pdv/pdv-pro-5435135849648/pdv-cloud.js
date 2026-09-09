@@ -1,9 +1,11 @@
 import { db } from './firebase-config.js';
 import { protegerPagina, sair, validarSenhaAtual } from './auth.js';
 import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from './catalogo-admin.js';
-import { deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { inicializarOperadores } from './operator-admin.js';
+import { deleteDoc, doc, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
-let uid, writing = false;
+let uid, writing = false, writingLocalStorage = false, lastCloudState = null, lastSubmittedState = null;
+let cloudQueue = Promise.resolve();
 // Captura a configuração padrão antes que qualquer armazenamento local de outra conta seja usado.
 const pixPadrao = { ...(window.CONFIG_PIX || {}) };
 
@@ -15,19 +17,75 @@ function state() {
     clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [],
     orcamentos: window.orcamentos || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
-    configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}, updatedAt: serverTimestamp()
+    configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}
   };
 }
 
+const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+function mergeRecords(field, baseState, localState, remoteState) {
+  const base = new Map((baseState?.[field] || []).map(item => [item.id, item]));
+  const local = new Map((localState?.[field] || []).map(item => [item.id, item]));
+  const remote = new Map((remoteState?.[field] || []).map(item => [item.id, item]));
+
+  base.forEach((_, id) => { if (!local.has(id)) remote.delete(id); });
+  local.forEach((item, id) => {
+    const before = base.get(id);
+    if (!before) {
+      if (!remote.has(id)) remote.set(id, item);
+      return;
+    }
+    if (same(item, before)) return;
+    if (field === 'produtos') {
+      const current = remote.get(id) || before;
+      const merged = { ...current, ...item };
+      if (Number.isFinite(Number(item.estoque)) && Number.isFinite(Number(before.estoque))) {
+        merged.estoque = Number(current.estoque || 0) + (Number(item.estoque) - Number(before.estoque));
+      }
+      remote.set(id, merged);
+      return;
+    }
+    remote.set(id, item);
+  });
+  return [...remote.values()];
+}
+
+function mergeState(baseState, localState, remoteState) {
+  const merged = { ...remoteState, ownerUid: uid };
+  ['produtos', 'vendas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'orcamentos']
+    .forEach(field => { merged[field] = mergeRecords(field, baseState, localState, remoteState); });
+  ['categorias', 'categoriasOcultas', 'configSistema', 'configPix'].forEach(field => {
+    merged[field] = same(localState[field], baseState?.[field]) ? (remoteState?.[field] ?? localState[field]) : localState[field];
+  });
+  return merged;
+}
+
 async function salvarNuvem() {
-  if (!uid || writing) return;
-  try {
-    await setDoc(doc(db, 'users', uid, 'app', 'state'), state(), { merge: true });
-    await sincronizarCatalogoPublico(uid);
-    return true;
-  }
-  catch (e) { console.error('Erro de sincronização:', e); window.mostrarMensagem?.('Não foi possível sincronizar os dados na nuvem.', 'erro'); }
-  return false;
+  if (!uid || writing) return false;
+  const localState = state();
+  const baseState = lastSubmittedState || lastCloudState || {};
+  lastSubmittedState = localState;
+  cloudQueue = cloudQueue.then(async () => {
+    try {
+      const ref = doc(db, 'users', uid, 'app', 'state');
+      const merged = await runTransaction(db, async transaction => {
+        const snapshot = await transaction.get(ref);
+        const remoteState = snapshot.exists() ? snapshot.data() : {};
+        const result = mergeState(baseState, localState, remoteState);
+        transaction.set(ref, { ...result, updatedAt: serverTimestamp() });
+        return result;
+      });
+      lastCloudState = merged;
+      await sincronizarCatalogoPublico(uid);
+      return true;
+    } catch (e) {
+      console.error('Erro de sincronização:', e);
+      lastSubmittedState = lastCloudState;
+      window.mostrarMensagem?.('Não foi possível sincronizar os dados na nuvem.', 'erro');
+      return false;
+    }
+  });
+  return cloudQueue;
 }
 
 function iniciarContaVazia() {
@@ -44,37 +102,57 @@ function iniciarContaVazia() {
   salvarNuvem();
 }
 
-protegerPagina((user) => {
-  uid = user.uid;
+protegerPagina((user, perfil) => {
+  uid = perfil.role === 'operator' ? perfil.ownerUid : user.uid;
+  if (!uid) { sair(); return; }
+  window.usuarioPdv = {
+    uid: user.uid,
+    ownerUid: uid,
+    nome: perfil.name || user.displayName || user.email?.split('@')[0] || 'Usuário',
+    email: user.email || perfil.email || '',
+    role: perfil.role || 'client'
+  };
+  window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
   inicializarCatalogoAdmin(uid);
-  window.validarSenhaAdm = validarSenhaAtual;
+  inicializarOperadores(perfil);
+  window.validarSenhaAdm = perfil.role === 'operator' ? async () => false : validarSenhaAtual;
   localStorage.removeItem('pdv_senha_adm_local');
   // Remove o hash legado: a senha administrativa agora é sempre validada pelo Firebase Authentication.
-  deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
+  if (perfil.role !== 'operator') deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
   document.body.style.visibility = 'visible';
+  window.aplicarPermissoesUsuario?.();
   setTimeout(() => window.focarBuscaProduto?.(), 0);
-  document.title = 'PDV - Pro';
+  document.title = perfil.role === 'operator' ? `PDV - Pro · ${window.usuarioPdv.nome}` : 'PDV - Pro';
   const header = document.querySelector('#menu-pdv');
   if (header && !document.querySelector('#btn-sair')) header.insertAdjacentHTML('beforeend', '<button id="btn-sair" class="bg-black px-3 py-2 rounded text-sm">Sair</button>');
   document.querySelector('#btn-sair')?.addEventListener('click', sair);
 
   onSnapshot(doc(db, 'users', uid, 'app', 'state'), snap => {
     if (!snap.exists()) { iniciarContaVazia(); return; }
-    const d = snap.data(); writing = true;
+    const d = snap.data(); lastCloudState = d; lastSubmittedState = d; writing = true;
     window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
     window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
     window.orcamentos = d.orcamentos || [];
     window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
     window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
+    window.normalizarEstoquesVinculados?.();
     window.aplicarTema?.();
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
     window.atualizarInterface?.(); window.atualizarInfoPix?.(); writing = false;
+    window.aplicarPermissoesUsuario?.();
     sincronizarCatalogoPublico(uid).catch(erro => console.error('Erro ao atualizar catálogo público:', erro));
   });
 
   const original = window.salvarDados;
-  window.salvarDados = () => { original?.(); return salvarNuvem(); };
+  window.salvarDados = () => {
+    writingLocalStorage = true;
+    try { original?.(); } finally { writingLocalStorage = false; }
+    return salvarNuvem();
+  };
   window.sincronizarCatalogoAgora = () => sincronizarCatalogoPublico(uid);
   const storageSet = Storage.prototype.setItem;
-  Storage.prototype.setItem = function(k, v) { storageSet.call(this, k, v); if (k.startsWith('pdv_')) salvarNuvem(); };
+  Storage.prototype.setItem = function(k, v) {
+    storageSet.call(this, k, v);
+    if (!writingLocalStorage && k.startsWith('pdv_')) salvarNuvem();
+  };
 });
