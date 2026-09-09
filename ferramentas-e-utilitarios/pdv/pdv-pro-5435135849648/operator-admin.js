@@ -1,19 +1,35 @@
-import { app } from './firebase-config.js';
-import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-functions.js';
-
-const functions = getFunctions(app, 'southamerica-east1');
-const callCreate = httpsCallable(functions, 'createOperator');
-const callList = httpsCallable(functions, 'listOperators');
-const callStatus = httpsCallable(functions, 'setOperatorStatus');
-const callPassword = httpsCallable(functions, 'updateOperatorPassword');
+import { app, auth, db } from './firebase-config.js';
+import { deleteApp, initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
+import {
+  createUserWithEmailAndPassword,
+  deleteUser,
+  getAuth,
+  sendPasswordResetEmail,
+  signOut,
+  updateProfile
+} from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where
+} from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 let canManage = false;
 
 function friendlyError(error) {
   const code = String(error?.code || '');
-  if (code.includes('already-exists')) return 'Este e-mail já está cadastrado no sistema.';
+  if (code.includes('email-already-in-use')) return 'Este e-mail já está cadastrado no sistema.';
+  if (code.includes('invalid-email')) return 'Informe um e-mail válido.';
+  if (code.includes('weak-password')) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if (code.includes('operation-not-allowed')) return 'Ative o provedor E-mail/senha no Firebase Authentication.';
   if (code.includes('unauthenticated')) return 'Sua sessão expirou. Entre novamente.';
-  if (code.includes('permission-denied')) return 'Somente o titular da empresa pode gerenciar operadores.';
+  if (code.includes('permission-denied')) return 'As permissões de operadores ainda não foram publicadas no Firebase.';
+  if (code.includes('network-request-failed')) return 'Sem conexão com o Firebase. Verifique a internet e tente novamente.';
   return error?.message?.replace(/^FirebaseError:\s*/i, '') || 'Não foi possível concluir a operação.';
 }
 
@@ -44,8 +60,8 @@ function operatorCard(operator) {
   const password = document.createElement('button');
   password.type = 'button';
   password.className = 'rounded-lg bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-800';
-  password.textContent = 'Trocar senha';
-  password.addEventListener('click', () => changePassword(operator));
+  password.textContent = 'Enviar troca de senha';
+  password.addEventListener('click', () => requestPasswordChange(operator));
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = operator.status === 'ativo'
@@ -59,13 +75,19 @@ function operatorCard(operator) {
 }
 
 async function loadOperators() {
-  if (!canManage) return;
+  if (!canManage || !auth.currentUser) return;
   const list = document.getElementById('lista-operadores');
   if (!list) return;
   list.innerHTML = '<p class="text-sm text-slate-500">Carregando operadores...</p>';
   try {
-    const result = await callList();
-    const operators = result.data?.operators || [];
+    const snapshot = await getDocs(query(
+      collection(db, 'users'),
+      where('ownerUid', '==', auth.currentUser.uid),
+      where('role', '==', 'operator')
+    ));
+    const operators = snapshot.docs
+      .map(item => ({ uid: item.id, ...item.data() }))
+      .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR'));
     list.replaceChildren(...operators.map(operatorCard));
     if (!operators.length) list.innerHTML = '<p class="rounded-lg border border-dashed p-4 text-sm text-slate-500">Nenhum operador cadastrado ainda.</p>';
     setStatus('');
@@ -76,17 +98,48 @@ async function loadOperators() {
   }
 }
 
+async function createOperatorAccount({ name, email, password }) {
+  const owner = auth.currentUser;
+  if (!owner) throw Object.assign(new Error('Sua sessão expirou.'), { code: 'auth/unauthenticated' });
+
+  const secondaryApp = initializeApp(app.options, `operator-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const secondaryAuth = getAuth(secondaryApp);
+  let operatorUser = null;
+  try {
+    const credential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    operatorUser = credential.user;
+    await updateProfile(operatorUser, { displayName: name });
+    await setDoc(doc(db, 'users', operatorUser.uid), {
+      name,
+      email: operatorUser.email.toLowerCase(),
+      role: 'operator',
+      status: 'ativo',
+      ownerUid: owner.uid,
+      createdBy: owner.uid,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return operatorUser.uid;
+  } catch (error) {
+    if (operatorUser) await deleteUser(operatorUser).catch(cleanupError => console.warn('Não foi possível desfazer a conta incompleta.', cleanupError));
+    throw error;
+  } finally {
+    await signOut(secondaryAuth).catch(() => {});
+    await deleteApp(secondaryApp).catch(() => {});
+  }
+}
+
 async function createOperator() {
   if (!canManage) return;
   const name = document.getElementById('operador-nome')?.value.trim();
-  const email = document.getElementById('operador-email')?.value.trim();
+  const email = document.getElementById('operador-email')?.value.trim().toLowerCase();
   const password = document.getElementById('operador-senha')?.value || '';
   if (!name || !email || password.length < 6) return setStatus('Informe nome, e-mail e uma senha com pelo menos 6 caracteres.', 'error');
   const button = document.getElementById('btn-salvar-operador');
   button.disabled = true;
   setStatus('Criando acesso do operador...');
   try {
-    await callCreate({ name, email, password });
+    await createOperatorAccount({ name, email, password });
     document.getElementById('operador-nome').value = '';
     document.getElementById('operador-email').value = '';
     document.getElementById('operador-senha').value = '';
@@ -105,7 +158,7 @@ async function changeStatus(operator) {
   if (next === 'inativo' && !confirm(`Pausar o acesso de ${operator.name}?`)) return;
   setStatus(next === 'ativo' ? 'Reativando acesso...' : 'Pausando acesso...');
   try {
-    await callStatus({ operatorUid: operator.uid, status: next });
+    await updateDoc(doc(db, 'users', operator.uid), { status: next, updatedAt: serverTimestamp() });
     await loadOperators();
     setStatus(next === 'ativo' ? 'Acesso reativado.' : 'Acesso pausado.', 'success');
   } catch (error) {
@@ -114,14 +167,12 @@ async function changeStatus(operator) {
   }
 }
 
-async function changePassword(operator) {
-  const password = prompt(`Nova senha para ${operator.name} (mínimo de 6 caracteres):`);
-  if (password === null) return;
-  if (password.length < 6) return setStatus('A nova senha precisa ter pelo menos 6 caracteres.', 'error');
-  setStatus('Atualizando senha...');
+async function requestPasswordChange(operator) {
+  if (!confirm(`Enviar um e-mail de troca de senha para ${operator.email}?`)) return;
+  setStatus('Enviando e-mail de troca de senha...');
   try {
-    await callPassword({ operatorUid: operator.uid, password });
-    setStatus('Senha do operador atualizada.', 'success');
+    await sendPasswordResetEmail(auth, operator.email);
+    setStatus('E-mail de troca de senha enviado ao operador.', 'success');
   } catch (error) {
     console.error(error);
     setStatus(friendlyError(error), 'error');

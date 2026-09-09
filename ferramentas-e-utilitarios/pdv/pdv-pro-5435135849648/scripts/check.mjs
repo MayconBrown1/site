@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const operatorAdmin = fs.readFileSync(new URL('../operator-admin.js', import.meta.url), 'utf8');
+const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -64,5 +66,11 @@ const remote = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2125 }]
 const merged = mergeState(base, local, remote);
 if (merged.produtos[0].estoque !== 2025) throw new Error('A mesclagem simultânea calculou o estoque incorretamente.');
 if (merged.vendas.length !== 2) throw new Error('A mesclagem simultânea perdeu uma venda.');
+
+for (const marker of ['createUserWithEmailAndPassword', 'initializeApp(app.options', 'sendPasswordResetEmail']) {
+  if (!operatorAdmin.includes(marker)) throw new Error(`Fluxo direto de operadores incompleto: ${marker}`);
+}
+if (operatorAdmin.includes('httpsCallable')) throw new Error('O cadastro de operadores ainda depende de uma Cloud Function.');
+if (!firestoreRules.includes("request.resource.data.role == 'operator'")) throw new Error('As regras de criação de operadores não foram encontradas.');
 
 console.log('Verificações do PDV concluídas com sucesso.');
