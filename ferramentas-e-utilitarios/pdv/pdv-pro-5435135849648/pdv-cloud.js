@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { protegerPagina, sair, validarSenhaAtual } from './auth.js';
+import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from './catalogo-admin.js';
 import { deleteDoc, doc, onSnapshot, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 let uid, writing = false;
@@ -20,8 +21,13 @@ function state() {
 
 async function salvarNuvem() {
   if (!uid || writing) return;
-  try { await setDoc(doc(db, 'users', uid, 'app', 'state'), state(), { merge: true }); }
+  try {
+    await setDoc(doc(db, 'users', uid, 'app', 'state'), state(), { merge: true });
+    await sincronizarCatalogoPublico(uid);
+    return true;
+  }
   catch (e) { console.error('Erro de sincronização:', e); window.mostrarMensagem?.('Não foi possível sincronizar os dados na nuvem.', 'erro'); }
+  return false;
 }
 
 function iniciarContaVazia() {
@@ -40,6 +46,7 @@ function iniciarContaVazia() {
 
 protegerPagina((user) => {
   uid = user.uid;
+  inicializarCatalogoAdmin(uid);
   window.validarSenhaAdm = validarSenhaAtual;
   localStorage.removeItem('pdv_senha_adm_local');
   // Remove o hash legado: a senha administrativa agora é sempre validada pelo Firebase Authentication.
@@ -62,10 +69,12 @@ protegerPagina((user) => {
     window.aplicarTema?.();
     if (d.configPix) Object.assign(window.CONFIG_PIX, d.configPix);
     window.atualizarInterface?.(); window.atualizarInfoPix?.(); writing = false;
+    sincronizarCatalogoPublico(uid).catch(erro => console.error('Erro ao atualizar catálogo público:', erro));
   });
 
   const original = window.salvarDados;
-  window.salvarDados = () => { original?.(); salvarNuvem(); };
+  window.salvarDados = () => { original?.(); return salvarNuvem(); };
+  window.sincronizarCatalogoAgora = () => sincronizarCatalogoPublico(uid);
   const storageSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function(k, v) { storageSet.call(this, k, v); if (k.startsWith('pdv_')) salvarNuvem(); };
 });

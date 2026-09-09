@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0f4c81">
+  <meta name="description" content="Catálogo público de produtos">
+  <title>Catálogo</title>
+  <link rel="stylesheet" href="./catalogo.css">
+</head>
+<body>
+  <header class="cabecalho">
+    <div class="cabecalho-conteudo">
+      <div id="logo-wrap" class="logo-wrap" hidden>
+        <img id="logo-loja" alt="">
+      </div>
+      <div>
+        <p class="rotulo">Catálogo</p>
+        <h1 id="nome-loja">Carregando...</h1>
+        <p id="descricao-loja" class="descricao-loja"></p>
+      </div>
+    </div>
+  </header>
+
+  <main class="conteudo">
+    <div id="status" class="status" role="status" aria-live="polite">
+      <span class="carregando" aria-hidden="true"></span>
+      Buscando produtos...
+    </div>
+    <section id="produtos" class="grade-produtos" aria-label="Produtos disponíveis" hidden></section>
+  </main>
+
+  <footer>
+    <p>Disponibilidade atualizada pelo estoque da loja.</p>
+  </footer>
+  <script type="module" src="./catalogo.js"></script>
+</body>
+</html>

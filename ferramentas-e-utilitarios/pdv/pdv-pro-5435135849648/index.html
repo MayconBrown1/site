@@ -64,13 +64,14 @@
                     <h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1>
                     <button type="button" onclick="alternarMenuPdv()" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xl sm:hidden" aria-label="Abrir menu" aria-controls="menu-pdv">☰</button>
                 </div>
-                <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
+                <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:flex-wrap sm:w-auto">
                     <button onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
                     <button onclick="showSection('orcamentos')" class="bg-emerald-500 hover:bg-emerald-700 px-3 py-2 rounded transition-colors text-sm">Orçamentos</button>
                     <button onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
                     <button onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
                     <button onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
+                    <button onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
                     <button onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
                     <button onclick="alternarTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">◐ Tema</button>
                     <button onclick="acessarAdm()" class="bg-[#d4af37] hover:bg-yellow-500 px-3 py-2 rounded transition-colors text-sm text-black">ADM do PDV</button>
@@ -255,6 +256,19 @@
                                 <datalist id="lista-categorias"></datalist>
                                 <p class="pdv-cnpj-hint">Digite uma nova categoria e clique em “+ Nova” para salvá-la.</p>
                             </div>
+                            <div class="sm:col-span-2">
+                                <label for="produto-descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição para o catálogo</label>
+                                <textarea id="produto-descricao" maxlength="1000" rows="3" class="w-full p-3 border rounded-lg text-base" placeholder="Detalhes que ajudam o cliente a conhecer o produto"></textarea>
+                            </div>
+                            <div>
+                                <label for="produto-imagem" class="block text-sm font-medium text-gray-700 mb-1">URL da imagem</label>
+                                <input type="url" id="produto-imagem" class="w-full p-3 border rounded-lg text-base" placeholder="https://exemplo.com/produto.jpg">
+                                <p class="pdv-cnpj-hint">Use um endereço público HTTPS da imagem.</p>
+                            </div>
+                            <div id="campo-visivel-catalogo" class="flex items-center rounded-lg border border-teal-200 bg-teal-50 p-3">
+                                <input type="checkbox" id="produto-visivel-catalogo" checked class="h-5 w-5 rounded border-gray-300 text-teal-600">
+                                <label for="produto-visivel-catalogo" class="ml-3 text-sm font-semibold text-teal-900">Visível no catálogo — Sim</label>
+                            </div>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3 mt-4">
                             <button onclick="salvarProduto()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition-colors text-base">
@@ -281,6 +295,7 @@
                                     <th class="px-4 py-2 text-right">Preço</th>
                                     <th class="px-4 py-2 text-right">Estoque</th>
                                     <th class="px-4 py-2 text-left">Categoria</th>
+                                    <th class="px-4 py-2 text-center">Catálogo</th>
                                     <th class="px-4 py-2 text-center">Ações</th>
                                 </tr>
                             </thead>
@@ -569,6 +584,52 @@
                         <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">📲 PDV instalável e menu móvel</h3><p class="mt-2 text-sm text-slate-700">Use <strong>Instalar PDV</strong> para adicionar o sistema ao computador ou celular. Em telas pequenas, os atalhos ficam organizados no menu ☰.</p></article>
                     </div>
                     <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Para próximas versões:</strong> esta página é o histórico do PDV. Ao adicionar uma melhoria, inclua aqui uma explicação curta do que mudou e de como usar.</div>
+                </div>
+            </div>
+
+            <!-- Seção Meu Catálogo -->
+            <div id="catalogo-section" class="section hidden">
+                <div class="mx-auto max-w-5xl rounded-lg bg-white p-4 shadow-md lg:p-6">
+                    <div class="mb-6">
+                        <p class="text-sm font-bold uppercase tracking-wider text-teal-700">Vitrine pública</p>
+                        <h2 class="mt-1 text-xl font-semibold lg:text-2xl">Meu Catálogo</h2>
+                        <p class="mt-2 max-w-3xl text-sm text-gray-600">Configure os dados que seus clientes verão. Somente produtos marcados como visíveis e com estoque maior que zero serão publicados.</p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <label for="catalogo-nome-loja" class="mb-1 block text-sm font-medium text-gray-700">Nome da loja *</label>
+                            <input id="catalogo-nome-loja" maxlength="120" class="w-full rounded-lg border p-3 text-base" placeholder="Nome que aparecerá no catálogo">
+                        </div>
+                        <div>
+                            <label for="catalogo-whatsapp" class="mb-1 block text-sm font-medium text-gray-700">WhatsApp com DDD *</label>
+                            <input id="catalogo-whatsapp" inputmode="tel" class="w-full rounded-lg border p-3 text-base" placeholder="(11) 99999-9999">
+                            <p class="pdv-cnpj-hint">Para números do Brasil, o código +55 é acrescentado automaticamente.</p>
+                        </div>
+                        <div>
+                            <label for="catalogo-logo" class="mb-1 block text-sm font-medium text-gray-700">URL da logo</label>
+                            <input id="catalogo-logo" type="url" class="w-full rounded-lg border p-3 text-base" placeholder="https://exemplo.com/logo.png">
+                            <p class="pdv-cnpj-hint">Use um endereço público HTTPS.</p>
+                        </div>
+                        <div>
+                            <label for="catalogo-slug" class="mb-1 block text-sm font-medium text-gray-700">Identificador público *</label>
+                            <input id="catalogo-slug" maxlength="50" class="w-full rounded-lg border p-3 text-base" placeholder="minha-loja" oninput="ajustarSlugCatalogo(this)">
+                            <p class="pdv-cnpj-hint">Exclusivo, sem espaços ou acentos. Exemplo: minha-loja.</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="catalogo-descricao" class="mb-1 block text-sm font-medium text-gray-700">Descrição curta</label>
+                            <textarea id="catalogo-descricao" maxlength="500" rows="3" class="w-full rounded-lg border p-3 text-base" placeholder="Conte brevemente o que sua loja oferece"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                        <label for="catalogo-link" class="mb-2 block text-sm font-semibold text-blue-900">Link do meu catálogo</label>
+                        <div class="flex flex-col gap-2 sm:flex-row">
+                            <input id="catalogo-link" readonly class="min-w-0 flex-1 rounded-lg border border-blue-200 bg-white p-3 text-sm text-blue-900" placeholder="Salve a configuração para gerar seu link">
+                            <button type="button" data-acao-link-catalogo onclick="copiarLinkCatalogo()" class="rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Copiar link</button>
+                            <button type="button" data-acao-link-catalogo onclick="compartilharCatalogo()" class="rounded-lg bg-slate-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Compartilhar</button>
+                        </div>
+                    </div>
+                    <button id="btn-salvar-catalogo" type="button" onclick="salvarMeuCatalogo()" class="mt-5 w-full rounded-lg bg-teal-600 px-5 py-3 font-bold text-white hover:bg-teal-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto">Salvar e publicar catálogo</button>
+                    <p id="catalogo-status" class="mt-3 text-sm text-slate-600" role="status" aria-live="polite"></p>
                 </div>
             </div>
 
@@ -1134,6 +1195,8 @@ if ('serviceWorker' in navigator) {
                 focarBuscaProduto();
             } else if (sectionName === 'clientes') {
                 atualizarClientesFiado();
+            } else if (sectionName === 'catalogo') {
+                window.carregarMeuCatalogo?.();
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
             }
@@ -1168,6 +1231,9 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-unidade').value = 'un';
             document.getElementById('produto-estoque').value = '0';
             document.getElementById('produto-categoria').value = '';
+            document.getElementById('produto-descricao').value = '';
+            document.getElementById('produto-imagem').value = '';
+            document.getElementById('produto-visivel-catalogo').checked = true;
             atualizarCamposTipoItem();
         }
 
@@ -1177,6 +1243,11 @@ if ('serviceWorker' in navigator) {
             document.getElementById('campo-produto-unidade').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-estoque').classList.toggle('hidden', ehServico);
             document.getElementById('produto-codigo').closest('div').classList.toggle('hidden', ehServico);
+            const campoCatalogo = document.getElementById('campo-visivel-catalogo');
+            const visivelCatalogo = document.getElementById('produto-visivel-catalogo');
+            campoCatalogo.classList.toggle('opacity-50', ehServico);
+            visivelCatalogo.disabled = ehServico;
+            if (ehServico) visivelCatalogo.checked = false;
             document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
             document.getElementById('produto-preco').required = !ehServico;
         }
@@ -1185,10 +1256,20 @@ if ('serviceWorker' in navigator) {
             const nome = document.getElementById('produto-nome').value.trim();
             const preco = parseFloat(document.getElementById('produto-preco').value);
             const tipo = document.getElementById('produto-tipo').value;
+            const imagem = document.getElementById('produto-imagem').value.trim();
             
             if (!nome || Number.isNaN(preco) || preco < 0 || (tipo === 'produto' && preco <= 0)) {
                 mostrarMensagem(tipo === 'servico' ? 'Informe o nome e um valor-base válido para o serviço.' : 'Nome e preço são obrigatórios e o preço deve ser maior que zero!', 'erro');
                 return;
+            }
+
+            if (imagem) {
+                try {
+                    if (new URL(imagem).protocol !== 'https:') throw new Error('Protocolo inválido');
+                } catch (_) {
+                    mostrarMensagem('A imagem precisa usar um endereço HTTPS válido.', 'erro');
+                    return;
+                }
             }
 
             const produto = {
@@ -1200,7 +1281,10 @@ if ('serviceWorker' in navigator) {
                 custo: tipo === 'servico' ? 0 : (parseFloat(document.getElementById('produto-custo').value) || 0),
                 unidade: tipo === 'servico' ? 'serviço' : document.getElementById('produto-unidade').value,
                 estoque: tipo === 'servico' ? null : (parseFloat(document.getElementById('produto-estoque').value) || 0),
-                categoria: document.getElementById('produto-categoria').value.trim()
+                categoria: document.getElementById('produto-categoria').value.trim(),
+                descricao: document.getElementById('produto-descricao').value.trim(),
+                imagem: imagem,
+                visivelCatalogo: tipo === 'produto' && document.getElementById('produto-visivel-catalogo').checked
             };
 
             if (produtoEditando) {
@@ -1346,6 +1430,9 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-unidade').value = produto.unidade;
             document.getElementById('produto-estoque').value = produto.estoque;
             document.getElementById('produto-categoria').value = produto.categoria || '';
+            document.getElementById('produto-descricao').value = produto.descricao || '';
+            document.getElementById('produto-imagem').value = produto.imagem || '';
+            document.getElementById('produto-visivel-catalogo').checked = produto.visivelCatalogo === true;
             atualizarCamposTipoItem();
             
             mostrarFormProduto();
@@ -1382,6 +1469,7 @@ if ('serviceWorker' in navigator) {
                     <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
                     <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${produto.estoque} ${produto.unidade}`}</td>
                     <td class="px-4 py-2">${produto.categoria || '-'}</td>
+                    <td class="px-4 py-2 text-center">${produto.visivelCatalogo === true && !ehServico ? '<span class="rounded-full bg-teal-100 px-2 py-1 text-xs font-semibold text-teal-800">Visível</span>' : '<span class="text-xs text-gray-500">Oculto</span>'}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="editarProduto('${produto.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
                             Editar
@@ -1403,6 +1491,7 @@ if ('serviceWorker' in navigator) {
                             <h4 class="font-semibold text-base">${produto.nome}</h4>
                             <p class="text-sm text-gray-600">${ehServico ? 'Serviço' : (produto.codigo || 'Sem código')}</p>
                             <p class="text-sm text-gray-600">${produto.categoria || 'Sem categoria'}</p>
+                            <p class="mt-1 text-xs font-semibold ${produto.visivelCatalogo === true && !ehServico ? 'text-teal-700' : 'text-gray-500'}">Catálogo: ${produto.visivelCatalogo === true && !ehServico ? 'visível' : 'oculto'}</p>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>

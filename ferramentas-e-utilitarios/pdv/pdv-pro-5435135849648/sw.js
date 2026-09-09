@@ -1,6 +1,6 @@
-const CACHE_NAME = 'pdv-pro-v9';
+const CACHE_NAME = 'pdv-pro-v10';
 const APP_SHELL = [
-  './', './index.html', './login.html', './cadastro.html', './admin.html', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
+  './', './index.html', './login.html', './cadastro.html', './admin.html', './catalogo/', './catalogo/index.html', './catalogo/catalogo.css', './catalogo/catalogo.js', './catalogo-admin.js', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'

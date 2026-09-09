@@ -25,6 +25,18 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, criado/alterado apenas por Cloud Function administrativa.
 - `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
+- `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
+- `publicCatalogs/{slug}`: somente nome, logo, WhatsApp e descrição pública da loja.
+- `publicCatalogs/{slug}/products/{id}`: projeção pública apenas dos produtos marcados como visíveis e com estoque positivo. Custos, vendas, clientes e demais dados internos nunca são copiados.
 - O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
+
+## Catálogo público
+
+1. Publique as regras atualizadas de `firestore.rules`.
+2. No PDV, abra **Meu Catálogo**, informe os dados da loja e escolha um identificador exclusivo.
+3. Em **Produtos**, marque **Visível no catálogo — Sim** apenas nos itens desejados.
+4. Compartilhe o link gerado no formato `catalogo/?loja=identificador`.
+
+O arquivo `catalogo/catalogo.js` contém a constante `LIMITE_ESTOQUE_BAIXO`, inicialmente definida como `5`. Produtos antigos sem `visivelCatalogo` permanecem ocultos até que sejam editados e marcados. Imagens e logo usam URLs públicas HTTPS para não aumentar o documento privado do Firestore nem exigir Firebase Storage.
 
 A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.

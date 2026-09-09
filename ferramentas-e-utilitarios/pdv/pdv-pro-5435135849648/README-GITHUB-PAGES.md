@@ -14,6 +14,12 @@ Envie os arquivos deste pacote para a raiz do repositório. Em Settings > Pages,
 
 Abra `https://SEU-USUARIO.github.io/SEU-REPOSITORIO/login.html`.
 
+O catálogo de cada cliente usa uma única página estática e um identificador exclusivo, por exemplo:
+
+`https://SEU-USUARIO.github.io/SEU-REPOSITORIO/catalogo/?loja=minha-loja`
+
+O parâmetro `?loja=` é usado porque o GitHub Pages não oferece reescrita dinâmica de rotas. Sempre publique a versão atualizada de `firestore.rules` antes de configurar o primeiro catálogo.
+
 ## Primeiro acesso do proprietário
 
 Entre com **mayconbrown083@gmail.com**. O sistema cria automaticamente o perfil de proprietário e abre `admin.html`. Nessa tela você aprova ou bloqueia clientes.
