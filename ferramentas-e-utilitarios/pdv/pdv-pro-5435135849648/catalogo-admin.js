@@ -130,7 +130,7 @@ async function executarSincronizacao(uid) {
   });
 
   const produtosPublicos = (window.produtos || [])
-    .filter(produto => produto?.visivelCatalogo === true && produto.tipo !== 'servico' && Number(produto.estoque) > 0)
+    .filter(produto => produto?.visivelCatalogo === true && (produto.tipo === 'servico' || Number(produto.estoque) > 0))
     .map((produto, indice) => ({
       ref: doc(db, 'publicCatalogs', slug, 'products', idPublicoProduto(produto, indice)),
       dados: {
@@ -138,10 +138,10 @@ async function executarSincronizacao(uid) {
         descricao: String(produto.descricao || '').trim().slice(0, 1000),
         preco: Number(produto.preco || 0),
         categoria: String(produto.categoria || '').trim().slice(0, 80),
-        estoque: Number(produto.estoque || 0),
+        estoque: produto.tipo === 'servico' ? null : Number(produto.estoque || 0),
         imagem: urlHttpsOuVazia(produto.imagem),
         unidade: String(produto.unidade || 'un').slice(0, 20),
-        tipo: 'produto',
+        tipo: produto.tipo === 'servico' ? 'servico' : 'produto',
         updatedAt: serverTimestamp()
       }
     }))

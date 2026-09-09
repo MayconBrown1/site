@@ -75,7 +75,8 @@ function criarImagem(produto, classe = 'produto-imagem') {
 }
 
 function linkWhatsapp(produto) {
-  const mensagem = `Olá! Tenho interesse no produto ${produto.nome}, no valor de ${moeda.format(Number(produto.preco || 0))}.`;
+  const tipoItem = produto.tipo === 'servico' ? 'serviço' : 'produto';
+  const mensagem = `Olá! Tenho interesse no ${tipoItem} ${produto.nome}, no valor de ${moeda.format(Number(produto.preco || 0))}.`;
   return `https://wa.me/${dadosLoja.whatsapp}?text=${encodeURIComponent(mensagem)}`;
 }
 
@@ -174,7 +175,7 @@ function preencherModal(produto) {
   nome.textContent = produto.nome;
   const descricao = document.createElement('p');
   descricao.className = `modal-descricao${produto.descricao ? '' : ' modal-sem-descricao'}`;
-  descricao.textContent = produto.descricao || 'A loja ainda não informou uma descrição para este produto.';
+  descricao.textContent = produto.descricao || `A loja ainda não informou uma descrição para este ${produto.tipo === 'servico' ? 'serviço' : 'produto'}.`;
 
   const rodape = document.createElement('div');
   rodape.className = 'modal-rodape';
@@ -219,11 +220,11 @@ function fecharDetalhes() {
 function renderizarProdutos() {
   if (!dadosLoja) return;
   const disponiveis = produtos
-    .filter(produto => Number(produto.estoque) > 0)
+    .filter(produto => produto.tipo === 'servico' || Number(produto.estoque) > 0)
     .sort((a, b) => String(a.nome).localeCompare(String(b.nome), 'pt-BR'));
   if (!disponiveis.length) {
     fecharDetalhes();
-    mostrarEstado('Nenhum produto disponível no momento. Volte em breve.');
+    mostrarEstado('Nenhum produto ou serviço disponível no momento. Volte em breve.');
     return;
   }
 
@@ -232,7 +233,7 @@ function renderizarProdutos() {
     ? disponiveis
     : disponiveis.filter(produto => chaveCategoria(nomeCategoria(produto)) === categoriaSelecionada);
   const titulo = categoriaSelecionada === 'todos'
-    ? 'Todos os produtos'
+    ? 'Todos os itens'
     : nomeCategoria(filtrados[0] || { categoria: 'Produtos' });
   elementos.tituloCategoria.textContent = titulo;
   elementos.tituloCategoria.hidden = false;

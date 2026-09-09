@@ -27,7 +27,7 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
 - `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
 - `publicCatalogs/{slug}`: somente nome, logo, WhatsApp e descrição pública da loja.
-- `publicCatalogs/{slug}/products/{id}`: projeção pública apenas dos produtos marcados como visíveis e com estoque positivo. Custos, vendas, clientes e demais dados internos nunca são copiados.
+- `publicCatalogs/{slug}/products/{id}`: projeção pública dos produtos visíveis com estoque positivo e dos serviços marcados como visíveis. Custos, vendas, clientes e demais dados internos nunca são copiados.
 - O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
 
 ## Catálogo público

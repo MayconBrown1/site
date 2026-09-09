@@ -593,7 +593,7 @@
                     <div class="mb-6">
                         <p class="text-sm font-bold uppercase tracking-wider text-teal-700">Vitrine pública</p>
                         <h2 class="mt-1 text-xl font-semibold lg:text-2xl">Meu Catálogo</h2>
-                        <p class="mt-2 max-w-3xl text-sm text-gray-600">Configure os dados que seus clientes verão. Somente produtos marcados como visíveis e com estoque maior que zero serão publicados.</p>
+                        <p class="mt-2 max-w-3xl text-sm text-gray-600">Configure os dados que seus clientes verão. Produtos marcados como visíveis aparecem enquanto houver estoque; serviços visíveis aparecem sem controle de quantidade.</p>
                     </div>
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
@@ -1245,9 +1245,8 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-codigo').closest('div').classList.toggle('hidden', ehServico);
             const campoCatalogo = document.getElementById('campo-visivel-catalogo');
             const visivelCatalogo = document.getElementById('produto-visivel-catalogo');
-            campoCatalogo.classList.toggle('opacity-50', ehServico);
-            visivelCatalogo.disabled = ehServico;
-            if (ehServico) visivelCatalogo.checked = false;
+            campoCatalogo.classList.remove('opacity-50');
+            visivelCatalogo.disabled = false;
             document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
             document.getElementById('produto-preco').required = !ehServico;
         }
@@ -1284,7 +1283,7 @@ if ('serviceWorker' in navigator) {
                 categoria: document.getElementById('produto-categoria').value.trim(),
                 descricao: document.getElementById('produto-descricao').value.trim(),
                 imagem: imagem,
-                visivelCatalogo: tipo === 'produto' && document.getElementById('produto-visivel-catalogo').checked
+                visivelCatalogo: document.getElementById('produto-visivel-catalogo').checked
             };
 
             if (produtoEditando) {
@@ -1469,7 +1468,7 @@ if ('serviceWorker' in navigator) {
                     <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
                     <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${produto.estoque} ${produto.unidade}`}</td>
                     <td class="px-4 py-2">${produto.categoria || '-'}</td>
-                    <td class="px-4 py-2 text-center">${produto.visivelCatalogo === true && !ehServico ? '<span class="rounded-full bg-teal-100 px-2 py-1 text-xs font-semibold text-teal-800">Visível</span>' : '<span class="text-xs text-gray-500">Oculto</span>'}</td>
+                    <td class="px-4 py-2 text-center">${produto.visivelCatalogo === true ? '<span class="rounded-full bg-teal-100 px-2 py-1 text-xs font-semibold text-teal-800">Visível</span>' : '<span class="text-xs text-gray-500">Oculto</span>'}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="editarProduto('${produto.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
                             Editar
@@ -1491,7 +1490,7 @@ if ('serviceWorker' in navigator) {
                             <h4 class="font-semibold text-base">${produto.nome}</h4>
                             <p class="text-sm text-gray-600">${ehServico ? 'Serviço' : (produto.codigo || 'Sem código')}</p>
                             <p class="text-sm text-gray-600">${produto.categoria || 'Sem categoria'}</p>
-                            <p class="mt-1 text-xs font-semibold ${produto.visivelCatalogo === true && !ehServico ? 'text-teal-700' : 'text-gray-500'}">Catálogo: ${produto.visivelCatalogo === true && !ehServico ? 'visível' : 'oculto'}</p>
+                            <p class="mt-1 text-xs font-semibold ${produto.visivelCatalogo === true ? 'text-teal-700' : 'text-gray-500'}">Catálogo: ${produto.visivelCatalogo === true ? 'visível' : 'oculto'}</p>
                         </div>
                         <div class="text-right">
                             <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>
