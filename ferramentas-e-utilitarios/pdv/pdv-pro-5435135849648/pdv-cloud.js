@@ -23,6 +23,14 @@ function state() {
 
 const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
+// O estado exibido na tela precisa ser independente da cópia usada como base da
+// sincronização. Sem essa cópia, uma venda também alterava a própria referência
+// de comparação e a nuvem entendia que estoque, venda e movimento não mudaram.
+function cloneState(value) {
+  if (value === undefined) return undefined;
+  return JSON.parse(JSON.stringify(value));
+}
+
 function mergeRecords(field, baseState, localState, remoteState) {
   const base = new Map((baseState?.[field] || []).map(item => [item.id, item]));
   const local = new Map((localState?.[field] || []).map(item => [item.id, item]));
@@ -62,9 +70,9 @@ function mergeState(baseState, localState, remoteState) {
 
 async function salvarNuvem() {
   if (!uid || writing) return false;
-  const localState = state();
-  const baseState = lastSubmittedState || lastCloudState || {};
-  lastSubmittedState = localState;
+  const localState = cloneState(state());
+  const baseState = cloneState(lastSubmittedState || lastCloudState || {});
+  lastSubmittedState = cloneState(localState);
   cloudQueue = cloudQueue.then(async () => {
     try {
       const ref = doc(db, 'users', uid, 'app', 'state');
@@ -75,7 +83,7 @@ async function salvarNuvem() {
         transaction.set(ref, { ...result, updatedAt: serverTimestamp() });
         return result;
       });
-      lastCloudState = merged;
+      lastCloudState = cloneState(merged);
       await sincronizarCatalogoPublico(uid);
       return true;
     } catch (e) {
@@ -141,7 +149,11 @@ protegerPagina(async (user, perfil) => {
 
   onSnapshot(doc(db, 'users', uid, 'app', 'state'), snap => {
     if (!snap.exists()) { iniciarContaVazia(); return; }
-    const d = snap.data(); lastCloudState = d; lastSubmittedState = d; writing = true;
+    const recebido = snap.data();
+    lastCloudState = cloneState(recebido);
+    lastSubmittedState = cloneState(recebido);
+    const d = cloneState(recebido);
+    writing = true;
     window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
     window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
     window.orcamentos = d.orcamentos || [];

@@ -63,8 +63,8 @@ if (produtos[0].estoque !== 2200 || produtos[1].estoque !== 2200) throw new Erro
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
 const mergeStart = cloudSource.indexOf('const same =');
 const mergeEnd = cloudSource.indexOf('async function salvarNuvem', mergeStart);
-const makeMerge = new Function('uid', `${cloudSource.slice(mergeStart, mergeEnd)}; return mergeState;`);
-const mergeState = makeMerge('empresa-1');
+const makeCloudHelpers = new Function('uid', `${cloudSource.slice(mergeStart, mergeEnd)}; return { mergeState, cloneState };`);
+const { mergeState, cloneState } = makeCloudHelpers('empresa-1');
 const emptyCollections = { movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
 const base = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2200 }], vendas: [] };
 const local = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2100 }], vendas: [{ id: 'v-local', total: 10 }] };
@@ -72,6 +72,18 @@ const remote = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2125 }]
 const merged = mergeState(base, local, remote);
 if (merged.produtos[0].estoque !== 2025) throw new Error('A mesclagem simultânea calculou o estoque incorretamente.');
 if (merged.vendas.length !== 2) throw new Error('A mesclagem simultânea perdeu uma venda.');
+
+// Reproduz a venda feita logo após carregar os dados da nuvem. A base não pode
+// mudar junto com os objetos da tela, ou a venda e a baixa parecem não existir.
+const recebido = { ...emptyCollections, produtos: [{ id: 'produto-1', estoque: 10 }], vendas: [] };
+const baseIsolada = cloneState(recebido);
+const tela = cloneState(recebido);
+tela.produtos[0].estoque -= 1;
+tela.vendas.push({ id: 'venda-1', total: 1 });
+const vendaMesclada = mergeState(baseIsolada, tela, recebido);
+if (baseIsolada.produtos[0].estoque !== 10) throw new Error('A base da nuvem foi alterada junto com a tela.');
+if (vendaMesclada.produtos[0].estoque !== 9) throw new Error('A baixa de estoque da venda foi perdida.');
+if (vendaMesclada.vendas.length !== 1) throw new Error('O registro da venda foi perdido.');
 
 for (const marker of ['createUserWithEmailAndPassword', 'initializeApp(app.options', 'sendPasswordResetEmail']) {
   if (!operatorAdmin.includes(marker)) throw new Error(`Fluxo direto de operadores incompleto: ${marker}`);
