@@ -466,7 +466,7 @@
             <div id="caixa-section" class="section hidden">
                 <div class="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
-                        <div id="aviso-caixa-operador" class="mb-4 hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">Como operador, você pode abrir e fechar o caixa e acompanhar entradas e saídas. Movimentações manuais e sangrias ficam disponíveis somente para o titular.</div>
+                        <div id="aviso-caixa-operador" class="mb-4 hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">Como operador, você pode abrir e fechar o caixa e acompanhar entradas e saídas. Para registrar uma entrada ou retirada, será exigida a senha do titular da empresa.</div>
                         <h2 id="titulo-movimentacao-caixa" class="text-lg lg:text-xl font-semibold mb-4">Movimentação de Caixa</h2>
                         <div id="form-movimentacao-caixa" class="space-y-4">
                             <div>
@@ -1163,8 +1163,6 @@ if ('serviceWorker' in navigator) {
                 botao.classList.toggle('hidden', operador && !permitidas.has(botao.dataset.section));
             });
             document.querySelectorAll('#menu-pdv [data-owner-only]').forEach(botao => botao.classList.toggle('hidden', operador));
-            document.getElementById('titulo-movimentacao-caixa')?.classList.toggle('hidden', operador);
-            document.getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador);
             document.getElementById('aviso-caixa-operador')?.classList.toggle('hidden', !operador);
             const identificacao = document.getElementById('usuario-pdv-atual');
             if (identificacao && window.usuarioPdv) {
@@ -1623,6 +1621,7 @@ if ('serviceWorker' in navigator) {
         // Variáveis para controle de ações protegidas
         let acaoPendente = null;
         let produtoParaAcao = null;
+        let movimentoAutorizadoPorSenha = false;
 
         function editarProduto(id) {
             if (!exigirTitular('Edição de produtos disponível somente para o titular.')) return;
@@ -3085,14 +3084,18 @@ function showInstallButton() {
 
         // Movimentação de caixa
         function registrarMovimento() {
-            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             if (!exigirCaixaAberto('Abra o caixa antes de registrar uma movimentação.')) return;
             acaoPendente = 'registrar_movimento';
-            solicitarSenhaAcao('Digite a senha para registrar este movimento:');
+            solicitarSenhaAcao(ehOperadorAtual()
+                ? 'Digite a senha do titular para registrar esta entrada ou retirada:'
+                : 'Digite a senha para registrar este movimento:');
         }
 
         function executarRegistroMovimento() {
-            if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
+            if (!movimentoAutorizadoPorSenha) {
+                mostrarMensagem('Confirme a senha do titular antes de registrar a movimentação.', 'erro');
+                return;
+            }
             const caixa = exigirCaixaAberto('O caixa foi fechado. Abra um caixa para registrar a movimentação.');
             if (!caixa) return;
             const tipo = document.getElementById('movimento-tipo').value;
@@ -3487,7 +3490,9 @@ function showInstallButton() {
             
             // Alterar o texto do modal
             modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
-            modal.querySelector('p').textContent = `${mensagem} Use a mesma senha utilizada no login do PDV.`;
+            modal.querySelector('p').textContent = ehOperadorAtual()
+                ? `${mensagem} A senha do operador não autoriza esta movimentação.`
+                : `${mensagem} Use a mesma senha utilizada no login do PDV.`;
             
             // Focar no campo de senha
             document.getElementById('senha-exclusao').focus();
@@ -3516,6 +3521,9 @@ function showInstallButton() {
         return;
     }
 
+    // A autorização vale somente durante a execução desta confirmação.
+    movimentoAutorizadoPorSenha = acaoPendente === 'registrar_movimento';
+
     // Executar ação pendente
     switch (acaoPendente) {
         case 'editar_produto':
@@ -3534,6 +3542,7 @@ function showInstallButton() {
             executarExclusaoMovimento();
             break;
     }
+    movimentoAutorizadoPorSenha = false;
 
     // Limpar variáveis
     acaoPendente = null;
@@ -3611,6 +3620,7 @@ function showInstallButton() {
         function cancelarExclusaoVenda() {
             vendaParaExcluir = null;
             movimentoParaExcluir = null;
+            movimentoAutorizadoPorSenha = false;
             document.getElementById('senha-exclusao').value = '';
             
             const modal = document.getElementById('modal-senha');

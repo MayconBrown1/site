@@ -1,5 +1,6 @@
-import { auth, db } from './firebase-config.js';
-import { EmailAuthProvider, reauthenticateWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
+import { app, auth, db } from './firebase-config.js';
+import { deleteApp, initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
+import { EmailAuthProvider, getAuth, reauthenticateWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 const OWNER_EMAIL = 'mayconbrown083@gmail.com';
@@ -43,6 +44,21 @@ export async function validarSenhaAtual(senha) {
   } catch (erro) {
     if (['auth/invalid-credential', 'auth/wrong-password', 'auth/user-mismatch', 'auth/invalid-login-credentials'].includes(erro.code)) return false;
     throw erro;
+  }
+}
+export async function validarSenhaTitular(emailTitular, uidTitular, senha) {
+  if (!emailTitular || !uidTitular || !senha) return false;
+  const appValidacao = initializeApp(app.options, `validar-titular-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const authValidacao = getAuth(appValidacao);
+  try {
+    const credencial = await signInWithEmailAndPassword(authValidacao, emailTitular, String(senha));
+    return credencial.user.uid === uidTitular;
+  } catch (erro) {
+    if (['auth/invalid-credential', 'auth/wrong-password', 'auth/user-mismatch', 'auth/invalid-login-credentials', 'auth/user-not-found'].includes(erro.code)) return false;
+    throw erro;
+  } finally {
+    await signOut(authValidacao).catch(() => {});
+    await deleteApp(appValidacao).catch(() => {});
   }
 }
 export async function sair() { await signOut(auth); location.replace('./login.html'); }

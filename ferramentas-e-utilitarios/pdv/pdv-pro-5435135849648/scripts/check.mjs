@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const operatorAdmin = fs.readFileSync(new URL('../operator-admin.js', import.meta.url), 'utf8');
 const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+const authSource = fs.readFileSync(new URL('../auth.js', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -75,5 +76,15 @@ for (const marker of ['createUserWithEmailAndPassword', 'initializeApp(app.optio
 }
 if (operatorAdmin.includes('httpsCallable')) throw new Error('O cadastro de operadores ainda depende de uma Cloud Function.');
 if (!firestoreRules.includes("request.resource.data.role == 'operator'")) throw new Error('As regras de criação de operadores não foram encontradas.');
+
+if (html.includes("getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador)")) {
+  throw new Error('O formulário de movimentação não pode ser ocultado do operador.');
+}
+for (const marker of ['movimentoAutorizadoPorSenha', 'A senha do operador não autoriza esta movimentação.']) {
+  if (!html.includes(marker)) throw new Error(`Proteção da movimentação do operador ausente: ${marker}`);
+}
+if (!authSource.includes('validarSenhaTitular') || !cloudSource.includes('validarSenhaTitular(emailTitular, uid, senha)')) {
+  throw new Error('A movimentação do operador precisa validar a conta do titular.');
+}
 
 console.log('Verificações do PDV concluídas com sucesso.');

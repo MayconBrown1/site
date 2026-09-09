@@ -1,8 +1,8 @@
 import { db } from './firebase-config.js';
-import { protegerPagina, sair, validarSenhaAtual } from './auth.js';
+import { protegerPagina, sair, validarSenhaAtual, validarSenhaTitular } from './auth.js';
 import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from './catalogo-admin.js';
 import { inicializarOperadores } from './operator-admin.js';
-import { deleteDoc, doc, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { deleteDoc, doc, getDoc, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 let uid, writing = false, writingLocalStorage = false, lastCloudState = null, lastSubmittedState = null;
 let cloudQueue = Promise.resolve();
@@ -102,9 +102,19 @@ function iniciarContaVazia() {
   salvarNuvem();
 }
 
-protegerPagina((user, perfil) => {
+protegerPagina(async (user, perfil) => {
   uid = perfil.role === 'operator' ? perfil.ownerUid : user.uid;
   if (!uid) { sair(); return; }
+  let emailTitular = user.email || perfil.email || '';
+  if (perfil.role === 'operator') {
+    try {
+      const titular = await getDoc(doc(db, 'users', uid));
+      emailTitular = titular.exists() ? titular.data().email || '' : '';
+    } catch (erro) {
+      console.error('Não foi possível carregar a identificação do titular.', erro);
+      emailTitular = '';
+    }
+  }
   window.usuarioPdv = {
     uid: user.uid,
     ownerUid: uid,
@@ -115,7 +125,9 @@ protegerPagina((user, perfil) => {
   window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
   inicializarCatalogoAdmin(uid);
   inicializarOperadores(perfil);
-  window.validarSenhaAdm = perfil.role === 'operator' ? async () => false : validarSenhaAtual;
+  window.validarSenhaAdm = perfil.role === 'operator'
+    ? senha => validarSenhaTitular(emailTitular, uid, senha)
+    : validarSenhaAtual;
   localStorage.removeItem('pdv_senha_adm_local');
   // Remove o hash legado: a senha administrativa agora é sempre validada pelo Firebase Authentication.
   if (perfil.role !== 'operator') deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
