@@ -27,8 +27,17 @@
       <span class="carregando" aria-hidden="true"></span>
       Buscando produtos...
     </div>
+    <nav id="categorias" class="categorias" aria-label="Categorias de produtos" hidden></nav>
+    <h2 id="titulo-categoria" class="titulo-categoria" hidden></h2>
     <section id="produtos" class="grade-produtos" aria-label="Produtos disponíveis" hidden></section>
   </main>
+
+  <div id="modal-produto" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-produto-nome">
+    <div class="modal-painel" role="document">
+      <button id="fechar-modal" class="modal-fechar" type="button" aria-label="Fechar detalhes do produto">×</button>
+      <div id="modal-produto-conteudo"></div>
+    </div>
+  </div>
 
   <footer>
     <p>Disponibilidade atualizada pelo estoque da loja.</p>

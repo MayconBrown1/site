@@ -10,13 +10,21 @@ const elementos = {
   logoWrap: document.getElementById('logo-wrap'),
   logo: document.getElementById('logo-loja'),
   status: document.getElementById('status'),
-  produtos: document.getElementById('produtos')
+  categorias: document.getElementById('categorias'),
+  tituloCategoria: document.getElementById('titulo-categoria'),
+  produtos: document.getElementById('produtos'),
+  modal: document.getElementById('modal-produto'),
+  modalConteudo: document.getElementById('modal-produto-conteudo'),
+  fecharModal: document.getElementById('fechar-modal')
 };
 
 const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 let dadosLoja = null;
 let produtos = [];
 let pararProdutos = null;
+let categoriaSelecionada = 'todos';
+let focoAntesDoModal = null;
+let produtoAbertoId = '';
 
 function slugDaPagina() {
   const parametro = new URLSearchParams(location.search).get('loja');
@@ -35,6 +43,8 @@ function mostrarEstado(mensagem, erro = false) {
   elementos.status.textContent = mensagem;
   elementos.status.className = `status${erro ? ' erro' : ''}`;
   elementos.status.hidden = false;
+  elementos.categorias.hidden = true;
+  elementos.tituloCategoria.hidden = true;
   elementos.produtos.hidden = true;
 }
 
@@ -45,9 +55,9 @@ function textoEstoque(estoque) {
   return `Últimas ${quantidade.toLocaleString('pt-BR')} unidades`;
 }
 
-function criarImagem(produto) {
+function criarImagem(produto, classe = 'produto-imagem') {
   const area = document.createElement('div');
-  area.className = 'produto-imagem';
+  area.className = classe;
   const inicial = document.createElement('span');
   inicial.className = 'produto-inicial';
   inicial.textContent = String(produto.nome || '?').trim().charAt(0).toUpperCase() || '?';
@@ -72,34 +82,36 @@ function linkWhatsapp(produto) {
 function criarCard(produto) {
   const artigo = document.createElement('article');
   artigo.className = 'produto';
-  artigo.append(criarImagem(produto));
 
-  const corpo = document.createElement('div');
-  corpo.className = 'produto-corpo';
-  if (produto.categoria) {
-    const categoria = document.createElement('p');
-    categoria.className = 'categoria';
-    categoria.textContent = produto.categoria;
-    corpo.append(categoria);
+  const abrir = document.createElement('button');
+  abrir.type = 'button';
+  abrir.className = 'produto-imagem';
+  abrir.setAttribute('aria-label', `Ver detalhes de ${produto.nome}`);
+  const imagem = criarImagem(produto, '');
+  imagem.className = '';
+  while (imagem.firstChild) abrir.append(imagem.firstChild);
+  const aviso = textoEstoque(produto.estoque);
+  if (aviso) {
+    const selo = document.createElement('span');
+    selo.className = 'estoque-selo';
+    selo.textContent = aviso;
+    abrir.append(selo);
   }
+  abrir.addEventListener('click', () => abrirDetalhes(produto, abrir));
+  artigo.append(abrir);
+
+  const resumo = document.createElement('div');
+  resumo.className = 'produto-resumo';
   const nome = document.createElement('h2');
+  nome.className = 'produto-nome';
   nome.textContent = produto.nome;
-  corpo.append(nome);
-  if (produto.descricao) {
-    const descricao = document.createElement('p');
-    descricao.className = 'produto-descricao';
-    descricao.textContent = produto.descricao;
-    corpo.append(descricao);
-  }
-
-  const rodape = document.createElement('div');
-  rodape.className = 'produto-rodape';
+  resumo.append(nome);
   const preco = document.createElement('p');
-  preco.className = 'preco';
+  preco.className = 'produto-preco';
   preco.textContent = moeda.format(Number(produto.preco || 0));
-  const estoque = document.createElement('p');
-  estoque.className = 'estoque-baixo';
-  estoque.textContent = textoEstoque(produto.estoque);
+  resumo.append(preco);
+  const acoes = document.createElement('div');
+  acoes.className = 'produto-acoes';
   const botao = document.createElement('a');
   botao.className = 'whatsapp';
   botao.href = linkWhatsapp(produto);
@@ -107,10 +119,101 @@ function criarCard(produto) {
   botao.rel = 'noopener noreferrer';
   botao.textContent = 'Pedir pelo WhatsApp';
   botao.setAttribute('aria-label', `Pedir ${produto.nome} pelo WhatsApp`);
-  rodape.append(preco, estoque, botao);
-  corpo.append(rodape);
-  artigo.append(corpo);
+  acoes.append(botao);
+  resumo.append(acoes);
+  artigo.append(resumo);
   return artigo;
+}
+
+function nomeCategoria(produto) {
+  return String(produto.categoria || '').trim() || 'Outros';
+}
+
+function chaveCategoria(nome) {
+  return nome.toLocaleLowerCase('pt-BR');
+}
+
+function renderizarCategorias(disponiveis) {
+  const mapa = new Map();
+  disponiveis.forEach(produto => {
+    const nome = nomeCategoria(produto);
+    if (!mapa.has(chaveCategoria(nome))) mapa.set(chaveCategoria(nome), nome);
+  });
+  const categorias = [...mapa.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR'));
+  if (categoriaSelecionada !== 'todos' && !mapa.has(categoriaSelecionada)) categoriaSelecionada = 'todos';
+
+  const opcoes = [['todos', 'Todos'], ...categorias];
+  elementos.categorias.replaceChildren(...opcoes.map(([chave, rotulo]) => {
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = `categoria-botao${categoriaSelecionada === chave ? ' ativa' : ''}`;
+    botao.textContent = rotulo;
+    botao.setAttribute('aria-pressed', String(categoriaSelecionada === chave));
+    botao.addEventListener('click', () => {
+      categoriaSelecionada = chave;
+      renderizarProdutos();
+      elementos.tituloCategoria.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return botao;
+  }));
+  elementos.categorias.hidden = false;
+}
+
+function preencherModal(produto) {
+  const grade = document.createElement('div');
+  grade.className = 'modal-grid';
+  grade.append(criarImagem(produto, 'modal-imagem'));
+
+  const detalhes = document.createElement('div');
+  detalhes.className = 'modal-detalhes';
+  const categoria = document.createElement('p');
+  categoria.className = 'modal-categoria';
+  categoria.textContent = nomeCategoria(produto);
+  const nome = document.createElement('h2');
+  nome.id = 'modal-produto-nome';
+  nome.textContent = produto.nome;
+  const descricao = document.createElement('p');
+  descricao.className = `modal-descricao${produto.descricao ? '' : ' modal-sem-descricao'}`;
+  descricao.textContent = produto.descricao || 'A loja ainda não informou uma descrição para este produto.';
+
+  const rodape = document.createElement('div');
+  rodape.className = 'modal-rodape';
+  const preco = document.createElement('p');
+  preco.className = 'modal-preco';
+  preco.textContent = moeda.format(Number(produto.preco || 0));
+  const estoque = document.createElement('p');
+  estoque.className = 'modal-estoque';
+  estoque.textContent = textoEstoque(produto.estoque);
+  const whatsapp = document.createElement('a');
+  whatsapp.className = 'whatsapp';
+  whatsapp.href = linkWhatsapp(produto);
+  whatsapp.target = '_blank';
+  whatsapp.rel = 'noopener noreferrer';
+  whatsapp.textContent = 'Pedir pelo WhatsApp';
+  whatsapp.setAttribute('aria-label', `Pedir ${produto.nome} pelo WhatsApp`);
+  rodape.append(preco, estoque, whatsapp);
+  detalhes.append(categoria, nome, descricao, rodape);
+  grade.append(detalhes);
+  elementos.modalConteudo.replaceChildren(grade);
+}
+
+function abrirDetalhes(produto, origem) {
+  produtoAbertoId = produto.id;
+  focoAntesDoModal = origem || document.activeElement;
+  preencherModal(produto);
+  elementos.modal.hidden = false;
+  document.body.classList.add('modal-aberto');
+  elementos.fecharModal.focus();
+}
+
+function fecharDetalhes() {
+  if (elementos.modal.hidden) return;
+  elementos.modal.hidden = true;
+  elementos.modalConteudo.replaceChildren();
+  document.body.classList.remove('modal-aberto');
+  produtoAbertoId = '';
+  focoAntesDoModal?.focus?.();
+  focoAntesDoModal = null;
 }
 
 function renderizarProdutos() {
@@ -118,14 +221,56 @@ function renderizarProdutos() {
   const disponiveis = produtos
     .filter(produto => Number(produto.estoque) > 0)
     .sort((a, b) => String(a.nome).localeCompare(String(b.nome), 'pt-BR'));
-  elementos.produtos.replaceChildren(...disponiveis.map(criarCard));
   if (!disponiveis.length) {
+    fecharDetalhes();
     mostrarEstado('Nenhum produto disponível no momento. Volte em breve.');
     return;
   }
+
+  renderizarCategorias(disponiveis);
+  const filtrados = categoriaSelecionada === 'todos'
+    ? disponiveis
+    : disponiveis.filter(produto => chaveCategoria(nomeCategoria(produto)) === categoriaSelecionada);
+  const titulo = categoriaSelecionada === 'todos'
+    ? 'Todos os produtos'
+    : nomeCategoria(filtrados[0] || { categoria: 'Produtos' });
+  elementos.tituloCategoria.textContent = titulo;
+  elementos.tituloCategoria.hidden = false;
+  elementos.produtos.replaceChildren(...filtrados.map(criarCard));
   elementos.status.hidden = true;
   elementos.produtos.hidden = false;
+
+  if (produtoAbertoId) {
+    const atualizado = disponiveis.find(produto => produto.id === produtoAbertoId);
+    if (atualizado) preencherModal(atualizado);
+    else fecharDetalhes();
+  }
 }
+
+elementos.fecharModal.addEventListener('click', fecharDetalhes);
+elementos.modal.addEventListener('click', evento => {
+  if (evento.target === elementos.modal) fecharDetalhes();
+});
+document.addEventListener('keydown', evento => {
+  if (elementos.modal.hidden) return;
+  if (evento.key === 'Escape') {
+    fecharDetalhes();
+    return;
+  }
+  if (evento.key === 'Tab') {
+    const focaveis = [...elementos.modal.querySelectorAll('button:not([disabled]), a[href]')];
+    if (!focaveis.length) return;
+    const primeiro = focaveis[0];
+    const ultimo = focaveis.at(-1);
+    if (evento.shiftKey && document.activeElement === primeiro) {
+      evento.preventDefault();
+      ultimo.focus();
+    } else if (!evento.shiftKey && document.activeElement === ultimo) {
+      evento.preventDefault();
+      primeiro.focus();
+    }
+  }
+});
 
 function aplicarLoja(loja) {
   dadosLoja = loja;
