@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0d12">
+  <meta name="description" content="Finanças Pro — controle receitas, despesas, contas e metas em um só lugar.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Finanças Pro">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icons/favicon-32.png" sizes="32x32">
+  <link rel="stylesheet" href="./assets/styles.css">
+  <title>Finanças Pro</title>
+</head>
+<body>
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7a3 3 0 0 1 3-3h11v4H7a3 3 0 0 0 0 6h13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M17 11h3v4h-3a2 2 0 0 1 0-4z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="m14 10 6-6"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="m4 4 7 .3L20 13l-7 7-8.7-9z"/><circle cx="8" cy="8" r="1"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4m8-4v4M3 10h18"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m1-9a3 3 0 0 0 0-6m2 8a5 5 0 0 1 3 4.6V20"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M5 8h14l-4-4m4 12H5l4 4"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="m3 3 18 18M10.6 5.2A8.4 8.4 0 0 1 12 5c6 0 10 7 10 7a15 15 0 0 1-2.1 2.8M6.5 6.5C3.8 8.3 2 12 2 12s4 7 10 7a9 9 0 0 0 3.5-.7"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h5m5-4 4-4-4-4m4 4H9"/></symbol>
+    <symbol id="i-install" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16m-10 4v6m4-6v6M9 7l1-3h4l1 3m3 0-1 14H7L6 7"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m4 20 4-.8L19 8l-3-3L4.8 16zM14 7l3 3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></symbol>
+  </svg>
+
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+  <main id="auth-view" class="auth-shell">
+    <section class="auth-brand" aria-label="Finanças Pro">
+      <div class="brand-lockup">
+        <img class="brand-logo" src="./icons/icon-192.png" alt="">
+        <div><strong>Finanças Pro</strong><span>Seu dinheiro, com clareza.</span></div>
+      </div>
+      <div class="auth-copy">
+        <span class="eyebrow">CONTROLE FINANCEIRO PESSOAL</span>
+        <h1>Decisões melhores começam com uma visão completa.</h1>
+        <p>Acompanhe saldo, receitas, despesas, contas e metas com seus dados protegidos na sua conta.</p>
+      </div>
+      <div class="auth-preview" aria-hidden="true">
+        <div class="preview-top"><span>Economia mensal</span><b>+18,4%</b></div>
+        <div class="preview-balance"><small>Saldo disponível</small><strong>R$ 4.820,50</strong></div>
+        <div class="preview-bars"><i style="height:38%"></i><i style="height:55%"></i><i style="height:48%"></i><i style="height:72%"></i><i style="height:62%"></i><i style="height:88%"></i></div>
+      </div>
+    </section>
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="mobile-brand"><img src="./icons/icon-192.png" alt=""><strong>Finanças Pro</strong></div>
+        <div class="auth-tabs" role="tablist">
+          <button class="auth-tab active" data-auth-mode="login" type="button">Entrar</button>
+          <button class="auth-tab" data-auth-mode="register" type="button">Criar conta</button>
+        </div>
+        <div id="auth-message" class="auth-message hidden" role="status"></div>
+        <form id="auth-form">
+          <label id="name-field" class="field hidden"><span>Seu nome</span><input id="auth-name" autocomplete="name" placeholder="Como quer ser chamado?"></label>
+          <label class="field"><span>E-mail</span><input id="auth-email" type="email" autocomplete="email" required placeholder="voce@email.com"></label>
+          <label class="field"><span>Senha</span><div class="input-action"><input id="auth-password" type="password" minlength="6" autocomplete="current-password" required placeholder="Mínimo de 6 caracteres"><button id="toggle-password" type="button" aria-label="Mostrar senha"><svg><use href="#i-eye"></use></svg></button></div></label>
+          <button id="auth-submit" class="primary-btn" type="submit">Entrar na minha conta</button>
+          <button id="forgot-password" class="text-btn" type="button">Esqueci minha senha</button>
+        </form>
+        <p class="auth-footnote">Ao continuar, você concorda com o uso dos seus dados apenas para operar o Finanças Pro.</p>
+      </div>
+    </section>
+  </main>
+
+  <section id="pending-view" class="state-screen hidden">
+    <div class="state-card">
+      <img src="./icons/icon-192.png" alt="" class="state-logo">
+      <span class="status-pill">Cadastro recebido</span>
+      <h1>Sua conta aguarda aprovação</h1>
+      <p>O administrador precisa liberar seu acesso. Você poderá entrar assim que a conta for aprovada.</p>
+      <div class="state-account"><span>Conta</span><strong id="pending-email">—</strong></div>
+      <div class="state-actions"><button id="refresh-status" class="primary-btn">Verificar novamente</button><button class="secondary-btn logout-action">Sair</button></div>
+    </div>
+  </section>
+
+  <section id="blocked-view" class="state-screen hidden">
+    <div class="state-card danger-state">
+      <img src="./icons/icon-192.png" alt="" class="state-logo">
+      <span class="status-pill danger">Acesso bloqueado</span>
+      <h1>Esta conta não pode acessar</h1>
+      <p>Entre em contato com o administrador caso acredite que isso aconteceu por engano.</p>
+      <button class="secondary-btn logout-action">Voltar ao login</button>
+    </div>
+  </section>
+
+  <div id="app-view" class="app-shell hidden">
+    <div id="scrim" class="scrim"></div>
+    <aside id="sidebar" class="sidebar" aria-label="Menu principal">
+      <div class="profile-block">
+        <img id="profile-avatar" src="./icons/icon-192.png" alt="Foto do perfil">
+        <div class="profile-copy"><strong id="profile-name">Minha conta</strong><span id="profile-email">—</span><small id="profile-status"><i></i> Conta aprovada</small></div>
+        <button id="close-sidebar" class="icon-btn mobile-only" aria-label="Fechar menu"><svg><use href="#i-close"></use></svg></button>
+      </div>
+      <nav class="main-nav">
+        <button class="nav-item active" data-view="dashboard"><svg><use href="#i-grid"></use></svg><span>Resumo</span></button>
+        <button class="nav-item" data-view="accounts"><svg><use href="#i-wallet"></use></svg><span>Contas</span></button>
+        <button class="nav-item" data-view="transactions"><svg><use href="#i-list"></use></svg><span>Transações</span></button>
+        <span class="nav-label">PLANEJAR</span>
+        <button class="nav-item" data-view="budgets"><span class="nav-symbol">%</span><span>Orçamentos</span></button>
+        <button class="nav-item" data-view="goals"><svg><use href="#i-target"></use></svg><span>Objetivos</span></button>
+        <span class="nav-label">ANALISAR</span>
+        <button class="nav-item" data-view="reports"><svg><use href="#i-chart"></use></svg><span>Relatórios e gráficos</span></button>
+        <button class="nav-item" data-view="categories"><svg><use href="#i-tag"></use></svg><span>Categorias</span></button>
+        <button class="nav-item" data-view="calendar"><svg><use href="#i-calendar"></use></svg><span>Calendário</span></button>
+        <button id="admin-nav" class="nav-item admin-nav hidden" data-view="admin"><svg><use href="#i-users"></use></svg><span>Gerenciar contas</span><em id="pending-count" class="count-badge hidden">0</em></button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="install-app" class="install-btn hidden"><svg><use href="#i-install"></use></svg><span>Instalar aplicativo</span></button>
+        <button class="nav-item logout-action"><svg><use href="#i-logout"></use></svg><span>Sair</span></button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <button id="menu-button" class="icon-btn" aria-label="Abrir menu"><svg><use href="#i-menu"></use></svg></button>
+        <div class="month-switcher"><button id="prev-month" aria-label="Mês anterior">‹</button><strong id="month-label">—</strong><button id="next-month" aria-label="Próximo mês">›</button></div>
+        <div class="top-actions"><button id="privacy-button" class="icon-btn" aria-label="Ocultar valores"><svg><use href="#i-eye"></use></svg></button><button id="more-button" class="icon-btn" aria-label="Mais opções" aria-expanded="false"><svg><use href="#i-more"></use></svg></button></div>
+        <div id="more-menu" class="popover hidden">
+          <label class="menu-toggle"><span>Modo privado</span><input id="privacy-toggle" type="checkbox"><i></i></label>
+          <button data-action="balance-details">Detalhamento do saldo</button>
+          <button data-action="set-balance">Configurar saldo inicial</button>
+          <button data-action="summary-settings">Configurar resumo</button>
+          <button data-action="calculator">Calculadora</button>
+          <button data-action="help">Ajuda e instalação</button>
+        </div>
+      </header>
+
+      <main id="content" class="content" tabindex="-1"></main>
+
+      <div class="fab-wrap">
+        <div id="quick-menu" class="quick-menu hidden">
+          <button data-transaction="transfer"><span class="quick-icon transfer"><svg><use href="#i-transfer"></use></svg></span><strong>Transferência</strong></button>
+          <button data-transaction="income"><span class="quick-icon income"><svg><use href="#i-plus"></use></svg></span><strong>Receita</strong></button>
+          <button data-transaction="expense"><span class="quick-icon expense"><svg><use href="#i-minus"></use></svg></span><strong>Despesa</strong></button>
+        </div>
+        <button id="fab" class="fab" aria-label="Adicionar movimentação" aria-expanded="false"><svg><use href="#i-plus"></use></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="app-dialog" class="app-dialog">
+    <div class="dialog-head"><div><span id="dialog-kicker" class="eyebrow"></span><h2 id="dialog-title">—</h2></div><button id="dialog-close" class="icon-btn" aria-label="Fechar"><svg><use href="#i-close"></use></svg></button></div>
+    <div id="dialog-body" class="dialog-body"></div>
+  </dialog>
+
+  <script type="module" src="./assets/app.js"></script>
+</body>
+</html>
