@@ -142,6 +142,7 @@ svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width:
 .flow-item { display: grid; gap: 4px; padding-top: 14px; border-top: 1px solid rgba(146,157,171,.18); }
 .flow-item span { color: var(--muted); font-size: .78rem; }
 .flow-item strong { font-size: 1.02rem; }
+.flow-item button { width: max-content; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
 .flow-item.expected strong { color: var(--blue); }
 
 .dashboard-grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(310px,.8fr); gap: 22px; margin-top: 22px; }

@@ -293,9 +293,9 @@ function renderDashboard() {
       <div class="balance-top"><span>Saldo consolidado</span><small>Atualizado agora</small></div>
       <div class="balance-current"><button data-open-history="all"><small>Saldo atual</small><strong class="private-value">${money(s.current)}</strong></button></div>
       <div class="balance-flow">
-        <div class="flow-item"><span>Saldo inicial</span><strong class="private-value">${money(s.initial)}</strong></div>
-        <div class="flow-item"><span>Resultado do mês</span><strong class="private-value">${money(s.savings)}</strong></div>
-        <div class="flow-item expected"><span>Saldo previsto</span><strong class="private-value">${money(s.expected)}</strong></div>
+        <div class="flow-item"><span>Saldo inicial</span><button data-action-balance="initial"><strong class="private-value">${money(s.initial)}</strong></button></div>
+        <div class="flow-item"><span>Resultado do mês</span><button data-open-history="all"><strong class="private-value">${money(s.savings)}</strong></button></div>
+        <div class="flow-item expected"><span>Saldo previsto</span><button data-open-history="all"><strong class="private-value">${money(s.expected)}</strong></button></div>
       </div>
     </section>
     <div class="dashboard-grid">
@@ -592,6 +592,8 @@ async function adminUserAction(uid, action) {
 
 function wireViewEvents() {
   els.content.querySelectorAll("[data-open-history]").forEach(btn=>btn.addEventListener("click",()=>openHistory(btn.dataset.openHistory)));
+  els.content.querySelector("[data-action-balance='initial']")?.addEventListener("click",openSetBalance);
+  els.content.querySelector("[data-more-summary]")?.addEventListener("click",openSummarySettings);
   els.content.querySelectorAll("[data-transaction-id]").forEach(btn=>btn.addEventListener("click",()=>openTransactionDetails(btn.dataset.transactionId)));
   els.content.querySelector("[data-view-all]")?.addEventListener("click",e=>navigate(e.currentTarget.dataset.viewAll));
   els.content.querySelector("[data-new-transaction]")?.addEventListener("click",e=>openTransactionForm(e.currentTarget.dataset.newTransaction));
