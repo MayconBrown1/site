@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Publicador Marketplace</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><img class="brand-logo" src="/resposta-rapida-extensao/PUBLICADOR MARKETPLACE/icons/icon-128.png" alt=""><div><strong>PUBLICADOR MARKETPLACE</strong><small>Fila de classificados do Facebook</small></div></div>
+    <nav><button class="tab active" data-tab="ads">Anúncios</button><button class="tab" data-tab="settings">Configurações</button><a class="privacy-link" href="privacy.html" target="_blank">Privacidade</a></nav>
+  </header>
+  <main>
+    <section id="ads-view" class="view active">
+      <div class="hero">
+        <div><p class="eyebrow">PAINEL DA FILA</p><h1>Seus anúncios, em sequência.</h1><p id="ad-count">0 anúncios cadastrados</p></div>
+        <div class="hero-actions"><button class="secondary" id="import-button">Importar JSON</button><button class="secondary" id="export-button">Exportar anúncios</button><button class="primary" id="add-ad">＋ Adicionar anúncio</button><input id="import-file" type="file" accept="application/json" hidden></div>
+      </div>
+
+      <section class="queue-panel">
+        <div class="queue-head">
+          <div><span class="live-dot"></span><strong id="queue-title">Fila parada</strong><p id="queue-subtitle">Selecione os anúncios e clique em Iniciar.</p></div>
+          <div class="queue-actions">
+            <button class="success" id="start">▶ Iniciar</button><button class="secondary" id="pause">⏸ Pausar</button><button class="secondary" id="resume">↻ Continuar</button><button class="danger ghost" id="stop">⏹ Parar</button>
+          </div>
+        </div>
+        <div class="progress"><span id="progress-bar"></span></div>
+        <div class="stats"><div><strong id="published-stat">0</strong><span>Publicados</span></div><div><strong id="pending-stat">0</strong><span>Pendentes</span></div><div><strong id="error-stat">0</strong><span>Erros</span></div><div><strong id="step-stat">IDLE</strong><span>Etapa</span></div></div>
+        <div id="confirmation" class="confirmation hidden"></div>
+      </section>
+
+      <section class="content-grid">
+        <div class="card ads-card">
+          <div class="card-title"><div><h2>Anúncios</h2><p>Use as setas para ajustar a ordem.</p></div><button class="text-button" id="clear-completed">Limpar concluídos</button></div>
+          <div id="ads-list" class="ads-list"></div>
+        </div>
+        <aside class="card log-card">
+          <div class="card-title"><div><h2>Log da fila</h2><p>Últimas 500 ações</p></div><button class="text-button" id="clear-log">Limpar</button></div>
+          <div id="logs" class="logs"><p class="empty">Nenhuma atividade nesta fila.</p></div>
+        </aside>
+      </section>
+    </section>
+
+    <section id="settings-view" class="view">
+      <div class="settings-wrap"><div><p class="eyebrow">PREFERÊNCIAS</p><h1>Configurações padrão</h1><p>Novos anúncios começam com estes valores.</p></div>
+        <form id="settings-form" class="card settings-form">
+          <label>Tipo padrão<select name="listingType"><option value="item">Item para venda</option><option value="vehicle">Veículo para venda</option><option value="property">Imóvel residencial para venda ou locação</option></select></label>
+          <label>Categoria padrão<select name="category" id="settings-category"></select></label>
+          <label>Condição padrão<select name="condition" id="settings-condition"></select></label>
+          <label>Disponibilidade padrão<select name="availability" id="settings-availability"></select></label>
+          <label>Localização padrão<input name="location" required></label>
+          <fieldset><legend>Recebimento padrão</legend><div id="settings-delivery" class="checks"></div></fieldset>
+          <label class="check-row"><input type="checkbox" name="publishToGroups"> Publicar também em grupos</label>
+          <label class="check-row"><input type="checkbox" name="selectAllGroups"> Selecionar todos os grupos disponíveis</label>
+          <label>Grupos preferidos (um por linha)<textarea name="preferredGroups" rows="4" placeholder="Usado quando “todos” estiver desmarcado"></textarea></label>
+          <fieldset><legend>Modo de publicação</legend><div class="checks"><label><input type="radio" name="mode" value="automatic"> Automático</label><label><input type="radio" name="mode" value="assisted"> Assistido — parar antes de Publicar</label></div></fieldset>
+          <button class="primary" type="submit">Salvar configurações</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="ad-dialog">
+    <form id="ad-form" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">CLASSIFICADO</p><h2 id="form-title">Adicionar anúncio</h2></div><button type="button" class="icon-button" id="close-dialog" aria-label="Fechar">×</button></div>
+      <div class="form-grid">
+        <label class="wide">Tipo de classificado<select name="listingType" id="listing-type"><option value="item">Item para venda</option><option value="vehicle">Veículo para venda</option><option value="property">Imóvel residencial para venda ou locação</option></select><small id="type-help"></small></label>
+        <div class="wide image-field"><div><strong>Imagens *</strong><small>Selecione arquivos reais; eles ficam no IndexedDB da extensão.</small></div><label class="upload"><input id="image-input" type="file" accept="image/*" multiple hidden>＋ Selecionar imagens</label><div id="image-list" class="image-list"></div></div>
+        <label class="wide">Título *<input name="title" maxlength="100" required></label>
+        <label>Preço *<input name="price" inputmode="decimal" placeholder="20,00" required></label>
+        <label class="item-only">Categoria *<select name="category" id="ad-category"></select></label>
+        <label class="item-only">Condição *<select name="condition" id="ad-condition"></select></label>
+        <label class="item-only">Disponibilidade<select name="availability" id="ad-availability"></select></label>
+        <label>Marca (opcional)<input name="brand"></label>
+        <label>SKU (opcional)<input name="sku"></label>
+        <label class="wide">Descrição *<textarea name="description" rows="7" required></textarea></label>
+        <label class="wide">Etiquetas<input id="tags-input" placeholder="placa de acrílico, sinalização, gravação a laser"><small>Separe por vírgula. Serão usadas no máximo 20.</small><div id="tag-preview" class="tag-preview"></div></label>
+        <label>Localização *<input name="location" required></label>
+        <fieldset><legend>Recebimento</legend><div id="ad-delivery" class="checks"></div></fieldset>
+        <label class="check-row"><input type="checkbox" name="publishToGroups"> Publicar também em grupos</label>
+        <label class="check-row"><input type="checkbox" name="selectAllGroups"> Selecionar todos os grupos</label>
+        <label class="wide">Grupos preferidos (um por linha)<textarea name="preferredGroups" rows="3"></textarea></label>
+      </div>
+      <div class="dialog-actions"><button type="button" class="secondary" id="cancel-dialog">Cancelar</button><button type="submit" class="primary">Salvar anúncio</button></div>
+    </form>
+  </dialog>
+  <dialog id="privacy-consent" class="privacy-consent">
+    <div class="privacy-consent-body">
+      <img src="/resposta-rapida-extensao/PUBLICADOR MARKETPLACE/icons/icon-128.png" alt="" width="64" height="64">
+      <p class="eyebrow">DADOS E PRIVACIDADE</p>
+      <h2>Seus anúncios ficam no seu dispositivo</h2>
+      <p>A extensão armazena localmente os anúncios, imagens, localização informada, preferências e logs da fila. Ela acessa somente páginas do Facebook para preencher e acompanhar o formulário quando você inicia a publicação.</p>
+      <p>Ao publicar, os dados do anúncio são enviados ao Facebook pela própria página. A extensão não envia dados ao desenvolvedor, não usa analytics e não armazena senha, cookies ou credenciais.</p>
+      <p><a href="privacy.html" target="_blank">Leia a Política de Privacidade completa</a></p>
+      <button id="accept-privacy" class="primary" type="button">Entendi e concordo</button>
+    </div>
+  </dialog>
+  <div id="toast" class="toast hidden"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
