@@ -19,6 +19,39 @@
       });
     }
   </script>
+
+  <style>
+  .badge-notif {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background: #dc2626;
+    color: white;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    line-height: 1;
+    animation: pulse-badge 1.5s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+  }
+
+  .nav-contato-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+</style>
+
 </head>
 <body class="bg-gray-50 text-gray-800">
 
@@ -28,7 +61,10 @@
       <a href="/admin/index.html">
         <img src="/img/logo-brown-preto.png" alt="Maycon Brown" class="h-10" />
       </a>
-      <button class="md:hidden focus:outline-none" onclick="toggleMenu()">
+      <button
+  class="md:hidden focus:outline-none relative"
+  onclick="toggleMenu()"
+>
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 6h16M4 12h16M4 18h16"></path>
@@ -38,7 +74,10 @@
         <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+        <span class="nav-contato-wrapper">
+  <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+  <span id="badge-desktop" class="badge-notif hidden">0</span>
+</span>
       </nav>
     </div>
     <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
@@ -46,7 +85,10 @@
         <a href="/admin/index.html" class="text-indigo-600 font-semibold">Início</a>
         <a href="/softwares-admin.html" class="hover:text-indigo-600">Softwares</a>
         <a href="/matrizes-admin.html" class="hover:text-indigo-600">Matrizes</a>
-        <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+        <span class="nav-contato-wrapper" style="width:fit-content">
+  <a href="/painel-mensagens.html" class="hover:text-indigo-600">Contato</a>
+  <span id="badge-mobile" class="badge-notif hidden">0</span>
+</span>
       </nav>
     </div>
   </header>
@@ -156,7 +198,31 @@
       </a>
       <button onclick="copiarTexto('https://mayconbrown.com.br/limpar-pc')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow">
         Limpeza Avançada de PC
-      </button>      
+      </button>
+      <a href="/catalogo-teste/manual/index.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Criação de Catalogo online Firebase
+      </a>   
+      <a href="/shopee/index-admin.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Achados da Shopee ADM
+      </a>   
+      <a href="/uny3d/index-admin.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Uny3D ADM
+      </a>   
+      <a href="/ferramentas-e-utilitarios/mensagem-rapida/index.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Mensagem Rapida Face
+      </a>   
 
 
     </div>
@@ -193,12 +259,18 @@
           class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
         Controle Financeiro Pessoal
       </a>
-      <a href="https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/" 
+      <a href="/ferramentas-e-utilitarios/pdv" 
         target="_blank" 
           rel="noopener noreferrer"
           class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
         PDV - Sistema de Caixa
-      </a>     
+      </a>
+      <a href="/ferramentas-e-utilitarios/pdv/recuperar-senha/index.html" 
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Recuperar Senha PDV
+      </a>         
       <a href="/ferramentas-e-utilitarios/calculadora-impressao-3d/index.html"
         target="_blank" 
           rel="noopener noreferrer"
@@ -228,6 +300,24 @@
           rel="noopener noreferrer"
           class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
         Gerador de Orçamento
+      </a>
+      <a href="/resposta-rapida-extensao/356435151/35156346351/index.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Serial Extensão Resposta Rapida Whatsapp
+      </a>
+      <a href="/resposta-rapida-extensao/extensao-gmail-resposta-rapida/135646541541646/obrigado.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Serial Extensão Resposta Rapida Gamil
+      </a>
+      <a href="\correcao-definitiva-ldk-wilcom\index.html"
+        target="_blank" 
+          rel="noopener noreferrer"
+          class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow inline-block text-center">
+        Correção Definitiva LDK Wilcom
       </a>
 
 
@@ -277,7 +367,7 @@
       <button onclick="copiarTexto('https://www.mediafire.com/file_premium/y9grjxh6rbcj6qy/CorelDRAW_Graphics_Suite_2025_v26.0.0.101_-_Maycon_Brown.zip/file')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow">
         CorelDraw 2025
       </button>
-      <button onclick="copiarTexto('https://www.mediafire.com/file_premium/v3r0byndx03534u/26_CorelDRAW_Graphics_Suite_2026_v27.0.0.121_-_Maycon_Brown.zip/file')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow">
+      <button onclick="copiarTexto('https://www.mediafire.com/file_premium/34ntnm3w1n0r0tp/CorelDRAW_Graphics_Suite_2026_v27.0.0.121_-_Maycon_Brown.zip/file')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow">
         CorelDraw 2026
       </button>
       <button onclick="copiarTexto('https://www.mediafire.com/file_premium/3jnl31pkgv3jvre/Wilcom_E4.2_-_Maycon_Brown.zip/file')" class="bg-blue-600 hover:bg-green-700 text-white font-semibold py-3 px-3 rounded-lg shadow">
@@ -617,36 +707,115 @@
 
   <!-- Firebase Auth: Proteção e Logout -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+  import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
-      authDomain: "mayconbrown-bda8c.firebaseapp.com",
-      projectId: "mayconbrown-bda8c",
-      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
-      messagingSenderId: "226624962636",
-      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
-      measurementId: "G-Y1BTTK576V"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
+    authDomain: "mayconbrown-bda8c.firebaseapp.com",
+    projectId: "mayconbrown-bda8c",
+    storageBucket: "mayconbrown-bda8c.firebasestorage.app",
+    messagingSenderId: "226624962636",
+    appId: "1:226624962636:web:410ad40aa6099ca57474e9",
+    measurementId: "G-Y1BTTK576V"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    // Verifica se o usuário está logado
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = "/admin/login.html"; // redireciona se não estiver logado
+  const badgeDesktop = document.getElementById("badge-desktop");
+  const badgeMobile = document.getElementById("badge-mobile");
+
+  function atualizarBadge(count) {
+    [badgeDesktop, badgeMobile].forEach(b => {
+      if (count > 0) {
+        b.textContent = count > 99 ? "99+" : count;
+        b.classList.remove("hidden");
+      } else {
+        b.classList.add("hidden");
       }
     });
+  }
 
-    // Função de logout
-    document.getElementById("logout").addEventListener("click", () => {
-      signOut(auth).then(() => {
-        window.location.href = "/admin/login.html";
+let primeiraRenderizacao = true;
+let idsConhecidos = new Set();
+let somInicialTocado = false;
+
+function tocarNotificacao() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.3);
+
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch (e) {}
+}
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "/admin/login.html";
+    } else {
+
+      const contatosRef = collection(db, "contatos");
+
+      onSnapshot(query(contatosRef), (snapshot) => {
+        let naoLidas = 0;
+
+        snapshot.forEach((doc) => {
+  const dados = doc.data();
+
+  if (dados.lida !== true) {
+    naoLidas++;
+  }
+
+  const ehNova =
+    !primeiraRenderizacao &&
+    !idsConhecidos.has(doc.id) &&
+    dados.lida !== true;
+
+  if (ehNova) {
+    tocarNotificacao();
+  }
+
+  idsConhecidos.add(doc.id);
+});
+
+        atualizarBadge(naoLidas);
+
+// Toca ao abrir a página se houver mensagens não lidas
+if (
+  primeiraRenderizacao &&
+  naoLidas > 0 &&
+  !somInicialTocado
+) {
+  tocarNotificacao();
+  somInicialTocado = true;
+}
+
+primeiraRenderizacao = false;
       });
+    }
+  });
+
+  document.getElementById("logout").addEventListener("click", () => {
+    signOut(auth).then(() => {
+      window.location.href = "/admin/login.html";
     });
-  </script>
+  });
+</script>
 
   <script>
   // Cria e adiciona a animação no <head> via JS
