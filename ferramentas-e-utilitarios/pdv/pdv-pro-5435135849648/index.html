@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDV - Pro</title>
-    <link rel="shortcut icon" href="/img/pdv1.ico" type="image/x-icon">
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#050505">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,6 +85,7 @@
                     <button data-section="produtos" onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
                     <button data-section="clientes" onclick="showSection('clientes')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Clientes</button>
                     <button data-section="caixa" onclick="showSection('caixa')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Caixa</button>
+                    <button data-owner-only data-section="financeiro" onclick="showSection('financeiro')" class="bg-emerald-700 hover:bg-emerald-800 px-3 py-2 rounded transition-colors text-sm">Financeiro</button>
                     <button data-section="relatorios" onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button data-section="catalogo" onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
                     <button data-section="novidades" onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
@@ -158,6 +159,11 @@
                         </div>
                         
                         <div id="pagamento-detalhes" class="hidden">
+                            <div class="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                                <label for="cliente-venda" class="block text-sm font-medium text-gray-700 mb-1">Cliente da venda (opcional)</label>
+                                <select id="cliente-venda" class="w-full p-3 border rounded-lg text-base" onchange="atualizarClienteVendaSelecionado()"></select>
+                                <p class="mt-1 text-xs text-gray-500">Selecione para registrar esta compra no histórico do cliente. Em vendas fiado, o cliente é obrigatório.</p>
+                            </div>
                             <div id="dinheiro-form" class="hidden space-y-3">
                                 <div>
                                     <label for="valor-recebido" class="block text-sm font-medium text-gray-700 mb-1">Valor Recebido</label>
@@ -194,8 +200,7 @@
                                 </div>
                             </div>
                             <div id="fiado-form" class="hidden space-y-3">
-                                <div><label for="fiado-cliente" class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label><select id="fiado-cliente" class="w-full p-3 border rounded-lg text-base" onchange="atualizarInfoFiadoVenda()"></select></div>
-                                <div id="fiado-info" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Selecione um cliente cadastrado.</div>
+                                <div id="fiado-info" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Selecione acima o cliente desta venda.</div>
                                 <div><label for="fiado-vencimento" class="block text-sm font-medium text-gray-700 mb-1">Data prevista para pagamento</label><input id="fiado-vencimento" type="date" class="w-full p-3 border rounded-lg text-base"></div>
                             </div>
                             
@@ -453,12 +458,36 @@
                 </div>
             </div>
 
-            <!-- Seção Clientes Fiado -->
+            <!-- Seção Clientes -->
             <div id="clientes-section" class="section hidden">
-                <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
-                    <div class="flex flex-col sm:flex-row justify-between gap-3 mb-5"><div><h2 class="text-xl lg:text-2xl font-semibold">Clientes Fiado</h2><p class="text-sm text-gray-500">Limites, vencimentos, pagamentos e extratos.</p></div><button onclick="mostrarFormClienteFiado()" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-3 rounded-lg">Novo cliente</button></div>
-                    <div id="form-cliente-fiado" class="hidden mb-5 rounded-lg bg-gray-50 p-4"><h3 class="font-semibold mb-3">Cadastrar cliente fiado</h3><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"><input id="cliente-fiado-nome" placeholder="Nome *" class="p-3 border rounded-lg"><input id="cliente-fiado-telefone" placeholder="Telefone" class="p-3 border rounded-lg"><input id="cliente-fiado-limite" type="number" min="0" step="0.01" placeholder="Limite mensal (R$)" class="p-3 border rounded-lg"><input id="cliente-fiado-dia" type="number" min="1" max="31" placeholder="Dia de pagamento" class="p-3 border rounded-lg"></div><label class="mt-3 flex items-center gap-2 text-sm"><input id="cliente-fiado-sem-limite" type="checkbox"> Sem limite de compra</label><div class="flex gap-3 mt-4"><button onclick="salvarClienteFiado()" class="bg-green-600 text-white px-4 py-2 rounded-lg">Salvar cliente</button><button onclick="cancelarClienteFiado()" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Cancelar</button></div></div>
-                    <div id="lista-clientes-fiado" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div><h2 class="text-xl lg:text-2xl font-semibold">Cadastro de clientes</h2><p class="text-sm text-gray-500">Dados de contato, compras pagas, fiado e histórico completo.</p></div>
+                            <button onclick="mostrarFormCliente()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg">Novo cliente</button>
+                        </div>
+                        <div id="form-cliente" class="hidden mt-5 rounded-xl border border-slate-200 bg-gray-50 p-4">
+                            <h3 id="titulo-form-cliente" class="font-semibold mb-3">Cadastrar cliente</h3>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                <div><label for="cliente-nome" class="mb-1 block text-sm font-medium">Nome completo *</label><input id="cliente-nome" maxlength="120" class="w-full rounded-lg border p-3" autocomplete="name"></div>
+                                <div><label for="cliente-cpf" class="mb-1 block text-sm font-medium">CPF</label><input id="cliente-cpf" inputmode="numeric" maxlength="14" class="w-full rounded-lg border p-3" placeholder="000.000.000-00" oninput="formatarCpfCliente(this)"></div>
+                                <div><label for="cliente-whatsapp" class="mb-1 block text-sm font-medium">WhatsApp</label><input id="cliente-whatsapp" inputmode="tel" maxlength="20" class="w-full rounded-lg border p-3" placeholder="(00) 00000-0000" oninput="formatarTelefoneCliente(this)"></div>
+                                <div><label for="cliente-email" class="mb-1 block text-sm font-medium">E-mail</label><input id="cliente-email" type="email" maxlength="160" class="w-full rounded-lg border p-3" placeholder="cliente@email.com"></div>
+                                <div><label for="cliente-nascimento" class="mb-1 block text-sm font-medium">Data de nascimento</label><input id="cliente-nascimento" type="date" class="w-full rounded-lg border p-3"></div>
+                                <div><label for="cliente-cidade" class="mb-1 block text-sm font-medium">Cidade / UF</label><input id="cliente-cidade" maxlength="100" class="w-full rounded-lg border p-3"></div>
+                                <div class="sm:col-span-2 lg:col-span-3"><label for="cliente-endereco" class="mb-1 block text-sm font-medium">Endereço</label><input id="cliente-endereco" maxlength="240" class="w-full rounded-lg border p-3" placeholder="Rua, número, bairro e CEP"></div>
+                                <div class="sm:col-span-2 lg:col-span-3"><label for="cliente-observacoes" class="mb-1 block text-sm font-medium">Observações</label><textarea id="cliente-observacoes" maxlength="500" rows="2" class="w-full rounded-lg border p-3"></textarea></div>
+                            </div>
+                            <p class="mt-3 text-sm text-slate-600">Qualquer cliente cadastrado pode ser associado a uma venda paga ou fiado. Não é necessário definir limite.</p>
+                            <div class="mt-4 flex flex-wrap gap-3"><button onclick="salvarCliente()" class="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">Salvar cliente</button><button onclick="cancelarCliente()" class="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancelar</button></div>
+                        </div>
+                        <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <input id="busca-clientes" class="w-full rounded-lg border p-3 sm:max-w-md" placeholder="Buscar por nome, CPF, WhatsApp ou e-mail" oninput="atualizarClientes()">
+                            <span id="total-clientes" class="text-sm font-medium text-slate-600"></span>
+                        </div>
+                        <div id="lista-clientes" class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
+                    </div>
+                    <div id="historico-cliente" class="hidden bg-white rounded-lg shadow-md p-4 lg:p-6"></div>
                 </div>
             </div>
 
@@ -471,10 +500,23 @@
                         <div id="form-movimentacao-caixa" class="space-y-4">
                             <div>
                                 <label for="movimento-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                                <select id="movimento-tipo" class="w-full p-3 border rounded-lg text-base">
+                                <select id="movimento-tipo" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposMovimento()">
                                     <option value="entrada">Entrada</option>
                                     <option value="saida">Saída</option>
                                 </select>
+                            </div>
+                            <div id="campo-finalidade-movimento">
+                                <label for="movimento-finalidade" class="block text-sm font-medium text-gray-700 mb-1">Finalidade da retirada</label>
+                                <select id="movimento-finalidade" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposMovimento()">
+                                    <option value="sangria">Sangria — dinheiro guardado</option>
+                                    <option value="despesa">Despesa — dinheiro gasto</option>
+                                    <option value="transferencia">Transferência entre contas</option>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-500">Somente “Despesa” reduz o resultado no Financeiro.</p>
+                            </div>
+                            <div id="campo-categoria-despesa" class="hidden">
+                                <label for="movimento-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria da despesa</label>
+                                <select id="movimento-categoria" class="w-full p-3 border rounded-lg text-base"></select>
                             </div>
                             <div>
                                 <label for="movimento-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
@@ -514,6 +556,44 @@
                             <p id="descricao-historico-fechamentos" class="text-sm text-gray-500">Os registros ficam salvos na nuvem e o PDF pode ser baixado novamente.</p>
                         </div>
                         <div id="historico-fechamentos" class="grid grid-cols-1 lg:grid-cols-2 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Financeiro: acesso exclusivo do titular -->
+            <div id="financeiro-section" class="section hidden" data-owner-only>
+                <div class="space-y-4 lg:space-y-6">
+                    <div class="rounded-xl bg-gradient-to-br from-slate-950 to-emerald-950 p-5 text-white shadow-lg lg:p-7">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                            <div><p class="text-sm font-semibold uppercase tracking-wider text-emerald-300">Área exclusiva do titular</p><h2 class="mt-1 text-2xl font-bold lg:text-3xl">Controle financeiro</h2><p class="mt-2 max-w-2xl text-sm text-slate-300">Vendas entram automaticamente. Despesas do caixa aparecem somente quando a retirada for classificada como despesa.</p></div>
+                            <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="atualizarFinanceiro()"></label>
+                        </div>
+                        <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Receitas</span><strong id="financeiro-receitas" class="mt-1 block text-xl text-emerald-300">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Despesas</span><strong id="financeiro-despesas" class="mt-1 block text-xl text-rose-300">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Resultado</span><strong id="financeiro-resultado" class="mt-1 block text-xl">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Fiado a receber</span><strong id="financeiro-a-receber" class="mt-1 block text-xl text-amber-300">R$ 0,00</strong></div>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,.55fr)]">
+                        <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 class="text-lg font-semibold">Lançamentos</h3><p class="text-sm text-gray-500">Vendas, recebimentos, receitas e despesas do período.</p></div><div class="flex gap-2"><button onclick="mostrarFormFinanceiro('receita')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">+ Receita</button><button onclick="mostrarFormFinanceiro('despesa')" class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white">+ Despesa</button></div></div>
+                            <div id="lista-financeiro" class="mt-4 space-y-2"></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div id="form-financeiro" class="hidden bg-white rounded-lg shadow-md p-4 lg:p-6">
+                                <h3 id="titulo-form-financeiro" class="text-lg font-semibold">Adicionar lançamento</h3>
+                                <div class="mt-4 space-y-3">
+                                    <div><label for="financeiro-tipo" class="mb-1 block text-sm font-medium">Tipo</label><select id="financeiro-tipo" class="w-full rounded-lg border p-3" onchange="atualizarCategoriasFinanceiro()"><option value="receita">Receita</option><option value="despesa">Despesa</option></select></div>
+                                    <div><label for="financeiro-categoria" class="mb-1 block text-sm font-medium">Categoria</label><select id="financeiro-categoria" class="w-full rounded-lg border p-3"></select></div>
+                                    <div><label for="financeiro-descricao" class="mb-1 block text-sm font-medium">Descrição *</label><input id="financeiro-descricao" maxlength="160" class="w-full rounded-lg border p-3"></div>
+                                    <div><label for="financeiro-valor" class="mb-1 block text-sm font-medium">Valor *</label><input id="financeiro-valor" type="number" min="0.01" step="0.01" class="w-full rounded-lg border p-3"></div>
+                                    <div><label for="financeiro-data" class="mb-1 block text-sm font-medium">Data *</label><input id="financeiro-data" type="date" class="w-full rounded-lg border p-3"></div>
+                                    <div class="flex gap-2"><button onclick="salvarLancamentoFinanceiro()" class="flex-1 rounded-lg bg-slate-900 p-3 font-semibold text-white">Salvar</button><button onclick="cancelarFormFinanceiro()" class="rounded-lg bg-gray-500 px-4 py-3 text-white">Cancelar</button></div>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-lg shadow-md p-4 lg:p-6"><h3 class="text-lg font-semibold">Por categoria</h3><div id="resumo-categorias-financeiro" class="mt-4 space-y-3"></div></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -818,10 +898,22 @@
             <div class="space-y-4">
                 <div>
                     <label for="edit-movimento-tipo" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                    <select id="edit-movimento-tipo" class="w-full p-3 border rounded-lg text-base">
+                    <select id="edit-movimento-tipo" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposEdicaoMovimento()">
                         <option value="entrada">Entrada</option>
                         <option value="saida">Saída</option>
                     </select>
+                </div>
+                <div id="edit-campo-finalidade-movimento">
+                    <label for="edit-movimento-finalidade" class="block text-sm font-medium text-gray-700 mb-1">Finalidade da retirada</label>
+                    <select id="edit-movimento-finalidade" class="w-full p-3 border rounded-lg text-base" onchange="atualizarCamposEdicaoMovimento()">
+                        <option value="sangria">Sangria — dinheiro guardado</option>
+                        <option value="despesa">Despesa — dinheiro gasto</option>
+                        <option value="transferencia">Transferência entre contas</option>
+                    </select>
+                </div>
+                <div id="edit-campo-categoria-despesa" class="hidden">
+                    <label for="edit-movimento-categoria" class="block text-sm font-medium text-gray-700 mb-1">Categoria da despesa</label>
+                    <select id="edit-movimento-categoria" class="w-full p-3 border rounded-lg text-base"></select>
                 </div>
                 <div>
                     <label for="edit-movimento-valor" class="block text-sm font-medium text-gray-700 mb-1">Valor</label>
@@ -1121,6 +1213,7 @@ if ('serviceWorker' in navigator) {
         let movimentoParaExcluir = null;
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
+        let lancamentosFinanceiros = JSON.parse(localStorage.getItem('pdv_lancamentos_financeiros') || '[]');
         let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
         let itensOrcamento = [];
         let orcamentoEditando = null;
@@ -1135,6 +1228,7 @@ if ('serviceWorker' in navigator) {
             configSistema: { get: () => configSistema, set: v => { configSistema = v; } },
             clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
             pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
+            lancamentosFinanceiros: { get: () => lancamentosFinanceiros, set: v => { lancamentosFinanceiros = v; } },
             orcamentos: { get: () => orcamentos, set: v => { orcamentos = v; } },
             CONFIG_PIX: { get: () => CONFIG_PIX }
         });
@@ -1185,6 +1279,7 @@ if ('serviceWorker' in navigator) {
             atualizarInterface();
             configurarAtalhos();
             atualizarInfoPix();
+            atualizarCamposMovimento();
             showSection('vendas');
             document.addEventListener('keydown', event => {
                 if (event.key === 'Escape') fecharModalPix();
@@ -1290,7 +1385,10 @@ if ('serviceWorker' in navigator) {
                 atualizarListaProdutos();
                 focarBuscaProduto();
             } else if (sectionName === 'clientes') {
-                atualizarClientesFiado();
+                atualizarClientes();
+            } else if (sectionName === 'financeiro') {
+                if (!exigirTitular('O controle financeiro está disponível somente para o titular.')) return;
+                atualizarFinanceiro();
             } else if (sectionName === 'catalogo') {
                 window.carregarMeuCatalogo?.();
             } else if (sectionName === 'adm') {
@@ -2262,7 +2360,7 @@ function showInstallButton() {
             vendaAtual = { tipo: tipo };
             
             document.getElementById('pagamento-detalhes').classList.remove('hidden');
-            document.querySelectorAll('#pagamento-detalhes > div').forEach(div => {
+            document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => {
                 div.classList.add('hidden');
             });
             
@@ -2273,8 +2371,8 @@ function showInstallButton() {
             } else if (tipo === 'pix') {
                 gerarQRCodePix();
             } else if (tipo === 'fiado') {
-                atualizarSelectClientesFiado();
-                atualizarInfoFiadoVenda();
+                atualizarSelectClientes();
+                atualizarClienteVendaSelecionado();
             }
             salvarRascunhoVenda();
         }
@@ -2542,6 +2640,7 @@ function showInstallButton() {
             const desconto = parseFloat(document.getElementById('desconto').value) || 0;
             const valorDesconto = subtotal * (desconto / 100);
             const total = subtotal - valorDesconto;
+            const clienteSelecionado = clientesFiado.find(c => c.id === document.getElementById('cliente-venda').value);
 
             // Validações específicas por tipo de pagamento
             if (vendaAtual.tipo === 'dinheiro') {
@@ -2558,10 +2657,8 @@ function showInstallButton() {
                 vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
                 vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
             } else if (vendaAtual.tipo === 'fiado') {
-                const cliente = clientesFiado.find(c => c.id === document.getElementById('fiado-cliente').value);
+                const cliente = clienteSelecionado;
                 if (!cliente) { mostrarMensagem('Selecione um cliente para a venda fiado.', 'erro'); return; }
-                const saldo = saldoClienteFiado(cliente.id);
-                if (!cliente.semLimite && saldo + total > Number(cliente.limite || 0)) { mostrarMensagem(`Limite insuficiente. Saldo atual: R$ ${saldo.toFixed(2)}.`, 'erro'); return; }
                 vendaAtual.clienteId = cliente.id;
                 vendaAtual.clienteNome = cliente.nome;
                 vendaAtual.vencimento = document.getElementById('fiado-vencimento').value || '';
@@ -2593,6 +2690,8 @@ function showInstallButton() {
                 valorDesconto: valorDesconto,
                 total: total,
                 pagamento: vendaAtual,
+                clienteId: clienteSelecionado?.id || '',
+                clienteNome: clienteSelecionado?.nome || '',
                 caixaId: caixa.id,
                 vendedor: vendedorAtual()
             };
@@ -2621,6 +2720,7 @@ function showInstallButton() {
             movimentos.push(movimento);
 
             salvarDados();
+            atualizarFinanceiro();
             mostrarComprovante(venda);
             limparVenda();
             mostrarMensagem('Venda finalizada com sucesso!', 'sucesso');
@@ -2636,7 +2736,7 @@ function showInstallButton() {
             document.getElementById('pix-id').value = '';
             document.getElementById('tipo-cartao').value = 'credito';
             document.getElementById('parcelas').value = '1';
-            document.getElementById('fiado-cliente').value = '';
+            document.getElementById('cliente-venda').value = '';
             document.getElementById('fiado-vencimento').value = '';
             document.getElementById('pagamento-detalhes').classList.add('hidden');
             
@@ -2721,6 +2821,9 @@ function showInstallButton() {
             
             // Informações de pagamento detalhadas
             let pagamentoTexto = `<strong>Forma de Pagamento:</strong> ${venda.pagamento.tipo.toUpperCase()}`;
+            if (venda.clienteNome || venda.pagamento?.clienteNome) {
+                pagamentoTexto = `<strong>Cliente:</strong> ${textoSeguro(venda.clienteNome || venda.pagamento.clienteNome)}<br>` + pagamentoTexto;
+            }
             
             if (venda.pagamento.tipo === 'dinheiro') {
                 if (venda.pagamento.valorRecebido) {
@@ -2808,7 +2911,7 @@ function showInstallButton() {
         // ===============================
         let yPos = 8;
             const calcAltura = () => {
-            yPos += 8 + (configSistema.cnpj ? 4 : 0) + 8 + 5 + 4 + 4 + 8; // cabeçalho
+            yPos += 8 + (configSistema.cnpj ? 4 : 0) + 8 + 5 + 4 + 4 + 8 + (venda.clienteNome || venda.pagamento?.clienteNome ? 4 : 0); // cabeçalho
             yPos += 6 + 5 + 5; // separadores e cabeçalhos
 
             // itens
@@ -2822,6 +2925,7 @@ function showInstallButton() {
             if (venda.pagamento.tipo === 'dinheiro') yPos += 12;
             else if (venda.pagamento.tipo === 'cartao') yPos += 10;
             else if (venda.pagamento.tipo === 'pix') yPos += 10;
+            else if (venda.pagamento.tipo === 'fiado') yPos += 4;
 
             yPos += 6 + 6 + 8 + 4 + 4; // final
 
@@ -2871,6 +2975,10 @@ function showInstallButton() {
         doc.text(`Hora: ${data.toLocaleTimeString('pt-BR')}`, largura / 2, y, { align: 'center' });
         y += 4;
         doc.text(`Vendedor: ${String(venda.vendedor?.nome || 'Titular').slice(0, 32)}`, largura / 2, y, { align: 'center' });
+        if (venda.clienteNome || venda.pagamento?.clienteNome) {
+            y += 4;
+            doc.text(`Cliente: ${String(venda.clienteNome || venda.pagamento.clienteNome).slice(0, 34)}`, largura / 2, y, { align: 'center' });
+        }
         y += 8;
 
         // Separadores
@@ -2957,6 +3065,8 @@ function showInstallButton() {
             doc.text(forma, margemEsquerda, y); y += 4;
             if (venda.pagamento.pixId)
                 doc.text(`ID Transacao: ${venda.pagamento.pixId}`, margemEsquerda, y), y += 4;
+        } else if (forma === 'FIADO') {
+            doc.text('FIADO', margemEsquerda, y); y += 4;
         }
 
         y += 6;
@@ -3009,6 +3119,9 @@ function showInstallButton() {
             movimentoEditando = movimento;
             
             document.getElementById('edit-movimento-tipo').value = movimento.tipo;
+            document.getElementById('edit-movimento-finalidade').value = movimento.finalidade || 'sangria';
+            atualizarCamposEdicaoMovimento();
+            document.getElementById('edit-movimento-categoria').value = movimento.categoriaFinanceira || 'Outros';
             document.getElementById('edit-movimento-valor').value = movimento.valor;
             document.getElementById('edit-movimento-descricao').value = movimento.descricao;
             
@@ -3027,6 +3140,8 @@ function showInstallButton() {
             }
             
             const tipo = document.getElementById('edit-movimento-tipo').value;
+            const finalidade = tipo === 'saida' ? document.getElementById('edit-movimento-finalidade').value : '';
+            const categoriaFinanceira = finalidade === 'despesa' ? document.getElementById('edit-movimento-categoria').value : '';
             const valor = parseFloat(document.getElementById('edit-movimento-valor').value);
             const descricao = document.getElementById('edit-movimento-descricao').value.trim();
             
@@ -3044,12 +3159,15 @@ function showInstallButton() {
             const index = movimentos.findIndex(m => m.id === movimentoEditando.id);
             if (index !== -1) {
                 movimentos[index].tipo = tipo;
+                movimentos[index].finalidade = finalidade;
+                movimentos[index].categoriaFinanceira = categoriaFinanceira;
                 movimentos[index].valor = valor;
                 movimentos[index].descricao = descricao;
                 
                 salvarDados();
                 atualizarHistoricoMovimentos();
                 calcularSaldoCaixa();
+                atualizarFinanceiro();
                 cancelarEdicaoMovimento();
                 mostrarMensagem('Movimento atualizado com sucesso!', 'sucesso');
             }
@@ -3099,6 +3217,8 @@ function showInstallButton() {
             const caixa = exigirCaixaAberto('O caixa foi fechado. Abra um caixa para registrar a movimentação.');
             if (!caixa) return;
             const tipo = document.getElementById('movimento-tipo').value;
+            const finalidade = tipo === 'saida' ? document.getElementById('movimento-finalidade').value : '';
+            const categoriaFinanceira = finalidade === 'despesa' ? document.getElementById('movimento-categoria').value : '';
             const valor = parseFloat(document.getElementById('movimento-valor').value);
             const descricao = document.getElementById('movimento-descricao').value.trim();
 
@@ -3112,10 +3232,17 @@ function showInstallButton() {
                 return;
             }
 
+            if (tipo === 'saida' && finalidade === 'despesa' && !categoriaFinanceira) {
+                mostrarMensagem('Selecione a categoria da despesa.', 'erro');
+                return;
+            }
+
             const movimento = {
                 id: 'm_' + Date.now(),
                 data: new Date().toISOString(),
                 tipo: tipo,
+                finalidade: finalidade,
+                categoriaFinanceira: categoriaFinanceira,
                 valor: valor,
                 descricao: descricao,
                 caixaId: caixa.id
@@ -3126,9 +3253,12 @@ function showInstallButton() {
             
             document.getElementById('movimento-valor').value = '';
             document.getElementById('movimento-descricao').value = '';
+            document.getElementById('movimento-finalidade').value = 'sangria';
+            atualizarCamposMovimento();
             
             atualizarHistoricoMovimentos();
             calcularSaldoCaixa();
+            atualizarFinanceiro();
             mostrarMensagem('Movimento registrado com sucesso!', 'sucesso');
         }
 
@@ -3155,6 +3285,7 @@ function showInstallButton() {
                     <div class="flex justify-between items-start mb-2">
                         <div class="flex-1">
                             <div class="font-medium">${movimento.descricao}</div>
+                            ${movimento.tipo === 'saida' && !movimento.vendaId ? `<div class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">${movimento.finalidade === 'despesa' ? `Despesa · ${movimento.categoriaFinanceira || 'Outros'}` : movimento.finalidade === 'transferencia' ? 'Transferência' : 'Sangria'}</div>` : ''}
                             <div class="text-sm text-gray-600">${data.toLocaleDateString('pt-BR')} ${data.toLocaleTimeString('pt-BR')}</div>
                             ${movimento.vendedor?.nome ? `<div class="text-xs font-semibold text-gray-600">Vendedor: ${movimento.vendedor.nome}</div>` : ''}
                         </div>
@@ -3591,6 +3722,8 @@ function showInstallButton() {
             atualizarRelatorios();
             calcularSaldoCaixa();
             atualizarTabelaProdutos();
+            atualizarClientes();
+            atualizarFinanceiro();
             
             mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
             vendaParaExcluir = null;
@@ -3628,6 +3761,8 @@ function showInstallButton() {
             atualizarTabelaVendasDia();
             atualizarRelatorios();
             atualizarTabelaProdutos();
+            atualizarClientes();
+            atualizarFinanceiro();
             
             movimentoParaExcluir = null;
         }
@@ -3677,6 +3812,7 @@ function showInstallButton() {
         caixas: caixas,
         clientesFiado: clientesFiado,
         pagamentosFiado: pagamentosFiado,
+        lancamentosFinanceiros: lancamentosFinanceiros,
         orcamentos: orcamentos,
         configSistema: configSistema,
         configPix: CONFIG_PIX,
@@ -3937,8 +4073,8 @@ function showInstallButton() {
             mostrarMensagem('Configurações do sistema salvas com sucesso!', 'sucesso');
         }
 
-        function resetarSistema() {
-            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, vendas, orçamentos e movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
+        async function resetarSistema() {
+            if (!confirm('⚠️ ATENÇÃO: Esta ação irá apagar TODOS os dados do sistema (produtos, clientes, vendas, finanças, orçamentos e movimentos). Esta ação não pode ser desfeita!\n\nTem certeza que deseja continuar?')) {
                 return;
             }
             
@@ -3946,7 +4082,22 @@ function showInstallButton() {
                 return;
             }
             
-            // Limpar todos os dados
+            produtos = [];
+            vendas = [];
+            movimentos = [];
+            caixas = [];
+            clientesFiado = [];
+            pagamentosFiado = [];
+            lancamentosFinanceiros = [];
+            orcamentos = [];
+            categoriasOcultas = [];
+            categorias = [...CATEGORIAS_PADRAO];
+            configSistema = { nomeEmpresa: 'PDV - Pro', cnpj: '' };
+            Object.assign(CONFIG_PIX, { chavePix: '00000000000', nomeRecebedor: 'Seu Nome Aqui', cidade: 'Sua Cidade Aqui', nomeBanco: 'Nome do Banco' });
+
+            await Promise.all([Promise.resolve(salvarDados()), Promise.resolve(window.salvarFinanceiro?.())]);
+
+            // Limpar cópias locais para reconstruí-las a partir do estado zerado.
             localStorage.removeItem('pdv_produtos');
             localStorage.removeItem('pdv_vendas');
             localStorage.removeItem('pdv_movimentos');
@@ -3954,6 +4105,9 @@ function showInstallButton() {
             localStorage.removeItem('pdv_categorias');
             localStorage.removeItem('pdv_categorias_ocultas');
             localStorage.removeItem('pdv_orcamentos');
+            localStorage.removeItem('pdv_clientes_fiado');
+            localStorage.removeItem('pdv_pagamentos_fiado');
+            localStorage.removeItem('pdv_lancamentos_financeiros');
             localStorage.removeItem('pdv_config_sistema');
             localStorage.removeItem('pdv_config_pix');
             
@@ -3997,6 +4151,7 @@ function showInstallButton() {
                     caixas = backup.caixas || [];
                     clientesFiado = backup.clientesFiado || [];
                     pagamentosFiado = backup.pagamentosFiado || [];
+                    lancamentosFinanceiros = backup.lancamentosFinanceiros || [];
                     orcamentos = backup.orcamentos || [];
                     categoriasOcultas = Array.isArray(backup.categoriasOcultas) ? backup.categoriasOcultas : [];
                     categorias = [...new Set([...CATEGORIAS_PADRAO, ...(Array.isArray(backup.categorias) ? backup.categorias : [])])]
@@ -4013,6 +4168,7 @@ function showInstallButton() {
                     
                     // Salvar dados restaurados
                     salvarDados();
+                    window.salvarFinanceiro?.();
                     
                     // Atualizar interface
                     atualizarInterface();
@@ -4077,7 +4233,7 @@ function showInstallButton() {
             const agora = new Date().toISOString();
             pagamentosFiado.push({id:'pf_'+Date.now(),clienteId,valor,data:agora,caixaId:caixa.id});
             movimentos.push({id:'m_'+Date.now(),data:agora,tipo:'entrada',valor,descricao:`Pagamento fiado — ${cliente.nome}`,caixaId:caixa.id});
-            salvarDados(); atualizarClientesFiado(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); mostrarMensagem(`Pagamento registrado. Restante: R$ ${(saldo-valor).toFixed(2)}.`, 'sucesso');
+            salvarDados(); atualizarClientes(); atualizarFinanceiro(); calcularSaldoCaixa(); atualizarHistoricoMovimentos(); mostrarMensagem(`Pagamento registrado. Restante: R$ ${(saldo-valor).toFixed(2)}.`, 'sucesso');
         }
         function gerarExtratoFiado(clienteId) {
             const cliente=clientesFiado.find(c=>c.id===clienteId); if(!cliente) return;
@@ -4533,6 +4689,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
+            localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(lancamentosFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
         }
 
@@ -4548,7 +4705,8 @@ function showInstallButton() {
                 valorRecebido: document.getElementById('valor-recebido').value,
                 pixId: document.getElementById('pix-id').value,
                 tipoCartao: document.getElementById('tipo-cartao').value,
-                parcelas: document.getElementById('parcelas').value
+                parcelas: document.getElementById('parcelas').value,
+                clienteId: document.getElementById('cliente-venda').value
             };
             localStorage.setItem(CHAVE_RASCUNHO_VENDA, JSON.stringify(rascunho));
         }
@@ -4564,9 +4722,11 @@ function showInstallButton() {
                 document.getElementById('pix-id').value = rascunho.pixId || '';
                 document.getElementById('tipo-cartao').value = rascunho.tipoCartao || 'credito';
                 document.getElementById('parcelas').value = rascunho.parcelas || '1';
+                atualizarSelectClientes();
+                document.getElementById('cliente-venda').value = rascunho.clienteId || '';
                 if (vendaAtual?.tipo) {
                     document.getElementById('pagamento-detalhes').classList.remove('hidden');
-                    document.querySelectorAll('#pagamento-detalhes > div').forEach(div => div.classList.add('hidden'));
+                    document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));
                     document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
                 }
             } catch (erro) {
@@ -4633,5 +4793,11 @@ function showInstallButton() {
             atualizarHistoricoFechamentos();
             atualizarListaOrcamentos();
             atualizarDadosEmitenteOrcamento();
+            atualizarClientes();
+            atualizarFinanceiro();
+            atualizarCamposMovimento();
         }
     </script>
+    <script src="./clientes-financeiro.js"></script>
+</body>
+</html>

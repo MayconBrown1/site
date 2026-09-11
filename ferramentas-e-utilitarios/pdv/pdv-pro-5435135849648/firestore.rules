@@ -1,0 +1,160 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    // A verificação ocorre no token autenticado do Firebase e nas Rules, não no HTML.
+    function owner() { return signedIn() && request.auth.token.email == 'mayconbrown083@gmail.com'; }
+    function self(uid) { return signedIn() && request.auth.uid == uid; }
+    function activeSelf(uid) {
+      return self(uid) && exists(/databases/$(database)/documents/users/$(uid))
+        && get(/databases/$(database)/documents/users/$(uid)).data.status == 'ativo';
+    }
+    function activeOperatorFor(ownerUid) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'operator'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ativo'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.ownerUid == ownerUid
+        && exists(/databases/$(database)/documents/users/$(ownerUid))
+        && get(/databases/$(database)/documents/users/$(ownerUid)).data.status == 'ativo';
+    }
+    function activeBusinessOwner() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'ativo'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role != 'operator';
+    }
+    function businessMember(uid) { return activeSelf(uid) || activeOperatorFor(uid); }
+    function validCatalogSlug(slug) {
+      return slug.size() >= 3 && slug.size() <= 50
+        && slug.matches('^[a-z0-9]+(-[a-z0-9]+)*$');
+    }
+    function catalogOwner(slug) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/catalogOwners/$(slug))
+        && businessMember(get(/databases/$(database)/documents/catalogOwners/$(slug)).data.uid);
+    }
+
+    match /accessRequests/{requestId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name','email','whatsapp','status','createdAt','requestId','uid'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.name is string && request.resource.data.whatsapp is string;
+      allow read, update, delete: if owner();
+    }
+
+    match /users/{uid} {
+      allow read: if owner() || self(uid) || activeOperatorFor(uid)
+        || (activeBusinessOwner()
+          && resource.data.role == 'operator'
+          && resource.data.ownerUid == request.auth.uid);
+      allow create: if owner() || (self(uid)
+        && request.resource.data.keys().hasOnly(['name','email','whatsapp','status','createdAt','role','approvedAt','blockedAt'])
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pendente'
+        && request.resource.data.role == 'client')
+        || (activeBusinessOwner()
+          && uid != request.auth.uid
+          && request.resource.data.keys().hasOnly(['name','email','role','status','ownerUid','createdBy','createdAt','updatedAt'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.name.size() <= 80
+          && request.resource.data.email is string
+          && request.resource.data.email.size() > 3
+          && request.resource.data.email.size() <= 160
+          && request.resource.data.role == 'operator'
+          && request.resource.data.status == 'ativo'
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.updatedAt is timestamp);
+      allow update: if owner() || (activeBusinessOwner()
+        && resource.data.role == 'operator'
+        && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','updatedAt'])
+        && (request.resource.data.status == 'ativo' || request.resource.data.status == 'inativo')
+        && request.resource.data.updatedAt is timestamp);
+      allow delete: if owner();
+
+      match /app/state {
+        allow read: if owner() || businessMember(uid);
+        allow delete: if owner() || activeSelf(uid);
+        // Senhas, hashes e segredos administrativos nunca podem ser misturados ao estado geral do PDV.
+        allow create, update: if (owner() || businessMember(uid))
+          && request.resource.data.ownerUid == uid
+          && !request.resource.data.keys().hasAny(['senha', 'password', 'adminPassword', 'adminPasswordHash', 'senhaAdm']);
+      }
+
+      match /app/security {
+        // Documento legado: pode somente ser removido. A senha atual é validada pelo Authentication.
+        allow read, create, update: if false;
+        allow delete: if owner() || activeSelf(uid);
+      }
+
+      match /app/financeiro {
+        // Receitas e despesas particulares nunca são entregues às contas de operador.
+        allow read, delete: if owner()
+          || (activeSelf(uid)
+            && get(/databases/$(database)/documents/users/$(uid)).data.role != 'operator'
+            && resource.data.ownerUid == uid);
+        allow create, update: if owner()
+          || (activeSelf(uid)
+            && get(/databases/$(database)/documents/users/$(uid)).data.role != 'operator'
+            && request.resource.data.ownerUid == uid);
+      }
+
+    }
+
+    // Reserva privada do identificador público. Visitantes e outros clientes não podem ler UIDs.
+    match /catalogOwners/{slug} {
+      allow get: if owner() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow list: if owner();
+      allow create: if validCatalogSlug(slug) && businessMember(request.resource.data.uid)
+        && request.resource.data.keys().hasOnly(['uid', 'createdAt', 'updatedAt'])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      allow update: if validCatalogSlug(slug) && businessMember(resource.data.uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.keys().hasOnly(['uid', 'createdAt', 'updatedAt'])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if owner() || (activeSelf(request.auth.uid) && resource.data.uid == request.auth.uid);
+    }
+
+    // Projeção pública e sanitizada. Nenhum custo, venda, cliente ou configuração privada entra aqui.
+    match /publicCatalogs/{slug} {
+      allow get: if resource.data.ativo == true || catalogOwner(slug) || owner();
+      allow list: if false;
+      allow create, update: if validCatalogSlug(slug) && catalogOwner(slug)
+        && request.resource.data.keys().hasOnly(['nomeLoja', 'logo', 'whatsapp', 'descricaoCurta', 'ativo', 'updatedAt'])
+        && request.resource.data.nomeLoja is string && request.resource.data.nomeLoja.size() > 0 && request.resource.data.nomeLoja.size() <= 120
+        && request.resource.data.logo is string && request.resource.data.logo.size() <= 2000
+        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.matches('^[0-9]{12,15}$')
+        && request.resource.data.descricaoCurta is string && request.resource.data.descricaoCurta.size() <= 500
+        && request.resource.data.ativo == true
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if catalogOwner(slug) || owner();
+
+      match /products/{productId} {
+        allow read: if get(/databases/$(database)/documents/publicCatalogs/$(slug)).data.ativo == true
+          || catalogOwner(slug) || owner();
+        allow create, update: if catalogOwner(slug)
+          && request.resource.data.keys().hasOnly(['nome', 'descricao', 'preco', 'categoria', 'estoque', 'imagem', 'unidade', 'tipo', 'updatedAt'])
+          && request.resource.data.nome is string && request.resource.data.nome.size() > 0 && request.resource.data.nome.size() <= 120
+          && request.resource.data.descricao is string && request.resource.data.descricao.size() <= 1000
+          && request.resource.data.preco is number && request.resource.data.preco >= 0
+          && request.resource.data.categoria is string && request.resource.data.categoria.size() <= 80
+          && ((request.resource.data.tipo == 'produto'
+              && request.resource.data.estoque is number && request.resource.data.estoque > 0)
+            || (request.resource.data.tipo == 'servico' && request.resource.data.estoque == null))
+          && request.resource.data.imagem is string && request.resource.data.imagem.size() <= 2000
+          && request.resource.data.unidade is string && request.resource.data.unidade.size() <= 20
+          && (request.resource.data.tipo == 'produto' || request.resource.data.tipo == 'servico')
+          && request.resource.data.updatedAt is timestamp;
+        allow delete: if catalogOwner(slug) || owner();
+      }
+    }
+  }
+}

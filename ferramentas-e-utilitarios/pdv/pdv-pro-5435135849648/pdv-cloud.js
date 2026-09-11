@@ -2,10 +2,11 @@ import { db } from './firebase-config.js';
 import { protegerPagina, sair, validarSenhaAtual, validarSenhaTitular } from './auth.js';
 import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from './catalogo-admin.js';
 import { inicializarOperadores } from './operator-admin.js';
-import { deleteDoc, doc, getDoc, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { deleteDoc, doc, getDoc, onSnapshot, runTransaction, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 let uid, writing = false, writingLocalStorage = false, lastCloudState = null, lastSubmittedState = null;
 let cloudQueue = Promise.resolve();
+let financeQueue = Promise.resolve();
 // Captura a configuração padrão antes que qualquer armazenamento local de outra conta seja usado.
 const pixPadrao = { ...(window.CONFIG_PIX || {}) };
 
@@ -96,6 +97,26 @@ async function salvarNuvem() {
   return cloudQueue;
 }
 
+async function salvarFinanceiroNuvem() {
+  if (!uid || window.usuarioPdv?.role === 'operator') return false;
+  const lancamentos = cloneState(window.lancamentosFinanceiros || []);
+  financeQueue = financeQueue.then(async () => {
+    try {
+      await setDoc(doc(db, 'users', uid, 'app', 'financeiro'), {
+        ownerUid: uid,
+        lancamentosFinanceiros: lancamentos,
+        updatedAt: serverTimestamp()
+      });
+      return true;
+    } catch (e) {
+      console.error('Erro de sincronização financeira:', e);
+      window.mostrarMensagem?.('Não foi possível sincronizar os lançamentos financeiros.', 'erro');
+      return false;
+    }
+  });
+  return financeQueue;
+}
+
 function iniciarContaVazia() {
   // Nunca reutiliza produtos, vendas, PIX ou empresa que estavam no navegador de outra conta.
   writing = true;
@@ -130,6 +151,10 @@ protegerPagina(async (user, perfil) => {
     email: user.email || perfil.email || '',
     role: perfil.role || 'client'
   };
+  if (perfil.role === 'operator') {
+    window.lancamentosFinanceiros = [];
+    localStorage.removeItem('pdv_lancamentos_financeiros');
+  }
   window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
   inicializarCatalogoAdmin(uid);
   inicializarOperadores(perfil);
@@ -167,12 +192,28 @@ protegerPagina(async (user, perfil) => {
     sincronizarCatalogoPublico(uid).catch(erro => console.error('Erro ao atualizar catálogo público:', erro));
   });
 
+  if (perfil.role !== 'operator') {
+    onSnapshot(doc(db, 'users', uid, 'app', 'financeiro'), snap => {
+      if (!snap.exists()) {
+        window.lancamentosFinanceiros = window.lancamentosFinanceiros || [];
+        window.atualizarFinanceiro?.();
+        return;
+      }
+      window.lancamentosFinanceiros = cloneState(snap.data().lancamentosFinanceiros || []);
+      writingLocalStorage = true;
+      try { localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(window.lancamentosFinanceiros)); }
+      finally { writingLocalStorage = false; }
+      window.atualizarFinanceiro?.();
+    });
+  }
+
   const original = window.salvarDados;
   window.salvarDados = () => {
     writingLocalStorage = true;
     try { original?.(); } finally { writingLocalStorage = false; }
     return salvarNuvem();
   };
+  window.salvarFinanceiro = salvarFinanceiroNuvem;
   window.sincronizarCatalogoAgora = () => sincronizarCatalogoPublico(uid);
   const storageSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function(k, v) {

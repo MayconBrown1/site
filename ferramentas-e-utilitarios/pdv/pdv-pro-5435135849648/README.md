@@ -23,13 +23,16 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 
 - `accessRequests/{id}`: pedidos públicos, sem senha.
 - `users/{uid}`: perfil e status, protegido pelas Firestore Rules.
-- `users/{uid}/app/state`: produtos, estoque, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquele cliente, sincronizados em tempo real.
+- `users/{uid}/app/state`: produtos, estoque, clientes, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquela empresa, sincronizados em tempo real.
+- `users/{uid}/app/financeiro`: receitas e despesas manuais exclusivas do titular. As regras bloqueiam a leitura por operadores; vendas e despesas classificadas no caixa são vinculadas automaticamente na tela financeira.
 - Operadores usam `users/{operatorUid}` com `role: operator` e `ownerUid` apontando para o titular. A conta é criada em uma instância secundária do Firebase Authentication, sem desconectar o titular, e o perfil é protegido pelas Firestore Rules.
 - Produtos que compartilham saldo guardam `estoqueVinculadoId`; o produto de origem mantém a quantidade e todos os itens vinculados são sincronizados após vendas e ajustes.
 - `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
 - `publicCatalogs/{slug}`: somente nome, logo, WhatsApp e descrição pública da loja.
 - `publicCatalogs/{slug}/products/{id}`: projeção pública dos produtos visíveis com estoque positivo e dos serviços marcados como visíveis. Custos, vendas, clientes e demais dados internos nunca são copiados.
 - O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
+- O módulo **Clientes** cadastra nome, CPF, WhatsApp, e-mail, endereço e demais dados e relaciona compras pagas ou fiado ao histórico de cada pessoa, sem exigir limite de crédito.
+- O módulo **Financeiro** fica visível somente para o titular, registra receitas e despesas manuais e consolida vendas, recebimentos de fiado e retiradas do caixa classificadas como despesa. Sangrias e transferências não alteram o resultado financeiro.
 
 ## Catálogo público
 

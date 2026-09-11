@@ -1,9 +1,11 @@
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const operatorAdmin = fs.readFileSync(new URL('../operator-admin.js', import.meta.url), 'utf8');
 const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
 const authSource = fs.readFileSync(new URL('../auth.js', import.meta.url), 'utf8');
+const customerFinanceSource = fs.readFileSync(new URL('../clientes-financeiro.js', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -11,6 +13,7 @@ const inlineScripts = html
   .filter(Boolean);
 
 inlineScripts.forEach(script => new Function(script));
+new Function(customerFinanceSource);
 
 const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
@@ -31,6 +34,51 @@ for (const marker of [
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
+
+for (const marker of [
+  'Cadastro de clientes',
+  'cliente-venda',
+  'financeiro-section',
+  'movimento-finalidade'
+]) {
+  if (!html.includes(marker)) throw new Error(`Novo recurso ausente em index.html: ${marker}`);
+}
+for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'finalidade === \'despesa\'']) {
+  if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
+}
+if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regras privadas do Financeiro não foram encontradas.');
+
+const featureContext = {
+  console,
+  clientesFiado: [{ id: 'cl-1', nome: 'Cliente Teste' }],
+  vendas: [
+    { id: 'v-paga', data: '2026-09-10T12:00:00', total: 100, clienteId: 'cl-1', pagamento: { tipo: 'pix' } },
+    { id: 'v-fiado', data: '2026-09-10T13:00:00', total: 80, clienteId: 'cl-1', pagamento: { tipo: 'fiado', clienteId: 'cl-1' } }
+  ],
+  pagamentosFiado: [{ id: 'pf-1', clienteId: 'cl-1', valor: 30, data: '2026-09-10T14:00:00' }],
+  movimentos: [
+    { id: 'm-despesa', tipo: 'saida', finalidade: 'despesa', categoriaFinanceira: 'Alimentação', valor: 20, descricao: 'Compra', data: '2026-09-10T15:00:00' },
+    { id: 'm-sangria', tipo: 'saida', finalidade: 'sangria', valor: 50, descricao: 'Guardar', data: '2026-09-10T16:00:00' }
+  ],
+  lancamentosFinanceiros: [{ id: 'lf-1', tipo: 'receita', categoria: 'Salário', valor: 2000, descricao: 'Pró-labore', data: '2026-09-10T12:00:00' }],
+  saldoClienteFiado: () => 50,
+  ehOperadorAtual: () => false,
+  salvarDados: () => {},
+  salvarRascunhoVenda: () => {},
+  mostrarMensagem: () => {},
+  exigirTitular: () => true,
+  confirm: () => true,
+  document: {}
+};
+featureContext.window = featureContext;
+vm.runInNewContext(customerFinanceSource, featureContext);
+if (!featureContext.validarCpfCliente('529.982.247-25') || featureContext.validarCpfCliente('111.111.111-11')) throw new Error('A validação de CPF falhou.');
+if (featureContext.comprasDoCliente('cl-1').length !== 2) throw new Error('O histórico não relacionou vendas pagas e fiado ao cliente.');
+const lancamentosTeste = featureContext.todosLancamentosFinanceiros();
+if (!lancamentosTeste.some(item => item.id === 'venda_v-paga' && item.valor === 100 && !item.pendente)) throw new Error('A venda paga não entrou no Financeiro.');
+if (!lancamentosTeste.some(item => item.id === 'venda_v-fiado' && item.valor === 50 && item.pendente)) throw new Error('O saldo fiado pendente está incorreto.');
+if (!lancamentosTeste.some(item => item.id === 'caixa_m-despesa' && item.valor === 20)) throw new Error('A despesa do caixa não entrou no Financeiro.');
+if (lancamentosTeste.some(item => item.id === 'caixa_m-sangria')) throw new Error('A sangria alterou o Financeiro indevidamente.');
 
 const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);
