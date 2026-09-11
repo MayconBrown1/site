@@ -6,6 +6,7 @@ const operatorAdmin = fs.readFileSync(new URL('../operator-admin.js', import.met
 const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
 const authSource = fs.readFileSync(new URL('../auth.js', import.meta.url), 'utf8');
 const customerFinanceSource = fs.readFileSync(new URL('../clientes-financeiro.js', import.meta.url), 'utf8');
+const serviceWorkerSource = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -29,6 +30,9 @@ for (const marker of [
   'vendedor: vendedorAtual()',
   'function aplicarPermissoesUsuario',
   'filtro-vendedor-relatorio',
+  'filtro-data-relatorio',
+  'function vendasDaDataRelatorio',
+  'Escolha qualquer dia para consultar as vendas e os comprovantes.',
   'function caixaVisivelNoHistorico',
   'somente o fechamento do dia anterior'
 ]) {
@@ -39,6 +43,7 @@ for (const marker of [
   'Cadastro de clientes',
   'cliente-venda',
   'financeiro-section',
+  'financeiro-saldo',
   'movimento-finalidade',
   'financeiro-transferencias',
   "mostrarFormFinanceiro('transferencia')"
@@ -46,6 +51,15 @@ for (const marker of [
   if (!html.includes(marker)) throw new Error(`Novo recurso ausente em index.html: ${marker}`);
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
+if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
+for (const marker of ['Última atualização', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+  if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
+}
+const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
+const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];
+if (!cacheAtual || !cacheDasNovidades || cacheAtual !== cacheDasNovidades) {
+  throw new Error(`ATUALIZE A ÁREA NOVIDADES: o cache do aplicativo (${cacheAtual || 'não encontrado'}) precisa ser igual ao registro mais recente (${cacheDasNovidades || 'não encontrado'}).`);
+}
 for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'finalidade === \'despesa\'']) {
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
 }
@@ -100,6 +114,20 @@ const historicoContinuo = [
 const saldoInicialOutubro = featureContext.saldoAntesDoPeriodo(historicoContinuo, '2026-10');
 const outubro = featureContext.calcularResumoFinanceiro(historicoContinuo.filter(item => item.data.startsWith('2026-10')), saldoInicialOutubro);
 if (saldoInicialOutubro !== 10500 || outubro.resultado !== -200 || outubro.transferencias !== -300 || outubro.saldoPrevisto !== 10000) throw new Error('A continuidade automática entre meses falhou.');
+
+const reportStart = html.indexOf('function chaveDataRelatorio');
+const reportEnd = html.indexOf('function atualizarFiltroVendedores', reportStart);
+if (reportStart < 0 || reportEnd < 0) throw new Error('Não foi possível localizar as funções do relatório por data.');
+const reportHelpersSource = html.slice(reportStart, reportEnd);
+const reportSales = [
+  { id: 'ontem', data: '2026-09-10T12:00:00', total: 10 },
+  { id: 'hoje', data: '2026-09-11T12:00:00', total: 20 }
+];
+const makeReportHelpers = new Function('vendas', 'document', `${reportHelpersSource}; return { chaveDataRelatorio, vendasDaDataRelatorio };`);
+const reportHelpers = makeReportHelpers(reportSales, {});
+if (reportHelpers.vendasDaDataRelatorio('2026-09-10').map(venda => venda.id).join(',') !== 'ontem') {
+  throw new Error('O relatório não separou corretamente as vendas por data local.');
+}
 
 const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);

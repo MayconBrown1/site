@@ -25,6 +25,7 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `users/{uid}`: perfil e status, protegido pelas Firestore Rules.
 - `users/{uid}/app/state`: produtos, estoque, clientes, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquela empresa, sincronizados em tempo real.
 - `users/{uid}/app/financeiro`: receitas e despesas manuais exclusivas do titular. As regras bloqueiam a leitura por operadores; vendas e despesas classificadas no caixa são vinculadas automaticamente na tela financeira.
+- Em Relatórios, o titular pode selecionar qualquer data para consultar a quantidade, o faturamento, as vendas e os respectivos comprovantes daquele dia.
 - Operadores usam `users/{operatorUid}` com `role: operator` e `ownerUid` apontando para o titular. A conta é criada em uma instância secundária do Firebase Authentication, sem desconectar o titular, e o perfil é protegido pelas Firestore Rules.
 - Produtos que compartilham saldo guardam `estoqueVinculadoId`; o produto de origem mantém a quantidade e todos os itens vinculados são sincronizados após vendas e ajustes.
 - `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
@@ -32,7 +33,11 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `publicCatalogs/{slug}/products/{id}`: projeção pública dos produtos visíveis com estoque positivo e dos serviços marcados como visíveis. Custos, vendas, clientes e demais dados internos nunca são copiados.
 - O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
 - O módulo **Clientes** cadastra nome, CPF, WhatsApp, e-mail, endereço e demais dados e relaciona compras pagas ou fiado ao histórico de cada pessoa, sem exigir limite de crédito.
-- O módulo **Financeiro** fica visível somente para o titular, aceita valores com centavos e mantém uma carteira contínua. O saldo final de um mês vira automaticamente o saldo inicial do seguinte. Receitas, despesas e transferências podem ser lançadas manualmente; transferências de entrada ou saída alteram a carteira sem virar receita ou despesa. O painel consolida vendas, recebimentos de fiado e retiradas do caixa classificadas como despesa, além de calcular resultado, saldo previsto e percentual de economia. Lançamentos manuais podem ficar no histórico sem serem considerados nos cálculos.
+- O módulo **Financeiro** fica visível somente para o titular, aceita valores com centavos e mantém uma carteira contínua. O saldo final de um mês vira automaticamente o saldo inicial do seguinte. Receitas, despesas e transferências podem ser lançadas manualmente; transferências de entrada ou saída alteram a carteira sem virar receita ou despesa. O painel consolida vendas, recebimentos de fiado e retiradas do caixa classificadas como despesa, além de calcular resultado, saldo e percentual de economia. Lançamentos manuais podem ficar no histórico sem serem considerados nos cálculos.
+
+## Regra de atualização das Novidades
+
+Toda alteração funcional ou visual deve ser registrada no primeiro bloco da seção **Novidades**. A versão desse bloco, informada em `data-novidades-cache`, precisa acompanhar o `CACHE_NAME` de `sw.js`. O comando `node scripts/check.mjs` interrompe a verificação e mostra um aviso quando os identificadores não correspondem.
 
 ## Catálogo público
 

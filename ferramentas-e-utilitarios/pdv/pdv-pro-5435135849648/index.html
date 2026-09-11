@@ -569,14 +569,19 @@
                             <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="atualizarFinanceiro()"></label>
                         </div>
                         <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                            <div class="col-span-2 rounded-2xl bg-white p-5 text-slate-950 shadow-xl ring-2 ring-emerald-300/70 lg:col-span-4 lg:p-6">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                    <div><span class="text-sm font-bold uppercase tracking-wider text-emerald-700">Saldo</span><strong id="financeiro-saldo" class="mt-2 block text-3xl font-extrabold tracking-tight text-emerald-700 lg:text-4xl">R$ 0,00</strong></div>
+                                    <span class="text-sm font-medium text-slate-500">Valor disponível na carteira</span>
+                                </div>
+                            </div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Saldo inicial automático</span><strong id="financeiro-saldo-inicial" class="mt-1 block text-xl text-sky-300">R$ 0,00</strong><span class="mt-1 block text-xs text-slate-400">Fechamento do mês anterior</span></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Receitas consideradas</span><strong id="financeiro-receitas" class="mt-1 block text-xl text-emerald-300">R$ 0,00</strong></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Despesas consideradas</span><strong id="financeiro-despesas" class="mt-1 block text-xl text-rose-300">R$ 0,00</strong></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Resultado do mês</span><strong id="financeiro-resultado" class="mt-1 block text-xl">R$ 0,00</strong></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Transferências</span><strong id="financeiro-transferencias" class="mt-1 block text-xl text-sky-300">R$ 0,00</strong><span class="mt-1 block text-xs text-slate-400">Movimento líquido da carteira</span></div>
-                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Saldo previsto</span><strong id="financeiro-saldo-previsto" class="mt-1 block text-xl">R$ 0,00</strong><span class="mt-1 block text-xs text-slate-400">Inicial + resultado + transferências</span></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Economia mensal</span><strong id="financeiro-economia" class="mt-1 block text-xl">0,0%</strong><span class="mt-1 block text-xs text-slate-400">Resultado ÷ receitas</span></div>
-                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Fiado a receber</span><strong id="financeiro-a-receber" class="mt-1 block text-xl text-amber-300">R$ 0,00</strong></div>
+                            <div class="col-span-2 rounded-xl bg-white/10 p-4 lg:col-span-2"><span class="text-sm text-slate-300">Fiado a receber</span><strong id="financeiro-a-receber" class="mt-1 block text-xl text-amber-300">R$ 0,00</strong></div>
                         </div>
                     </div>
                     <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,.55fr)]">
@@ -612,11 +617,11 @@
                         
                         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-4 lg:mb-6">
                             <div class="bg-blue-50 p-3 lg:p-4 rounded-lg">
-                                <h3 class="font-semibold text-blue-800 text-sm lg:text-base">Vendas Hoje</h3>
+                                <h3 class="font-semibold text-blue-800 text-sm lg:text-base">Vendas na data</h3>
                                 <div class="text-xl lg:text-2xl font-bold text-blue-600" id="vendas-hoje">0</div>
                             </div>
                             <div class="bg-green-50 p-3 lg:p-4 rounded-lg">
-                                <h3 class="font-semibold text-green-800 text-sm lg:text-base">Faturamento Hoje</h3>
+                                <h3 class="font-semibold text-green-800 text-sm lg:text-base">Faturamento na data</h3>
                                 <div class="text-lg lg:text-2xl font-bold text-green-600" id="faturamento-hoje">R$ 0,00</div>
                             </div>
                             <div class="bg-purple-50 p-3 lg:p-4 rounded-lg">
@@ -630,8 +635,20 @@
                         </div>
 
                         <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                            <label for="filtro-vendedor-relatorio" class="block text-sm font-semibold text-slate-700">Vendas por operador</label>
-                            <select id="filtro-vendedor-relatorio" class="mt-2 w-full rounded-lg border p-3 sm:max-w-sm" onchange="atualizarRelatorios()"><option value="">Todos os vendedores</option></select>
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label for="filtro-data-relatorio" class="block text-sm font-semibold text-slate-700">Data das vendas</label>
+                                    <div class="mt-2 flex gap-2">
+                                        <input id="filtro-data-relatorio" type="date" class="min-w-0 flex-1 rounded-lg border bg-white p-3" onchange="atualizarRelatorios()">
+                                        <button type="button" onclick="selecionarHojeRelatorio()" class="rounded-lg bg-slate-700 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800">Hoje</button>
+                                    </div>
+                                    <p class="mt-1 text-xs text-slate-500">Escolha qualquer dia para consultar as vendas e os comprovantes.</p>
+                                </div>
+                                <div>
+                                    <label for="filtro-vendedor-relatorio" class="block text-sm font-semibold text-slate-700">Vendas por operador</label>
+                                    <select id="filtro-vendedor-relatorio" class="mt-2 w-full rounded-lg border bg-white p-3" onchange="atualizarRelatorios()"><option value="">Todos os vendedores</option></select>
+                                </div>
+                            </div>
                             <div id="resumo-vendedores" class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></div>
                         </div>
                         
@@ -649,7 +666,8 @@
                     </div>
                     
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
-                        <h3 class="text-lg lg:text-xl font-semibold mb-4">Vendas do Dia</h3>
+                        <h3 class="text-lg lg:text-xl font-semibold mb-1">Vendas do dia</h3>
+                        <p id="titulo-data-vendas" class="mb-4 text-sm font-medium text-slate-500"></p>
                         
                         <!-- Cards para mobile -->
                         <div class="block lg:hidden">
@@ -677,6 +695,12 @@
                 </div>
             </div>
 
+            <!--
+                MANUTENÇÃO OBRIGATÓRIA: toda alteração funcional ou visual do PDV deve ser
+                registrada no primeiro bloco de Novidades. Atualize também o CACHE_NAME de
+                sw.js e o atributo data-novidades-cache abaixo. scripts/check.mjs bloqueia
+                versões em que esses dois identificadores não sejam iguais.
+            -->
             <!-- Seção Novidades -->
             <div id="novidades-section" class="section hidden">
                 <div class="bg-white rounded-lg shadow-md p-5 lg:p-7">
@@ -686,8 +710,23 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Versão atual</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 11/09/2026</span>
                     </div>
+                    <section data-novidades-cache="pdv-pro-v28" data-atualizacao="2026-09-11" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                        <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Clientes, Financeiro e relatórios aprimorados</h3></div>
+                            <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
+                        </div>
+                        <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">👥 Cadastro completo de clientes</h4><p class="mt-2 text-sm text-slate-700">Agora é possível guardar nome, CPF, WhatsApp, e-mail, nascimento, endereço, cidade e observações sem precisar definir limite de crédito.</p></article>
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">🧾 Histórico de cada cliente</h4><p class="mt-2 text-sm text-slate-700">Associe o cliente a vendas pagas ou fiado e consulte depois os produtos comprados, a data, o valor, a forma de pagamento e o comprovante.</p></article>
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">💰 Financeiro exclusivo do titular</h4><p class="mt-2 text-sm text-slate-700">Vendas e recebimentos entram automaticamente. Receitas, despesas e valores com centavos também podem ser registrados manualmente, sem acesso dos operadores.</p></article>
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">🔄 Saldo contínuo e transferências</h4><p class="mt-2 text-sm text-slate-700">O saldo final continua no mês seguinte. Use Transferência para informar dinheiro que entra ou sai da carteira sem transformar o valor em receita ou despesa.</p></article>
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">🏧 Retiradas do caixa classificadas</h4><p class="mt-2 text-sm text-slate-700">Ao retirar dinheiro, diferencie sangria, transferência e despesa. A sangria apenas guarda o dinheiro; somente a despesa reduz o resultado financeiro.</p></article>
+                            <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">📅 Relatórios de dias anteriores</h4><p class="mt-2 text-sm text-slate-700">Em Relatórios, escolha qualquer data para conferir vendas, faturamento, operador e comprovantes. O saldo do Financeiro também ganhou destaque no topo do painel.</p></article>
+                        </div>
+                    </section>
+                    <h3 class="mb-4 text-lg font-bold text-slate-800">Atualizações anteriores</h3>
                     <div class="grid gap-4 lg:grid-cols-2">
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">🔗 Estoque compartilhado</h3><p class="mt-2 text-sm text-slate-700">Produtos diferentes podem consumir o mesmo saldo. No cadastro, escolha outro produto em <strong>Estoque compartilhado</strong>; vendas de qualquer item vinculado baixam o mesmo estoque.</p></article>
                         <article class="rounded-xl border border-teal-100 bg-teal-50/60 p-5"><h3 class="font-bold text-teal-900">👤 Acesso de operadores</h3><p class="mt-2 text-sm text-slate-700">O titular pode criar acessos individuais no ADM. Cada venda registra o vendedor; operadores acessam vendas, orçamentos, clientes e abertura/fechamento do caixa, sem relatórios, cadastros administrativos ou sangrias.</p></article>
@@ -705,7 +744,7 @@
                         <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">✏️ Gestão de clientes fiado</h3><p class="mt-2 text-sm text-slate-700">Clientes podem ser editados a qualquer momento. A exclusão é permitida apenas quando o saldo está zerado, protegendo o histórico financeiro.</p></article>
                         <article class="rounded-xl border border-amber-100 bg-amber-50/60 p-5"><h3 class="font-bold text-amber-900">📲 PDV instalável e menu móvel</h3><p class="mt-2 text-sm text-slate-700">Use <strong>Instalar PDV</strong> para adicionar o sistema ao computador ou celular. Em telas pequenas, os atalhos ficam organizados no menu ☰.</p></article>
                     </div>
-                    <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Para próximas versões:</strong> esta página é o histórico do PDV. Ao adicionar uma melhoria, inclua aqui uma explicação curta do que mudou e de como usar.</div>
+                    <div class="mt-6 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900"><strong>Histórico do PDV:</strong> as novidades mais recentes aparecem primeiro, e as versões anteriores continuam disponíveis logo abaixo.</div>
                 </div>
             </div>
 
@@ -3488,13 +3527,51 @@ function showInstallButton() {
         function chaveVendedorVenda(venda) { return venda.vendedor?.id || venda.vendedor?.nome || 'titular'; }
         function nomeVendedorVenda(venda) { return venda.vendedor?.nome || 'Titular'; }
 
-        function atualizarFiltroVendedores(vendasHoje) {
+        function chaveDataRelatorio(valor) {
+            const data = valor instanceof Date ? valor : new Date(valor);
+            if (Number.isNaN(data.getTime())) return '';
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        function dataSelecionadaRelatorio() {
+            const filtro = document.getElementById('filtro-data-relatorio');
+            if (!filtro) return chaveDataRelatorio(new Date());
+            if (!filtro.value) filtro.value = chaveDataRelatorio(new Date());
+            return filtro.value;
+        }
+
+        function vendasDaDataRelatorio(dataSelecionada) {
+            return vendas.filter(venda => chaveDataRelatorio(venda.data) === dataSelecionada);
+        }
+
+        function selecionarHojeRelatorio() {
+            const filtro = document.getElementById('filtro-data-relatorio');
+            if (filtro) filtro.value = chaveDataRelatorio(new Date());
+            atualizarRelatorios();
+        }
+
+        function formatarDataRelatorio(dataSelecionada) {
+            const [ano, mes, dia] = dataSelecionada.split('-').map(Number);
+            if (!ano || !mes || !dia) return '';
+            return new Date(ano, mes - 1, dia).toLocaleDateString('pt-BR', {
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+            });
+        }
+
+        function moedaRelatorio(valor) {
+            return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function atualizarFiltroVendedores(vendasDaData) {
             const filtro = document.getElementById('filtro-vendedor-relatorio');
             const resumo = document.getElementById('resumo-vendedores');
             if (!filtro || !resumo) return '';
             const selecionado = filtro.value;
             const grupos = new Map();
-            vendasHoje.forEach(venda => {
+            vendasDaData.forEach(venda => {
                 const chave = chaveVendedorVenda(venda);
                 const grupo = grupos.get(chave) || { nome: nomeVendedorVenda(venda), quantidade: 0, total: 0 };
                 grupo.quantidade += 1;
@@ -3512,7 +3589,7 @@ function showInstallButton() {
                 nome.textContent = grupo.nome;
                 const total = document.createElement('span');
                 total.className = 'text-slate-600';
-                total.textContent = `${grupo.quantidade} venda(s) · R$ ${grupo.total.toFixed(2)}`;
+                total.textContent = `${grupo.quantidade} venda(s) · ${moedaRelatorio(grupo.total)}`;
                 card.append(nome, total);
                 return card;
             }));
@@ -3520,25 +3597,27 @@ function showInstallButton() {
         }
 
         function atualizarRelatorios() {
-            const hoje = new Date().toDateString();
-            const todasVendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje);
-            const vendedorSelecionado = atualizarFiltroVendedores(todasVendasHoje);
-            const vendasHoje = vendedorSelecionado ? todasVendasHoje.filter(venda => chaveVendedorVenda(venda) === vendedorSelecionado) : todasVendasHoje;
+            const dataSelecionada = dataSelecionadaRelatorio();
+            const todasVendasDaData = vendasDaDataRelatorio(dataSelecionada);
+            const vendedorSelecionado = atualizarFiltroVendedores(todasVendasDaData);
+            const vendasFiltradas = vendedorSelecionado ? todasVendasDaData.filter(venda => chaveVendedorVenda(venda) === vendedorSelecionado) : todasVendasDaData;
+            const tituloData = document.getElementById('titulo-data-vendas');
+            if (tituloData) tituloData.textContent = formatarDataRelatorio(dataSelecionada);
             
-            document.getElementById('vendas-hoje').textContent = vendasHoje.length;
+            document.getElementById('vendas-hoje').textContent = vendasFiltradas.length;
             
-            const faturamentoHoje = vendasHoje.reduce((sum, v) => sum + v.total, 0);
-            document.getElementById('faturamento-hoje').textContent = `R$ ${faturamentoHoje.toFixed(2)}`;
+            const faturamentoDaData = vendasFiltradas.reduce((sum, v) => sum + Number(v.total || 0), 0);
+            document.getElementById('faturamento-hoje').textContent = moedaRelatorio(faturamentoDaData);
             
             document.getElementById('total-produtos').textContent = produtos.length;
             
             const estoqueBaixo = produtos.filter(p => p.estoque <= 5).length;
             document.getElementById('estoque-baixo').textContent = estoqueBaixo;
             
-            atualizarTabelaVendasDia();
+            atualizarTabelaVendasDia(vendasFiltradas);
         }
 
-        function atualizarTabelaVendasDia() {
+        function atualizarTabelaVendasDia(vendasFiltradas = null) {
             // Atualizar tabela desktop
             const tbody = document.getElementById('tabela-vendas-dia');
             tbody.innerHTML = '';
@@ -3547,11 +3626,11 @@ function showInstallButton() {
             const cardsContainer = document.getElementById('vendas-cards');
             cardsContainer.innerHTML = '';
 
-            const hoje = new Date().toDateString();
             const vendedorSelecionado = document.getElementById('filtro-vendedor-relatorio')?.value || '';
-            const vendasHoje = vendas.filter(v => new Date(v.data).toDateString() === hoje && (!vendedorSelecionado || chaveVendedorVenda(v) === vendedorSelecionado));
+            const vendasDaData = vendasFiltradas || vendasDaDataRelatorio(dataSelecionadaRelatorio())
+                .filter(venda => !vendedorSelecionado || chaveVendedorVenda(venda) === vendedorSelecionado);
 
-            vendasHoje.reverse().forEach(venda => {
+            [...vendasDaData].sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(venda => {
                 const data = new Date(venda.data);
                 const itensResumo = venda.itens.map(item => `${item.nome} (${item.quantidade})`).join(', ');
                 
@@ -3562,7 +3641,7 @@ function showInstallButton() {
                 tr.innerHTML = `
                     <td class="px-4 py-2">${data.toLocaleTimeString('pt-BR')}</td>
                     <td class="px-4 py-2">${itensResumo}</td>
-                    <td class="px-4 py-2 text-right">R$ ${venda.total.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${moedaRelatorio(venda.total)}</td>
                     <td class="px-4 py-2">${venda.pagamento.tipo}</td>
                     <td class="px-4 py-2">${nomeVendedorVenda(venda)}</td>
                     <td class="px-4 py-2 text-center">
@@ -3591,7 +3670,7 @@ function showInstallButton() {
                             <div class="text-sm font-medium text-gray-700 mt-1">Vendedor: ${nomeVendedorVenda(venda)}</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-green-600 text-lg">R$ ${venda.total.toFixed(2)}</div>
+                            <div class="font-bold text-green-600 text-lg">${moedaRelatorio(venda.total)}</div>
                         </div>
                     </div>
                     <div class="flex gap-2 mt-2">
@@ -3608,8 +3687,10 @@ function showInstallButton() {
                 cardsContainer.appendChild(card);
             });
 
-            if (vendasHoje.length === 0) {
-                cardsContainer.innerHTML = '<div class="text-center text-gray-500 py-4">Nenhuma venda hoje</div>';
+            if (vendasDaData.length === 0) {
+                const mensagem = 'Nenhuma venda encontrada nesta data';
+                cardsContainer.innerHTML = `<div class="text-center text-gray-500 py-4">${mensagem}</div>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">${mensagem}</td></tr>`;
             }
         }
 

@@ -471,9 +471,9 @@ function atualizarFinanceiro() {
     const campoResultado = document.getElementById('financeiro-resultado');
     campoResultado.textContent = moedaBR(resultado);
     campoResultado.className = `mt-1 block text-xl ${resultado >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
-    const campoSaldoPrevisto = document.getElementById('financeiro-saldo-previsto');
-    campoSaldoPrevisto.textContent = moedaBR(saldoPrevisto);
-    campoSaldoPrevisto.className = `mt-1 block text-xl ${saldoPrevisto >= 0 ? 'text-sky-300' : 'text-rose-300'}`;
+    const campoSaldo = document.getElementById('financeiro-saldo');
+    campoSaldo.textContent = moedaBR(saldoPrevisto);
+    campoSaldo.className = `mt-2 block text-3xl font-extrabold tracking-tight lg:text-4xl ${saldoPrevisto >= 0 ? 'text-emerald-700' : 'text-rose-700'}`;
     const campoEconomia = document.getElementById('financeiro-economia');
     campoEconomia.textContent = `${economia > 0 ? '+' : ''}${economia.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
     campoEconomia.className = `mt-1 block text-xl ${economia >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
