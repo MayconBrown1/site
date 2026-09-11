@@ -39,10 +39,13 @@ for (const marker of [
   'Cadastro de clientes',
   'cliente-venda',
   'financeiro-section',
-  'movimento-finalidade'
+  'movimento-finalidade',
+  'financeiro-transferencias',
+  "mostrarFormFinanceiro('transferencia')"
 ]) {
   if (!html.includes(marker)) throw new Error(`Novo recurso ausente em index.html: ${marker}`);
 }
+if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'finalidade === \'despesa\'']) {
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
 }
@@ -87,6 +90,16 @@ const resumoFinanceiro = featureContext.calcularResumoFinanceiro([
   { tipo: 'despesa', valor: 999, considerado: false }
 ], 250.35);
 if (resumoFinanceiro.resultado !== -55 || Math.abs(resumoFinanceiro.saldoPrevisto - 195.35) > 0.001 || Math.abs(resumoFinanceiro.economia + 55) > 0.001) throw new Error(`O resumo mensal do Financeiro está incorreto: ${JSON.stringify(resumoFinanceiro)}`);
+const historicoContinuo = [
+  { tipo: 'transferencia', direcao: 'entrada', valor: 10000, data: '2026-09-01T12:00:00' },
+  { tipo: 'receita', valor: 1000, data: '2026-09-10T12:00:00' },
+  { tipo: 'despesa', valor: 500, data: '2026-09-20T12:00:00' },
+  { tipo: 'despesa', valor: 200, data: '2026-10-05T12:00:00' },
+  { tipo: 'transferencia', direcao: 'saida', valor: 300, data: '2026-10-06T12:00:00' }
+];
+const saldoInicialOutubro = featureContext.saldoAntesDoPeriodo(historicoContinuo, '2026-10');
+const outubro = featureContext.calcularResumoFinanceiro(historicoContinuo.filter(item => item.data.startsWith('2026-10')), saldoInicialOutubro);
+if (saldoInicialOutubro !== 10500 || outubro.resultado !== -200 || outubro.transferencias !== -300 || outubro.saldoPrevisto !== 10000) throw new Error('A continuidade automática entre meses falhou.');
 
 const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);

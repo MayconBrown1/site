@@ -1,5 +1,6 @@
 const CATEGORIAS_RECEITA = ['Venda', 'Salário', 'Freelance', 'Serviços', 'Rendimentos', 'Outras receitas'];
 const CATEGORIAS_DESPESA = ['Alimentação', 'Saúde', 'Transporte', 'Estoque e fornecedores', 'Aluguel', 'Contas e serviços', 'Impostos', 'Manutenção', 'Outros'];
+const CATEGORIAS_TRANSFERENCIA = ['Saldo inicial', 'Conta bancária', 'Dinheiro em espécie', 'Outra carteira', 'Ajuste de saldo'];
 
 function escaparDado(valor) {
     return String(valor ?? '').replace(/[&<>"']/g, caractere => ({
@@ -269,7 +270,9 @@ function fecharHistoricoCliente() {
 }
 
 function categoriasDoTipo(tipo) {
-    return tipo === 'despesa' ? CATEGORIAS_DESPESA : CATEGORIAS_RECEITA;
+    if (tipo === 'despesa') return CATEGORIAS_DESPESA;
+    if (tipo === 'transferencia') return CATEGORIAS_TRANSFERENCIA;
+    return CATEGORIAS_RECEITA;
 }
 
 function preencherCategorias(select, tipo, valorAtual = '') {
@@ -336,8 +339,8 @@ function mostrarFormFinanceiro(tipo) {
     if (!exigirTitular('O controle financeiro está disponível somente para o titular.')) return;
     document.getElementById('form-financeiro').classList.remove('hidden');
     document.getElementById('financeiro-tipo').value = tipo;
+    document.getElementById('financeiro-direcao').value = 'entrada';
     document.getElementById('financeiro-data').value = dataLocalISO();
-    document.getElementById('titulo-form-financeiro').textContent = tipo === 'receita' ? 'Adicionar receita' : 'Adicionar despesa';
     document.getElementById('financeiro-considerar').checked = true;
     atualizarCategoriasFinanceiro();
     document.getElementById('financeiro-descricao').focus();
@@ -346,7 +349,9 @@ function mostrarFormFinanceiro(tipo) {
 function atualizarCategoriasFinanceiro() {
     const tipo = document.getElementById('financeiro-tipo')?.value || 'receita';
     preencherCategorias(document.getElementById('financeiro-categoria'), tipo, document.getElementById('financeiro-categoria')?.value);
-    document.getElementById('titulo-form-financeiro').textContent = tipo === 'receita' ? 'Adicionar receita' : 'Adicionar despesa';
+    document.getElementById('financeiro-campo-direcao').classList.toggle('hidden', tipo !== 'transferencia');
+    document.getElementById('financeiro-label-categoria').textContent = tipo === 'transferencia' ? 'Origem ou destino' : 'Categoria';
+    document.getElementById('titulo-form-financeiro').textContent = tipo === 'receita' ? 'Adicionar receita' : tipo === 'despesa' ? 'Adicionar despesa' : 'Adicionar transferência';
 }
 
 function cancelarFormFinanceiro() {
@@ -363,13 +368,14 @@ function salvarLancamentoFinanceiro() {
     const valor = parseValorMonetario(document.getElementById('financeiro-valor').value);
     const data = document.getElementById('financeiro-data').value;
     const considerado = document.getElementById('financeiro-considerar').checked;
+    const direcao = tipo === 'transferencia' ? document.getElementById('financeiro-direcao').value : '';
     if (!descricao || Number.isNaN(valor) || valor <= 0 || !data) return mostrarMensagem('Preencha descrição, valor e data do lançamento.', 'erro');
-    lancamentosFinanceiros.push({ id: 'lf_' + Date.now(), tipo, categoria, descricao, valor, considerado, data: `${data}T12:00:00`, criadoEm: new Date().toISOString() });
+    lancamentosFinanceiros.push({ id: 'lf_' + Date.now(), tipo, categoria, descricao, valor, considerado, direcao, data: `${data}T12:00:00`, criadoEm: new Date().toISOString() });
     salvarDados();
     window.salvarFinanceiro?.();
     cancelarFormFinanceiro();
     atualizarFinanceiro();
-    mostrarMensagem(tipo === 'receita' ? 'Receita adicionada.' : 'Despesa adicionada.', 'sucesso');
+    mostrarMensagem(tipo === 'receita' ? 'Receita adicionada.' : tipo === 'despesa' ? 'Despesa adicionada.' : 'Transferência registrada na carteira.', 'sucesso');
 }
 
 function excluirLancamentoFinanceiro(id) {
@@ -392,44 +398,76 @@ function alternarConsideracaoLancamento(id) {
     atualizarFinanceiro();
 }
 
-function salvarSaldoInicialFinanceiro() {
-    if (!exigirTitular('O controle financeiro está disponível somente para o titular.')) return;
-    const periodo = document.getElementById('financeiro-periodo').value || periodoFinanceiroAtual();
-    const campo = document.getElementById('financeiro-saldo-inicial-input');
-    const valor = parseValorMonetario(campo.value);
-    if (Number.isNaN(valor)) return mostrarMensagem('Informe um saldo inicial válido, incluindo os centavos.', 'erro');
-    saldosIniciaisFinanceiros[periodo] = valor;
-    formatarCampoMonetario(campo);
+function migrarSaldoInicialLegado() {
+    const saldos = saldosIniciaisFinanceiros && typeof saldosIniciaisFinanceiros === 'object' ? saldosIniciaisFinanceiros : {};
+    const primeiroSaldo = Object.entries(saldos).filter(([, valor]) => Number(valor) !== 0).sort(([a], [b]) => a.localeCompare(b))[0];
+    if (!primeiroSaldo) {
+        saldosIniciaisFinanceiros = {};
+        return false;
+    }
+    const [periodo, valorOriginal] = primeiroSaldo;
+    const valor = Number(valorOriginal);
+    const id = `lf_saldo_inicial_${periodo}`;
+    if (!lancamentosFinanceiros.some(item => item.id === id)) {
+        lancamentosFinanceiros.push({
+            id,
+            tipo: 'transferencia',
+            categoria: 'Saldo inicial',
+            descricao: 'Saldo inicial transferido para a carteira',
+            valor: Math.abs(valor),
+            direcao: valor < 0 ? 'saida' : 'entrada',
+            considerado: true,
+            data: `${periodo}-01T12:00:00`,
+            criadoEm: new Date().toISOString(),
+            migrado: true
+        });
+    }
+    saldosIniciaisFinanceiros = {};
     salvarDados();
     window.salvarFinanceiro?.();
-    atualizarFinanceiro();
-    mostrarMensagem('Saldo inicial do mês salvo.', 'sucesso');
+    return true;
 }
 
 function calcularResumoFinanceiro(lancamentos, saldoInicial = 0) {
     const considerados = lancamentos.filter(item => !item.pendente && item.considerado !== false);
     const receitas = considerados.filter(item => item.tipo === 'receita').reduce((total, item) => total + Number(item.valor || 0), 0);
     const despesas = considerados.filter(item => item.tipo === 'despesa').reduce((total, item) => total + Number(item.valor || 0), 0);
+    const transferencias = considerados.filter(item => item.tipo === 'transferencia').reduce((total, item) => total + (item.direcao === 'saida' ? -1 : 1) * Number(item.valor || 0), 0);
     const resultado = receitas - despesas;
-    const saldoPrevisto = Number(saldoInicial || 0) + resultado;
+    const saldoPrevisto = Number(saldoInicial || 0) + resultado + transferencias;
     const economia = receitas > 0 ? resultado / receitas * 100 : despesas > 0 ? -100 : 0;
-    return { considerados, receitas, despesas, resultado, saldoPrevisto, economia };
+    return { considerados, receitas, despesas, transferencias, resultado, saldoPrevisto, economia };
+}
+
+function impactoNoSaldo(lancamento) {
+    if (lancamento.pendente || lancamento.considerado === false) return 0;
+    if (lancamento.tipo === 'receita') return Number(lancamento.valor || 0);
+    if (lancamento.tipo === 'despesa') return -Number(lancamento.valor || 0);
+    if (lancamento.tipo === 'transferencia') return (lancamento.direcao === 'saida' ? -1 : 1) * Number(lancamento.valor || 0);
+    return 0;
+}
+
+function saldoAntesDoPeriodo(lancamentos, periodo) {
+    return lancamentos.filter(item => periodoDaData(item.data) < periodo).reduce((saldo, item) => saldo + impactoNoSaldo(item), 0);
 }
 
 function atualizarFinanceiro() {
     if (!document.getElementById('financeiro-section') || ehOperadorAtual()) return;
+    migrarSaldoInicialLegado();
     const campoPeriodo = document.getElementById('financeiro-periodo');
     if (!campoPeriodo.value) campoPeriodo.value = periodoFinanceiroAtual();
     const periodo = campoPeriodo.value;
-    const lancamentos = todosLancamentosFinanceiros().filter(item => periodoDaData(item.data) === periodo).sort((a, b) => new Date(b.data) - new Date(a.data));
-    const saldoInicial = Number(saldosIniciaisFinanceiros[periodo] || 0);
-    const { considerados, receitas, despesas, resultado, saldoPrevisto, economia } = calcularResumoFinanceiro(lancamentos, saldoInicial);
+    const todosLancamentos = todosLancamentosFinanceiros();
+    const lancamentos = todosLancamentos.filter(item => periodoDaData(item.data) === periodo).sort((a, b) => new Date(b.data) - new Date(a.data));
+    const saldoInicial = saldoAntesDoPeriodo(todosLancamentos, periodo);
+    const { considerados, receitas, despesas, transferencias, resultado, saldoPrevisto, economia } = calcularResumoFinanceiro(lancamentos, saldoInicial);
     const aReceber = clientesFiado.reduce((total, cliente) => total + saldoClienteFiado(cliente.id), 0);
     document.getElementById('financeiro-saldo-inicial').textContent = moedaBR(saldoInicial);
-    const campoSaldoInicial = document.getElementById('financeiro-saldo-inicial-input');
-    if (document.activeElement !== campoSaldoInicial) campoSaldoInicial.value = saldoInicial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     document.getElementById('financeiro-receitas').textContent = moedaBR(receitas);
     document.getElementById('financeiro-despesas').textContent = moedaBR(despesas);
+    const campoTransferencias = document.getElementById('financeiro-transferencias');
+    campoTransferencias.textContent = `${transferencias > 0 ? '+' : ''}${moedaBR(transferencias)}`;
+    campoTransferencias.className = `mt-1 block text-xl ${transferencias >= 0 ? 'text-sky-300' : 'text-rose-300'}`;
     const campoResultado = document.getElementById('financeiro-resultado');
     campoResultado.textContent = moedaBR(resultado);
     campoResultado.className = `mt-1 block text-xl ${resultado >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
@@ -442,7 +480,12 @@ function atualizarFinanceiro() {
     document.getElementById('financeiro-a-receber').textContent = moedaBR(aReceber);
 
     const rotulosOrigem = { venda: 'Venda automática', recebimento: 'Fiado recebido', caixa: 'Despesa do caixa', manual: 'Lançamento manual' };
-    document.getElementById('lista-financeiro').innerHTML = lancamentos.map(item => `<article class="flex flex-col gap-2 rounded-lg border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between ${item.considerado === false ? 'bg-slate-50 opacity-60' : ''}"><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong>${escaparDado(item.descricao)}</strong>${item.pendente ? '<span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">A receber</span>' : ''}${item.considerado === false ? '<span class="rounded-full bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">Não considerado</span>' : ''}</div><p class="text-xs text-gray-500">${new Date(item.data).toLocaleDateString('pt-BR')} · ${escaparDado(item.categoria)} · ${rotulosOrigem[item.origem] || 'Lançamento'}</p></div><div class="flex flex-wrap items-center justify-between gap-2 sm:justify-end"><strong class="${item.tipo === 'receita' ? item.pendente ? 'text-amber-700' : 'text-emerald-700' : 'text-rose-700'}">${item.tipo === 'despesa' ? '-' : '+'}${moedaBR(item.valor)}</strong>${!item.automatico ? `<button onclick="alternarConsideracaoLancamento('${escaparDado(item.id)}')" class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">${item.considerado === false ? 'Considerar' : 'Desconsiderar'}</button><button onclick="excluirLancamentoFinanceiro('${escaparDado(item.id)}')" class="rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Excluir</button>` : ''}</div></article>`).join('') || '<p class="rounded-lg border border-dashed p-6 text-center text-gray-500">Nenhum lançamento neste período.</p>';
+    document.getElementById('lista-financeiro').innerHTML = lancamentos.map(item => {
+        const transferencia = item.tipo === 'transferencia';
+        const saida = item.tipo === 'despesa' || (transferencia && item.direcao === 'saida');
+        const classeValor = transferencia ? item.direcao === 'saida' ? 'text-rose-700' : 'text-sky-700' : item.tipo === 'receita' ? item.pendente ? 'text-amber-700' : 'text-emerald-700' : 'text-rose-700';
+        return `<article class="flex flex-col gap-2 rounded-lg border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between ${item.considerado === false ? 'bg-slate-50 opacity-60' : ''}"><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong>${escaparDado(item.descricao)}</strong>${item.pendente ? '<span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">A receber</span>' : ''}${transferencia ? `<span class="rounded-full bg-sky-100 px-2 py-1 text-xs font-semibold text-sky-800">Transferência ${item.direcao === 'saida' ? 'de saída' : 'de entrada'}</span>` : ''}${item.considerado === false ? '<span class="rounded-full bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">Não considerado</span>' : ''}</div><p class="text-xs text-gray-500">${new Date(item.data).toLocaleDateString('pt-BR')} · ${escaparDado(item.categoria)} · ${rotulosOrigem[item.origem] || 'Lançamento'}</p></div><div class="flex flex-wrap items-center justify-between gap-2 sm:justify-end"><strong class="${classeValor}">${saida ? '-' : '+'}${moedaBR(item.valor)}</strong>${!item.automatico ? `<button onclick="alternarConsideracaoLancamento('${escaparDado(item.id)}')" class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">${item.considerado === false ? 'Considerar' : 'Desconsiderar'}</button><button onclick="excluirLancamentoFinanceiro('${escaparDado(item.id)}')" class="rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Excluir</button>` : ''}</div></article>`;
+    }).join('') || '<p class="rounded-lg border border-dashed p-6 text-center text-gray-500">Nenhum lançamento neste período.</p>';
 
     const totaisCategoria = new Map();
     considerados.forEach(item => {
@@ -452,7 +495,7 @@ function atualizarFinanceiro() {
     const maior = Math.max(1, ...totaisCategoria.values());
     document.getElementById('resumo-categorias-financeiro').innerHTML = [...totaisCategoria.entries()].sort((a, b) => b[1] - a[1]).map(([chave, valor]) => {
         const [tipo, categoria] = chave.split('|');
-        const cor = tipo === 'receita' ? 'bg-emerald-500' : 'bg-rose-500';
+        const cor = tipo === 'receita' ? 'bg-emerald-500' : tipo === 'transferencia' ? 'bg-sky-500' : 'bg-rose-500';
         return `<div><div class="mb-1 flex justify-between gap-3 text-sm"><span>${escaparDado(categoria)}</span><strong>${moedaBR(valor)}</strong></div><div class="h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full ${cor}" style="width:${Math.max(4, valor / maior * 100).toFixed(1)}%"></div></div></div>`;
     }).join('') || '<p class="text-sm text-gray-500">Sem valores realizados no período.</p>';
 }
@@ -477,7 +520,6 @@ window.cancelarFormFinanceiro = cancelarFormFinanceiro;
 window.salvarLancamentoFinanceiro = salvarLancamentoFinanceiro;
 window.excluirLancamentoFinanceiro = excluirLancamentoFinanceiro;
 window.alternarConsideracaoLancamento = alternarConsideracaoLancamento;
-window.salvarSaldoInicialFinanceiro = salvarSaldoInicialFinanceiro;
 window.parseValorMonetario = parseValorMonetario;
 window.formatarCampoMonetario = formatarCampoMonetario;
 window.atualizarFinanceiro = atualizarFinanceiro;
