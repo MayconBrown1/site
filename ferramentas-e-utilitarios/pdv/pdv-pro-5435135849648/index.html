@@ -566,12 +566,18 @@
                     <div class="rounded-xl bg-gradient-to-br from-slate-950 to-emerald-950 p-5 text-white shadow-lg lg:p-7">
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                             <div><p class="text-sm font-semibold uppercase tracking-wider text-emerald-300">Área exclusiva do titular</p><h2 class="mt-1 text-2xl font-bold lg:text-3xl">Controle financeiro</h2><p class="mt-2 max-w-2xl text-sm text-slate-300">Vendas entram automaticamente. Despesas do caixa aparecem somente quando a retirada for classificada como despesa.</p></div>
-                            <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="atualizarFinanceiro()"></label>
+                            <div class="grid gap-3 sm:grid-cols-2">
+                                <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="atualizarFinanceiro()"></label>
+                                <label class="text-sm font-medium">Saldo inicial do mês<span class="mt-1 flex overflow-hidden rounded-lg border border-white/20 bg-white/10"><span class="flex items-center px-3 text-slate-300">R$</span><input id="financeiro-saldo-inicial-input" inputmode="decimal" class="min-w-0 flex-1 border-0 bg-transparent p-3 text-white" placeholder="0,00" onblur="formatarCampoMonetario(this)"><button type="button" onclick="salvarSaldoInicialFinanceiro()" class="rounded-none border-0 bg-emerald-600 px-3 text-sm text-white hover:bg-emerald-500">Salvar</button></span></label>
+                            </div>
                         </div>
                         <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Receitas</span><strong id="financeiro-receitas" class="mt-1 block text-xl text-emerald-300">R$ 0,00</strong></div>
-                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Despesas</span><strong id="financeiro-despesas" class="mt-1 block text-xl text-rose-300">R$ 0,00</strong></div>
-                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Resultado</span><strong id="financeiro-resultado" class="mt-1 block text-xl">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Saldo inicial</span><strong id="financeiro-saldo-inicial" class="mt-1 block text-xl text-sky-300">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Receitas consideradas</span><strong id="financeiro-receitas" class="mt-1 block text-xl text-emerald-300">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Despesas consideradas</span><strong id="financeiro-despesas" class="mt-1 block text-xl text-rose-300">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Resultado do mês</span><strong id="financeiro-resultado" class="mt-1 block text-xl">R$ 0,00</strong></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Saldo previsto</span><strong id="financeiro-saldo-previsto" class="mt-1 block text-xl">R$ 0,00</strong><span class="mt-1 block text-xs text-slate-400">Inicial + resultado</span></div>
+                            <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Economia mensal</span><strong id="financeiro-economia" class="mt-1 block text-xl">0,0%</strong><span class="mt-1 block text-xs text-slate-400">Resultado ÷ receitas</span></div>
                             <div class="rounded-xl bg-white/10 p-4"><span class="text-sm text-slate-300">Fiado a receber</span><strong id="financeiro-a-receber" class="mt-1 block text-xl text-amber-300">R$ 0,00</strong></div>
                         </div>
                     </div>
@@ -587,8 +593,9 @@
                                     <div><label for="financeiro-tipo" class="mb-1 block text-sm font-medium">Tipo</label><select id="financeiro-tipo" class="w-full rounded-lg border p-3" onchange="atualizarCategoriasFinanceiro()"><option value="receita">Receita</option><option value="despesa">Despesa</option></select></div>
                                     <div><label for="financeiro-categoria" class="mb-1 block text-sm font-medium">Categoria</label><select id="financeiro-categoria" class="w-full rounded-lg border p-3"></select></div>
                                     <div><label for="financeiro-descricao" class="mb-1 block text-sm font-medium">Descrição *</label><input id="financeiro-descricao" maxlength="160" class="w-full rounded-lg border p-3"></div>
-                                    <div><label for="financeiro-valor" class="mb-1 block text-sm font-medium">Valor *</label><input id="financeiro-valor" type="number" min="0.01" step="0.01" class="w-full rounded-lg border p-3"></div>
+                                    <div><label for="financeiro-valor" class="mb-1 block text-sm font-medium">Valor *</label><input id="financeiro-valor" type="text" inputmode="decimal" class="w-full rounded-lg border p-3" placeholder="Ex.: 1,15" onblur="formatarCampoMonetario(this)"><p class="mt-1 text-xs text-gray-500">Aceita centavos com vírgula ou ponto.</p></div>
                                     <div><label for="financeiro-data" class="mb-1 block text-sm font-medium">Data *</label><input id="financeiro-data" type="date" class="w-full rounded-lg border p-3"></div>
+                                    <label class="flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-sm"><input id="financeiro-considerar" type="checkbox" class="mt-1" checked><span><strong>Considerar nos cálculos</strong><span class="block text-xs text-gray-500">Desmarque para guardar o lançamento no histórico sem alterar receitas, despesas ou saldo.</span></span></label>
                                     <div class="flex gap-2"><button onclick="salvarLancamentoFinanceiro()" class="flex-1 rounded-lg bg-slate-900 p-3 font-semibold text-white">Salvar</button><button onclick="cancelarFormFinanceiro()" class="rounded-lg bg-gray-500 px-4 py-3 text-white">Cancelar</button></div>
                                 </div>
                             </div>
@@ -1214,6 +1221,7 @@ if ('serviceWorker' in navigator) {
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
         let lancamentosFinanceiros = JSON.parse(localStorage.getItem('pdv_lancamentos_financeiros') || '[]');
+        let saldosIniciaisFinanceiros = JSON.parse(localStorage.getItem('pdv_saldos_iniciais_financeiros') || '{}');
         let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
         let itensOrcamento = [];
         let orcamentoEditando = null;
@@ -1229,6 +1237,7 @@ if ('serviceWorker' in navigator) {
             clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
             pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
             lancamentosFinanceiros: { get: () => lancamentosFinanceiros, set: v => { lancamentosFinanceiros = v; } },
+            saldosIniciaisFinanceiros: { get: () => saldosIniciaisFinanceiros, set: v => { saldosIniciaisFinanceiros = v; } },
             orcamentos: { get: () => orcamentos, set: v => { orcamentos = v; } },
             CONFIG_PIX: { get: () => CONFIG_PIX }
         });
@@ -3813,6 +3822,7 @@ function showInstallButton() {
         clientesFiado: clientesFiado,
         pagamentosFiado: pagamentosFiado,
         lancamentosFinanceiros: lancamentosFinanceiros,
+        saldosIniciaisFinanceiros: saldosIniciaisFinanceiros,
         orcamentos: orcamentos,
         configSistema: configSistema,
         configPix: CONFIG_PIX,
@@ -4089,6 +4099,7 @@ function showInstallButton() {
             clientesFiado = [];
             pagamentosFiado = [];
             lancamentosFinanceiros = [];
+            saldosIniciaisFinanceiros = {};
             orcamentos = [];
             categoriasOcultas = [];
             categorias = [...CATEGORIAS_PADRAO];
@@ -4108,6 +4119,7 @@ function showInstallButton() {
             localStorage.removeItem('pdv_clientes_fiado');
             localStorage.removeItem('pdv_pagamentos_fiado');
             localStorage.removeItem('pdv_lancamentos_financeiros');
+            localStorage.removeItem('pdv_saldos_iniciais_financeiros');
             localStorage.removeItem('pdv_config_sistema');
             localStorage.removeItem('pdv_config_pix');
             
@@ -4152,6 +4164,7 @@ function showInstallButton() {
                     clientesFiado = backup.clientesFiado || [];
                     pagamentosFiado = backup.pagamentosFiado || [];
                     lancamentosFinanceiros = backup.lancamentosFinanceiros || [];
+                    saldosIniciaisFinanceiros = backup.saldosIniciaisFinanceiros || {};
                     orcamentos = backup.orcamentos || [];
                     categoriasOcultas = Array.isArray(backup.categoriasOcultas) ? backup.categoriasOcultas : [];
                     categorias = [...new Set([...CATEGORIAS_PADRAO, ...(Array.isArray(backup.categorias) ? backup.categorias : [])])]
@@ -4690,6 +4703,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
             localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(lancamentosFinanceiros));
+            localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(saldosIniciaisFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
         }
 

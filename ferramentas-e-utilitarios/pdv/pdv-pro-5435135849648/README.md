@@ -32,7 +32,7 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `publicCatalogs/{slug}/products/{id}`: projeção pública dos produtos visíveis com estoque positivo e dos serviços marcados como visíveis. Custos, vendas, clientes e demais dados internos nunca são copiados.
 - O módulo **Orçamentos** cria propostas com produtos e serviços cadastrados, validade, dados completos do cliente e da empresa, histórico e exportação em PDF, sem movimentar estoque ou caixa.
 - O módulo **Clientes** cadastra nome, CPF, WhatsApp, e-mail, endereço e demais dados e relaciona compras pagas ou fiado ao histórico de cada pessoa, sem exigir limite de crédito.
-- O módulo **Financeiro** fica visível somente para o titular, registra receitas e despesas manuais e consolida vendas, recebimentos de fiado e retiradas do caixa classificadas como despesa. Sangrias e transferências não alteram o resultado financeiro.
+- O módulo **Financeiro** fica visível somente para o titular, aceita valores com centavos, registra saldo inicial por mês, receitas e despesas manuais e consolida vendas, recebimentos de fiado e retiradas do caixa classificadas como despesa. O painel calcula resultado, saldo previsto e percentual de economia; lançamentos manuais podem ficar no histórico sem serem considerados nos cálculos. Sangrias e transferências não alteram o resultado financeiro.
 
 ## Catálogo público
 

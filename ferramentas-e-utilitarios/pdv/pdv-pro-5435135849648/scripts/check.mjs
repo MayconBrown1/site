@@ -61,6 +61,7 @@ const featureContext = {
     { id: 'm-sangria', tipo: 'saida', finalidade: 'sangria', valor: 50, descricao: 'Guardar', data: '2026-09-10T16:00:00' }
   ],
   lancamentosFinanceiros: [{ id: 'lf-1', tipo: 'receita', categoria: 'Salário', valor: 2000, descricao: 'Pró-labore', data: '2026-09-10T12:00:00' }],
+  saldosIniciaisFinanceiros: { '2026-09': 250.35 },
   saldoClienteFiado: () => 50,
   ehOperadorAtual: () => false,
   salvarDados: () => {},
@@ -73,12 +74,19 @@ const featureContext = {
 featureContext.window = featureContext;
 vm.runInNewContext(customerFinanceSource, featureContext);
 if (!featureContext.validarCpfCliente('529.982.247-25') || featureContext.validarCpfCliente('111.111.111-11')) throw new Error('A validação de CPF falhou.');
+if (featureContext.parseValorMonetario('1,15') !== 1.15 || featureContext.parseValorMonetario('1.234,56') !== 1234.56) throw new Error('A leitura de valores com centavos falhou.');
 if (featureContext.comprasDoCliente('cl-1').length !== 2) throw new Error('O histórico não relacionou vendas pagas e fiado ao cliente.');
 const lancamentosTeste = featureContext.todosLancamentosFinanceiros();
 if (!lancamentosTeste.some(item => item.id === 'venda_v-paga' && item.valor === 100 && !item.pendente)) throw new Error('A venda paga não entrou no Financeiro.');
 if (!lancamentosTeste.some(item => item.id === 'venda_v-fiado' && item.valor === 50 && item.pendente)) throw new Error('O saldo fiado pendente está incorreto.');
 if (!lancamentosTeste.some(item => item.id === 'caixa_m-despesa' && item.valor === 20)) throw new Error('A despesa do caixa não entrou no Financeiro.');
 if (lancamentosTeste.some(item => item.id === 'caixa_m-sangria')) throw new Error('A sangria alterou o Financeiro indevidamente.');
+const resumoFinanceiro = featureContext.calcularResumoFinanceiro([
+  { tipo: 'receita', valor: 100 },
+  { tipo: 'despesa', valor: 155 },
+  { tipo: 'despesa', valor: 999, considerado: false }
+], 250.35);
+if (resumoFinanceiro.resultado !== -55 || Math.abs(resumoFinanceiro.saldoPrevisto - 195.35) > 0.001 || Math.abs(resumoFinanceiro.economia + 55) > 0.001) throw new Error(`O resumo mensal do Financeiro está incorreto: ${JSON.stringify(resumoFinanceiro)}`);
 
 const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);

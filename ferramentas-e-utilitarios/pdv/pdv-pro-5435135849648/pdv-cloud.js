@@ -100,11 +100,13 @@ async function salvarNuvem() {
 async function salvarFinanceiroNuvem() {
   if (!uid || window.usuarioPdv?.role === 'operator') return false;
   const lancamentos = cloneState(window.lancamentosFinanceiros || []);
+  const saldosIniciais = cloneState(window.saldosIniciaisFinanceiros || {});
   financeQueue = financeQueue.then(async () => {
     try {
       await setDoc(doc(db, 'users', uid, 'app', 'financeiro'), {
         ownerUid: uid,
         lancamentosFinanceiros: lancamentos,
+        saldosIniciaisFinanceiros: saldosIniciais,
         updatedAt: serverTimestamp()
       });
       return true;
@@ -153,7 +155,9 @@ protegerPagina(async (user, perfil) => {
   };
   if (perfil.role === 'operator') {
     window.lancamentosFinanceiros = [];
+    window.saldosIniciaisFinanceiros = {};
     localStorage.removeItem('pdv_lancamentos_financeiros');
+    localStorage.removeItem('pdv_saldos_iniciais_financeiros');
   }
   window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
   inicializarCatalogoAdmin(uid);
@@ -196,12 +200,17 @@ protegerPagina(async (user, perfil) => {
     onSnapshot(doc(db, 'users', uid, 'app', 'financeiro'), snap => {
       if (!snap.exists()) {
         window.lancamentosFinanceiros = window.lancamentosFinanceiros || [];
+        window.saldosIniciaisFinanceiros = window.saldosIniciaisFinanceiros || {};
         window.atualizarFinanceiro?.();
         return;
       }
       window.lancamentosFinanceiros = cloneState(snap.data().lancamentosFinanceiros || []);
+      window.saldosIniciaisFinanceiros = cloneState(snap.data().saldosIniciaisFinanceiros || {});
       writingLocalStorage = true;
-      try { localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(window.lancamentosFinanceiros)); }
+      try {
+        localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(window.lancamentosFinanceiros));
+        localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(window.saldosIniciaisFinanceiros));
+      }
       finally { writingLocalStorage = false; }
       window.atualizarFinanceiro?.();
     });
