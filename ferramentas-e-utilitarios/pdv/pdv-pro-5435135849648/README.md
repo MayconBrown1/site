@@ -39,6 +39,10 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 
 Toda alteração funcional ou visual deve ser registrada no primeiro bloco da seção **Novidades**. A versão desse bloco, informada em `data-novidades-cache`, precisa acompanhar o `CACHE_NAME` de `sw.js`. O comando `node scripts/check.mjs` interrompe a verificação e mostra um aviso quando os identificadores não correspondem.
 
+## Painel de Tema
+
+O botão **Tema** abre um painel exclusivo do titular. As escolhas de fundo, textos, cartões, botões, barra superior, fonte, cantos e imagem de fundo por URL ficam em `configSistema.temaPersonalizado`, são sincronizadas com o estado da empresa e aplicadas também à experiência dos operadores. Links de imagem aceitam somente HTTP ou HTTPS.
+
 ## Catálogo público
 
 1. Publique as regras atualizadas de `firestore.rules`.
