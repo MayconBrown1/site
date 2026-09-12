@@ -55,7 +55,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Tema do PDV também no catálogo público', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Cinco novos temas criativos e neon', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -71,10 +71,10 @@ if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regra
 for (const marker of ['modal-tema', 'tema-cor-fundo', 'tema-cor-texto', 'tema-cor-botao', 'tema-imagem-url', 'function abrirPainelTema', 'function salvarTema', 'function restaurarTemaPadrao', 'body.tema-personalizado']) {
   if (!html.includes(marker)) throw new Error(`Painel de Tema incompleto: ${marker}`);
 }
-for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 'data-tema-preset="conveniencia"', 'data-tema-preset="doceria"', 'data-tema-preset="hortifruti"']) {
+for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 'data-tema-preset="conveniencia"', 'data-tema-preset="doceria"', 'data-tema-preset="hortifruti"', 'data-tema-preset="grafica"', 'data-tema-preset="informatica"', 'data-tema-preset="futurista"', 'data-tema-preset="neon-laranja"', 'data-tema-preset="neon-verde"']) {
   if (!html.includes(marker)) throw new Error(`Tema comercial ausente: ${marker}`);
 }
-for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp']) {
+for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp', 'grafica-tecnologia.webp', 'informatica.webp', 'futurista.webp', 'neon-laranja.webp', 'neon-verde.webp']) {
   if (!fs.existsSync(new URL(`../assets/temas/${asset}`, import.meta.url))) throw new Error(`Imagem do tema ausente: ${asset}`);
   if (!serviceWorkerSource.includes(`'./assets/temas/${asset}'`)) throw new Error(`Imagem do tema fora do cache offline: ${asset}`);
 }

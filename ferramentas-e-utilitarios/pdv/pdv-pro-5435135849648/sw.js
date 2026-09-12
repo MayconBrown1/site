@@ -1,7 +1,8 @@
-const CACHE_NAME = 'pdv-pro-v32';
+const CACHE_NAME = 'pdv-pro-v33';
 const APP_SHELL = [
   './', './index.html', './login.html', './cadastro.html', './admin.html', './favicon.svg', './catalogo/', './catalogo/index.html', './catalogo/catalogo.css', './catalogo/catalogo.js', './catalogo-admin.js', './clientes-financeiro.js', './operator-admin.js', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
   './assets/temas/pet-shop.webp', './assets/temas/adega.webp', './assets/temas/conveniencia.webp', './assets/temas/doceria.webp', './assets/temas/hortifruti.webp',
+  './assets/temas/grafica-tecnologia.webp', './assets/temas/informatica.webp', './assets/temas/futurista.webp', './assets/temas/neon-laranja.webp', './assets/temas/neon-verde.webp',
   'https://cdn.tailwindcss.com',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'

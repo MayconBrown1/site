@@ -67,9 +67,13 @@
         body.tema-personalizado main .text-gray-900,
         body.tema-personalizado main .text-gray-800,
         body.tema-personalizado main .text-gray-700,
+        body.tema-personalizado main .text-gray-600,
+        body.tema-personalizado main .text-gray-500,
         body.tema-personalizado main .text-slate-900,
         body.tema-personalizado main .text-slate-800,
-        body.tema-personalizado main .text-slate-700 { color: var(--tema-texto) !important; }
+        body.tema-personalizado main .text-slate-700,
+        body.tema-personalizado main .text-slate-600,
+        body.tema-personalizado main .text-slate-500 { color: var(--tema-texto) !important; }
         body.tema-personalizado main .bg-white.rounded-lg,
         body.tema-personalizado main .bg-white.rounded-xl,
         body.tema-personalizado main .rounded-lg,
@@ -762,12 +766,13 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 12/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v32" data-atualizacao="2026-09-12" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v33" data-atualizacao="2026-09-12" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Tema do PDV também no catálogo público</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Cinco novos temas criativos e neon</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-fuchsia-200 bg-gradient-to-r from-cyan-50 via-fuchsia-50 to-lime-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-fuchsia-950">⚡ Gráfica, Informática, Futurista e Neon</h4><p class="mt-2 text-sm text-slate-700">O Painel de Tema ganhou cinco opções: <strong>Gráfica &amp; Tecnologia, Técnico de Informática, Futurista, Neon Laranja e Neon Verde</strong>. Cada uma traz fundo exclusivo, cores completas e prévia imediata; escolha a opção e clique em <strong>Salvar tema</strong> para aplicar também no catálogo público.</p></article>
                             <article class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🛍️ Uma identidade visual em todo lugar</h4><p class="mt-2 text-sm text-slate-700">Ao salvar ou restaurar um tema no PDV, o catálogo público passa a usar automaticamente as mesmas cores, fonte, cantos e imagem de fundo. Se o catálogo já estiver publicado, basta salvar o tema; os clientes verão a mudança no mesmo link.</p></article>
                             <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🎨 Cinco temas comerciais com imagem</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Tema</strong>, escolha um visual pronto para <strong>Pet Shop/Casa de Ração, Adega, Conveniência, Doceria ou Hortifruti</strong>. Cada opção já configura a imagem de fundo, as cores, a fonte, os cartões e os botões; confira a prévia e clique em <strong>Salvar tema</strong>.</p></article>
                             <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">↩️ O tema padrão continua disponível</h4><p class="mt-2 text-sm text-slate-700">Para voltar ao visual original do PDV, escolha <strong>Padrão</strong> entre os temas prontos ou use <strong>Restaurar padrão</strong>. As personalizações são removidas e o sistema volta exatamente às cores originais.</p></article>
@@ -1014,6 +1019,21 @@
                         </button>
                         <button data-tema-preservar data-tema-preset="hortifruti" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('hortifruti')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
                             <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/hortifruti.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🥕 Hortifruti</strong><small class="text-slate-500">Feira e produtos frescos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="grafica" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('grafica')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/grafica-tecnologia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🎨 Gráfica &amp; Tecnologia</strong><small class="text-slate-500">CMYK vivo e criativo</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="informatica" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('informatica')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/informatica.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🖥️ Técnico de Informática</strong><small class="text-slate-500">Hardware e circuitos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="futurista" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('futurista')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/futurista.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🚀 Futurista</strong><small class="text-slate-500">Azul, violeta e holografia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="neon-laranja" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('neon-laranja')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/neon-laranja.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟠 Neon Laranja</strong><small class="text-slate-500">Laranja elétrico e preto</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="neon-verde" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('neon-verde')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/neon-verde.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟢 Neon Verde</strong><small class="text-slate-500">Verde elétrico e tecnologia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                     </div>
                 </div>
@@ -1583,7 +1603,12 @@ if ('serviceWorker' in navigator) {
             adega: { ...TEMA_PADRAO, fundo: '#16090d', texto: '#fff7ed', cartao: '#2a161b', botao: '#c18a2d', textoBotao: '#1b0c08', barra: '#12070a', textoBarra: '#f5d58a', fonte: 'georgia', bordas: 'discreto', imagem: './assets/temas/adega.webp', sobreposicao: 10 },
             conveniencia: { ...TEMA_PADRAO, fundo: '#07182e', texto: '#f8fafc', cartao: '#122a49', botao: '#f97316', textoBotao: '#ffffff', barra: '#061222', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'discreto', imagem: './assets/temas/conveniencia.webp', sobreposicao: 10 },
             doceria: { ...TEMA_PADRAO, fundo: '#fff0f5', texto: '#5b2944', cartao: '#fffafa', botao: '#db5b8f', textoBotao: '#ffffff', barra: '#7b3659', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', imagem: './assets/temas/doceria.webp', sobreposicao: 0 },
-            hortifruti: { ...TEMA_PADRAO, fundo: '#edf7e8', texto: '#183b24', cartao: '#fffdf2', botao: '#2f855a', textoBotao: '#ffffff', barra: '#164e32', textoBarra: '#ffffff', bordas: 'arredondado', imagem: './assets/temas/hortifruti.webp', sobreposicao: 5 }
+            hortifruti: { ...TEMA_PADRAO, fundo: '#edf7e8', texto: '#183b24', cartao: '#fffdf2', botao: '#2f855a', textoBotao: '#ffffff', barra: '#164e32', textoBarra: '#ffffff', bordas: 'arredondado', imagem: './assets/temas/hortifruti.webp', sobreposicao: 5 },
+            grafica: { ...TEMA_PADRAO, fundo: '#f4fbff', texto: '#16324f', cartao: '#ffffff', botao: '#e6007e', textoBotao: '#ffffff', barra: '#006fb9', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'amplo', imagem: './assets/temas/grafica-tecnologia.webp', sobreposicao: 0 },
+            informatica: { ...TEMA_PADRAO, fundo: '#07111f', texto: '#e8f4ff', cartao: '#10243a', botao: '#0ea5e9', textoBotao: '#03131f', barra: '#050b14', textoBarra: '#7dd3fc', fonte: 'verdana', bordas: 'discreto', imagem: './assets/temas/informatica.webp', sobreposicao: 10 },
+            futurista: { ...TEMA_PADRAO, fundo: '#0c1231', texto: '#f4f3ff', cartao: '#171f4a', botao: '#8b5cf6', textoBotao: '#ffffff', barra: '#080d24', textoBarra: '#dbeafe', bordas: 'amplo', imagem: './assets/temas/futurista.webp', sobreposicao: 10 },
+            'neon-laranja': { ...TEMA_PADRAO, fundo: '#080808', texto: '#fff7ed', cartao: '#1b120e', botao: '#ff6a00', textoBotao: '#140700', barra: '#050505', textoBarra: '#ff9a3d', fonte: 'verdana', bordas: 'discreto', imagem: './assets/temas/neon-laranja.webp', sobreposicao: 10 },
+            'neon-verde': { ...TEMA_PADRAO, fundo: '#020a05', texto: '#ecfdf5', cartao: '#0b1a10', botao: '#39ff14', textoBotao: '#031405', barra: '#010503', textoBarra: '#8aff75', fonte: 'verdana', bordas: 'discreto', imagem: './assets/temas/neon-verde.webp', sobreposicao: 10 }
         });
         const FONTES_TEMA = Object.freeze({
             sistema: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
