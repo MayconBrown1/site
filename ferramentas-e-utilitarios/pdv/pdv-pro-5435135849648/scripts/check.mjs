@@ -52,7 +52,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -185,7 +185,12 @@ if (vendaMesclada.vendas.length !== 1) throw new Error('O registro da venda foi 
 for (const marker of ['createUserWithEmailAndPassword', 'initializeApp(app.options', 'sendPasswordResetEmail']) {
   if (!operatorAdmin.includes(marker)) throw new Error(`Fluxo direto de operadores incompleto: ${marker}`);
 }
-if (operatorAdmin.includes('httpsCallable')) throw new Error('O cadastro de operadores ainda depende de uma Cloud Function.');
+for (const marker of ['deleteDoc', "remove.textContent = 'Excluir'", 'function deleteOperator']) {
+  if (!operatorAdmin.includes(marker)) throw new Error(`Exclusão de operadores incompleta: ${marker}`);
+}
+if (!firestoreRules.includes("resource.data.ownerUid == request.auth.uid")) throw new Error('O titular precisa ter permissão para excluir os próprios operadores.');
+if (operatorAdmin.includes('httpsCallable')) throw new Error('A gestão de operadores não pode depender de uma Cloud Function.');
+if (!html.includes('text-[#f6c453]') || !html.includes('>ADM do PDV</button>')) throw new Error('O botão ADM do PDV precisa manter o texto dourado.');
 if (!firestoreRules.includes("request.resource.data.role == 'operator'")) throw new Error('As regras de criação de operadores não foram encontradas.');
 
 if (html.includes("getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador)")) {

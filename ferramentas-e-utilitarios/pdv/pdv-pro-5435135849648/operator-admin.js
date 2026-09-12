@@ -10,6 +10,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -27,6 +28,7 @@ function friendlyError(error) {
   if (code.includes('invalid-email')) return 'Informe um e-mail válido.';
   if (code.includes('weak-password')) return 'A senha precisa ter pelo menos 6 caracteres.';
   if (code.includes('operation-not-allowed')) return 'Ative o provedor E-mail/senha no Firebase Authentication.';
+  if (code.includes('not-found')) return 'Este operador não foi encontrado ou já foi excluído.';
   if (code.includes('unauthenticated')) return 'Sua sessão expirou. Entre novamente.';
   if (code.includes('permission-denied')) return 'As permissões de operadores ainda não foram publicadas no Firebase.';
   if (code.includes('network-request-failed')) return 'Sem conexão com o Firebase. Verifique a internet e tente novamente.';
@@ -69,7 +71,12 @@ function operatorCard(operator) {
     : 'rounded-lg bg-green-100 px-3 py-2 text-sm font-semibold text-green-800';
   toggle.textContent = operator.status === 'ativo' ? 'Pausar acesso' : 'Reativar acesso';
   toggle.addEventListener('click', () => changeStatus(operator));
-  actions.append(password, toggle);
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700';
+  remove.textContent = 'Excluir';
+  remove.addEventListener('click', () => deleteOperator(operator));
+  actions.append(password, toggle, remove);
   card.append(info, actions);
   return card;
 }
@@ -173,6 +180,21 @@ async function requestPasswordChange(operator) {
   try {
     await sendPasswordResetEmail(auth, operator.email);
     setStatus('E-mail de troca de senha enviado ao operador.', 'success');
+  } catch (error) {
+    console.error(error);
+    setStatus(friendlyError(error), 'error');
+  }
+}
+
+async function deleteOperator(operator) {
+  if (!canManage) return;
+  const confirmed = confirm(`Excluir o operador ${operator.name}?\n\nEle perderá o acesso ao PDV e desaparecerá desta lista. Esta ação não pode ser desfeita.`);
+  if (!confirmed) return;
+  setStatus(`Excluindo ${operator.name}...`);
+  try {
+    await deleteDoc(doc(db, 'users', operator.uid));
+    await loadOperators();
+    setStatus('Operador excluído. O acesso ao PDV foi removido.', 'success');
   } catch (error) {
     console.error(error);
     setStatus(friendlyError(error), 'error');

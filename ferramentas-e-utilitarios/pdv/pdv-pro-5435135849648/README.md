@@ -26,7 +26,7 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 - `users/{uid}/app/state`: produtos, estoque, clientes, vendas, sessões e fechamentos de caixa, categorias e configurações do PDV daquela empresa, sincronizados em tempo real.
 - `users/{uid}/app/financeiro`: receitas e despesas manuais exclusivas do titular. As regras bloqueiam a leitura por operadores; vendas e despesas classificadas no caixa são vinculadas automaticamente na tela financeira.
 - Em Relatórios, o titular pode selecionar qualquer data para consultar a quantidade, o faturamento, as vendas e os respectivos comprovantes daquele dia.
-- Operadores usam `users/{operatorUid}` com `role: operator` e `ownerUid` apontando para o titular. A conta é criada em uma instância secundária do Firebase Authentication, sem desconectar o titular, e o perfil é protegido pelas Firestore Rules.
+- Operadores usam `users/{operatorUid}` com `role: operator` e `ownerUid` apontando para o titular. A conta é criada em uma instância secundária do Firebase Authentication, sem desconectar o titular, e o perfil é protegido pelas Firestore Rules. O titular pode pausar, reativar ou excluir um operador; a exclusão remove o perfil da empresa, faz o nome desaparecer da lista e bloqueia novos acessos ao PDV.
 - Produtos que compartilham saldo guardam `estoqueVinculadoId`; o produto de origem mantém a quantidade e todos os itens vinculados são sincronizados após vendas e ajustes.
 - `catalogOwners/{slug}`: reserva privada e exclusiva do identificador público; o UID não aparece no link nem no documento público.
 - `publicCatalogs/{slug}`: somente nome, logo, WhatsApp e descrição pública da loja.
