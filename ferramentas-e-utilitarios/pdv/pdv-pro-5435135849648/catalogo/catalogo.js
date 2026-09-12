@@ -3,6 +3,81 @@ import { collection, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/
 
 // Altere somente este valor para mudar quando o aviso de estoque baixo aparece.
 const LIMITE_ESTOQUE_BAIXO = 5;
+const TEMA_CATALOGO_PADRAO = Object.freeze({
+  fundo: '#f3f6fa', texto: '#152033', cartao: '#ffffff', botao: '#0f4c81', textoBotao: '#ffffff',
+  barra: '#082f52', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado',
+  imagem: '', ajusteImagem: 'cover', sobreposicao: 20
+});
+const FONTES_CATALOGO = Object.freeze({
+  sistema: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  arial: 'Arial, sans-serif', verdana: 'Verdana, sans-serif', georgia: 'Georgia, serif'
+});
+const RAIOS_CATALOGO = Object.freeze({ discreto: '10px', arredondado: '18px', amplo: '26px' });
+
+function corTemaCatalogo(valor, padrao) {
+  return /^#[0-9a-f]{6}$/i.test(String(valor || '')) ? String(valor).toLowerCase() : padrao;
+}
+
+function caminhoImagemTemaCatalogo(valor) {
+  const texto = String(valor || '').trim();
+  if (!texto) return '';
+  if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return `../${texto.slice(2)}`;
+  try {
+    const url = new URL(texto);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function misturarCores(corA, corB, proporcao = 0.5) {
+  const canais = cor => [1, 3, 5].map(inicio => parseInt(cor.slice(inicio, inicio + 2), 16));
+  const a = canais(corA);
+  const b = canais(corB);
+  return `#${a.map((canal, indice) => Math.round(canal * proporcao + b[indice] * (1 - proporcao)).toString(16).padStart(2, '0')).join('')}`;
+}
+
+function normalizarTemaCatalogo(tema = {}) {
+  const seguro = {
+    fundo: corTemaCatalogo(tema.fundo, TEMA_CATALOGO_PADRAO.fundo),
+    texto: corTemaCatalogo(tema.texto, TEMA_CATALOGO_PADRAO.texto),
+    cartao: corTemaCatalogo(tema.cartao, TEMA_CATALOGO_PADRAO.cartao),
+    botao: corTemaCatalogo(tema.botao, TEMA_CATALOGO_PADRAO.botao),
+    textoBotao: corTemaCatalogo(tema.textoBotao, TEMA_CATALOGO_PADRAO.textoBotao),
+    barra: corTemaCatalogo(tema.barra, TEMA_CATALOGO_PADRAO.barra),
+    textoBarra: corTemaCatalogo(tema.textoBarra, TEMA_CATALOGO_PADRAO.textoBarra),
+    fonte: FONTES_CATALOGO[tema.fonte] ? tema.fonte : TEMA_CATALOGO_PADRAO.fonte,
+    bordas: RAIOS_CATALOGO[tema.bordas] ? tema.bordas : TEMA_CATALOGO_PADRAO.bordas,
+    imagem: caminhoImagemTemaCatalogo(tema.imagem),
+    ajusteImagem: ['cover', 'contain', 'repeat'].includes(tema.ajusteImagem) ? tema.ajusteImagem : TEMA_CATALOGO_PADRAO.ajusteImagem,
+    sobreposicao: Math.min(80, Math.max(0, Number(tema.sobreposicao ?? TEMA_CATALOGO_PADRAO.sobreposicao)))
+  };
+  seguro.textoSuave = misturarCores(seguro.texto, seguro.cartao, 0.68);
+  seguro.borda = misturarCores(seguro.texto, seguro.cartao, 0.18);
+  seguro.realceSuave = misturarCores(seguro.botao, seguro.cartao, 0.14);
+  return seguro;
+}
+
+function aplicarTemaCatalogo(tema) {
+  const seguro = normalizarTemaCatalogo(tema || TEMA_CATALOGO_PADRAO);
+  const repeticao = seguro.ajusteImagem === 'repeat' ? 'repeat' : 'no-repeat';
+  const tamanho = seguro.ajusteImagem === 'repeat' ? 'auto' : seguro.ajusteImagem;
+  const opacidade = seguro.sobreposicao / 100;
+  const imagem = seguro.imagem
+    ? `linear-gradient(rgba(0,0,0,${opacidade}), rgba(0,0,0,${opacidade})), url(${JSON.stringify(seguro.imagem)})`
+    : 'none';
+  const valores = {
+    '--fundo': seguro.fundo, '--texto': seguro.texto, '--texto-suave': seguro.textoSuave,
+    '--cartao': seguro.cartao, '--azul': seguro.botao, '--azul-escuro': seguro.barra,
+    '--dourado': seguro.botao, '--acao-texto': seguro.textoBotao, '--barra-texto': seguro.textoBarra,
+    '--borda': seguro.borda, '--realce-suave': seguro.realceSuave,
+    '--fundo-translucido': `${seguro.fundo}f2`, '--fonte-catalogo': FONTES_CATALOGO[seguro.fonte],
+    '--raio-cartao': RAIOS_CATALOGO[seguro.bordas], '--tema-imagem': imagem,
+    '--tema-imagem-tamanho': tamanho, '--tema-imagem-repeticao': repeticao
+  };
+  Object.entries(valores).forEach(([nome, valor]) => document.documentElement.style.setProperty(nome, valor));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', seguro.barra);
+}
 
 const elementos = {
   nome: document.getElementById('nome-loja'),
@@ -275,6 +350,7 @@ document.addEventListener('keydown', evento => {
 
 function aplicarLoja(loja) {
   dadosLoja = loja;
+  aplicarTemaCatalogo(loja.tema);
   elementos.nome.textContent = loja.nomeLoja;
   elementos.descricao.textContent = loja.descricaoCurta || '';
   document.title = `Catálogo · ${loja.nomeLoja}`;

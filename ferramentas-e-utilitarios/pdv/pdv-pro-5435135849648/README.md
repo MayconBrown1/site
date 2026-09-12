@@ -50,7 +50,7 @@ O botão **Tema** abre um painel exclusivo do titular. Além do visual padrão, 
 3. Em **Produtos**, marque **Visível no catálogo — Sim** apenas nos itens desejados.
 4. Compartilhe o link gerado no formato `catalogo/?loja=identificador`.
 
-O arquivo `catalogo/catalogo.js` contém a constante `LIMITE_ESTOQUE_BAIXO`, inicialmente definida como `5`. Produtos antigos sem `visivelCatalogo` permanecem ocultos até que sejam editados e marcados. Imagens e logo usam URLs públicas HTTPS para não aumentar o documento privado do Firestore nem exigir Firebase Storage.
+O arquivo `catalogo/catalogo.js` contém a constante `LIMITE_ESTOQUE_BAIXO`, inicialmente definida como `5`. Produtos antigos sem `visivelCatalogo` permanecem ocultos até que sejam editados e marcados. Imagens e logo usam URLs públicas HTTPS para não aumentar o documento privado do Firestore nem exigir Firebase Storage. O tema salvo no PDV é publicado de forma sanitizada junto aos dados públicos da loja; cores, fonte, cantos e imagem de fundo são aplicados em tempo real no mesmo link do catálogo.
 
 A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.
 

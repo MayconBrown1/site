@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdv-pro-v31';
+const CACHE_NAME = 'pdv-pro-v32';
 const APP_SHELL = [
   './', './index.html', './login.html', './cadastro.html', './admin.html', './favicon.svg', './catalogo/', './catalogo/index.html', './catalogo/catalogo.css', './catalogo/catalogo.js', './catalogo-admin.js', './clientes-financeiro.js', './operator-admin.js', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
   './assets/temas/pet-shop.webp', './assets/temas/adega.webp', './assets/temas/conveniencia.webp', './assets/temas/doceria.webp', './assets/temas/hortifruti.webp',

@@ -7,6 +7,9 @@ const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta
 const authSource = fs.readFileSync(new URL('../auth.js', import.meta.url), 'utf8');
 const customerFinanceSource = fs.readFileSync(new URL('../clientes-financeiro.js', import.meta.url), 'utf8');
 const serviceWorkerSource = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+const catalogAdminSource = fs.readFileSync(new URL('../catalogo-admin.js', import.meta.url), 'utf8');
+const publicCatalogSource = fs.readFileSync(new URL('../catalogo/catalogo.js', import.meta.url), 'utf8');
+const publicCatalogCss = fs.readFileSync(new URL('../catalogo/catalogo.css', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -52,7 +55,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Temas prontos para cada tipo de comércio', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Tema do PDV também no catálogo público', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -85,6 +88,22 @@ if (themeHelpers.normalizarUrlImagemTema('./assets/temas/pet-shop.webp') !== './
 let imagemInseguraAceita = false;
 try { themeHelpers.normalizarUrlImagemTema('javascript:alert(1)'); imagemInseguraAceita = true; } catch (_) {}
 if (imagemInseguraAceita) throw new Error('O tema aceitou um protocolo de imagem inseguro.');
+
+for (const marker of ['function temaPublicoAtual', 'tema: temaPublicoAtual()']) {
+  if (!catalogAdminSource.includes(marker)) throw new Error(`Sincronização do tema com o catálogo incompleta: ${marker}`);
+}
+for (const marker of ['function aplicarTemaCatalogo', 'aplicarTemaCatalogo(loja.tema)', '--tema-imagem', '--raio-cartao']) {
+  if (!publicCatalogSource.includes(marker) && !publicCatalogCss.includes(marker)) throw new Error(`Tema do catálogo público incompleto: ${marker}`);
+}
+if (!firestoreRules.includes("'descricaoCurta', 'tema', 'ativo'")) throw new Error('As regras públicas não permitem a projeção sanitizada do tema.');
+const catalogThemeStart = publicCatalogSource.indexOf('const TEMA_CATALOGO_PADRAO');
+const catalogThemeEnd = publicCatalogSource.indexOf('const elementos', catalogThemeStart);
+if (catalogThemeStart < 0 || catalogThemeEnd < 0) throw new Error('Não foi possível localizar os controles de tema do catálogo.');
+const catalogThemeHelpers = new Function(`${publicCatalogSource.slice(catalogThemeStart, catalogThemeEnd)}; return { caminhoImagemTemaCatalogo, normalizarTemaCatalogo };`)();
+if (catalogThemeHelpers.caminhoImagemTemaCatalogo('./assets/temas/pet-shop.webp') !== '../assets/temas/pet-shop.webp') throw new Error('O catálogo não resolveu a imagem local do tema.');
+if (catalogThemeHelpers.caminhoImagemTemaCatalogo('javascript:alert(1)') !== '') throw new Error('O catálogo aceitou um protocolo de imagem inseguro.');
+const temaCatalogoTeste = catalogThemeHelpers.normalizarTemaCatalogo({ fundo: '#16090d', botao: '#c18a2d', imagem: './assets/temas/adega.webp' });
+if (temaCatalogoTeste.fundo !== '#16090d' || temaCatalogoTeste.botao !== '#c18a2d' || temaCatalogoTeste.imagem !== '../assets/temas/adega.webp') throw new Error('A aparência do tema não chegou corretamente ao catálogo.');
 
 const featureContext = {
   console,

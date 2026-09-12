@@ -11,6 +11,11 @@ import {
 
 const SLUGS_RESERVADOS = new Set(['admin', 'cadastro', 'catalogo', 'login', 'pdv', 'suporte']);
 const TAMANHO_LOTE = 400;
+const TEMA_PUBLICO_PADRAO = Object.freeze({
+  fundo: '#f1f5f9', texto: '#172033', cartao: '#ffffff', botao: '#2563eb', textoBotao: '#ffffff',
+  barra: '#050505', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado',
+  imagem: '', ajusteImagem: 'cover', sobreposicao: 20
+});
 let usuarioUid = '';
 let sincronizacaoAtual = null;
 let repetirSincronizacao = false;
@@ -41,6 +46,50 @@ function urlHttpsOuVazia(valor) {
   } catch (_) {
     return '';
   }
+}
+
+function corTemaPublico(valor, padrao) {
+  return /^#[0-9a-f]{6}$/i.test(String(valor || '')) ? String(valor).toLowerCase() : padrao;
+}
+
+function imagemTemaPublico(valor) {
+  const texto = String(valor || '').trim();
+  if (!texto) return '';
+  if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto;
+  try {
+    const url = new URL(texto);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function normalizarTemaPublico(tema = {}) {
+  return {
+    fundo: corTemaPublico(tema.fundo, TEMA_PUBLICO_PADRAO.fundo),
+    texto: corTemaPublico(tema.texto, TEMA_PUBLICO_PADRAO.texto),
+    cartao: corTemaPublico(tema.cartao, TEMA_PUBLICO_PADRAO.cartao),
+    botao: corTemaPublico(tema.botao, TEMA_PUBLICO_PADRAO.botao),
+    textoBotao: corTemaPublico(tema.textoBotao, TEMA_PUBLICO_PADRAO.textoBotao),
+    barra: corTemaPublico(tema.barra, TEMA_PUBLICO_PADRAO.barra),
+    textoBarra: corTemaPublico(tema.textoBarra, TEMA_PUBLICO_PADRAO.textoBarra),
+    fonte: ['sistema', 'arial', 'verdana', 'georgia'].includes(tema.fonte) ? tema.fonte : TEMA_PUBLICO_PADRAO.fonte,
+    bordas: ['discreto', 'arredondado', 'amplo'].includes(tema.bordas) ? tema.bordas : TEMA_PUBLICO_PADRAO.bordas,
+    imagem: imagemTemaPublico(tema.imagem),
+    ajusteImagem: ['cover', 'contain', 'repeat'].includes(tema.ajusteImagem) ? tema.ajusteImagem : TEMA_PUBLICO_PADRAO.ajusteImagem,
+    sobreposicao: Math.min(80, Math.max(0, Number(tema.sobreposicao ?? TEMA_PUBLICO_PADRAO.sobreposicao)))
+  };
+}
+
+function temaPublicoAtual() {
+  if (window.configSistema?.temaPersonalizado) return normalizarTemaPublico(window.configSistema.temaPersonalizado);
+  if (window.configSistema?.tema === 'escuro') {
+    return normalizarTemaPublico({
+      fundo: '#090909', texto: '#f5f5f5', cartao: '#171717', botao: '#d4af37',
+      textoBotao: '#111111', barra: '#050505', textoBarra: '#ffffff'
+    });
+  }
+  return normalizarTemaPublico(TEMA_PUBLICO_PADRAO);
 }
 
 function linkDoCatalogo(slug) {
@@ -125,6 +174,7 @@ async function executarSincronizacao(uid) {
     logo: urlHttpsOuVazia(configuracao.logo),
     whatsapp: normalizarWhatsapp(configuracao.whatsapp),
     descricaoCurta: String(configuracao.descricaoCurta || '').trim().slice(0, 500),
+    tema: temaPublicoAtual(),
     ativo: true,
     updatedAt: serverTimestamp()
   });
