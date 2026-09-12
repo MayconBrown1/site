@@ -64,23 +64,107 @@
     <!-- Título -->
     <section class="bg-gray-100 py-12">
       <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">
+        <h2 class="text-2xl font-bold text-center mb-4 text-gray-800">
           Comandos de Reparo do Windows
         </h2>
-        <h2 class="text-1xl text-center mb-8 text-gray-800">
-          Executa o CMD como administrador e cola os comandos.
-        </h2>
+
+        <p class="text-center text-gray-700">
+          Execute o CMD ou Terminal como administrador e utilize os comandos abaixo.
+        </p>
+
+        <p class="text-center text-sm text-gray-500 mt-2">
+          Para uma verificação completa, execute os comandos na ordem apresentada.
+        </p>
       </div>
     </section>
 
     <!-- Comandos -->
-    <main class="flex flex-col items-center justify-center gap-8 min-h-[40vh] px-4">
+    <main class="flex flex-col items-center justify-center gap-8 min-h-[40vh] px-4 mt-8">
 
-      <!-- DISM -->
+      <!-- 1 - DISM CheckHealth -->
       <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
-        <h3 class="text-xl font-bold mb-3">Reparar Imagem do Windows (DISM)</h3>
 
-        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm">
+        <p class="text-sm font-bold text-indigo-600 mb-2">
+          1º PASSO
+        </p>
+
+        <h3 class="text-xl font-bold mb-3">
+          Verificação Rápida da Imagem do Windows
+        </h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm break-all">
+          DISM /Online /Cleanup-Image /CheckHealth
+        </div>
+
+        <button onclick="copiarTexto('DISM /Online /Cleanup-Image /CheckHealth')"
+          class="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition">
+          Copiar Comando
+        </button>
+
+        <div class="mt-5 text-left bg-indigo-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-700">
+            <strong>O que esse comando faz?</strong><br>
+            Faz uma verificação rápida para saber se o Windows já detectou algum problema
+            ou corrupção na imagem do sistema.
+          </p>
+
+          <p class="text-sm text-gray-600 mt-2">
+            Ele não realiza uma análise profunda e não faz nenhum reparo.
+            É usado principalmente como uma verificação inicial.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- 2 - DISM ScanHealth -->
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+
+        <p class="text-sm font-bold text-yellow-600 mb-2">
+          2º PASSO
+        </p>
+
+        <h3 class="text-xl font-bold mb-3">
+          Verificação Completa da Imagem do Windows
+        </h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm break-all">
+          DISM /Online /Cleanup-Image /ScanHealth
+        </div>
+
+        <button onclick="copiarTexto('DISM /Online /Cleanup-Image /ScanHealth')"
+          class="px-8 py-3 bg-yellow-600 text-white font-bold rounded-xl shadow-lg hover:bg-yellow-700 transition">
+          Copiar Comando
+        </button>
+
+        <div class="mt-5 text-left bg-yellow-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-700">
+            <strong>O que esse comando faz?</strong><br>
+            Faz uma análise mais completa da imagem do Windows procurando arquivos
+            e componentes corrompidos.
+          </p>
+
+          <p class="text-sm text-gray-600 mt-2">
+            Essa verificação pode demorar alguns minutos.
+            O comando apenas identifica os problemas e não realiza o reparo.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- 3 - DISM RestoreHealth -->
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+
+        <p class="text-sm font-bold text-green-600 mb-2">
+          3º PASSO
+        </p>
+
+        <h3 class="text-xl font-bold mb-3">
+          Reparar a Imagem do Windows
+        </h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm break-all">
           DISM /Online /Cleanup-Image /RestoreHealth
         </div>
 
@@ -88,13 +172,39 @@
           class="px-8 py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition">
           Copiar Comando
         </button>
+
+        <div class="mt-5 text-left bg-green-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-700">
+            <strong>O que esse comando faz?</strong><br>
+            Verifica a imagem do Windows e tenta reparar automaticamente os componentes
+            corrompidos encontrados.
+          </p>
+
+          <p class="text-sm text-gray-600 mt-2">
+            Quando necessário, o Windows pode utilizar o Windows Update para obter
+            arquivos íntegros e substituir componentes danificados.
+          </p>
+
+          <p class="text-sm font-semibold text-gray-700 mt-2">
+            Aguarde até chegar a 100% antes de fechar a janela.
+          </p>
+        </div>
+
       </div>
 
-      <!-- SFC -->
-      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
-        <h3 class="text-xl font-bold mb-3">Verificar Arquivos do Sistema (SFC)</h3>
 
-        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm">
+      <!-- 4 - SFC -->
+      <div class="bg-white p-6 rounded-xl shadow-md text-center max-w-xl w-full">
+
+        <p class="text-sm font-bold text-blue-600 mb-2">
+          4º PASSO
+        </p>
+
+        <h3 class="text-xl font-bold mb-3">
+          Verificar e Reparar Arquivos do Sistema
+        </h3>
+
+        <div class="bg-gray-100 p-3 rounded mb-4 font-mono text-sm break-all">
           sfc /scannow
         </div>
 
@@ -102,6 +212,24 @@
           class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition">
           Copiar Comando
         </button>
+
+        <div class="mt-5 text-left bg-blue-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-700">
+            <strong>O que esse comando faz?</strong><br>
+            Verifica os arquivos protegidos do Windows e procura arquivos ausentes,
+            modificados ou corrompidos.
+          </p>
+
+          <p class="text-sm text-gray-600 mt-2">
+            Caso encontre problemas, o próprio Windows tenta substituir os arquivos
+            danificados por cópias corretas.
+          </p>
+
+          <p class="text-sm font-semibold text-gray-700 mt-2">
+            É recomendado executar este comando depois do DISM /RestoreHealth.
+          </p>
+        </div>
+
       </div>
 
     </main>

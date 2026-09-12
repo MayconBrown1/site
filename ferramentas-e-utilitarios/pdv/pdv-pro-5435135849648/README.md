@@ -41,7 +41,7 @@ Toda alteração funcional ou visual deve ser registrada no primeiro bloco da se
 
 ## Painel de Tema
 
-O botão **Tema** abre um painel exclusivo do titular. As escolhas de fundo, textos, cartões, botões, barra superior, fonte, cantos e imagem de fundo por URL ficam em `configSistema.temaPersonalizado`, são sincronizadas com o estado da empresa e aplicadas também à experiência dos operadores. Links de imagem aceitam somente HTTP ou HTTPS.
+O botão **Tema** abre um painel exclusivo do titular. Além do visual padrão, escuro e dourado, há temas prontos para Pet Shop/Casa de Ração, Adega, Conveniência, Doceria e Hortifruti, todos com imagem local otimizada e identidade visual completa. As escolhas de fundo, textos, cartões, botões, barra superior, fonte, cantos e imagem de fundo ficam em `configSistema.temaPersonalizado`, são sincronizadas com o estado da empresa e aplicadas também à experiência dos operadores. Imagens personalizadas por link aceitam somente HTTP ou HTTPS; os fundos locais ficam restritos à pasta segura de temas do aplicativo.
 
 ## Catálogo público
 

@@ -89,6 +89,11 @@
         body.tema-personalizado #modal-tema [data-tema-painel] label { color:#172033 !important; }
         body.tema-personalizado #modal-tema [data-tema-painel] input,
         body.tema-personalizado #modal-tema [data-tema-painel] select { background:#fff !important; color:#172033 !important; border-color:#cbd5e1 !important; }
+        #temas-predefinidos [data-tema-preset] { position:relative; transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+        #temas-predefinidos [data-tema-preset]:hover { transform:translateY(-2px); }
+        #temas-predefinidos [data-tema-preset][aria-pressed="true"] { border-color:#059669 !important; box-shadow:0 0 0 3px rgba(16,185,129,.24), 0 10px 24px rgba(15,23,42,.12); }
+        #temas-predefinidos [data-tema-preset][aria-pressed="true"] .tema-preset-check { display:flex; }
+        .tema-preset-check { display:none; position:absolute; right:.55rem; top:.55rem; align-items:center; justify-content:center; width:1.6rem; height:1.6rem; border-radius:999px; background:#059669; color:#fff; font-size:.85rem; font-weight:900; box-shadow:0 2px 8px rgba(0,0,0,.24); }
         main { max-width: 1600px; width: 100%; margin: 0 auto; }
         .bg-white.rounded-lg.shadow-md { border: 1px solid #e2e8f0; box-shadow: 0 8px 24px rgba(15, 23, 42, .06); border-radius: .9rem; }
         input, select, textarea { border-color: #cbd5e1 !important; }
@@ -755,15 +760,16 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 11/09/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 12/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v30" data-atualizacao="2026-09-11" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v31" data-atualizacao="2026-09-12" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Painel de Tema e controles aprimorados</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Temas prontos para cada tipo de comércio</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
-                            <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🎨 Painel de Tema completo</h4><p class="mt-2 text-sm text-slate-700">Ao clicar em <strong>Tema</strong>, o titular pode escolher as cores do fundo, letras, cartões, botões e barra superior, além da fonte, formato dos cantos e uma imagem de fundo por link. As mudanças aparecem como prévia e podem ser salvas ou restauradas ao padrão.</p></article>
+                            <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🎨 Cinco temas comerciais com imagem</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Tema</strong>, escolha um visual pronto para <strong>Pet Shop/Casa de Ração, Adega, Conveniência, Doceria ou Hortifruti</strong>. Cada opção já configura a imagem de fundo, as cores, a fonte, os cartões e os botões; confira a prévia e clique em <strong>Salvar tema</strong>.</p></article>
+                            <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">↩️ O tema padrão continua disponível</h4><p class="mt-2 text-sm text-slate-700">Para voltar ao visual original do PDV, escolha <strong>Padrão</strong> entre os temas prontos ou use <strong>Restaurar padrão</strong>. As personalizações são removidas e o sistema volta exatamente às cores originais.</p></article>
                             <article class="rounded-xl border border-amber-200 bg-amber-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-amber-950">🛡️ Exclusão de operadores no ADM</h4><p class="mt-2 text-sm text-slate-700">O titular agora pode excluir um operador pelo botão <strong>Excluir</strong>. O funcionário perde o acesso e desaparece da lista. O botão <strong>ADM do PDV</strong> também ganhou texto dourado para ficar mais visível na barra escura.</p></article>
                             <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">👥 Cadastro completo de clientes</h4><p class="mt-2 text-sm text-slate-700">Agora é possível guardar nome, CPF, WhatsApp, e-mail, nascimento, endereço, cidade e observações sem precisar definir limite de crédito.</p></article>
                             <article class="rounded-xl border border-white bg-white/90 p-4 shadow-sm"><h4 class="font-bold text-slate-900">🧾 Histórico de cada cliente</h4><p class="mt-2 text-sm text-slate-700">Associe o cliente a vendas pagas ou fiado e consulte depois os produtos comprados, a data, o valor, a forma de pagamento e o comprovante.</p></article>
@@ -981,10 +987,34 @@
                 <button data-tema-preservar type="button" onclick="fecharPainelTema()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none text-slate-700 hover:bg-slate-200" aria-label="Fechar painel de tema">×</button>
             </div>
             <div class="overflow-y-auto p-4 lg:p-6">
-                <div class="mb-5 flex flex-wrap gap-2">
-                    <button data-tema-preservar type="button" onclick="aplicarPredefinicaoTema('claro')" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700">Claro</button>
-                    <button data-tema-preservar type="button" onclick="aplicarPredefinicaoTema('escuro')" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Escuro</button>
-                    <button data-tema-preservar type="button" onclick="aplicarPredefinicaoTema('dourado')" class="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950">Dourado</button>
+                <div class="mb-5">
+                    <div class="mb-3"><h3 class="font-bold text-slate-800">Temas prontos</h3><p class="text-sm text-slate-500">Escolha uma opção para ver a prévia completa no PDV.</p></div>
+                    <div id="temas-predefinidos" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                        <button data-tema-preservar data-tema-preset="claro" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('claro')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-gradient-to-br from-slate-100 via-white to-blue-100"></span><span class="block p-3"><strong class="block text-sm text-slate-900">Padrão</strong><small class="text-slate-500">Visual original do PDV</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="escuro" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('escuro')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-gradient-to-br from-black via-slate-900 to-amber-700"></span><span class="block p-3"><strong class="block text-sm text-slate-900">Escuro</strong><small class="text-slate-500">Preto com dourado</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="dourado" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('dourado')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-gradient-to-br from-amber-100 via-amber-300 to-yellow-600"></span><span class="block p-3"><strong class="block text-sm text-slate-900">Dourado</strong><small class="text-slate-500">Elegante e luminoso</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="petshop" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('petshop')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/pet-shop.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🐾 Pet Shop</strong><small class="text-slate-500">Casa de ração e pets</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="adega" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('adega')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/adega.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🍷 Adega</strong><small class="text-slate-500">Vinhos e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="conveniencia" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('conveniencia')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/conveniencia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛒 Conveniência</strong><small class="text-slate-500">Lanches e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="doceria" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('doceria')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/doceria.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🧁 Doceria</strong><small class="text-slate-500">Rosa e delicado</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                        <button data-tema-preservar data-tema-preset="hortifruti" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('hortifruti')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/hortifruti.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🥕 Hortifruti</strong><small class="text-slate-500">Feira e produtos frescos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold">Fundo do sistema<input id="tema-cor-fundo" type="color" class="mt-2 h-12 w-full cursor-pointer rounded-lg border p-1" oninput="visualizarTema()"></label>
@@ -998,7 +1028,7 @@
                     <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold">Formato dos cantos<select id="tema-bordas" class="mt-2 w-full rounded-lg border p-3" onchange="visualizarTema()"><option value="discreto">Discreto</option><option value="arredondado">Arredondado</option><option value="amplo">Bem arredondado</option></select></label>
                     <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold">Ajuste da imagem<select id="tema-imagem-ajuste" class="mt-2 w-full rounded-lg border p-3" onchange="visualizarTema()"><option value="cover">Preencher a tela</option><option value="contain">Mostrar imagem inteira</option><option value="repeat">Repetir imagem</option></select></label>
                     <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold sm:col-span-2">Escurecer imagem: <output id="tema-sobreposicao-valor">20%</output><input id="tema-sobreposicao" type="range" min="0" max="80" step="5" class="mt-3 w-full" oninput="visualizarTema()"></label>
-                    <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold sm:col-span-2 lg:col-span-4">Imagem de fundo por link<input id="tema-imagem-url" type="url" class="mt-2 w-full rounded-lg border p-3" placeholder="https://exemplo.com/minha-imagem.jpg" onchange="visualizarTema()"><span class="mt-1 block text-xs font-normal text-slate-500">Use um link público começando com http:// ou https://. Deixe vazio para não usar imagem.</span></label>
+                    <label class="rounded-xl border border-slate-200 p-3 text-sm font-semibold sm:col-span-2 lg:col-span-4">Imagem de fundo<input id="tema-imagem-url" type="url" class="mt-2 w-full rounded-lg border p-3" placeholder="https://exemplo.com/minha-imagem.jpg" onchange="visualizarTema()"><span class="mt-1 block text-xs font-normal text-slate-500">Os temas prontos já trazem a própria imagem. Para usar a sua, cole um link público começando com http:// ou https://; deixe vazio para remover o fundo.</span></label>
                 </div>
                 <p id="tema-status" class="mt-4 min-h-5 text-sm font-medium text-red-600" role="status"></p>
             </div>
@@ -1547,7 +1577,12 @@ if ('serviceWorker' in navigator) {
         const TEMAS_PREDEFINIDOS = Object.freeze({
             claro: { ...TEMA_PADRAO },
             escuro: { ...TEMA_PADRAO, fundo: '#090909', texto: '#f5f5f5', cartao: '#171717', botao: '#d4af37', textoBotao: '#111111', barra: '#050505', textoBarra: '#ffffff' },
-            dourado: { ...TEMA_PADRAO, fundo: '#fff8e7', texto: '#291f0b', cartao: '#fffdf7', botao: '#d4af37', textoBotao: '#17120a', barra: '#17120a', textoBarra: '#f8d76b', bordas: 'amplo' }
+            dourado: { ...TEMA_PADRAO, fundo: '#fff8e7', texto: '#291f0b', cartao: '#fffdf7', botao: '#d4af37', textoBotao: '#17120a', barra: '#17120a', textoBarra: '#f8d76b', bordas: 'amplo' },
+            petshop: { ...TEMA_PADRAO, fundo: '#e7f3eb', texto: '#173b36', cartao: '#fffdf7', botao: '#147d72', textoBotao: '#ffffff', barra: '#174f49', textoBarra: '#ffffff', bordas: 'amplo', imagem: './assets/temas/pet-shop.webp', sobreposicao: 5 },
+            adega: { ...TEMA_PADRAO, fundo: '#16090d', texto: '#fff7ed', cartao: '#2a161b', botao: '#c18a2d', textoBotao: '#1b0c08', barra: '#12070a', textoBarra: '#f5d58a', fonte: 'georgia', bordas: 'discreto', imagem: './assets/temas/adega.webp', sobreposicao: 10 },
+            conveniencia: { ...TEMA_PADRAO, fundo: '#07182e', texto: '#f8fafc', cartao: '#122a49', botao: '#f97316', textoBotao: '#ffffff', barra: '#061222', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'discreto', imagem: './assets/temas/conveniencia.webp', sobreposicao: 10 },
+            doceria: { ...TEMA_PADRAO, fundo: '#fff0f5', texto: '#5b2944', cartao: '#fffafa', botao: '#db5b8f', textoBotao: '#ffffff', barra: '#7b3659', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', imagem: './assets/temas/doceria.webp', sobreposicao: 0 },
+            hortifruti: { ...TEMA_PADRAO, fundo: '#edf7e8', texto: '#183b24', cartao: '#fffdf2', botao: '#2f855a', textoBotao: '#ffffff', barra: '#164e32', textoBarra: '#ffffff', bordas: 'arredondado', imagem: './assets/temas/hortifruti.webp', sobreposicao: 5 }
         });
         const FONTES_TEMA = Object.freeze({
             sistema: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -1562,6 +1597,7 @@ if ('serviceWorker' in navigator) {
         function normalizarUrlImagemTema(valor, estrito = true) {
             const texto = String(valor || '').trim();
             if (!texto) return '';
+            if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto;
             try {
                 const url = new URL(texto);
                 if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Protocolo inválido');
@@ -1623,6 +1659,20 @@ if ('serviceWorker' in navigator) {
             return normalizarTema(TEMA_PADRAO);
         }
 
+        let temaPredefinidoSelecionado = '';
+
+        function nomePredefinicaoTema(tema) {
+            const temaNormalizado = JSON.stringify(normalizarTema(tema));
+            return Object.entries(TEMAS_PREDEFINIDOS).find(([, predefinicao]) => JSON.stringify(normalizarTema(predefinicao)) === temaNormalizado)?.[0] || '';
+        }
+
+        function marcarPredefinicaoTema(nome = '') {
+            temaPredefinidoSelecionado = nome;
+            document.querySelectorAll('[data-tema-preset]').forEach(botao => {
+                botao.setAttribute('aria-pressed', String(botao.dataset.temaPreset === nome));
+            });
+        }
+
         function preencherFormularioTema(tema) {
             const seguro = normalizarTema(tema);
             const campos = {
@@ -1655,7 +1705,9 @@ if ('serviceWorker' in navigator) {
 
         function abrirPainelTema() {
             if (!exigirTitular('O Painel de Tema está disponível somente para o titular.')) return;
-            preencherFormularioTema(temaBaseDoFormulario());
+            const temaBase = temaBaseDoFormulario();
+            preencherFormularioTema(temaBase);
+            marcarPredefinicaoTema(nomePredefinicaoTema(temaBase));
             document.getElementById('tema-status').textContent = '';
             const modal = document.getElementById('modal-tema');
             modal.classList.remove('hidden');
@@ -1663,6 +1715,7 @@ if ('serviceWorker' in navigator) {
         }
 
         function visualizarTema() {
+            marcarPredefinicaoTema();
             const campoImagem = document.getElementById('tema-imagem-url');
             const status = document.getElementById('tema-status');
             const valorSobreposicao = document.getElementById('tema-sobreposicao').value;
@@ -1676,6 +1729,9 @@ if ('serviceWorker' in navigator) {
             const predefinicao = TEMAS_PREDEFINIDOS[nome] || TEMA_PADRAO;
             preencherFormularioTema(predefinicao);
             visualizarTema();
+            marcarPredefinicaoTema(nome);
+            const nomeExibicao = document.querySelector(`[data-tema-preset="${nome}"] strong`)?.textContent.trim() || nome;
+            document.getElementById('tema-status').textContent = `Prévia do tema ${nomeExibicao}. Clique em Salvar tema para confirmar.`;
         }
 
         function fecharPainelTema(manterPrevia = false) {
@@ -1689,8 +1745,13 @@ if ('serviceWorker' in navigator) {
             const status = document.getElementById('tema-status');
             try {
                 const tema = lerTemaFormulario(true);
-                configSistema.temaPersonalizado = tema;
-                configSistema.tema = 'personalizado';
+                if (temaPredefinidoSelecionado === 'claro') {
+                    delete configSistema.temaPersonalizado;
+                    configSistema.tema = 'claro';
+                } else {
+                    configSistema.temaPersonalizado = tema;
+                    configSistema.tema = 'personalizado';
+                }
                 aplicarTema();
                 salvarDados();
                 fecharPainelTema(true);

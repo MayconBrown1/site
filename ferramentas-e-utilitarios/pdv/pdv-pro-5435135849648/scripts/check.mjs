@@ -52,7 +52,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Painel de Tema completo', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Temas prontos para cada tipo de comércio', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -68,12 +68,20 @@ if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regra
 for (const marker of ['modal-tema', 'tema-cor-fundo', 'tema-cor-texto', 'tema-cor-botao', 'tema-imagem-url', 'function abrirPainelTema', 'function salvarTema', 'function restaurarTemaPadrao', 'body.tema-personalizado']) {
   if (!html.includes(marker)) throw new Error(`Painel de Tema incompleto: ${marker}`);
 }
+for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 'data-tema-preset="conveniencia"', 'data-tema-preset="doceria"', 'data-tema-preset="hortifruti"']) {
+  if (!html.includes(marker)) throw new Error(`Tema comercial ausente: ${marker}`);
+}
+for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp']) {
+  if (!fs.existsSync(new URL(`../assets/temas/${asset}`, import.meta.url))) throw new Error(`Imagem do tema ausente: ${asset}`);
+  if (!serviceWorkerSource.includes(`'./assets/temas/${asset}'`)) throw new Error(`Imagem do tema fora do cache offline: ${asset}`);
+}
 if (html.includes('onclick="alternarTema()"')) throw new Error('O botão Tema não pode mais alternar cores sem abrir o painel.');
 const themeStart = html.indexOf('const TEMA_PADRAO');
 const themeEnd = html.indexOf('function produtoRaizEstoque', themeStart);
 if (themeStart < 0 || themeEnd < 0) throw new Error('Não foi possível localizar os controles de tema.');
 const themeHelpers = new Function(`${html.slice(themeStart, themeEnd)}; return { normalizarUrlImagemTema, normalizarTema };`)();
 if (themeHelpers.normalizarUrlImagemTema('https://exemplo.com/fundo.jpg') !== 'https://exemplo.com/fundo.jpg') throw new Error('O link HTTPS da imagem do tema não foi aceito.');
+if (themeHelpers.normalizarUrlImagemTema('./assets/temas/pet-shop.webp') !== './assets/temas/pet-shop.webp') throw new Error('A imagem local dos temas prontos não foi aceita.');
 let imagemInseguraAceita = false;
 try { themeHelpers.normalizarUrlImagemTema('javascript:alert(1)'); imagemInseguraAceita = true; } catch (_) {}
 if (imagemInseguraAceita) throw new Error('O tema aceitou um protocolo de imagem inseguro.');
