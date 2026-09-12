@@ -8,9 +8,10 @@
   "theme_color": "#d4af37",
   "icons": [
     {
-      "src": "/img/pdv1-152.png",
-      "sizes": "152x152",
-      "type": "image/png"
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

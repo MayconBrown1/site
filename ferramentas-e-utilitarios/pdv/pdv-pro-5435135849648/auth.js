@@ -1,9 +1,19 @@
 import { app, auth, db } from './firebase-config.js';
 import { deleteApp, initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
-import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
+import { doc, getDoc, getDocFromServer, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 const OWNER_EMAIL = 'mayconbrown083@gmail.com';
+const PROFILE_CACHE_PREFIX = 'pdv_offline_profile_';
+
+function perfilEmCache(uid) {
+  try { return JSON.parse(localStorage.getItem(`${PROFILE_CACHE_PREFIX}${uid}`) || 'null'); }
+  catch (_) { return null; }
+}
+
+function salvarPerfilEmCache(uid, perfil) {
+  localStorage.setItem(`${PROFILE_CACHE_PREFIX}${uid}`, JSON.stringify(perfil));
+}
 
 export async function entrar(email, senha) {
   const cred = await signInWithEmailAndPassword(auth, email, senha);
@@ -65,13 +75,43 @@ export async function sair() { await signOut(auth); location.replace('./login.ht
 export function protegerPagina(callback) {
   return onAuthStateChanged(auth, async user => {
     if (!user) return location.replace('./login.html');
-    const perfil = await getDoc(doc(db, 'users', user.uid));
-    if (!perfil.exists() || perfil.data().status !== 'ativo') { await signOut(auth); return location.replace('./login.html?status=restrito'); }
-    const dadosPerfil = perfil.data();
-    if (dadosPerfil.role === 'operator') {
-      const titular = dadosPerfil.ownerUid ? await getDoc(doc(db, 'users', dadosPerfil.ownerUid)) : null;
-      if (!titular?.exists() || titular.data().status !== 'ativo') { await signOut(auth); return location.replace('./login.html?status=restrito'); }
+    const validar = async (somenteServidor = false) => {
+      const buscar = somenteServidor ? getDocFromServer : getDoc;
+      const perfil = await buscar(doc(db, 'users', user.uid));
+      if (!perfil.exists() || perfil.data().status !== 'ativo') throw new Error('acesso-restrito');
+      const dadosPerfil = perfil.data();
+      if (dadosPerfil.role === 'operator') {
+        const titular = dadosPerfil.ownerUid ? await buscar(doc(db, 'users', dadosPerfil.ownerUid)) : null;
+        if (!titular?.exists() || titular.data().status !== 'ativo') throw new Error('acesso-restrito');
+      }
+      salvarPerfilEmCache(user.uid, dadosPerfil);
+      return dadosPerfil;
+    };
+
+    try {
+      callback(user, await validar());
+    } catch (erro) {
+      const cache = perfilEmCache(user.uid);
+      if (!navigator.onLine && erro.message !== 'acesso-restrito' && cache?.status === 'ativo') callback(user, cache);
+      else {
+        console.error('Não foi possível validar o acesso.', erro);
+        await signOut(auth);
+        location.replace('./login.html?status=restrito');
+        return;
+      }
     }
-    callback(user, dadosPerfil);
+
+    // O acesso offline usa a última autorização válida do aparelho. Assim que a
+    // rede volta, o servidor é consultado para aplicar bloqueios sem demora.
+    window.addEventListener('online', async () => {
+      try { await validar(true); }
+      catch (erro) {
+        console.error('O acesso não pôde ser revalidado.', erro);
+        if (erro.message === 'acesso-restrito') {
+          await signOut(auth);
+          location.replace('./login.html?status=restrito');
+        }
+      }
+    });
   });
 }

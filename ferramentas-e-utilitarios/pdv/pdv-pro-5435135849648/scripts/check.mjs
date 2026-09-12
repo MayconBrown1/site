@@ -7,6 +7,8 @@ const firestoreRules = fs.readFileSync(new URL('../firestore.rules', import.meta
 const authSource = fs.readFileSync(new URL('../auth.js', import.meta.url), 'utf8');
 const customerFinanceSource = fs.readFileSync(new URL('../clientes-financeiro.js', import.meta.url), 'utf8');
 const serviceWorkerSource = fs.readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
+const firebaseConfigSource = fs.readFileSync(new URL('../firebase-config.js', import.meta.url), 'utf8');
+const pwaInstallSource = fs.readFileSync(new URL('../pwa-install.js', import.meta.url), 'utf8');
 const catalogAdminSource = fs.readFileSync(new URL('../catalogo-admin.js', import.meta.url), 'utf8');
 const publicCatalogSource = fs.readFileSync(new URL('../catalogo/catalogo.js', import.meta.url), 'utf8');
 const publicCatalogCss = fs.readFileSync(new URL('../catalogo/catalogo.css', import.meta.url), 'utf8');
@@ -55,13 +57,25 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Cinco novos temas criativos e neon', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
 const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];
 if (!cacheAtual || !cacheDasNovidades || cacheAtual !== cacheDasNovidades) {
   throw new Error(`ATUALIZE A ÁREA NOVIDADES: o cache do aplicativo (${cacheAtual || 'não encontrado'}) precisa ser igual ao registro mais recente (${cacheDasNovidades || 'não encontrado'}).`);
+}
+for (const marker of ['persistentLocalCache', 'persistentMultipleTabManager']) {
+  if (!firebaseConfigSource.includes(marker)) throw new Error(`Persistência offline do Firebase ausente: ${marker}`);
+}
+for (const marker of ['PROFILE_CACHE_PREFIX', 'getDocFromServer', "window.addEventListener('online'"]) {
+  if (!authSource.includes(marker)) throw new Error(`Acesso offline/revalidação incompleto: ${marker}`);
+}
+for (const marker of ['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js', 'TRUSTED_REMOTE_ORIGINS']) {
+  if (!serviceWorkerSource.includes(marker)) throw new Error(`Recurso essencial fora do cache offline: ${marker}`);
+}
+for (const marker of ['pdv-conexao-status', 'Sem internet · dados salvos neste aparelho', 'pdv-sync-status']) {
+  if (!pwaInstallSource.includes(marker)) throw new Error(`Indicador de funcionamento offline incompleto: ${marker}`);
 }
 for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'finalidade === \'despesa\'']) {
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
@@ -198,6 +212,9 @@ helpers.restaurarEstoqueDosItens([
 if (produtos[0].estoque !== 2200 || produtos[1].estoque !== 2200) throw new Error('A restauração compartilhada falhou.');
 
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
+for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática']) {
+  if (!cloudSource.includes(marker)) throw new Error(`Fila de sincronização offline incompleta: ${marker}`);
+}
 const mergeStart = cloudSource.indexOf('const same =');
 const mergeEnd = cloudSource.indexOf('async function salvarNuvem', mergeStart);
 const makeCloudHelpers = new Function('uid', `${cloudSource.slice(mergeStart, mergeEnd)}; return { mergeState, cloneState };`);
