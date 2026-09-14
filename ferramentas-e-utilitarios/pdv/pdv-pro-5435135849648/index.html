@@ -239,6 +239,17 @@
                                 <select id="cliente-venda" class="w-full p-3 border rounded-lg text-base" onchange="atualizarClienteVendaSelecionado()"></select>
                                 <p class="mt-1 text-xs text-gray-500">Selecione para registrar esta compra no histórico do cliente. Em vendas fiado, o cliente é obrigatório.</p>
                             </div>
+                            <div id="saldo-cliente-venda" class="mb-3 hidden rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div><p class="text-sm font-semibold text-emerald-900">Saldo disponível do cliente</p><strong id="saldo-cliente-disponivel" class="text-lg text-emerald-700">R$ 0,00</strong></div>
+                                    <label class="flex cursor-pointer items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-emerald-900"><input id="usar-saldo-cliente" type="checkbox" class="h-4 w-4" onchange="atualizarUsoSaldoVenda(true)"> Usar saldo</label>
+                                </div>
+                                <div id="campos-uso-saldo" class="mt-3 hidden grid gap-3 sm:grid-cols-2">
+                                    <div><label for="valor-saldo-cliente" class="mb-1 block text-xs font-semibold text-gray-700">Valor do saldo nesta compra</label><input id="valor-saldo-cliente" type="number" min="0" step="0.01" class="w-full rounded-lg border p-2" oninput="atualizarUsoSaldoVenda(false)" onchange="atualizarUsoSaldoVenda(true)"></div>
+                                    <div class="rounded-lg bg-white p-2"><span class="block text-xs text-gray-600">Falta receber agora</span><strong id="valor-restante-venda" class="text-lg text-blue-700">R$ 0,00</strong></div>
+                                </div>
+                                <p class="mt-2 text-xs text-emerald-800">O saldo usado será descontado do cliente e não entrará novamente no caixa.</p>
+                            </div>
                             <div id="dinheiro-form" class="hidden space-y-3">
                                 <div>
                                     <label for="valor-recebido" class="block text-sm font-medium text-gray-700 mb-1">Valor Recebido</label>
@@ -544,7 +555,7 @@
                 <div class="space-y-4 lg:space-y-6">
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div><h2 class="text-xl lg:text-2xl font-semibold">Cadastro de clientes</h2><p class="text-sm text-gray-500">Dados de contato, compras pagas, fiado e histórico completo.</p></div>
+                            <div><h2 class="text-xl lg:text-2xl font-semibold">Cadastro de clientes</h2><p class="text-sm text-gray-500">Dados de contato, saldo disponível, compras pagas, fiado e histórico completo.</p></div>
                             <button onclick="mostrarFormCliente()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg">Novo cliente</button>
                         </div>
                         <div id="form-cliente" class="hidden mt-5 rounded-xl border border-slate-200 bg-gray-50 p-4">
@@ -793,13 +804,15 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 14/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v37" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v38" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Menu compacto também no computador</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Saldo do cliente nas compras</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
-                            <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">☰ Mais espaço e organização em qualquer tela</h4><p class="mt-2 text-sm text-slate-700">No computador e no celular, os atalhos de <strong>Vendas, Orçamentos, Produtos</strong> e das demais áreas ficam recolhidos no botão de três linhas. Clique em <strong>☰</strong> para abrir o menu em uma faixa própria; o conteúdo é deslocado para baixo, sem opções cobrindo a tela. Ao escolher uma área, o menu fecha automaticamente.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">💰 Guarde e acompanhe o saldo de cada cliente</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Clientes</strong>, use <strong>Adicionar saldo</strong> quando um troco ficar com a loja e informe o motivo. O valor, a data e cada uso ou devolução aparecem no histórico do cliente, separados do fiado.</p></article>
+                            <article class="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">🧾 Use o saldo na venda sem duplicar a entrada</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, selecione o cliente, marque <strong>Usar saldo</strong> e confirme o valor. O PDV cobra e lança no caixa somente a diferença. O comprovante mostra o total da compra, o saldo utilizado e quanto foi pago naquele momento.</p></article>
+                            <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">☰ Menu compacto também no computador — Mais espaço e organização em qualquer tela</h4><p class="mt-2 text-sm text-slate-700">No computador e no celular, os atalhos de <strong>Vendas, Orçamentos, Produtos</strong> e das demais áreas ficam recolhidos no botão de três linhas. Clique em <strong>☰</strong> para abrir o menu em uma faixa própria; o conteúdo é deslocado para baixo, sem opções cobrindo a tela. Ao escolher uma área, o menu fecha automaticamente.</p></article>
                             <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Alertas personalizados de estoque mínimo</h4><p class="mt-2 text-sm text-slate-700">Saiba a hora certa de repor cada produto: ao cadastrar ou editar um item, preencha <strong>Estoque mínimo para alerta</strong> com o limite ideal. Quando o saldo chegar ao limite ou ficar abaixo dele, o botão <strong>Estoque</strong> exibirá um contador. Abra o aviso para conferir os produtos; depois de visualizar, o contador desaparece até surgir um novo alerta ou o saldo cair novamente.</p></article>
                             <article class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-orange-950">🏪 Temas para mais tipos de comércio</h4><p class="mt-2 text-sm text-slate-700">Abra <strong>Tema</strong> e escolha uma das novas opções: <strong>Borracharia, Oficina de Motos, Oficina de Carros, Autopeças, Mercado/Mercearia, Moda, Beleza/Cosméticos, Material de Construção, Papelaria ou Farmácia</strong>. Cada opção já traz fundo, paleta e estilo próprios; confira a prévia e clique em <strong>Salvar tema</strong>.</p></article>
                             <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🔳 Mais contraste e formatos de botão</h4><p class="mt-2 text-sm text-slate-700">As áreas de <strong>Novidades</strong> e <strong>Histórico de movimentação</strong> agora acompanham corretamente temas escuros, incluindo Neon Verde, Neon Laranja, Futurista e Informática. Também é possível escolher botões retos, discretos, arredondados, em cápsula ou chanfrados no Painel de Tema.</p></article>
@@ -1472,6 +1485,7 @@ if ('serviceWorker' in navigator) {
         let movimentoParaExcluir = null;
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
+        let movimentosSaldoCliente = JSON.parse(localStorage.getItem('pdv_movimentos_saldo_cliente') || '[]');
         let lancamentosFinanceiros = JSON.parse(localStorage.getItem('pdv_lancamentos_financeiros') || '[]');
         let saldosIniciaisFinanceiros = JSON.parse(localStorage.getItem('pdv_saldos_iniciais_financeiros') || '{}');
         let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
@@ -1488,6 +1502,7 @@ if ('serviceWorker' in navigator) {
             configSistema: { get: () => configSistema, set: v => { configSistema = v; } },
             clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
             pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
+            movimentosSaldoCliente: { get: () => movimentosSaldoCliente, set: v => { movimentosSaldoCliente = v; } },
             lancamentosFinanceiros: { get: () => lancamentosFinanceiros, set: v => { lancamentosFinanceiros = v; } },
             saldosIniciaisFinanceiros: { get: () => saldosIniciaisFinanceiros, set: v => { saldosIniciaisFinanceiros = v; } },
             orcamentos: { get: () => orcamentos, set: v => { orcamentos = v; } },
@@ -3035,6 +3050,7 @@ function showInstallButton() {
             document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
             document.getElementById('total-venda').textContent = `R$ ${total.toFixed(2)}`;
 
+            atualizarUsoSaldoVenda(vendaAtual?.tipo === 'pix');
             if (vendaAtual) {
                 calcularTroco();
             }
@@ -3052,14 +3068,13 @@ function showInstallButton() {
             });
             
             document.getElementById(tipo + '-form').classList.remove('hidden');
+            atualizarSelectClientes();
+            atualizarClienteVendaSelecionado();
             
             if (tipo === 'dinheiro') {
                 document.getElementById('valor-recebido').focus();
             } else if (tipo === 'pix') {
                 gerarQRCodePix();
-            } else if (tipo === 'fiado') {
-                atualizarSelectClientes();
-                atualizarClienteVendaSelecionado();
             }
             salvarRascunhoVenda();
         }
@@ -3136,8 +3151,14 @@ function showInstallButton() {
                 mostrarMensagem('Adicione produtos ao carrinho primeiro!', 'erro');
                 return;
             }
-            const total = totalAtualDaVenda();
-            if (total <= 0) { mostrarMensagem('O total da venda precisa ser maior que zero.', 'erro'); return; }
+            const total = totalReceberAgora();
+            if (total <= 0) {
+                codigoPixAtual = '';
+                document.getElementById('pix-id').value = '';
+                fecharModalPix();
+                mostrarMensagem('A compra será paga integralmente com o saldo do cliente.', 'sucesso');
+                return;
+            }
             codigoPixAtual = '';
             document.getElementById('btn-copiar-pix').classList.add('hidden');
             gerarQRCodePixManual(total);
@@ -3300,7 +3321,7 @@ function showInstallButton() {
             const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
             const desconto = parseFloat(document.getElementById('desconto').value) || 0;
             const valorDesconto = total * (desconto / 100);
-            const totalFinal = total - valorDesconto;
+            const totalFinal = Math.max(0, total - valorDesconto - valorSaldoAplicadoVenda());
             
             const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
             const troco = valorRecebido - totalFinal;
@@ -3328,16 +3349,28 @@ function showInstallButton() {
             const valorDesconto = subtotal * (desconto / 100);
             const total = subtotal - valorDesconto;
             const clienteSelecionado = clientesFiado.find(c => c.id === document.getElementById('cliente-venda').value);
+            const saldoUtilizado = valorSaldoAplicadoVenda();
+            const valorCobrado = Math.max(0, Math.round((total - saldoUtilizado) * 100) / 100);
+
+            if (saldoUtilizado > 0 && !clienteSelecionado) {
+                mostrarMensagem('Selecione o cliente para utilizar o saldo.', 'erro');
+                return;
+            }
+            if (saldoUtilizado > saldoCreditoCliente(clienteSelecionado?.id) || saldoUtilizado > total) {
+                mostrarMensagem('O saldo informado não está mais disponível. Confira o cliente e tente novamente.', 'erro');
+                atualizarClienteVendaSelecionado();
+                return;
+            }
 
             // Validações específicas por tipo de pagamento
             if (vendaAtual.tipo === 'dinheiro') {
                 const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
-                if (valorRecebido < total) {
+                if (valorRecebido < valorCobrado) {
                     mostrarMensagem('Valor recebido é insuficiente!', 'erro');
                     return;
                 }
                 vendaAtual.valorRecebido = valorRecebido;
-                vendaAtual.troco = valorRecebido - total;
+                vendaAtual.troco = valorRecebido - valorCobrado;
             } else if (vendaAtual.tipo === 'pix') {
                 vendaAtual.pixId = document.getElementById('pix-id').value;
             } else if (vendaAtual.tipo === 'cartao') {
@@ -3350,6 +3383,8 @@ function showInstallButton() {
                 vendaAtual.clienteNome = cliente.nome;
                 vendaAtual.vencimento = document.getElementById('fiado-vencimento').value || '';
             }
+            vendaAtual.saldoUtilizado = saldoUtilizado;
+            vendaAtual.valorCobrado = valorCobrado;
 
             // Soma todos os itens que consomem o mesmo estoque antes de baixar o saldo.
             const consumoPorEstoque = new Map();
@@ -3392,14 +3427,28 @@ function showInstallButton() {
 
             // Salvar venda
             vendas.push(venda);
+
+            if (saldoUtilizado > 0) {
+                movimentosSaldoCliente.push({
+                    id: 'msc_' + Date.now() + '_venda',
+                    clienteId: clienteSelecionado.id,
+                    tipo: 'debito',
+                    valor: saldoUtilizado,
+                    data: venda.data,
+                    motivo: `Utilizado na venda #${venda.id}`,
+                    origem: 'venda',
+                    vendaId: venda.id,
+                    caixaId: caixa.id
+                });
+            }
             
             // Vendas à vista entram no caixa; vendas fiado ficam no saldo do cliente.
             const movimento = {
                 id: 'm_' + Date.now(),
                 data: new Date().toISOString(),
                 tipo: vendaAtual.tipo === 'fiado' ? 'fiado' : 'entrada',
-                valor: total,
-                descricao: `Venda #${venda.id} - ${vendaAtual.tipo}`,
+                valor: valorCobrado,
+                descricao: `Venda #${venda.id} - ${vendaAtual.tipo}${saldoUtilizado > 0 ? ` + saldo do cliente R$ ${saldoUtilizado.toFixed(2)}` : ''}`,
                 vendaId: venda.id,
                 caixaId: caixa.id,
                 vendedor: venda.vendedor
@@ -3425,6 +3474,10 @@ function showInstallButton() {
             document.getElementById('parcelas').value = '1';
             document.getElementById('cliente-venda').value = '';
             document.getElementById('fiado-vencimento').value = '';
+            document.getElementById('usar-saldo-cliente').checked = false;
+            document.getElementById('valor-saldo-cliente').value = '';
+            document.getElementById('saldo-cliente-venda').classList.add('hidden');
+            document.getElementById('campos-uso-saldo').classList.add('hidden');
             document.getElementById('pagamento-detalhes').classList.add('hidden');
             
             // Resetar status PIX
@@ -3502,6 +3555,11 @@ function showInstallButton() {
                     </div>
                 `;
             }
+            const saldoUtilizado = Number(venda.pagamento?.saldoUtilizado || 0);
+            const valorCobrado = Number(venda.pagamento?.valorCobrado ?? venda.total);
+            if (saldoUtilizado > 0) {
+                totaisHtml += `<div class="flex justify-between text-sm font-semibold text-emerald-700"><span>Saldo do cliente utilizado:</span><span>-R$ ${saldoUtilizado.toFixed(2)}</span></div><div class="flex justify-between text-sm font-bold text-blue-700"><span>Pago nesta venda:</span><span>R$ ${valorCobrado.toFixed(2)}</span></div>`;
+            }
             
             document.getElementById('comprovante-total').innerHTML = totaisHtml;
             document.getElementById('comprovante-total-final').textContent = `R$ ${venda.total.toFixed(2)}`;
@@ -3511,6 +3569,7 @@ function showInstallButton() {
             if (venda.clienteNome || venda.pagamento?.clienteNome) {
                 pagamentoTexto = `<strong>Cliente:</strong> ${textoSeguro(venda.clienteNome || venda.pagamento.clienteNome)}<br>` + pagamentoTexto;
             }
+            if (saldoUtilizado > 0) pagamentoTexto += `<br><strong>Saldo do cliente utilizado:</strong> R$ ${saldoUtilizado.toFixed(2)}<br><strong>Valor pago agora:</strong> R$ ${valorCobrado.toFixed(2)}`;
             
             if (venda.pagamento.tipo === 'dinheiro') {
                 if (venda.pagamento.valorRecebido) {
@@ -3523,7 +3582,7 @@ function showInstallButton() {
                 const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CRÉDITO';
                 const parcelas = venda.pagamento.parcelas || 1;
                 pagamentoTexto += ` ${tipoCartao}`;
-                pagamentoTexto += `<br><strong>Parcelas:</strong> ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`;
+                pagamentoTexto += `<br><strong>Parcelas:</strong> ${parcelas}x de R$ ${(valorCobrado / parcelas).toFixed(2)}`;
             } else if (venda.pagamento.tipo === 'pix') {
                 if (venda.pagamento.pixId) {
                     pagamentoTexto += `<br><strong>ID Transação:</strong> ${venda.pagamento.pixId}`;
@@ -3606,6 +3665,7 @@ function showInstallButton() {
 
             yPos += 6 + 5; // subtotal
             if (venda.desconto > 0) yPos += 5;
+            if (Number(venda.pagamento?.saldoUtilizado || 0) > 0) yPos += 10;
             yPos += 8 + 6 + 5; // total + separador + pagamento título
 
             // formas de pagamento
@@ -3720,6 +3780,19 @@ function showInstallButton() {
             y += 5;
         }
 
+        const saldoUtilizado = Number(venda.pagamento?.saldoUtilizado || 0);
+        const valorCobrado = Number(venda.pagamento?.valorCobrado ?? venda.total);
+        if (saldoUtilizado > 0) {
+            doc.text('Saldo do cliente:', margemEsquerda, y);
+            doc.text(`-R$ ${saldoUtilizado.toFixed(2)}`, margemDireita, y, { align: 'right' });
+            y += 5;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Pago nesta venda:', margemEsquerda, y);
+            doc.text(`R$ ${valorCobrado.toFixed(2)}`, margemDireita, y, { align: 'right' });
+            doc.setFont('helvetica', 'normal');
+            y += 5;
+        }
+
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
         doc.text(`TOTAL A PAGAR:`, margemEsquerda, y);
@@ -3747,7 +3820,7 @@ function showInstallButton() {
             const tipo = venda.pagamento.tipoCartao?.toUpperCase() || 'CREDITO';
             const parcelas = venda.pagamento.parcelas || 1;
             doc.text(`${forma} ${tipo}`, margemEsquerda, y); y += 4;
-            doc.text(`Parcelas: ${parcelas}x de R$ ${(venda.total / parcelas).toFixed(2)}`, margemEsquerda, y); y += 4;
+            doc.text(`Parcelas: ${parcelas}x de R$ ${(valorCobrado / parcelas).toFixed(2)}`, margemEsquerda, y); y += 4;
         } else if (forma === 'PIX') {
             doc.text(forma, margemEsquerda, y); y += 4;
             if (venda.pagamento.pixId)
@@ -3800,6 +3873,10 @@ function showInstallButton() {
             // Não permitir editar movimentos de vendas
             if (movimento.vendaId) {
                 mostrarMensagem('Não é possível editar movimentos gerados por vendas!', 'erro');
+                return;
+            }
+            if (movimento.saldoClienteLancamentoId) {
+                mostrarMensagem('Movimentos de saldo devem ser corrigidos pelo histórico do cliente.', 'erro');
                 return;
             }
             
@@ -3871,6 +3948,10 @@ function showInstallButton() {
             if (!exigirTitular('Movimentações e sangrias estão disponíveis somente para o titular.')) return;
             const movimento = movimentos.find(m => m.id === movimentoId);
             if (!movimento) return;
+            if (movimento.saldoClienteLancamentoId) {
+                mostrarMensagem('Movimentos de saldo não podem ser excluídos pelo caixa.', 'erro');
+                return;
+            }
             const caixa = exigirCaixaAberto('Abra o caixa para excluir uma movimentação.');
             if (!caixa || !registroPertenceAoCaixa(movimento, caixa)) {
                 if (caixa) mostrarMensagem('Não é possível excluir uma movimentação de um caixa já fechado.', 'erro');
@@ -4023,7 +4104,7 @@ function showInstallButton() {
             if (!caixa) return { caixa: null, mov: [], vendasDia: [], dinheiro: 0, pix: 0, cartao: 0, fiado: 0, entradas: 0, saidas: 0, esperado: 0 };
             const mov = movimentos.filter(m => registroPertenceAoCaixa(m, caixa));
             const vendasDia = vendas.filter(v => registroPertenceAoCaixa(v, caixa));
-            const porTipo = tipo => vendasDia.filter(v => v.pagamento?.tipo === tipo).reduce((s, v) => s + Number(v.total || 0), 0);
+            const porTipo = tipo => vendasDia.filter(v => v.pagamento?.tipo === tipo).reduce((s, v) => s + Number(v.pagamento?.valorCobrado ?? v.total ?? 0), 0);
             const entradas = mov.filter(m => m.tipo === 'entrada').reduce((s, m) => s + Number(m.valor || 0), 0);
             const saidas = mov.filter(m => m.tipo === 'saida').reduce((s, m) => s + Number(m.valor || 0), 0);
             return { caixa, mov, vendasDia, dinheiro: porTipo('dinheiro'), pix: porTipo('pix'), cartao: porTipo('cartao'), fiado: porTipo('fiado'), entradas, saidas, esperado: Number(caixa.abertura || 0) + entradas - saidas };
@@ -4441,6 +4522,7 @@ function showInstallButton() {
             
             // Remover movimento de caixa relacionado
             movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
+            movimentosSaldoCliente = movimentosSaldoCliente.filter(m => m.vendaId !== vendaParaExcluir.id);
             
             // Remover venda
             vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
@@ -4471,6 +4553,7 @@ function showInstallButton() {
                     
                     // Remover a venda também
                     vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
+                    movimentosSaldoCliente = movimentosSaldoCliente.filter(m => m.vendaId !== movimentoParaExcluir.vendaId);
                     
                     mostrarMensagem('Movimento e venda excluídos com sucesso! Estoque restaurado.', 'sucesso');
                 } else {
@@ -4540,6 +4623,7 @@ function showInstallButton() {
         caixas: caixas,
         clientesFiado: clientesFiado,
         pagamentosFiado: pagamentosFiado,
+        movimentosSaldoCliente: movimentosSaldoCliente,
         lancamentosFinanceiros: lancamentosFinanceiros,
         saldosIniciaisFinanceiros: saldosIniciaisFinanceiros,
         orcamentos: orcamentos,
@@ -4817,6 +4901,7 @@ function showInstallButton() {
             caixas = [];
             clientesFiado = [];
             pagamentosFiado = [];
+            movimentosSaldoCliente = [];
             lancamentosFinanceiros = [];
             saldosIniciaisFinanceiros = {};
             orcamentos = [];
@@ -4837,6 +4922,7 @@ function showInstallButton() {
             localStorage.removeItem('pdv_orcamentos');
             localStorage.removeItem('pdv_clientes_fiado');
             localStorage.removeItem('pdv_pagamentos_fiado');
+            localStorage.removeItem('pdv_movimentos_saldo_cliente');
             localStorage.removeItem('pdv_lancamentos_financeiros');
             localStorage.removeItem('pdv_saldos_iniciais_financeiros');
             localStorage.removeItem('pdv_config_sistema');
@@ -4882,6 +4968,7 @@ function showInstallButton() {
                     caixas = backup.caixas || [];
                     clientesFiado = backup.clientesFiado || [];
                     pagamentosFiado = backup.pagamentosFiado || [];
+                    movimentosSaldoCliente = backup.movimentosSaldoCliente || [];
                     lancamentosFinanceiros = backup.lancamentosFinanceiros || [];
                     saldosIniciaisFinanceiros = backup.saldosIniciaisFinanceiros || {};
                     orcamentos = backup.orcamentos || [];
@@ -4927,7 +5014,7 @@ function showInstallButton() {
         function mostrarFormClienteFiado() { document.getElementById('form-cliente-fiado').classList.remove('hidden'); }
         function cancelarClienteFiado() { document.getElementById('form-cliente-fiado').classList.add('hidden'); ['cliente-fiado-nome','cliente-fiado-telefone','cliente-fiado-limite','cliente-fiado-dia'].forEach(id => document.getElementById(id).value=''); document.getElementById('cliente-fiado-sem-limite').checked=false; clienteFiadoEditando=null; }
         function saldoClienteFiado(clienteId) {
-            const compras = vendas.filter(v => v.pagamento?.tipo === 'fiado' && v.pagamento.clienteId === clienteId).reduce((s,v) => s + Number(v.total || 0), 0);
+            const compras = vendas.filter(v => v.pagamento?.tipo === 'fiado' && v.pagamento.clienteId === clienteId).reduce((s,v) => s + Number(v.pagamento?.valorCobrado ?? v.total ?? 0), 0);
             const pagos = pagamentosFiado.filter(p => p.clienteId === clienteId).reduce((s,p) => s + Number(p.valor || 0), 0);
             return Math.max(0, compras - pagos);
         }
@@ -5421,6 +5508,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_config_sistema', JSON.stringify(configSistema));
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
+            localStorage.setItem('pdv_movimentos_saldo_cliente', JSON.stringify(movimentosSaldoCliente));
             localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(lancamentosFinanceiros));
             localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(saldosIniciaisFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
@@ -5440,7 +5528,9 @@ function showInstallButton() {
                 pixId: document.getElementById('pix-id').value,
                 tipoCartao: document.getElementById('tipo-cartao').value,
                 parcelas: document.getElementById('parcelas').value,
-                clienteId: document.getElementById('cliente-venda').value
+                clienteId: document.getElementById('cliente-venda').value,
+                usarSaldoCliente: document.getElementById('usar-saldo-cliente').checked,
+                valorSaldoCliente: document.getElementById('valor-saldo-cliente').value
             };
             localStorage.setItem(CHAVE_RASCUNHO_VENDA, JSON.stringify(rascunho));
         }
@@ -5458,6 +5548,10 @@ function showInstallButton() {
                 document.getElementById('parcelas').value = rascunho.parcelas || '1';
                 atualizarSelectClientes();
                 document.getElementById('cliente-venda').value = rascunho.clienteId || '';
+                atualizarClienteVendaSelecionado();
+                document.getElementById('usar-saldo-cliente').checked = !!rascunho.usarSaldoCliente;
+                document.getElementById('valor-saldo-cliente').value = rascunho.valorSaldoCliente || '';
+                atualizarUsoSaldoVenda(false);
                 if (vendaAtual?.tipo) {
                     document.getElementById('pagamento-detalhes').classList.remove('hidden');
                     document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));

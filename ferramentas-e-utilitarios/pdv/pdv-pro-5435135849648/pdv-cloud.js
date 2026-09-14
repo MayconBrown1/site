@@ -19,7 +19,7 @@ function state() {
   return {
     ownerUid: uid,
     produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
-    clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [],
+    clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [], movimentosSaldoCliente: window.movimentosSaldoCliente || [],
     orcamentos: window.orcamentos || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
     configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}
@@ -72,7 +72,7 @@ function mergeRecords(field, baseState, localState, remoteState) {
 
 function mergeState(baseState, localState, remoteState) {
   const merged = { ...remoteState, ownerUid: uid };
-  ['produtos', 'vendas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'orcamentos']
+  ['produtos', 'vendas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'movimentosSaldoCliente', 'orcamentos']
     .forEach(field => { merged[field] = mergeRecords(field, baseState, localState, remoteState); });
   ['categorias', 'categoriasOcultas', 'configSistema', 'configPix'].forEach(field => {
     merged[field] = same(localState[field], baseState?.[field]) ? (remoteState?.[field] ?? localState[field]) : localState[field];
@@ -125,7 +125,7 @@ function aplicarEstado(valor) {
   const d = cloneState(valor || {});
   writing = true;
   window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
-  window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || [];
+  window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || []; window.movimentosSaldoCliente = d.movimentosSaldoCliente || [];
   window.orcamentos = d.orcamentos || [];
   window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
   window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
@@ -254,7 +254,7 @@ async function salvarFinanceiroNuvem() {
 
 function iniciarContaVazia() {
   aplicarEstado({
-    ownerUid: uid, produtos: [], vendas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [],
+    ownerUid: uid, produtos: [], vendas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [],
     orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao
   });
   salvarNuvem();
@@ -373,7 +373,7 @@ protegerPagina(async (user, perfil) => {
 
   const chavesQueAlteramEstado = new Set([
     'pdv_produtos', 'pdv_vendas', 'pdv_movimentos', 'pdv_caixas', 'pdv_categorias', 'pdv_categorias_ocultas',
-    'pdv_config_sistema', 'pdv_clientes_fiado', 'pdv_pagamentos_fiado', 'pdv_orcamentos', 'pdv_config_pix'
+    'pdv_config_sistema', 'pdv_clientes_fiado', 'pdv_pagamentos_fiado', 'pdv_movimentos_saldo_cliente', 'pdv_orcamentos', 'pdv_config_pix'
   ]);
   const storageSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function(k, v) {

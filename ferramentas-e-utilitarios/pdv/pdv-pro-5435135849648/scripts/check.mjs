@@ -64,7 +64,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -84,7 +84,7 @@ for (const marker of ['firebase-app.js', 'firebase-auth.js', 'firebase-firestore
 for (const marker of ['pdv-conexao-status', 'Sem internet · dados salvos neste aparelho', 'pdv-sync-status']) {
   if (!pwaInstallSource.includes(marker)) throw new Error(`Indicador de funcionamento offline incompleto: ${marker}`);
 }
-for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'finalidade === \'despesa\'']) {
+for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'function saldoCreditoCliente', 'function registrarSaldoCliente', 'function devolverSaldoCliente', 'finalidade === \'despesa\'']) {
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
 }
 if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regras privadas do Financeiro não foram encontradas.');
@@ -139,9 +139,14 @@ const featureContext = {
   clientesFiado: [{ id: 'cl-1', nome: 'Cliente Teste' }],
   vendas: [
     { id: 'v-paga', data: '2026-09-10T12:00:00', total: 100, clienteId: 'cl-1', pagamento: { tipo: 'pix' } },
-    { id: 'v-fiado', data: '2026-09-10T13:00:00', total: 80, clienteId: 'cl-1', pagamento: { tipo: 'fiado', clienteId: 'cl-1' } }
+    { id: 'v-fiado', data: '2026-09-10T13:00:00', total: 80, clienteId: 'cl-1', pagamento: { tipo: 'fiado', clienteId: 'cl-1' } },
+    { id: 'v-saldo', data: '2026-09-10T13:30:00', total: 10, clienteId: 'cl-1', pagamento: { tipo: 'dinheiro', saldoUtilizado: 5, valorCobrado: 5 } }
   ],
   pagamentosFiado: [{ id: 'pf-1', clienteId: 'cl-1', valor: 30, data: '2026-09-10T14:00:00' }],
+  movimentosSaldoCliente: [
+    { id: 'msc-1', clienteId: 'cl-1', tipo: 'credito', valor: 10, data: '2026-09-10T11:00:00' },
+    { id: 'msc-2', clienteId: 'cl-1', tipo: 'debito', valor: 5, data: '2026-09-10T13:30:00', vendaId: 'v-saldo' }
+  ],
   movimentos: [
     { id: 'm-despesa', tipo: 'saida', finalidade: 'despesa', categoriaFinanceira: 'Alimentação', valor: 20, descricao: 'Compra', data: '2026-09-10T15:00:00' },
     { id: 'm-sangria', tipo: 'saida', finalidade: 'sangria', valor: 50, descricao: 'Guardar', data: '2026-09-10T16:00:00' }
@@ -161,9 +166,12 @@ featureContext.window = featureContext;
 vm.runInNewContext(customerFinanceSource, featureContext);
 if (!featureContext.validarCpfCliente('529.982.247-25') || featureContext.validarCpfCliente('111.111.111-11')) throw new Error('A validação de CPF falhou.');
 if (featureContext.parseValorMonetario('1,15') !== 1.15 || featureContext.parseValorMonetario('1.234,56') !== 1234.56) throw new Error('A leitura de valores com centavos falhou.');
-if (featureContext.comprasDoCliente('cl-1').length !== 2) throw new Error('O histórico não relacionou vendas pagas e fiado ao cliente.');
+if (featureContext.comprasDoCliente('cl-1').length !== 3) throw new Error('O histórico não relacionou vendas pagas, fiado e compras com saldo ao cliente.');
+if (featureContext.saldoCreditoCliente('cl-1') !== 5) throw new Error('O saldo disponível do cliente está incorreto.');
+if (featureContext.limitarSaldoCredito(8, 10, 20) !== 8 || featureContext.limitarSaldoCredito(20, 10, 20) !== 10) throw new Error('O uso do saldo não respeitou o disponível e o total da compra.');
 const lancamentosTeste = featureContext.todosLancamentosFinanceiros();
 if (!lancamentosTeste.some(item => item.id === 'venda_v-paga' && item.valor === 100 && !item.pendente)) throw new Error('A venda paga não entrou no Financeiro.');
+if (!lancamentosTeste.some(item => item.id === 'venda_v-saldo' && item.valor === 5 && !item.pendente)) throw new Error('A venda com saldo duplicou o valor já recebido no Financeiro.');
 if (!lancamentosTeste.some(item => item.id === 'venda_v-fiado' && item.valor === 50 && item.pendente)) throw new Error('O saldo fiado pendente está incorreto.');
 if (!lancamentosTeste.some(item => item.id === 'caixa_m-despesa' && item.valor === 20)) throw new Error('A despesa do caixa não entrou no Financeiro.');
 if (lancamentosTeste.some(item => item.id === 'caixa_m-sangria')) throw new Error('A sangria alterou o Financeiro indevidamente.');
@@ -183,6 +191,41 @@ const historicoContinuo = [
 const saldoInicialOutubro = featureContext.saldoAntesDoPeriodo(historicoContinuo, '2026-10');
 const outubro = featureContext.calcularResumoFinanceiro(historicoContinuo.filter(item => item.data.startsWith('2026-10')), saldoInicialOutubro);
 if (saldoInicialOutubro !== 10500 || outubro.resultado !== -200 || outubro.transferencias !== -300 || outubro.saldoPrevisto !== 10000) throw new Error('A continuidade automática entre meses falhou.');
+
+const finalizarStart = html.indexOf('function finalizarVenda()');
+const finalizarEnd = html.indexOf('function limparVenda()', finalizarStart);
+if (finalizarStart < 0 || finalizarEnd < 0) throw new Error('Não foi possível localizar a finalização da venda.');
+const camposVenda = {
+  desconto: { value: '0' },
+  'cliente-venda': { value: 'cl-1' },
+  'valor-recebido': { value: '5' },
+  'pix-id': { value: '' },
+  'tipo-cartao': { value: 'credito' },
+  parcelas: { value: '1' },
+  'fiado-vencimento': { value: '' }
+};
+const vendaContext = {
+  carrinho: [{ produtoId: 'servico-1', nome: 'Serviço teste', quantidade: 1, preco: 10, unidade: 'un', tipo: 'servico' }],
+  vendaAtual: { tipo: 'dinheiro' },
+  produtos: [{ id: 'servico-1', nome: 'Serviço teste', tipo: 'servico' }],
+  clientesFiado: [{ id: 'cl-1', nome: 'Cliente Teste' }],
+  vendas: [], movimentos: [], movimentosSaldoCliente: [],
+  document: { getElementById: id => camposVenda[id] },
+  exigirCaixaAberto: () => ({ id: 'cx-1' }),
+  valorSaldoAplicadoVenda: () => 5,
+  saldoCreditoCliente: () => 5,
+  mostrarMensagem: () => {},
+  produtoRaizEstoque: produto => produto,
+  estoqueDisponivel: () => 999,
+  normalizarEstoquesVinculados: () => {},
+  vendedorAtual: () => ({ id: 'titular', nome: 'Titular' }),
+  salvarDados: () => {}, atualizarFinanceiro: () => {}, mostrarComprovante: () => {}, limparVenda: () => {}
+};
+vm.runInNewContext(html.slice(finalizarStart, finalizarEnd), vendaContext);
+vendaContext.finalizarVenda();
+if (vendaContext.vendas.length !== 1 || vendaContext.vendas[0].pagamento.saldoUtilizado !== 5 || vendaContext.vendas[0].pagamento.valorCobrado !== 5) throw new Error('A venda não registrou corretamente a divisão entre saldo e pagamento atual.');
+if (vendaContext.movimentos.length !== 1 || vendaContext.movimentos[0].valor !== 5) throw new Error('O caixa recebeu novamente o valor usado do saldo do cliente.');
+if (vendaContext.movimentosSaldoCliente.length !== 1 || vendaContext.movimentosSaldoCliente[0].tipo !== 'debito' || vendaContext.movimentosSaldoCliente[0].valor !== 5) throw new Error('O saldo usado na venda não foi debitado do cliente.');
 
 const reportStart = html.indexOf('function chaveDataRelatorio');
 const reportEnd = html.indexOf('function atualizarFiltroVendedores', reportStart);
@@ -238,14 +281,14 @@ if (alertasEstoque.length !== 1 || alertasEstoque[0].id !== 'pb' || alertasEstoq
 if (html.includes("produtos.filter(p => p.estoque <= 5)")) throw new Error('O relatório ainda usa um limite fixo de estoque baixo.');
 
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
-for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática']) {
+for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática', 'movimentosSaldoCliente']) {
   if (!cloudSource.includes(marker)) throw new Error(`Fila de sincronização offline incompleta: ${marker}`);
 }
 const mergeStart = cloudSource.indexOf('const same =');
 const mergeEnd = cloudSource.indexOf('async function salvarNuvem', mergeStart);
 const makeCloudHelpers = new Function('uid', `${cloudSource.slice(mergeStart, mergeEnd)}; return { mergeState, cloneState };`);
 const { mergeState, cloneState } = makeCloudHelpers('empresa-1');
-const emptyCollections = { movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
+const emptyCollections = { movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
 const base = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2200 }], vendas: [] };
 const local = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2100 }], vendas: [{ id: 'v-local', total: 10 }] };
 const remote = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2125 }], vendas: [{ id: 'v-remota', total: 20 }] };

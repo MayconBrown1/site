@@ -111,6 +111,113 @@ function totalPagoPeloCliente(clienteId) {
     return comprasPagas + pagamentosDoCliente(clienteId).reduce((total, pagamento) => total + Number(pagamento.valor || 0), 0);
 }
 
+function lancamentosSaldoDoCliente(clienteId) {
+    return movimentosSaldoCliente.filter(movimento => movimento.clienteId === clienteId);
+}
+
+function saldoCreditoCliente(clienteId) {
+    if (!clienteId) return 0;
+    const saldo = lancamentosSaldoDoCliente(clienteId).reduce((total, movimento) => {
+        const valor = Number(movimento.valor || 0);
+        return total + (movimento.tipo === 'credito' ? valor : -valor);
+    }, 0);
+    return Math.max(0, Math.round(saldo * 100) / 100);
+}
+
+function limitarSaldoCredito(disponivel, totalVenda, solicitado) {
+    return Math.max(0, Math.min(Number(disponivel || 0), Number(totalVenda || 0), Number(solicitado || 0)));
+}
+
+function valorSaldoAplicadoVenda() {
+    const usar = document.getElementById('usar-saldo-cliente');
+    const clienteId = document.getElementById('cliente-venda')?.value || '';
+    if (!usar?.checked || !clienteId) return 0;
+    return limitarSaldoCredito(saldoCreditoCliente(clienteId), totalAtualDaVenda(), document.getElementById('valor-saldo-cliente')?.value);
+}
+
+function totalReceberAgora() {
+    return Math.max(0, Math.round((totalAtualDaVenda() - valorSaldoAplicadoVenda()) * 100) / 100);
+}
+
+function atualizarUsoSaldoVenda(regenerarPagamento = false) {
+    const painel = document.getElementById('saldo-cliente-venda');
+    const usar = document.getElementById('usar-saldo-cliente');
+    const campo = document.getElementById('valor-saldo-cliente');
+    const campos = document.getElementById('campos-uso-saldo');
+    if (!painel || !usar || !campo || !campos) return;
+    const clienteId = document.getElementById('cliente-venda')?.value || '';
+    const disponivel = saldoCreditoCliente(clienteId);
+    const total = typeof totalAtualDaVenda === 'function' ? totalAtualDaVenda() : 0;
+    usar.disabled = !clienteId || disponivel <= 0 || total <= 0;
+    if (usar.disabled) usar.checked = false;
+    campos.classList.toggle('hidden', !usar.checked);
+    if (usar.checked) {
+        const solicitado = parseValorMonetario(campo.value);
+        const valor = limitarSaldoCredito(disponivel, total, Number.isFinite(solicitado) && solicitado > 0 ? solicitado : Math.min(disponivel, total));
+        campo.value = valor.toFixed(2);
+    } else {
+        campo.value = '';
+    }
+    document.getElementById('valor-restante-venda').textContent = moedaBR(totalReceberAgora());
+    calcularTroco();
+    salvarRascunhoVenda();
+    if (regenerarPagamento && vendaAtual?.tipo === 'pix') gerarQRCodePix();
+}
+
+function novoIdSaldoCliente(sufixo = '') {
+    return `msc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${sufixo}`;
+}
+
+function atualizarAposSaldoCliente(clienteId) {
+    salvarDados();
+    atualizarClientes();
+    atualizarClienteVendaSelecionado();
+    calcularSaldoCaixa();
+    atualizarHistoricoMovimentos();
+    if (!document.getElementById('historico-cliente')?.classList.contains('hidden')) abrirHistoricoCliente(clienteId);
+}
+
+function registrarSaldoCliente(clienteId) {
+    const caixa = exigirCaixaAberto('Abra o caixa antes de registrar um saldo para o cliente.');
+    const cliente = clientesFiado.find(item => item.id === clienteId);
+    if (!caixa || !cliente) return;
+    const textoValor = prompt(`Adicionar saldo para ${cliente.nome}\nInforme o valor que ficou com a loja:`);
+    if (textoValor === null) return;
+    const valor = parseValorMonetario(textoValor);
+    if (!Number.isFinite(valor) || valor <= 0) return mostrarMensagem('Informe um saldo maior que zero.', 'erro');
+    const motivoInformado = prompt('Descreva o motivo deste saldo:', 'Troco não devolvido');
+    if (motivoInformado === null) return;
+    const motivo = motivoInformado.trim();
+    if (!motivo) return mostrarMensagem('Informe o motivo do saldo.', 'erro');
+    const data = new Date().toISOString();
+    const id = novoIdSaldoCliente();
+    movimentosSaldoCliente.push({ id, clienteId, tipo: 'credito', valor, data, motivo, origem: 'ajuste', caixaId: caixa.id });
+    movimentos.push({ id: 'm_' + id, data, tipo: 'entrada', valor, descricao: `Saldo recebido de cliente — ${cliente.nome}: ${motivo}`, caixaId: caixa.id, saldoClienteLancamentoId: id });
+    atualizarAposSaldoCliente(clienteId);
+    mostrarMensagem(`Saldo de ${moedaBR(valor)} registrado para ${cliente.nome}.`, 'sucesso');
+}
+
+function devolverSaldoCliente(clienteId) {
+    const caixa = exigirCaixaAberto('Abra o caixa antes de devolver o saldo do cliente.');
+    const cliente = clientesFiado.find(item => item.id === clienteId);
+    const disponivel = saldoCreditoCliente(clienteId);
+    if (!caixa || !cliente || disponivel <= 0) return;
+    const textoValor = prompt(`Devolver saldo para ${cliente.nome}\nDisponível: ${moedaBR(disponivel)}\nInforme o valor devolvido:`);
+    if (textoValor === null) return;
+    const valor = parseValorMonetario(textoValor);
+    if (!Number.isFinite(valor) || valor <= 0 || valor > disponivel) return mostrarMensagem(`Informe um valor entre R$ 0,01 e ${moedaBR(disponivel)}.`, 'erro');
+    const motivoInformado = prompt('Descreva a devolução:', 'Saldo devolvido em dinheiro');
+    if (motivoInformado === null) return;
+    const motivo = motivoInformado.trim();
+    if (!motivo) return mostrarMensagem('Informe o motivo da devolução.', 'erro');
+    const data = new Date().toISOString();
+    const id = novoIdSaldoCliente();
+    movimentosSaldoCliente.push({ id, clienteId, tipo: 'debito', valor, data, motivo, origem: 'devolucao', caixaId: caixa.id });
+    movimentos.push({ id: 'm_' + id, data, tipo: 'saida', finalidade: 'transferencia', valor, descricao: `Saldo devolvido ao cliente — ${cliente.nome}: ${motivo}`, caixaId: caixa.id, saldoClienteLancamentoId: id });
+    atualizarAposSaldoCliente(clienteId);
+    mostrarMensagem(`Devolução de ${moedaBR(valor)} registrada.`, 'sucesso');
+}
+
 function mostrarFormCliente() {
     document.getElementById('form-cliente').classList.remove('hidden');
     document.getElementById('cliente-nome').focus();
@@ -185,7 +292,7 @@ function editarCliente(id) {
 function excluirCliente(id) {
     const cliente = clientesFiado.find(item => item.id === id);
     if (!cliente) return;
-    if (comprasDoCliente(id).length || pagamentosDoCliente(id).length) {
+    if (comprasDoCliente(id).length || pagamentosDoCliente(id).length || lancamentosSaldoDoCliente(id).length) {
         mostrarMensagem('Este cliente possui histórico e não pode ser excluído. Você ainda pode editar os dados.', 'erro');
         return;
     }
@@ -201,20 +308,37 @@ function atualizarSelectClientes() {
     if (!select) return;
     const atual = select.value;
     const opcoes = [...clientesFiado].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
-        .map(cliente => `<option value="${escaparDado(cliente.id)}">${escaparDado(cliente.nome)}${cliente.cpf ? ` · ${formatarCpf(cliente.cpf)}` : ''}</option>`).join('');
+        .map(cliente => {
+            const saldo = saldoCreditoCliente(cliente.id);
+            return `<option value="${escaparDado(cliente.id)}">${escaparDado(cliente.nome)}${cliente.cpf ? ` · ${formatarCpf(cliente.cpf)}` : ''}${saldo > 0 ? ` · Saldo ${moedaBR(saldo)}` : ''}</option>`;
+        }).join('');
     select.innerHTML = '<option value="">Consumidor não identificado</option>' + opcoes;
     if (clientesFiado.some(cliente => cliente.id === atual)) select.value = atual;
 }
 
 function atualizarClienteVendaSelecionado() {
-    const cliente = clientesFiado.find(item => item.id === document.getElementById('cliente-venda')?.value);
+    const clienteId = document.getElementById('cliente-venda')?.value || '';
+    const cliente = clientesFiado.find(item => item.id === clienteId);
+    const painelSaldo = document.getElementById('saldo-cliente-venda');
+    const trocouCliente = painelSaldo?.dataset.clienteId !== clienteId;
+    if (painelSaldo) painelSaldo.dataset.clienteId = clienteId;
+    if (trocouCliente) {
+        document.getElementById('usar-saldo-cliente').checked = false;
+        document.getElementById('valor-saldo-cliente').value = '';
+    }
+    const credito = saldoCreditoCliente(clienteId);
+    painelSaldo?.classList.toggle('hidden', !cliente || credito <= 0);
+    const disponivel = document.getElementById('saldo-cliente-disponivel');
+    if (disponivel) disponivel.textContent = moedaBR(credito);
     const info = document.getElementById('fiado-info');
     if (info) {
         info.innerHTML = cliente
-            ? `<strong>${escaparDado(cliente.nome)}</strong> · Saldo fiado atual: ${moedaBR(saldoClienteFiado(cliente.id))}`
+            ? `<strong>${escaparDado(cliente.nome)}</strong> · Saldo fiado atual: ${moedaBR(saldoClienteFiado(cliente.id))} · Saldo disponível: ${moedaBR(credito)}`
             : 'Selecione acima o cliente desta venda.';
     }
+    atualizarUsoSaldoVenda(false);
     salvarRascunhoVenda();
+    if (trocouCliente && vendaAtual?.tipo === 'pix') gerarQRCodePix();
 }
 
 function atualizarClientes() {
@@ -234,13 +358,14 @@ function atualizarClientes() {
     document.getElementById('lista-clientes').innerHTML = filtrados.map(cliente => {
         const compras = comprasDoCliente(cliente.id).sort((a, b) => new Date(b.data) - new Date(a.data));
         const saldo = saldoClienteFiado(cliente.id);
+        const credito = saldoCreditoCliente(cliente.id);
         const contato = [cliente.whatsapp || cliente.telefone, cliente.email].filter(Boolean).map(escaparDado).join(' · ') || 'Contato não informado';
         return `<article class="rounded-xl border border-slate-200 bg-gray-50 p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0"><h3 class="text-lg font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${contato}</p><p class="mt-1 text-xs text-gray-500">${cliente.cpf ? `CPF ${formatarCpf(cliente.cpf)}` : 'CPF não informado'}${cliente.cidade ? ` · ${escaparDado(cliente.cidade)}` : ''}</p></div>
-                <div class="sm:text-right"><p class="text-sm text-gray-600">${compras.length} compra(s)</p><p class="font-bold ${saldo > 0 ? 'text-amber-700' : 'text-emerald-700'}">Fiado: ${moedaBR(saldo)}</p></div>
+                <div class="sm:text-right"><p class="text-sm text-gray-600">${compras.length} compra(s)</p><p class="font-bold ${credito > 0 ? 'text-emerald-700' : 'text-gray-600'}">Saldo: ${moedaBR(credito)}</p><p class="font-bold ${saldo > 0 ? 'text-amber-700' : 'text-gray-600'}">Fiado: ${moedaBR(saldo)}</p></div>
             </div>
-            <div class="mt-4 flex flex-wrap gap-2"><button onclick="abrirHistoricoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">Ver histórico</button>${saldo > 0 ? `<button onclick="registrarPagamentoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-green-600 px-3 py-2 text-sm text-white">Receber fiado</button><button onclick="gerarExtratoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">Extrato PDF</button>` : ''}<button onclick="editarCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-slate-600 px-3 py-2 text-sm text-white">Editar</button><button onclick="excluirCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white">Excluir</button></div>
+            <div class="mt-4 flex flex-wrap gap-2"><button onclick="abrirHistoricoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">Ver histórico</button><button onclick="registrarSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white">Adicionar saldo</button>${credito > 0 ? `<button onclick="devolverSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Devolver saldo</button>` : ''}${saldo > 0 ? `<button onclick="registrarPagamentoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-green-600 px-3 py-2 text-sm text-white">Receber fiado</button><button onclick="gerarExtratoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">Extrato PDF</button>` : ''}<button onclick="editarCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-slate-600 px-3 py-2 text-sm text-white">Editar</button><button onclick="excluirCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white">Excluir</button></div>
         </article>`;
     }).join('') || '<p class="rounded-xl border border-dashed p-6 text-center text-gray-500 lg:col-span-2">Nenhum cliente encontrado.</p>';
 }
@@ -250,17 +375,25 @@ function abrirHistoricoCliente(clienteId) {
     if (!cliente) return;
     const compras = comprasDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
     const pagamentos = pagamentosDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
+    const movimentosSaldo = lancamentosSaldoDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
     const totalCompras = compras.reduce((total, venda) => total + Number(venda.total || 0), 0);
     const container = document.getElementById('historico-cliente');
     const comprasHtml = compras.map(venda => {
         const fiado = venda.pagamento?.tipo === 'fiado';
         const itens = (venda.itens || []).map(item => `${Number(item.quantidade || 0).toLocaleString('pt-BR')}x ${escaparDado(item.nome)}`).join(', ');
-        return `<article class="rounded-lg border border-slate-200 p-3"><div class="flex flex-wrap items-start justify-between gap-2"><div><strong>${new Date(venda.data).toLocaleString('pt-BR')}</strong><p class="mt-1 text-sm text-gray-600">${itens || 'Itens não informados'}</p><p class="mt-1 text-xs font-semibold uppercase text-slate-500">${fiado ? 'Compra fiado' : `Pago em ${escaparDado(venda.pagamento?.tipo || 'não informado')}`}</p></div><strong class="${fiado ? 'text-amber-700' : 'text-emerald-700'}">${moedaBR(venda.total)}</strong></div></article>`;
+        const saldoUsado = Number(venda.pagamento?.saldoUtilizado || 0);
+        const pagoAgora = Number(venda.pagamento?.valorCobrado ?? venda.total);
+        return `<article class="rounded-lg border border-slate-200 p-3"><div class="flex flex-wrap items-start justify-between gap-2"><div><strong>${new Date(venda.data).toLocaleString('pt-BR')}</strong><p class="mt-1 text-sm text-gray-600">${itens || 'Itens não informados'}</p><p class="mt-1 text-xs font-semibold uppercase text-slate-500">${fiado ? 'Compra fiado' : `Pago em ${escaparDado(venda.pagamento?.tipo || 'não informado')}`}${saldoUsado > 0 ? ` · ${moedaBR(saldoUsado)} em saldo + ${moedaBR(pagoAgora)} agora` : ''}</p></div><strong class="${fiado ? 'text-amber-700' : 'text-emerald-700'}">${moedaBR(venda.total)}</strong></div></article>`;
     }).join('') || '<p class="text-sm text-gray-500">Este cliente ainda não possui compras registradas.</p>';
     const pagamentosHtml = pagamentos.map(pagamento => `<li class="flex justify-between gap-3 border-b py-2 text-sm"><span>${new Date(pagamento.data).toLocaleString('pt-BR')}</span><strong class="text-emerald-700">${moedaBR(pagamento.valor)}</strong></li>`).join('') || '<li class="text-sm text-gray-500">Nenhum pagamento de fiado registrado.</li>';
+    const saldoHtml = movimentosSaldo.map(movimento => {
+        const entrada = movimento.tipo === 'credito';
+        const rotulo = movimento.origem === 'venda' ? 'Usado em compra' : movimento.origem === 'devolucao' ? 'Devolvido ao cliente' : 'Saldo adicionado';
+        return `<li class="border-b py-3 text-sm"><div class="flex justify-between gap-3"><span>${new Date(movimento.data).toLocaleString('pt-BR')}<small class="block text-gray-500">${rotulo} · ${escaparDado(movimento.motivo || 'Sem observação')}</small></span><strong class="${entrada ? 'text-emerald-700' : 'text-red-600'}">${entrada ? '+' : '-'}${moedaBR(movimento.valor)}</strong></div></li>`;
+    }).join('') || '<li class="text-sm text-gray-500">Nenhuma movimentação de saldo registrada.</li>';
     container.innerHTML = `<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Histórico do cliente</p><h3 class="text-2xl font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${[cliente.whatsapp || cliente.telefone, cliente.email, cliente.cpf ? `CPF ${formatarCpf(cliente.cpf)}` : ''].filter(Boolean).map(escaparDado).join(' · ')}</p></div><button onclick="fecharHistoricoCliente()" class="self-start rounded-lg border px-3 py-2 text-sm">Fechar</button></div>
-        <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4"><div class="rounded-lg bg-blue-50 p-3"><span class="text-sm text-blue-800">Compras</span><strong class="block text-lg text-blue-700">${compras.length}</strong></div><div class="rounded-lg bg-emerald-50 p-3"><span class="text-sm text-emerald-800">Total comprado</span><strong class="block text-lg text-emerald-700">${moedaBR(totalCompras)}</strong></div><div class="rounded-lg bg-teal-50 p-3"><span class="text-sm text-teal-800">Total pago</span><strong class="block text-lg text-teal-700">${moedaBR(totalPagoPeloCliente(clienteId))}</strong></div><div class="rounded-lg bg-amber-50 p-3"><span class="text-sm text-amber-800">Saldo fiado</span><strong class="block text-lg text-amber-700">${moedaBR(saldoClienteFiado(clienteId))}</strong></div></div>
-        <div class="mt-5 grid gap-5 lg:grid-cols-[1.4fr_.6fr]"><div><h4 class="mb-3 font-semibold">Compras</h4><div class="space-y-2">${comprasHtml}</div></div><div><h4 class="mb-3 font-semibold">Pagamentos de fiado</h4><ul>${pagamentosHtml}</ul></div></div>`;
+        <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5"><div class="rounded-lg bg-blue-50 p-3"><span class="text-sm text-blue-800">Compras</span><strong class="block text-lg text-blue-700">${compras.length}</strong></div><div class="rounded-lg bg-emerald-50 p-3"><span class="text-sm text-emerald-800">Total comprado</span><strong class="block text-lg text-emerald-700">${moedaBR(totalCompras)}</strong></div><div class="rounded-lg bg-teal-50 p-3"><span class="text-sm text-teal-800">Total pago</span><strong class="block text-lg text-teal-700">${moedaBR(totalPagoPeloCliente(clienteId))}</strong></div><div class="rounded-lg bg-emerald-100 p-3"><span class="text-sm text-emerald-900">Saldo disponível</span><strong class="block text-lg text-emerald-800">${moedaBR(saldoCreditoCliente(clienteId))}</strong></div><div class="rounded-lg bg-amber-50 p-3"><span class="text-sm text-amber-800">Saldo fiado</span><strong class="block text-lg text-amber-700">${moedaBR(saldoClienteFiado(clienteId))}</strong></div></div>
+        <div class="mt-5 grid gap-5 lg:grid-cols-3"><div><h4 class="mb-3 font-semibold">Compras</h4><div class="space-y-2">${comprasHtml}</div></div><div><h4 class="mb-3 font-semibold">Histórico do saldo</h4><ul>${saldoHtml}</ul></div><div><h4 class="mb-3 font-semibold">Pagamentos de fiado</h4><ul>${pagamentosHtml}</ul></div></div>`;
     container.classList.remove('hidden');
     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -313,7 +446,7 @@ function todosLancamentosFinanceiros() {
     vendas.filter(venda => venda.pagamento?.tipo === 'fiado').sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(venda => {
         const clienteId = venda.clienteId || venda.pagamento?.clienteId;
         const disponivel = pagamentosDisponiveis.get(clienteId) || 0;
-        const totalVenda = Number(venda.total || 0);
+        const totalVenda = Number(venda.pagamento?.valorCobrado ?? venda.total ?? 0);
         const abatido = Math.min(disponivel, totalVenda);
         saldoPendentePorVenda.set(venda.id, Math.max(0, totalVenda - abatido));
         pagamentosDisponiveis.set(clienteId, Math.max(0, disponivel - abatido));
@@ -321,7 +454,7 @@ function todosLancamentosFinanceiros() {
     const vendasAutomaticas = vendas.flatMap(venda => {
         const fiado = venda.pagamento?.tipo === 'fiado';
         const cliente = clienteDaVenda(venda);
-        const valor = fiado ? saldoPendentePorVenda.get(venda.id) || 0 : Number(venda.total || 0);
+        const valor = fiado ? saldoPendentePorVenda.get(venda.id) || 0 : Number(venda.pagamento?.valorCobrado ?? venda.total ?? 0);
         if (fiado && valor <= 0) return [];
         return [{ id: `venda_${venda.id}`, data: venda.data, tipo: 'receita', categoria: 'Venda', valor, descricao: `${fiado ? 'Saldo fiado' : 'Venda'} #${venda.id}${cliente ? ` · ${cliente.nome}` : ''}`, origem: 'venda', automatico: true, pendente: fiado }];
     });
@@ -509,6 +642,12 @@ window.editarCliente = editarCliente;
 window.excluirCliente = excluirCliente;
 window.atualizarSelectClientes = atualizarSelectClientes;
 window.atualizarClienteVendaSelecionado = atualizarClienteVendaSelecionado;
+window.saldoCreditoCliente = saldoCreditoCliente;
+window.valorSaldoAplicadoVenda = valorSaldoAplicadoVenda;
+window.totalReceberAgora = totalReceberAgora;
+window.atualizarUsoSaldoVenda = atualizarUsoSaldoVenda;
+window.registrarSaldoCliente = registrarSaldoCliente;
+window.devolverSaldoCliente = devolverSaldoCliente;
 window.atualizarClientes = atualizarClientes;
 window.abrirHistoricoCliente = abrirHistoricoCliente;
 window.fecharHistoricoCliente = fecharHistoricoCliente;
