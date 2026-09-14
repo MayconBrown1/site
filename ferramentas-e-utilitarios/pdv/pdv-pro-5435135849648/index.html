@@ -160,6 +160,10 @@
                     <button data-section="relatorios" onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button data-section="catalogo" onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
                     <button data-section="novidades" onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
+                    <button id="btn-alertas-estoque" type="button" onclick="abrirAlertasEstoque()" class="relative bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded transition-colors text-sm" aria-label="Abrir alertas de estoque">
+                        🔔 Estoque
+                        <span id="contador-alertas-estoque" class="absolute -right-2 -top-2 hidden min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-xs font-black leading-4 text-white shadow-lg" aria-hidden="true">0</span>
+                    </button>
                     <button data-owner-only onclick="abrirPainelTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">🎨 Tema</button>
                     <button data-owner-only onclick="acessarAdm()" class="rounded border border-amber-400/60 bg-slate-900 px-3 py-2 text-sm font-bold text-[#f6c453] transition-colors hover:bg-black hover:text-yellow-300">ADM do PDV</button>
                 </div>
@@ -337,6 +341,11 @@
                                 <label for="produto-estoque" class="block text-sm font-medium text-gray-700 mb-1">Estoque Inicial</label>
                                 <input type="number" id="produto-estoque" step="0.01" min="0" value="0" class="w-full p-3 border rounded-lg text-base">
                             </div>
+                            <div id="campo-produto-estoque-minimo">
+                                <label for="produto-estoque-minimo" class="block text-sm font-medium text-gray-700 mb-1">Estoque mínimo para alerta</label>
+                                <input type="number" id="produto-estoque-minimo" step="0.01" min="0" value="5" required class="w-full p-3 border rounded-lg text-base" aria-describedby="produto-estoque-minimo-ajuda">
+                                <p id="produto-estoque-minimo-ajuda" class="mt-1 text-xs text-gray-500">O aviso aparece quando o saldo chegar a este valor ou ficar abaixo dele.</p>
+                            </div>
                             <div id="campo-produto-vinculo" class="sm:col-span-2 lg:col-span-1">
                                 <label for="produto-estoque-vinculo" class="block text-sm font-medium text-gray-700 mb-1">Estoque compartilhado</label>
                                 <select id="produto-estoque-vinculo" class="w-full p-3 border rounded-lg text-base" onchange="atualizarVinculoEstoqueForm()">
@@ -396,6 +405,7 @@
                                     <th class="px-4 py-2 text-left">Tipo / Código</th>
                                     <th class="px-4 py-2 text-right">Preço</th>
                                     <th class="px-4 py-2 text-right">Estoque</th>
+                                    <th class="px-4 py-2 text-right">Mín. alerta</th>
                                     <th class="px-4 py-2 text-left">Categoria</th>
                                     <th class="px-4 py-2 text-center">Catálogo</th>
                                     <th class="px-4 py-2 text-center">Ações</th>
@@ -783,12 +793,13 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 14/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v35" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v36" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">10 novos temas comerciais, mais contraste e novos botões</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Alertas personalizados de estoque mínimo</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Saiba a hora certa de repor cada produto</h4><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar um produto, preencha <strong>Estoque mínimo para alerta</strong> com o limite ideal daquele item. Quando o saldo chegar ao limite ou ficar abaixo dele, o botão <strong>Estoque</strong> na barra superior exibirá um contador. Abra o sino para conferir os produtos; depois de visualizar, o contador desaparece até surgir um novo alerta ou o saldo cair novamente.</p></article>
                             <article class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-orange-950">🏪 Temas para mais tipos de comércio</h4><p class="mt-2 text-sm text-slate-700">Abra <strong>Tema</strong> e escolha uma das novas opções: <strong>Borracharia, Oficina de Motos, Oficina de Carros, Autopeças, Mercado/Mercearia, Moda, Beleza/Cosméticos, Material de Construção, Papelaria ou Farmácia</strong>. Cada opção já traz fundo, paleta e estilo próprios; confira a prévia e clique em <strong>Salvar tema</strong>.</p></article>
                             <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🔳 Mais contraste e formatos de botão</h4><p class="mt-2 text-sm text-slate-700">As áreas de <strong>Novidades</strong> e <strong>Histórico de movimentação</strong> agora acompanham corretamente temas escuros, incluindo Neon Verde, Neon Laranja, Futurista e Informática. Também é possível escolher botões retos, discretos, arredondados, em cápsula ou chanfrados no Painel de Tema.</p></article>
                             <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📴 PDV funcionando offline com sincronização automática</h4><p class="mt-2 text-sm text-slate-700"><strong>Continue vendendo mesmo sem internet:</strong> depois de abrir o PDV online pelo menos uma vez neste aparelho, ele pode ser reaberto e usado sem conexão. Vendas, baixas de estoque, clientes, caixa, orçamentos e lançamentos ficam protegidos localmente no navegador.</p></article>
@@ -1110,6 +1121,20 @@
                 <button data-tema-preservar type="button" onclick="restaurarTemaPadrao()" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 hover:bg-red-100">Restaurar padrão</button>
                 <button data-tema-preservar type="button" onclick="fecharPainelTema()" class="rounded-lg bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300">Cancelar</button>
                 <button data-tema-preservar type="button" onclick="salvarTema()" class="rounded-lg bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700">Salvar tema</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-alertas-estoque" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/65 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-alertas-estoque">
+        <div class="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white text-slate-800 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-200 p-4 lg:p-5">
+                <div><p class="text-sm font-bold uppercase tracking-wider text-orange-700">Controle de reposição</p><h2 id="titulo-alertas-estoque" class="text-xl font-bold lg:text-2xl">Alertas de estoque</h2><p class="mt-1 text-sm text-slate-500">Produtos que chegaram ao limite mínimo definido no cadastro.</p></div>
+                <button type="button" data-tema-preservar onclick="fecharAlertasEstoque()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none text-slate-700 hover:bg-slate-200" aria-label="Fechar alertas de estoque">×</button>
+            </div>
+            <div id="lista-alertas-estoque" class="min-h-32 space-y-3 overflow-y-auto p-4 lg:p-5"></div>
+            <div class="flex flex-col-reverse gap-2 border-t border-slate-200 p-4 sm:flex-row sm:justify-end">
+                <button type="button" data-tema-preservar onclick="fecharAlertasEstoque()" class="rounded-lg bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300">Fechar</button>
+                <button id="btn-ir-produtos-alerta" type="button" data-tema-preservar onclick="irParaProdutosDosAlertas()" class="rounded-lg bg-orange-600 px-4 py-3 font-bold text-white hover:bg-orange-700">Abrir produtos</button>
             </div>
         </div>
     </div>
@@ -1502,6 +1527,7 @@ if ('serviceWorker' in navigator) {
                 const visivel = document.querySelector('.section:not(.hidden)')?.id?.replace('-section', '');
                 if (visivel && !permitidas.has(visivel)) showSection('vendas');
             }
+            atualizarNotificacaoEstoque();
         }
         window.aplicarPermissoesUsuario = aplicarPermissoesUsuario;
 
@@ -1517,7 +1543,10 @@ if ('serviceWorker' in navigator) {
             atualizarCamposMovimento();
             showSection('vendas');
             document.addEventListener('keydown', event => {
-                if (event.key === 'Escape') fecharModalPix();
+                if (event.key === 'Escape') {
+                    fecharModalPix();
+                    fecharAlertasEstoque();
+                }
             });
         });
 
@@ -1912,13 +1941,44 @@ if ('serviceWorker' in navigator) {
             return Number(produtoRaizEstoque(produto)?.estoque || 0);
         }
 
+        function estoqueMinimoProduto(produto) {
+            const raiz = produtoRaizEstoque(produto);
+            const minimo = Number(raiz?.estoqueMinimo);
+            return Number.isFinite(minimo) && minimo >= 0 ? minimo : 5;
+        }
+
         function chaveEstoque(produto) {
             return produtoRaizEstoque(produto)?.id || produto?.id || '';
         }
 
+        function estoquesBaixos() {
+            const alertas = [];
+            const estoquesProcessados = new Set();
+            produtos.forEach(produto => {
+                if (!produto || produto.tipo === 'servico') return;
+                const raiz = produtoRaizEstoque(produto);
+                if (!raiz || estoquesProcessados.has(raiz.id)) return;
+                estoquesProcessados.add(raiz.id);
+                const saldo = estoqueDisponivel(raiz);
+                const minimo = estoqueMinimoProduto(raiz);
+                if (saldo > minimo) return;
+                const vinculados = produtos
+                    .filter(item => item.id !== raiz.id && item.tipo !== 'servico' && chaveEstoque(item) === raiz.id)
+                    .map(item => item.nome);
+                alertas.push({ id: raiz.id, nome: raiz.nome, saldo, minimo, unidade: raiz.unidade || 'un', vinculados });
+            });
+            return alertas.sort((a, b) => (a.saldo / Math.max(a.minimo, 1)) - (b.saldo / Math.max(b.minimo, 1)) || a.nome.localeCompare(b.nome, 'pt-BR'));
+        }
+
         function normalizarEstoquesVinculados() {
             produtos.forEach(produto => {
-                if (produto.tipo === 'servico' || !produto.estoqueVinculadoId) return;
+                if (produto.tipo === 'servico') {
+                    delete produto.estoqueMinimo;
+                    return;
+                }
+                const minimo = Number(produto.estoqueMinimo);
+                produto.estoqueMinimo = Number.isFinite(minimo) && minimo >= 0 ? minimo : 5;
+                if (!produto.estoqueVinculadoId) return;
                 const raiz = produtoRaizEstoque(produto);
                 if (!raiz || raiz.id === produto.id || raiz.tipo === 'servico') {
                     delete produto.estoqueVinculadoId;
@@ -1926,6 +1986,7 @@ if ('serviceWorker' in navigator) {
                 }
                 produto.estoqueVinculadoId = raiz.id;
                 produto.estoque = Number(raiz.estoque || 0);
+                produto.estoqueMinimo = estoqueMinimoProduto(raiz);
                 produto.unidade = raiz.unidade || produto.unidade || 'un';
             });
         }
@@ -1982,24 +2043,139 @@ if ('serviceWorker' in navigator) {
         function atualizarVinculoEstoqueForm() {
             const select = document.getElementById('produto-estoque-vinculo');
             const estoque = document.getElementById('produto-estoque');
+            const estoqueMinimo = document.getElementById('produto-estoque-minimo');
             const unidade = document.getElementById('produto-unidade');
             const ajuda = document.getElementById('produto-estoque-vinculo-ajuda');
-            if (!select || !estoque || !unidade) return;
+            const ajudaMinimo = document.getElementById('produto-estoque-minimo-ajuda');
+            if (!select || !estoque || !estoqueMinimo || !unidade) return;
             const raiz = produtos.find(produto => produto.id === select.value);
             const vinculado = !!raiz;
             estoque.disabled = vinculado;
+            estoqueMinimo.disabled = vinculado;
             unidade.disabled = vinculado;
             estoque.classList.toggle('bg-slate-100', vinculado);
+            estoqueMinimo.classList.toggle('bg-slate-100', vinculado);
             unidade.classList.toggle('bg-slate-100', vinculado);
             if (vinculado) {
                 estoque.value = estoqueDisponivel(raiz);
+                estoqueMinimo.value = estoqueMinimoProduto(raiz);
                 unidade.value = raiz.unidade || 'un';
                 ajuda.textContent = `Mesmo saldo de “${raiz.nome}”. Qualquer venda baixa os dois produtos.`;
                 ajuda.className = 'mt-1 text-xs font-semibold text-blue-700';
+                ajudaMinimo.textContent = `O alerta também segue o limite definido em “${raiz.nome}”.`;
+                ajudaMinimo.className = 'mt-1 text-xs font-semibold text-blue-700';
             } else {
                 ajuda.textContent = 'Use estoque próprio ou vincule este item ao saldo de outro produto.';
                 ajuda.className = 'mt-1 text-xs text-gray-500';
+                ajudaMinimo.textContent = 'O aviso aparece quando o saldo chegar a este valor ou ficar abaixo dele.';
+                ajudaMinimo.className = 'mt-1 text-xs text-gray-500';
             }
+        }
+
+        function chaveAlertasEstoqueVistos() {
+            return `pdv_alertas_estoque_vistos_${window.usuarioPdv?.uid || 'local'}`;
+        }
+
+        function lerAlertasEstoqueVistos() {
+            try {
+                const vistos = JSON.parse(localStorage.getItem(chaveAlertasEstoqueVistos()) || '{}');
+                return vistos && typeof vistos === 'object' && !Array.isArray(vistos) ? vistos : {};
+            } catch (_) {
+                return {};
+            }
+        }
+
+        function salvarAlertasEstoqueVistos(vistos) {
+            const chave = chaveAlertasEstoqueVistos();
+            if (Object.keys(vistos).length) localStorage.setItem(chave, JSON.stringify(vistos));
+            else localStorage.removeItem(chave);
+        }
+
+        function mapaAlertasEstoque(alertas = estoquesBaixos()) {
+            return Object.fromEntries(alertas.map(alerta => [alerta.id, { saldo: alerta.saldo, minimo: alerta.minimo }]));
+        }
+
+        function atualizarNotificacaoEstoque() {
+            const botao = document.getElementById('btn-alertas-estoque');
+            const contador = document.getElementById('contador-alertas-estoque');
+            if (!botao || !contador) return [];
+            const alertas = estoquesBaixos();
+            const vistos = lerAlertasEstoqueVistos();
+            const idsAtuais = new Set(alertas.map(alerta => alerta.id));
+            Object.keys(vistos).forEach(id => { if (!idsAtuais.has(id)) delete vistos[id]; });
+            salvarAlertasEstoqueVistos(vistos);
+            const naoVistos = alertas.filter(alerta => {
+                const anterior = vistos[alerta.id];
+                return !anterior || alerta.saldo < Number(anterior.saldo) || alerta.minimo > Number(anterior.minimo);
+            });
+            contador.textContent = naoVistos.length > 99 ? '99+' : String(naoVistos.length);
+            contador.classList.toggle('hidden', naoVistos.length === 0);
+            botao.classList.toggle('ring-2', naoVistos.length > 0);
+            botao.classList.toggle('ring-red-400', naoVistos.length > 0);
+            botao.setAttribute('aria-label', naoVistos.length
+                ? `${naoVistos.length} novo(s) alerta(s) de estoque. Abrir alertas.`
+                : alertas.length ? `${alertas.length} produto(s) com estoque baixo, já visualizado(s).` : 'Abrir alertas de estoque. Nenhum produto está no limite.');
+            return alertas;
+        }
+        window.atualizarNotificacaoEstoque = atualizarNotificacaoEstoque;
+
+        function abrirAlertasEstoque() {
+            const alertas = estoquesBaixos();
+            salvarAlertasEstoqueVistos(mapaAlertasEstoque(alertas));
+            atualizarNotificacaoEstoque();
+            const lista = document.getElementById('lista-alertas-estoque');
+            lista.replaceChildren();
+            if (!alertas.length) {
+                const vazio = document.createElement('div');
+                vazio.className = 'rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center text-emerald-900';
+                vazio.innerHTML = '<div class="text-3xl" aria-hidden="true">✓</div><strong class="mt-2 block">Estoque em ordem</strong><p class="mt-1 text-sm">Nenhum produto chegou ao limite mínimo configurado.</p>';
+                lista.appendChild(vazio);
+            } else {
+                alertas.forEach(alerta => {
+                    const zerado = alerta.saldo <= 0;
+                    const card = document.createElement('article');
+                    card.className = `rounded-xl border p-4 ${zerado ? 'border-red-200 bg-red-50' : 'border-orange-200 bg-orange-50'}`;
+                    const topo = document.createElement('div');
+                    topo.className = 'flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between';
+                    const info = document.createElement('div');
+                    const nome = document.createElement('h3');
+                    nome.className = `font-bold ${zerado ? 'text-red-950' : 'text-orange-950'}`;
+                    nome.textContent = alerta.nome;
+                    const detalhe = document.createElement('p');
+                    detalhe.className = 'mt-1 text-sm text-slate-700';
+                    detalhe.textContent = `Saldo atual: ${alerta.saldo.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${alerta.unidade} · Mínimo: ${alerta.minimo.toLocaleString('pt-BR', { maximumFractionDigits: 2 })} ${alerta.unidade}`;
+                    info.append(nome, detalhe);
+                    if (alerta.vinculados.length) {
+                        const vinculos = document.createElement('p');
+                        vinculos.className = 'mt-1 text-xs font-semibold text-blue-700';
+                        vinculos.textContent = `Estoque compartilhado com: ${alerta.vinculados.join(', ')}`;
+                        info.appendChild(vinculos);
+                    }
+                    const situacao = document.createElement('span');
+                    situacao.className = `self-start rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${zerado ? 'bg-red-700 text-white' : 'bg-orange-600 text-white'}`;
+                    situacao.textContent = zerado ? 'Sem estoque' : 'Repor estoque';
+                    topo.append(info, situacao);
+                    card.appendChild(topo);
+                    lista.appendChild(card);
+                });
+            }
+            document.getElementById('btn-ir-produtos-alerta').classList.toggle('hidden', ehOperadorAtual());
+            const modal = document.getElementById('modal-alertas-estoque');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.querySelector('button[aria-label="Fechar alertas de estoque"]')?.focus();
+        }
+
+        function fecharAlertasEstoque() {
+            const modal = document.getElementById('modal-alertas-estoque');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function irParaProdutosDosAlertas() {
+            fecharAlertasEstoque();
+            if (ehOperadorAtual()) return mostrarMensagem('O cadastro de produtos está disponível somente para o titular.', 'erro');
+            showSection('produtos');
         }
 
         // Gerenciamento de produtos
@@ -2024,6 +2200,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-custo').value = '';
             document.getElementById('produto-unidade').value = 'un';
             document.getElementById('produto-estoque').value = '0';
+            document.getElementById('produto-estoque-minimo').value = '5';
             document.getElementById('produto-estoque-vinculo').value = '';
             document.getElementById('produto-categoria').value = '';
             document.getElementById('produto-descricao').value = '';
@@ -2037,6 +2214,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('campo-produto-custo').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-unidade').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-estoque').classList.toggle('hidden', ehServico);
+            document.getElementById('campo-produto-estoque-minimo').classList.toggle('hidden', ehServico);
             document.getElementById('campo-produto-vinculo').classList.toggle('hidden', ehServico);
             if (ehServico) document.getElementById('produto-estoque-vinculo').value = '';
             document.getElementById('produto-codigo').closest('div').classList.toggle('hidden', ehServico);
@@ -2073,6 +2251,12 @@ if ('serviceWorker' in navigator) {
             const raizSelecionada = tipo === 'produto'
                 ? produtoRaizEstoque(produtos.find(item => item.id === document.getElementById('produto-estoque-vinculo').value))
                 : null;
+            const campoEstoqueMinimo = document.getElementById('produto-estoque-minimo');
+            const estoqueMinimoInformado = Number(campoEstoqueMinimo.value);
+            if (tipo === 'produto' && (!campoEstoqueMinimo.value.trim() || !Number.isFinite(estoqueMinimoInformado) || estoqueMinimoInformado < 0)) {
+                mostrarMensagem('Informe um estoque mínimo válido, igual ou maior que zero.', 'erro');
+                return;
+            }
             const produto = {
                 id: produtoEditando ? produtoEditando.id : 'p_' + Date.now(),
                 tipo: tipo,
@@ -2082,6 +2266,7 @@ if ('serviceWorker' in navigator) {
                 custo: tipo === 'servico' ? 0 : (parseFloat(document.getElementById('produto-custo').value) || 0),
                 unidade: tipo === 'servico' ? 'serviço' : (raizSelecionada?.unidade || document.getElementById('produto-unidade').value),
                 estoque: tipo === 'servico' ? null : (raizSelecionada ? estoqueDisponivel(raizSelecionada) : (parseFloat(document.getElementById('produto-estoque').value) || 0)),
+                ...(tipo === 'produto' ? { estoqueMinimo: raizSelecionada ? estoqueMinimoProduto(raizSelecionada) : estoqueMinimoInformado } : {}),
                 categoria: document.getElementById('produto-categoria').value.trim(),
                 descricao: document.getElementById('produto-descricao').value.trim(),
                 imagem: imagem,
@@ -2236,6 +2421,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-custo').value = produto.custo || '';
             document.getElementById('produto-unidade').value = produto.unidade;
             document.getElementById('produto-estoque').value = produto.estoque;
+            document.getElementById('produto-estoque-minimo').value = estoqueMinimoProduto(produto);
             document.getElementById('produto-categoria').value = produto.categoria || '';
             document.getElementById('produto-descricao').value = produto.descricao || '';
             document.getElementById('produto-imagem').value = produto.imagem || '';
@@ -2272,8 +2458,9 @@ if ('serviceWorker' in navigator) {
             produtos.forEach(produto => {
                 const ehServico = produto.tipo === 'servico';
                 const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
+                const estoqueMinimo = ehServico ? null : estoqueMinimoProduto(produto);
                 const raizEstoque = ehServico ? null : produtoRaizEstoque(produto);
-                const estoqueClass = !ehServico && saldoEstoque <= 5 ? 'text-red-600 font-semibold' : '';
+                const estoqueClass = !ehServico && saldoEstoque <= estoqueMinimo ? 'text-red-600 font-semibold' : '';
                 const indicacaoVinculo = produto.estoqueVinculadoId && raizEstoque?.id !== produto.id
                     ? `<div class="mt-1 text-xs font-semibold text-blue-700">🔗 Mesmo estoque de ${raizEstoque.nome}</div>` : '';
                 
@@ -2286,6 +2473,7 @@ if ('serviceWorker' in navigator) {
                     <td class="px-4 py-2">${ehServico ? '<span class="text-teal-700 font-semibold">Serviço</span>' : (produto.codigo || '-')}</td>
                     <td class="px-4 py-2 text-right">R$ ${produto.preco.toFixed(2)}</td>
                     <td class="px-4 py-2 text-right ${estoqueClass}">${ehServico ? 'Não controla estoque' : `${saldoEstoque} ${produto.unidade}`}</td>
+                    <td class="px-4 py-2 text-right">${ehServico ? '—' : `${estoqueMinimo} ${produto.unidade}`}</td>
                     <td class="px-4 py-2">${produto.categoria || '-'}</td>
                     <td class="px-4 py-2 text-center">${produto.visivelCatalogo === true ? '<span class="rounded-full bg-teal-100 px-2 py-1 text-xs font-semibold text-teal-800">Visível</span>' : '<span class="text-xs text-gray-500">Oculto</span>'}</td>
                     <td class="px-4 py-2 text-center">
@@ -2315,6 +2503,7 @@ if ('serviceWorker' in navigator) {
                         <div class="text-right">
                             <div class="font-bold text-green-600">R$ ${produto.preco.toFixed(2)}</div>
                             <div class="text-sm ${estoqueClass}">${ehServico ? 'Valor ajustável na venda' : `Estoque: ${saldoEstoque} ${produto.unidade}`}</div>
+                            ${ehServico ? '' : `<div class="mt-1 text-xs text-gray-500">Alerta em: ${estoqueMinimo} ${produto.unidade}</div>`}
                         </div>
                     </div>
                     <div class="flex gap-2 mt-3">
@@ -2516,7 +2705,7 @@ function showInstallButton() {
                 
                 const ehServico = produto.tipo === 'servico';
                 const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
-                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= 5 ? 'text-orange-600' : 'text-green-600');
+                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= estoqueMinimoProduto(produto) ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
                     <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
@@ -2537,7 +2726,7 @@ function showInstallButton() {
                 
                 const ehServico = produto.tipo === 'servico';
                 const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
-                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= 5 ? 'text-orange-600' : 'text-green-600');
+                const estoqueClass = !ehServico && (saldoEstoque <= 0 ? 'text-red-600' : saldoEstoque <= estoqueMinimoProduto(produto) ? 'text-orange-600' : 'text-green-600');
                 
                 div.innerHTML = `
                     <div class="font-medium">${ehServico ? '🛠️ ' : ''}${produto.nome}</div>
@@ -4053,8 +4242,7 @@ function showInstallButton() {
             
             document.getElementById('total-produtos').textContent = produtos.length;
             
-            const estoqueBaixo = produtos.filter(p => p.estoque <= 5).length;
-            document.getElementById('estoque-baixo').textContent = estoqueBaixo;
+            document.getElementById('estoque-baixo').textContent = estoquesBaixos().length;
             
             atualizarTabelaVendasDia(vendasFiltradas);
         }
@@ -4325,10 +4513,10 @@ function showInstallButton() {
         }
 
         function exportarProdutos() {
-            const csv = ['Nome,Codigo,Preco,Custo,Estoque,Unidade,Categoria'];
+            const csv = ['Nome,Codigo,Preco,Custo,Estoque,Estoque Minimo,Unidade,Categoria'];
             
             produtos.forEach(produto => {
-                csv.push(`"${produto.nome}","${produto.codigo || ''}",${produto.preco.toFixed(2)},${produto.custo.toFixed(2)},${produto.estoque},"${produto.unidade}","${produto.categoria || ''}"`);
+                csv.push(`"${produto.nome}","${produto.codigo || ''}",${produto.preco.toFixed(2)},${produto.custo.toFixed(2)},${produto.estoque},${produto.tipo === 'servico' ? '' : estoqueMinimoProduto(produto)},"${produto.unidade}","${produto.categoria || ''}"`);
             });
             
             baixarCSV(csv.join('\n'), 'produtos.csv');
@@ -5227,6 +5415,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(lancamentosFinanceiros));
             localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(saldosIniciaisFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
+            atualizarNotificacaoEstoque();
         }
 
         function salvarRascunhoVenda() {
@@ -5283,6 +5472,7 @@ function showInstallButton() {
                         custo: 3.00,
                         unidade: 'un',
                         estoque: 50,
+                        estoqueMinimo: 5,
                         categoria: 'Bebidas'
                     },
                     {
@@ -5293,6 +5483,7 @@ function showInstallButton() {
                         custo: 0.45,
                         unidade: 'un',
                         estoque: 100,
+                        estoqueMinimo: 10,
                         categoria: 'Padaria'
                     },
                     {
@@ -5303,6 +5494,7 @@ function showInstallButton() {
                         custo: 3.20,
                         unidade: 'un',
                         estoque: 25,
+                        estoqueMinimo: 5,
                         categoria: 'Laticínios'
                     },
                     {
@@ -5313,6 +5505,7 @@ function showInstallButton() {
                         custo: 28.00,
                         unidade: 'kg',
                         estoque: 15.5,
+                        estoqueMinimo: 3,
                         categoria: 'Açougue'
                     }
                 ];
@@ -5321,6 +5514,7 @@ function showInstallButton() {
         }
 
         function atualizarInterface() {
+            normalizarEstoquesVinculados();
             atualizarListaCategorias();
             atualizarListaProdutos();
             atualizarCarrinho();
@@ -5332,6 +5526,7 @@ function showInstallButton() {
             atualizarClientes();
             atualizarFinanceiro();
             atualizarCamposMovimento();
+            atualizarNotificacaoEstoque();
         }
     </script>
     <script src="./clientes-financeiro.js"></script>

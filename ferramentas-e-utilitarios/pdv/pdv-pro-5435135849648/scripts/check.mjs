@@ -30,6 +30,10 @@ if (cloudinaryButtons.length !== 2) throw new Error('Os campos de imagem e logo 
 
 for (const marker of [
   'produto-estoque-vinculo',
+  'produto-estoque-minimo',
+  'btn-alertas-estoque',
+  'function abrirAlertasEstoque',
+  'function atualizarNotificacaoEstoque',
   'function produtoRaizEstoque',
   'function restaurarEstoqueDosItens',
   'vendedor: vendedorAtual()',
@@ -57,7 +61,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', '10 novos temas comerciais, mais contraste e novos botões', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -195,11 +199,12 @@ const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);
 if (start < 0 || end < 0) throw new Error('Não foi possível localizar as funções de estoque.');
 const helperSource = html.slice(start, end);
-const makeHelpers = new Function('produtos', 'carrinho', 'window', `${helperSource}; return { produtoRaizEstoque, estoqueDisponivel, chaveEstoque, normalizarEstoquesVinculados, totalReservadoNoEstoque, restaurarEstoqueDosItens };`);
+const makeHelpers = new Function('produtos', 'carrinho', 'window', `${helperSource}; return { produtoRaizEstoque, estoqueDisponivel, estoqueMinimoProduto, estoquesBaixos, chaveEstoque, normalizarEstoquesVinculados, totalReservadoNoEstoque, restaurarEstoqueDosItens };`);
 
 const produtos = [
-  { id: 'pb', nome: 'Xerox preto e branco', tipo: 'produto', unidade: 'un', estoque: 2200 },
-  { id: 'color', nome: 'Xerox colorida', tipo: 'produto', unidade: 'un', estoque: 0, estoqueVinculadoId: 'pb' }
+  { id: 'pb', nome: 'Xerox preto e branco', tipo: 'produto', unidade: 'un', estoque: 2200, estoqueMinimo: 500 },
+  { id: 'color', nome: 'Xerox colorida', tipo: 'produto', unidade: 'un', estoque: 0, estoqueMinimo: 10, estoqueVinculadoId: 'pb' },
+  { id: 'servico', nome: 'Arte final', tipo: 'servico', estoque: 0, estoqueMinimo: 100 }
 ];
 const carrinho = [
   { produtoId: 'pb', quantidade: 100 },
@@ -208,6 +213,8 @@ const carrinho = [
 const helpers = makeHelpers(produtos, carrinho, {});
 helpers.normalizarEstoquesVinculados();
 if (helpers.estoqueDisponivel(produtos[1]) !== 2200 || produtos[1].estoque !== 2200) throw new Error('O saldo vinculado não foi sincronizado.');
+if (helpers.estoqueMinimoProduto(produtos[1]) !== 500 || produtos[1].estoqueMinimo !== 500) throw new Error('O estoque vinculado não herdou o limite mínimo da origem.');
+if ('estoqueMinimo' in produtos[2]) throw new Error('Serviços não podem gerar alertas de estoque.');
 if (helpers.totalReservadoNoEstoque(produtos[0]) !== 175) throw new Error('O carrinho não somou o consumo compartilhado.');
 
 produtos[0].estoque -= 175;
@@ -218,6 +225,14 @@ helpers.restaurarEstoqueDosItens([
   { produtoId: 'color', estoqueOrigemId: 'pb', quantidade: 75 }
 ]);
 if (produtos[0].estoque !== 2200 || produtos[1].estoque !== 2200) throw new Error('A restauração compartilhada falhou.');
+if (helpers.estoquesBaixos().length !== 0) throw new Error('O alerta apareceu antes de o estoque atingir o limite.');
+produtos[0].estoqueMinimo = 2500;
+helpers.normalizarEstoquesVinculados();
+const alertasEstoque = helpers.estoquesBaixos();
+if (alertasEstoque.length !== 1 || alertasEstoque[0].id !== 'pb' || alertasEstoque[0].vinculados.join(',') !== 'Xerox colorida') {
+  throw new Error('Os alertas de estoque mínimo não agruparam corretamente o estoque compartilhado.');
+}
+if (html.includes("produtos.filter(p => p.estoque <= 5)")) throw new Error('O relatório ainda usa um limite fixo de estoque baixo.');
 
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
 for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática']) {

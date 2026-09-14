@@ -52,6 +52,8 @@ O botão **Tema** abre um painel exclusivo do titular. Além do visual padrão, 
 
 O arquivo `catalogo/catalogo.js` contém a constante `LIMITE_ESTOQUE_BAIXO`, inicialmente definida como `5`. Produtos antigos sem `visivelCatalogo` permanecem ocultos até que sejam editados e marcados. Imagens e logo usam URLs públicas HTTPS para não aumentar o documento privado do Firestore nem exigir Firebase Storage. O tema salvo no PDV é publicado de forma sanitizada junto aos dados públicos da loja; cores, fonte, cantos e imagem de fundo são aplicados em tempo real no mesmo link do catálogo.
 
+Cada produto possui o campo **Estoque mínimo para alerta**. Quando o saldo chega ao limite configurado, o botão **Estoque** da barra superior mostra um contador; ao abrir a lista, os avisos atuais são marcados como visualizados naquele usuário e aparelho. Uma nova queda de saldo ou uma nova entrada na faixa crítica faz o contador reaparecer. Produtos que compartilham estoque usam o limite do produto responsável pelo saldo e aparecem agrupados, evitando avisos duplicados. Produtos antigos recebem o limite padrão de 5 até serem editados.
+
 A senha solicitada pelo ADM do PDV e pelas ações protegidas é a mesma senha de login da conta. Ela é confirmada por reautenticação no Firebase Authentication, sem senha paralela no Firestore ou no `localStorage`.
 
 No ADM do PDV, o titular pode adicionar, pausar e reativar operadores. A troca de senha é enviada ao e-mail individual do funcionário. Ao publicar esta versão, envie em conjunto `firestore:rules` e `hosting`.
