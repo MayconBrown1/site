@@ -39,6 +39,8 @@ Nunca coloque o JSON da conta de serviço no código, em arquivo público, ou em
 
 Toda alteração funcional ou visual deve ser registrada no primeiro bloco da seção **Novidades**. A versão desse bloco, informada em `data-novidades-cache`, precisa acompanhar o `CACHE_NAME` de `sw.js`. O comando `node scripts/check.mjs` interrompe a verificação e mostra um aviso quando os identificadores não correspondem.
 
+O menu principal permanece recolhido no botão **☰** tanto no computador quanto no celular. Quando aberto, os atalhos são exibidos em uma grade dentro do cabeçalho e deslocam o conteúdo da página para baixo, sem sobreposição; a seleção de uma área fecha o menu automaticamente.
+
 ## Painel de Tema
 
 O botão **Tema** abre um painel exclusivo do titular. Além do visual padrão, escuro e dourado, há temas prontos para Pet Shop/Casa de Ração, Adega, Conveniência, Doceria, Hortifruti, Gráfica & Tecnologia, Técnico de Informática, Futurista, Neon Laranja, Neon Verde, Borracharia, Oficina de Motos, Oficina de Carros, Autopeças, Mercado/Mercearia, Moda, Beleza/Cosméticos, Material de Construção, Papelaria e Farmácia, todos com imagem local otimizada e identidade visual completa. As escolhas de fundo, textos, cartões, botões, barra superior, fonte, cantos, formato dos botões e imagem de fundo ficam em `configSistema.temaPersonalizado`, são sincronizadas com o estado da empresa e aplicadas também à experiência dos operadores. O sistema corrige automaticamente combinações de texto sem contraste suficiente, e as superfícies de Novidades e Histórico do Caixa acompanham os cartões do tema. Imagens personalizadas por link aceitam somente HTTP ou HTTPS; os fundos locais ficam restritos à pasta segura de temas do aplicativo.

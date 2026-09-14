@@ -145,12 +145,12 @@
     <div class="min-h-full flex flex-col">
         <!-- Header -->
         <header class="bg-blue-600 text-white p-3 md:p-4 shadow-lg">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <div class="flex w-full items-center justify-between sm:w-auto">
+            <div class="flex flex-col gap-3">
+                <div class="flex w-full items-center justify-between">
                     <div><h1 class="text-lg md:text-2xl font-bold">PDV - Pro</h1><p id="usuario-pdv-atual" class="hidden text-xs text-zinc-300"></p></div>
-                    <button type="button" onclick="alternarMenuPdv()" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xl sm:hidden" aria-label="Abrir menu" aria-controls="menu-pdv">☰</button>
+                    <button id="btn-menu-pdv" type="button" onclick="alternarMenuPdv()" class="rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-xl leading-none" aria-label="Abrir menu principal" aria-controls="menu-pdv" aria-expanded="false">☰</button>
                 </div>
-                <div id="menu-pdv" class="hidden grid-cols-2 gap-2 w-full sm:flex sm:flex-wrap sm:w-auto">
+                <div id="menu-pdv" class="hidden w-full grid-cols-2 gap-2 border-t border-white/15 pt-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                     <button data-section="vendas" onclick="showSection('vendas')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Vendas</button>
                     <button data-section="orcamentos" onclick="showSection('orcamentos')" class="bg-emerald-500 hover:bg-emerald-700 px-3 py-2 rounded transition-colors text-sm">Orçamentos</button>
                     <button data-section="produtos" onclick="showSection('produtos')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Produtos</button>
@@ -160,12 +160,12 @@
                     <button data-section="relatorios" onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button data-section="catalogo" onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
                     <button data-section="novidades" onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
-                    <button id="btn-alertas-estoque" type="button" onclick="abrirAlertasEstoque()" class="relative bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded transition-colors text-sm" aria-label="Abrir alertas de estoque">
+                    <button id="btn-alertas-estoque" type="button" onclick="abrirAlertasEstoque(); fecharMenuPdv()" class="relative bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded transition-colors text-sm" aria-label="Abrir alertas de estoque">
                         🔔 Estoque
                         <span id="contador-alertas-estoque" class="absolute -right-2 -top-2 hidden min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-xs font-black leading-4 text-white shadow-lg" aria-hidden="true">0</span>
                     </button>
-                    <button data-owner-only onclick="abrirPainelTema()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">🎨 Tema</button>
-                    <button data-owner-only onclick="acessarAdm()" class="rounded border border-amber-400/60 bg-slate-900 px-3 py-2 text-sm font-bold text-[#f6c453] transition-colors hover:bg-black hover:text-yellow-300">ADM do PDV</button>
+                    <button data-owner-only onclick="abrirPainelTema(); fecharMenuPdv()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">🎨 Tema</button>
+                    <button data-owner-only onclick="acessarAdm(); fecharMenuPdv()" class="rounded border border-amber-400/60 bg-slate-900 px-3 py-2 text-sm font-bold text-[#f6c453] transition-colors hover:bg-black hover:text-yellow-300">ADM do PDV</button>
                 </div>
             </div>
         </header>
@@ -793,13 +793,14 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 14/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v36" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v37" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Alertas personalizados de estoque mínimo</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Menu compacto também no computador</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
-                            <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Saiba a hora certa de repor cada produto</h4><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar um produto, preencha <strong>Estoque mínimo para alerta</strong> com o limite ideal daquele item. Quando o saldo chegar ao limite ou ficar abaixo dele, o botão <strong>Estoque</strong> na barra superior exibirá um contador. Abra o sino para conferir os produtos; depois de visualizar, o contador desaparece até surgir um novo alerta ou o saldo cair novamente.</p></article>
+                            <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">☰ Mais espaço e organização em qualquer tela</h4><p class="mt-2 text-sm text-slate-700">No computador e no celular, os atalhos de <strong>Vendas, Orçamentos, Produtos</strong> e das demais áreas ficam recolhidos no botão de três linhas. Clique em <strong>☰</strong> para abrir o menu em uma faixa própria; o conteúdo é deslocado para baixo, sem opções cobrindo a tela. Ao escolher uma área, o menu fecha automaticamente.</p></article>
+                            <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Alertas personalizados de estoque mínimo</h4><p class="mt-2 text-sm text-slate-700">Saiba a hora certa de repor cada produto: ao cadastrar ou editar um item, preencha <strong>Estoque mínimo para alerta</strong> com o limite ideal. Quando o saldo chegar ao limite ou ficar abaixo dele, o botão <strong>Estoque</strong> exibirá um contador. Abra o aviso para conferir os produtos; depois de visualizar, o contador desaparece até surgir um novo alerta ou o saldo cair novamente.</p></article>
                             <article class="rounded-xl border border-orange-200 bg-orange-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-orange-950">🏪 Temas para mais tipos de comércio</h4><p class="mt-2 text-sm text-slate-700">Abra <strong>Tema</strong> e escolha uma das novas opções: <strong>Borracharia, Oficina de Motos, Oficina de Carros, Autopeças, Mercado/Mercearia, Moda, Beleza/Cosméticos, Material de Construção, Papelaria ou Farmácia</strong>. Cada opção já traz fundo, paleta e estilo próprios; confira a prévia e clique em <strong>Salvar tema</strong>.</p></article>
                             <article class="rounded-xl border border-violet-200 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🔳 Mais contraste e formatos de botão</h4><p class="mt-2 text-sm text-slate-700">As áreas de <strong>Novidades</strong> e <strong>Histórico de movimentação</strong> agora acompanham corretamente temas escuros, incluindo Neon Verde, Neon Laranja, Futurista e Informática. Também é possível escolher botões retos, discretos, arredondados, em cápsula ou chanfrados no Painel de Tema.</p></article>
                             <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📴 PDV funcionando offline com sincronização automática</h4><p class="mt-2 text-sm text-slate-700"><strong>Continue vendendo mesmo sem internet:</strong> depois de abrir o PDV online pelo menos uma vez neste aparelho, ele pode ser reaberto e usado sem conexão. Vendas, baixas de estoque, clientes, caixa, orçamentos e lançamentos ficam protegidos localmente no navegador.</p></article>
@@ -1659,17 +1660,25 @@ if ('serviceWorker' in navigator) {
                 carregarConfiguracoesAdm();
                 window.carregarOperadores?.();
             }
-            if (window.innerWidth < 640) {
-                const menu = document.getElementById('menu-pdv');
-                menu.classList.add('hidden');
-                menu.classList.remove('grid');
-            }
+            fecharMenuPdv();
+        }
+
+        function definirMenuPdvAberto(aberto) {
+            const menu = document.getElementById('menu-pdv');
+            const botao = document.getElementById('btn-menu-pdv');
+            menu.classList.toggle('hidden', !aberto);
+            menu.classList.toggle('grid', aberto);
+            botao.setAttribute('aria-expanded', String(aberto));
+            botao.setAttribute('aria-label', aberto ? 'Fechar menu principal' : 'Abrir menu principal');
+        }
+
+        function fecharMenuPdv() {
+            definirMenuPdvAberto(false);
         }
 
         function alternarMenuPdv() {
             const menu = document.getElementById('menu-pdv');
-            menu.classList.toggle('hidden');
-            menu.classList.toggle('grid');
+            definirMenuPdvAberto(menu.classList.contains('hidden'));
         }
 
         const TEMA_PADRAO = Object.freeze({
