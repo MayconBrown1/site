@@ -1,8 +1,10 @@
-const CACHE_NAME = 'pdv-pro-v34';
+const CACHE_NAME = 'pdv-pro-v35';
 const APP_SHELL = [
   './', './index.html', './login.html', './cadastro.html', './admin.html', './favicon.svg', './catalogo/', './catalogo/index.html', './catalogo/catalogo.css', './catalogo/catalogo.js', './catalogo-admin.js', './clientes-financeiro.js', './operator-admin.js', './manifest.json', './pwa-install.js', './pdv-cloud.js', './auth.js', './firebase-config.js',
   './assets/temas/pet-shop.webp', './assets/temas/adega.webp', './assets/temas/conveniencia.webp', './assets/temas/doceria.webp', './assets/temas/hortifruti.webp',
-  './assets/temas/grafica-tecnologia.webp', './assets/temas/informatica.webp', './assets/temas/futurista.webp', './assets/temas/neon-laranja.webp', './assets/temas/neon-verde.webp'
+  './assets/temas/grafica-tecnologia.webp', './assets/temas/informatica.webp', './assets/temas/futurista.webp', './assets/temas/neon-laranja.webp', './assets/temas/neon-verde.webp',
+  './assets/temas/borracharia.webp', './assets/temas/oficina-motos.webp', './assets/temas/oficina-carros.webp', './assets/temas/autopecas.webp', './assets/temas/mercado.webp',
+  './assets/temas/moda.webp', './assets/temas/beleza.webp', './assets/temas/material-construcao.webp', './assets/temas/papelaria.webp', './assets/temas/farmacia.webp'
 ];
 const REMOTE_SHELL = [
   'https://cdn.tailwindcss.com',

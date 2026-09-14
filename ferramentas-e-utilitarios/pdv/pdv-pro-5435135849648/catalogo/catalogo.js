@@ -5,7 +5,7 @@ import { collection, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/
 const LIMITE_ESTOQUE_BAIXO = 5;
 const TEMA_CATALOGO_PADRAO = Object.freeze({
   fundo: '#f3f6fa', texto: '#152033', cartao: '#ffffff', botao: '#0f4c81', textoBotao: '#ffffff',
-  barra: '#082f52', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado',
+  barra: '#082f52', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado', formatoBotao: 'arredondado',
   imagem: '', ajusteImagem: 'cover', sobreposicao: 20
 });
 const FONTES_CATALOGO = Object.freeze({
@@ -13,6 +13,11 @@ const FONTES_CATALOGO = Object.freeze({
   arial: 'Arial, sans-serif', verdana: 'Verdana, sans-serif', georgia: 'Georgia, serif'
 });
 const RAIOS_CATALOGO = Object.freeze({ discreto: '10px', arredondado: '18px', amplo: '26px' });
+const FORMATOS_BOTAO_CATALOGO = Object.freeze({
+  reto: { raio: '0', recorte: 'none' }, discreto: { raio: '6px', recorte: 'none' },
+  arredondado: { raio: '14px', recorte: 'none' }, capsula: { raio: '999px', recorte: 'none' },
+  chanfrado: { raio: '0', recorte: 'polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px)' }
+});
 
 function corTemaCatalogo(valor, padrao) {
   return /^#[0-9a-f]{6}$/i.test(String(valor || '')) ? String(valor).toLowerCase() : padrao;
@@ -48,6 +53,7 @@ function normalizarTemaCatalogo(tema = {}) {
     textoBarra: corTemaCatalogo(tema.textoBarra, TEMA_CATALOGO_PADRAO.textoBarra),
     fonte: FONTES_CATALOGO[tema.fonte] ? tema.fonte : TEMA_CATALOGO_PADRAO.fonte,
     bordas: RAIOS_CATALOGO[tema.bordas] ? tema.bordas : TEMA_CATALOGO_PADRAO.bordas,
+    formatoBotao: FORMATOS_BOTAO_CATALOGO[tema.formatoBotao] ? tema.formatoBotao : TEMA_CATALOGO_PADRAO.formatoBotao,
     imagem: caminhoImagemTemaCatalogo(tema.imagem),
     ajusteImagem: ['cover', 'contain', 'repeat'].includes(tema.ajusteImagem) ? tema.ajusteImagem : TEMA_CATALOGO_PADRAO.ajusteImagem,
     sobreposicao: Math.min(80, Math.max(0, Number(tema.sobreposicao ?? TEMA_CATALOGO_PADRAO.sobreposicao)))
@@ -73,6 +79,8 @@ function aplicarTemaCatalogo(tema) {
     '--borda': seguro.borda, '--realce-suave': seguro.realceSuave,
     '--fundo-translucido': `${seguro.fundo}f2`, '--fonte-catalogo': FONTES_CATALOGO[seguro.fonte],
     '--raio-cartao': RAIOS_CATALOGO[seguro.bordas], '--tema-imagem': imagem,
+    '--raio-botao': FORMATOS_BOTAO_CATALOGO[seguro.formatoBotao].raio,
+    '--recorte-botao': FORMATOS_BOTAO_CATALOGO[seguro.formatoBotao].recorte,
     '--tema-imagem-tamanho': tamanho, '--tema-imagem-repeticao': repeticao
   };
   Object.entries(valores).forEach(([nome, valor]) => document.documentElement.style.setProperty(nome, valor));

@@ -14,6 +14,8 @@
   --realce-suave: #e8f1f9;
   --fundo-translucido: #f3f6faf2;
   --raio-cartao: 18px;
+  --raio-botao: 14px;
+  --recorte-botao: none;
   --tema-imagem: none;
   --tema-imagem-tamanho: cover;
   --tema-imagem-repeticao: no-repeat;
@@ -32,7 +34,7 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; letter-s
 .descricao-loja { max-width: 720px; margin: 12px 0 0; color: var(--barra-texto); opacity: .84; font-size: 1rem; line-height: 1.6; }
 .conteudo { width: min(1180px, calc(100% - 32px)); min-height: 55vh; margin: 0 auto; padding: 34px 0 48px; }
 .categorias { position: sticky; top: 0; z-index: 8; display: flex; gap: 10px; overflow-x: auto; margin: -8px 0 26px; padding: 12px 2px 13px; background: var(--fundo-translucido); border-bottom: 1px solid var(--borda); scrollbar-width: thin; backdrop-filter: blur(10px); }
-.categoria-botao { flex: 0 0 auto; min-height: 42px; padding: 9px 16px; border: 1px solid var(--borda); border-radius: 999px; background: var(--cartao); color: var(--texto); font: inherit; font-size: .9rem; font-weight: 750; cursor: pointer; transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease; }
+.categoria-botao { flex: 0 0 auto; min-height: 42px; padding: 9px 16px; border: 1px solid var(--borda); border-radius: var(--raio-botao); clip-path: var(--recorte-botao); background: var(--cartao); color: var(--texto); font: inherit; font-size: .9rem; font-weight: 750; cursor: pointer; transition: background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease; }
 .categoria-botao:hover { border-color: var(--azul); transform: translateY(-1px); }
 .categoria-botao.ativa { border-color: var(--azul); background: var(--azul); color: var(--acao-texto); }
 .categoria-botao:focus-visible { outline: 3px solid #82bdec; outline-offset: 2px; }
@@ -59,7 +61,7 @@ h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.05; letter-s
 .produto-rodape { margin-top: auto; padding-top: 20px; }
 .preco { margin: 0; color: var(--azul); font-size: 1.42rem; font-weight: 850; }
 .estoque-baixo { min-height: 21px; margin: 5px 0 12px; color: var(--azul); font-size: .88rem; font-weight: 750; }
-.whatsapp { min-height: 47px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: min(12px, var(--raio-cartao)); background: var(--azul); color: var(--acao-texto); text-decoration: none; font-weight: 800; transition: filter .18s ease, transform .18s ease; }
+.whatsapp { min-height: 47px; display: flex; align-items: center; justify-content: center; gap: 9px; border-radius: var(--raio-botao); clip-path: var(--recorte-botao); background: var(--azul); color: var(--acao-texto); text-decoration: none; font-weight: 800; transition: filter .18s ease, transform .18s ease; }
 .whatsapp:hover { filter: brightness(1.07); }
 .whatsapp:focus-visible { outline: 3px solid #66d98e; outline-offset: 3px; }
 .whatsapp::before { content: "●"; font-size: .82rem; color: #baf5ca; }
@@ -98,7 +100,7 @@ footer { border-top: 1px solid var(--borda); color: var(--texto-suave); text-ali
   .produto-resumo { padding: 7px; }
   .produto .produto-nome { font-size: .72rem; line-height: 1.25; }
   .produto-preco { margin: 4px 0 7px; font-size: .78rem; }
-  .produto .whatsapp { min-height: 34px; padding: 5px 3px; gap: 2px; border-radius: var(--raio-cartao); font-size: .68rem; line-height: 1.1; text-align: center; }
+  .produto .whatsapp { min-height: 34px; padding: 5px 3px; gap: 2px; border-radius: var(--raio-botao); font-size: .68rem; line-height: 1.1; text-align: center; }
   .produto .whatsapp::before { display: none; }
   .modal { padding: 10px; place-items: end center; }
   .modal-painel { width: 100%; max-height: 92vh; border-radius: var(--raio-cartao); }

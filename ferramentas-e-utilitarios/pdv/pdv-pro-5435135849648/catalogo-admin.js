@@ -13,7 +13,7 @@ const SLUGS_RESERVADOS = new Set(['admin', 'cadastro', 'catalogo', 'login', 'pdv
 const TAMANHO_LOTE = 400;
 const TEMA_PUBLICO_PADRAO = Object.freeze({
   fundo: '#f1f5f9', texto: '#172033', cartao: '#ffffff', botao: '#2563eb', textoBotao: '#ffffff',
-  barra: '#050505', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado',
+  barra: '#050505', textoBarra: '#ffffff', fonte: 'sistema', bordas: 'arredondado', formatoBotao: 'arredondado',
   imagem: '', ajusteImagem: 'cover', sobreposicao: 20
 });
 let usuarioUid = '';
@@ -75,6 +75,7 @@ function normalizarTemaPublico(tema = {}) {
     textoBarra: corTemaPublico(tema.textoBarra, TEMA_PUBLICO_PADRAO.textoBarra),
     fonte: ['sistema', 'arial', 'verdana', 'georgia'].includes(tema.fonte) ? tema.fonte : TEMA_PUBLICO_PADRAO.fonte,
     bordas: ['discreto', 'arredondado', 'amplo'].includes(tema.bordas) ? tema.bordas : TEMA_PUBLICO_PADRAO.bordas,
+    formatoBotao: ['reto', 'discreto', 'arredondado', 'capsula', 'chanfrado'].includes(tema.formatoBotao) ? tema.formatoBotao : TEMA_PUBLICO_PADRAO.formatoBotao,
     imagem: imagemTemaPublico(tema.imagem),
     ajusteImagem: ['cover', 'contain', 'repeat'].includes(tema.ajusteImagem) ? tema.ajusteImagem : TEMA_PUBLICO_PADRAO.ajusteImagem,
     sobreposicao: Math.min(80, Math.max(0, Number(tema.sobreposicao ?? TEMA_PUBLICO_PADRAO.sobreposicao)))

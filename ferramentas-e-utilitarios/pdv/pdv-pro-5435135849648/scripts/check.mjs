@@ -57,7 +57,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', '10 novos temas comerciais, mais contraste e novos botões', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -82,13 +82,13 @@ for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinan
 }
 if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regras privadas do Financeiro não foram encontradas.');
 
-for (const marker of ['modal-tema', 'tema-cor-fundo', 'tema-cor-texto', 'tema-cor-botao', 'tema-imagem-url', 'function abrirPainelTema', 'function salvarTema', 'function restaurarTemaPadrao', 'body.tema-personalizado']) {
+for (const marker of ['modal-tema', 'tema-cor-fundo', 'tema-cor-texto', 'tema-cor-botao', 'tema-formato-botao', 'tema-imagem-url', 'function abrirPainelTema', 'function salvarTema', 'function restaurarTemaPadrao', 'function garantirContrasteTema', 'body.tema-personalizado', '#historico-movimentos > div']) {
   if (!html.includes(marker)) throw new Error(`Painel de Tema incompleto: ${marker}`);
 }
-for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 'data-tema-preset="conveniencia"', 'data-tema-preset="doceria"', 'data-tema-preset="hortifruti"', 'data-tema-preset="grafica"', 'data-tema-preset="informatica"', 'data-tema-preset="futurista"', 'data-tema-preset="neon-laranja"', 'data-tema-preset="neon-verde"']) {
+for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 'data-tema-preset="conveniencia"', 'data-tema-preset="doceria"', 'data-tema-preset="hortifruti"', 'data-tema-preset="grafica"', 'data-tema-preset="informatica"', 'data-tema-preset="futurista"', 'data-tema-preset="neon-laranja"', 'data-tema-preset="neon-verde"', 'data-tema-preset="borracharia"', 'data-tema-preset="oficina-motos"', 'data-tema-preset="oficina-carros"', 'data-tema-preset="autopecas"', 'data-tema-preset="mercado"', 'data-tema-preset="moda"', 'data-tema-preset="beleza"', 'data-tema-preset="construcao"', 'data-tema-preset="papelaria"', 'data-tema-preset="farmacia"']) {
   if (!html.includes(marker)) throw new Error(`Tema comercial ausente: ${marker}`);
 }
-for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp', 'grafica-tecnologia.webp', 'informatica.webp', 'futurista.webp', 'neon-laranja.webp', 'neon-verde.webp']) {
+for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp', 'grafica-tecnologia.webp', 'informatica.webp', 'futurista.webp', 'neon-laranja.webp', 'neon-verde.webp', 'borracharia.webp', 'oficina-motos.webp', 'oficina-carros.webp', 'autopecas.webp', 'mercado.webp', 'moda.webp', 'beleza.webp', 'material-construcao.webp', 'papelaria.webp', 'farmacia.webp']) {
   if (!fs.existsSync(new URL(`../assets/temas/${asset}`, import.meta.url))) throw new Error(`Imagem do tema ausente: ${asset}`);
   if (!serviceWorkerSource.includes(`'./assets/temas/${asset}'`)) throw new Error(`Imagem do tema fora do cache offline: ${asset}`);
 }
@@ -96,20 +96,28 @@ if (html.includes('onclick="alternarTema()"')) throw new Error('O botão Tema n�
 const themeStart = html.indexOf('const TEMA_PADRAO');
 const themeEnd = html.indexOf('function produtoRaizEstoque', themeStart);
 if (themeStart < 0 || themeEnd < 0) throw new Error('Não foi possível localizar os controles de tema.');
-const themeHelpers = new Function(`${html.slice(themeStart, themeEnd)}; return { normalizarUrlImagemTema, normalizarTema };`)();
+const themeHelpers = new Function(`${html.slice(themeStart, themeEnd)}; return { normalizarUrlImagemTema, normalizarTema, TEMAS_PREDEFINIDOS, razaoContrasteTema };`)();
 if (themeHelpers.normalizarUrlImagemTema('https://exemplo.com/fundo.jpg') !== 'https://exemplo.com/fundo.jpg') throw new Error('O link HTTPS da imagem do tema não foi aceito.');
 if (themeHelpers.normalizarUrlImagemTema('./assets/temas/pet-shop.webp') !== './assets/temas/pet-shop.webp') throw new Error('A imagem local dos temas prontos não foi aceita.');
 let imagemInseguraAceita = false;
 try { themeHelpers.normalizarUrlImagemTema('javascript:alert(1)'); imagemInseguraAceita = true; } catch (_) {}
 if (imagemInseguraAceita) throw new Error('O tema aceitou um protocolo de imagem inseguro.');
+for (const [nome, tema] of Object.entries(themeHelpers.TEMAS_PREDEFINIDOS)) {
+  const seguro = themeHelpers.normalizarTema(tema);
+  if (themeHelpers.razaoContrasteTema(seguro.texto, seguro.cartao) < 4.5) throw new Error(`Contraste insuficiente entre texto e cartão no tema ${nome}.`);
+  if (themeHelpers.razaoContrasteTema(seguro.textoBotao, seguro.botao) < 4.5) throw new Error(`Contraste insuficiente no botão do tema ${nome}.`);
+  if (themeHelpers.razaoContrasteTema(seguro.textoBarra, seguro.barra) < 4.5) throw new Error(`Contraste insuficiente na barra do tema ${nome}.`);
+}
 
 for (const marker of ['function temaPublicoAtual', 'tema: temaPublicoAtual()']) {
   if (!catalogAdminSource.includes(marker)) throw new Error(`Sincronização do tema com o catálogo incompleta: ${marker}`);
 }
-for (const marker of ['function aplicarTemaCatalogo', 'aplicarTemaCatalogo(loja.tema)', '--tema-imagem', '--raio-cartao']) {
+for (const marker of ['function aplicarTemaCatalogo', 'aplicarTemaCatalogo(loja.tema)', '--tema-imagem', '--raio-cartao', '--raio-botao', '--recorte-botao']) {
   if (!publicCatalogSource.includes(marker) && !publicCatalogCss.includes(marker)) throw new Error(`Tema do catálogo público incompleto: ${marker}`);
 }
 if (!firestoreRules.includes("'descricaoCurta', 'tema', 'ativo'")) throw new Error('As regras públicas não permitem a projeção sanitizada do tema.');
+if (!firestoreRules.includes('request.resource.data.tema.formatoBotao')) throw new Error('As regras públicas não permitem salvar o formato dos botões.');
+if (!catalogAdminSource.includes('formatoBotao:')) throw new Error('A publicação do catálogo não inclui o formato dos botões.');
 const catalogThemeStart = publicCatalogSource.indexOf('const TEMA_CATALOGO_PADRAO');
 const catalogThemeEnd = publicCatalogSource.indexOf('const elementos', catalogThemeStart);
 if (catalogThemeStart < 0 || catalogThemeEnd < 0) throw new Error('Não foi possível localizar os controles de tema do catálogo.');
