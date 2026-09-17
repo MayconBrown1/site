@@ -25,6 +25,12 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "output" / "pdf" / "101-roteiros-reels-pdv-pro.pdf"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
+DOC_TITLE = "101 roteiros de Reels para vender o PDV Pro"
+COVER_KICKER = "CONTEUDO QUE MOSTRA VALOR"
+COVER_TITLE = "101 roteiros de Reels para vender o PDV Pro"
+COVER_SUBTITLE = "Um calendario de tres meses para explicar o sistema de forma simples, gerar desejo e levar o publico para a demonstracao."
+EDITION_FOOTER = "Edicao 2026  |  Baseado nos recursos reais do PDV Pro"
+
 FONT_REGULAR = Path("C:/Windows/Fonts/arial.ttf")
 FONT_BOLD = Path("C:/Windows/Fonts/arialbd.ttf")
 pdfmetrics.registerFont(TTFont("PdvSans", str(FONT_REGULAR)))
@@ -218,6 +224,12 @@ def P(text, style="BodyPdv"):
     return Paragraph(escape(clean), styles[style])
 
 
+def PB(label, text, style="BodyPdv"):
+    clean_label = str(label).replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-")
+    clean_text = str(text).replace("\u2011", "-").replace("\u2013", "-").replace("\u2014", "-")
+    return Paragraph(f"<b>{escape(clean_label)}</b> {escape(clean_text)}", styles[style])
+
+
 def page_base(canvas, doc):
     canvas.saveState()
     canvas.setFillColor(PAPER)
@@ -261,7 +273,7 @@ def cover(canvas, doc):
     canvas.drawCentredString(A4[0] / 2, 41 * mm, "O que mostrar, o que falar, texto na tela, CTA e legenda pronta")
     canvas.setFont("PdvSans", 8)
     canvas.setFillColor(colors.HexColor("#D7E4F3"))
-    canvas.drawCentredString(A4[0] / 2, 18 * mm, "Edicao 2026  |  Baseado nos recursos reais do PDV Pro")
+    canvas.drawCentredString(A4[0] / 2, 18 * mm, EDITION_FOOTER)
     canvas.restoreState()
 
 
@@ -288,7 +300,7 @@ def make_doc():
         str(OUT), pagesize=A4,
         leftMargin=16 * mm, rightMargin=16 * mm,
         topMargin=20 * mm, bottomMargin=18 * mm,
-        title="101 roteiros de Reels para vender o PDV Pro",
+        title=DOC_TITLE,
         author="PDV Pro",
         subject="Calendario de 101 dias com roteiros simples e persuasivos",
     )
@@ -300,11 +312,11 @@ def make_doc():
     story = []
 
     story.append(Spacer(1, 74 * mm))
-    story.append(P("CONTEUDO QUE MOSTRA VALOR", "CoverKicker"))
+    story.append(P(COVER_KICKER, "CoverKicker"))
     story.append(Spacer(1, 6 * mm))
-    story.append(P("101 roteiros de Reels para vender o PDV Pro", "CoverTitle"))
+    story.append(P(COVER_TITLE, "CoverTitle"))
     story.append(Spacer(1, 8 * mm))
-    story.append(P("Um calendario de tres meses para explicar o sistema de forma simples, gerar desejo e levar o publico para a demonstracao.", "CoverSub"))
+    story.append(P(COVER_SUBTITLE, "CoverSub"))
     story.append(PageBreak())
     doc.handle_nextPageTemplate("content")
 
@@ -363,8 +375,8 @@ def make_doc():
         story.append(Spacer(1, 3 * mm))
         rows = []
         for i in range(chunk_start, chunk_end, 2):
-            left = P(f"<b>Dia {i + 1:02d}</b>  {SCRIPTS[i]['title']}", "Calendar")
-            right = P(f"<b>Dia {i + 2:02d}</b>  {SCRIPTS[i + 1]['title']}", "Calendar") if i + 1 < chunk_end else P("", "Calendar")
+            left = PB(f"Dia {i + 1:02d}", SCRIPTS[i]["title"], "Calendar")
+            right = PB(f"Dia {i + 2:02d}", SCRIPTS[i + 1]["title"], "Calendar") if i + 1 < chunk_end else P("", "Calendar")
             rows.append([left, right])
         cal = Table(rows, colWidths=[doc.width / 2, doc.width / 2])
         cal.setStyle(TableStyle([
@@ -481,7 +493,7 @@ def make_doc():
     ]
     hook_rows = []
     for i in range(0, 30, 2):
-        hook_rows.append([P(f"<b>{i + 1:02d}.</b> {hooks[i]}", "SmallPdv"), P(f"<b>{i + 2:02d}.</b> {hooks[i + 1]}", "SmallPdv")])
+        hook_rows.append([PB(f"{i + 1:02d}.", hooks[i], "SmallPdv"), PB(f"{i + 2:02d}.", hooks[i + 1], "SmallPdv")])
     ht = Table(hook_rows, colWidths=[doc.width / 2, doc.width / 2])
     ht.setStyle(TableStyle([
         ("ROWBACKGROUNDS", (0, 0), (-1, -1), [WHITE, PAPER]), ("BOX", (0, 0), (-1, -1), .8, LINE),

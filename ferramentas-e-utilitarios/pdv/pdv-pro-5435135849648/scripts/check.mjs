@@ -46,7 +46,18 @@ for (const marker of [
   'function vendasDaDataRelatorio',
   'Escolha qualquer dia para consultar as vendas e os comprovantes.',
   'function caixaVisivelNoHistorico',
-  'somente o fechamento do dia anterior'
+  'somente o fechamento do dia anterior',
+  'btn-pagamento-dividido',
+  'function montarPagamentoVenda',
+  'function aprovarOrcamento',
+  'function confirmarAprovacaoOrcamento',
+  'sugestoes-clientes-orcamento',
+  'function buscarClientesOrcamento',
+  'function selecionarClienteOrcamento',
+  'function vincularClienteAoOrcamento',
+  "origemCadastro: 'orcamento'",
+  'PDF 2 vias',
+  "orcamento.status = 'aprovado'"
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
@@ -64,7 +75,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Busque ou cadastre o cliente no orçamento', 'Duas formas de pagamento na mesma venda', 'Desconto em porcentagem ou reais', 'Aprove o orçamento e conclua a venda', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -84,7 +95,7 @@ for (const marker of ['firebase-app.js', 'firebase-auth.js', 'firebase-firestore
 for (const marker of ['pdv-conexao-status', 'Sem internet · dados salvos neste aparelho', 'pdv-sync-status']) {
   if (!pwaInstallSource.includes(marker)) throw new Error(`Indicador de funcionamento offline incompleto: ${marker}`);
 }
-for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'function saldoCreditoCliente', 'function registrarSaldoCliente', 'function devolverSaldoCliente', 'finalidade === \'despesa\'']) {
+for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinanceiro', 'function saldoCreditoCliente', 'function registrarSaldoCliente', 'function devolverSaldoCliente', 'function formatarDocumentoCliente', 'function validarDocumentoCliente', 'finalidade === \'despesa\'']) {
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
 }
 if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regras privadas do Financeiro não foram encontradas.');
@@ -214,6 +225,11 @@ const vendaContext = {
   exigirCaixaAberto: () => ({ id: 'cx-1' }),
   valorSaldoAplicadoVenda: () => 5,
   saldoCreditoCliente: () => 5,
+  calcularDescontoVenda: () => ({ tipo: 'percentual', informado: 0, percentual: 0, valorDesconto: 0 }),
+  arredondarCentavos: valor => Math.round(Number(valor) * 100) / 100,
+  montarPagamentoVenda: valor => ({ pagamento: { tipo: 'dinheiro', valorRecebido: valor, troco: 0, valorCobrado: valor } }),
+  formasPagamentoRegistradas: (pagamento, valor) => [{ ...pagamento, valor: Number(pagamento.valorCobrado ?? valor) }],
+  saldoClienteFiado: () => 0,
   mostrarMensagem: () => {},
   produtoRaizEstoque: produto => produto,
   estoqueDisponivel: () => 999,

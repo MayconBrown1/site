@@ -202,11 +202,16 @@
                                 <span class="font-medium">Subtotal:</span>
                                 <span id="subtotal" class="text-base lg:text-lg">R$ 0,00</span>
                             </div>
-                            <div class="flex justify-between items-center mb-2 text-sm lg:text-base">
-                                <label for="desconto" class="font-medium">Desconto (%):</label>
-                                <input type="number" id="desconto" min="0" max="100" step="0.01" value="0" 
-                                       class="w-16 lg:w-20 p-1 border rounded text-right text-base" onchange="calcularTotal()">
+                            <div class="mb-2 grid grid-cols-[minmax(0,1fr)_7rem_6rem] items-end gap-2 text-sm lg:text-base">
+                                <label for="desconto" class="font-medium">Desconto</label>
+                                <select id="desconto-tipo" class="rounded border bg-white p-2 text-sm" onchange="alterarTipoDesconto()" aria-label="Escolher desconto em porcentagem ou valor">
+                                    <option value="percentual">Porcentagem</option>
+                                    <option value="valor">Valor (R$)</option>
+                                </select>
+                                <input type="number" id="desconto" min="0" max="100" step="0.01" value="0"
+                                       class="w-full rounded border p-2 text-right text-base" oninput="calcularTotal()" aria-label="Valor do desconto">
                             </div>
+                            <div id="desconto-resumo" class="mb-2 text-right text-xs font-medium text-red-600"></div>
                             <div class="flex justify-between items-center text-lg lg:text-xl font-bold text-green-600">
                                 <span>Total:</span>
                                 <span id="total-venda">R$ 0,00</span>
@@ -232,6 +237,10 @@
                             </button>
                             <button onclick="selecionarPagamento('fiado')" class="w-full p-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors text-sm lg:text-base">🧾 Fiado</button>
                         </div>
+
+                        <button id="btn-pagamento-dividido" type="button" onclick="alternarPagamentoDividido()" class="mb-3 w-full rounded-lg border-2 border-dashed border-indigo-300 bg-indigo-50 p-3 text-sm font-bold text-indigo-800 hover:bg-indigo-100">
+                            ➕ Dividir em 2 formas de pagamento
+                        </button>
                         
                         <div id="pagamento-detalhes" class="hidden">
                             <div class="mb-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -288,6 +297,18 @@
                             <div id="fiado-form" class="hidden space-y-3">
                                 <div id="fiado-info" class="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">Selecione acima o cliente desta venda.</div>
                                 <div><label for="fiado-vencimento" class="block text-sm font-medium text-gray-700 mb-1">Data prevista para pagamento</label><input id="fiado-vencimento" type="date" class="w-full p-3 border rounded-lg text-base"></div>
+                            </div>
+
+                            <div id="pagamento-dividido-painel" class="hidden space-y-3 rounded-xl border-2 border-indigo-200 bg-indigo-50 p-3">
+                                <div class="flex items-center justify-between gap-2"><strong class="text-sm text-indigo-950">Pagamento dividido</strong><span id="pagamento-dividido-restante" class="text-xs font-bold text-indigo-700">Distribua o total entre as duas formas</span></div>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <div class="rounded-lg bg-white p-3 shadow-sm"><label for="pagamento-forma-1" class="block text-xs font-bold uppercase text-slate-600">1ª forma</label><select id="pagamento-forma-1" class="mt-1 w-full rounded-lg border p-2" onchange="atualizarPagamentoDividido()"><option value="dinheiro">Dinheiro</option><option value="pix">PIX</option><option value="cartao">Cartão</option><option value="fiado">Fiado</option></select><label for="pagamento-valor-1" class="mt-2 block text-xs font-semibold text-slate-600">Valor</label><input id="pagamento-valor-1" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-2" oninput="ajustarValoresPagamentoDividido(1)"></div>
+                                    <div class="rounded-lg bg-white p-3 shadow-sm"><label for="pagamento-forma-2" class="block text-xs font-bold uppercase text-slate-600">2ª forma</label><select id="pagamento-forma-2" class="mt-1 w-full rounded-lg border p-2" onchange="atualizarPagamentoDividido()"><option value="pix">PIX</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão</option><option value="fiado">Fiado</option></select><label for="pagamento-valor-2" class="mt-2 block text-xs font-semibold text-slate-600">Valor</label><input id="pagamento-valor-2" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-2" oninput="ajustarValoresPagamentoDividido(2)"></div>
+                                </div>
+                                <div id="pagamento-dividido-dinheiro" class="hidden rounded-lg border border-green-200 bg-white p-3"><label for="valor-recebido-dividido" class="block text-sm font-medium">Valor em dinheiro recebido</label><input id="valor-recebido-dividido" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border p-2" oninput="atualizarPagamentoDividido()"><p class="mt-1 text-xs text-gray-500">O troco considera somente a parte paga em dinheiro.</p></div>
+                                <div id="pagamento-dividido-cartao" class="hidden grid gap-2 rounded-lg border border-blue-200 bg-white p-3 sm:grid-cols-2"><div><label for="tipo-cartao-dividido" class="block text-sm font-medium">Tipo do cartão</label><select id="tipo-cartao-dividido" class="mt-1 w-full rounded-lg border p-2" onchange="salvarRascunhoVenda()"><option value="credito">Crédito</option><option value="debito">Débito</option></select></div><div><label for="parcelas-dividido" class="block text-sm font-medium">Parcelas</label><select id="parcelas-dividido" class="mt-1 w-full rounded-lg border p-2" onchange="salvarRascunhoVenda()"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="6">6x</option><option value="12">12x</option></select></div></div>
+                                <div id="pagamento-dividido-pix" class="hidden rounded-lg border border-purple-200 bg-white p-3"><button type="button" onclick="gerarQRCodePixDividido()" class="w-full rounded-lg bg-purple-600 p-2 font-semibold text-white hover:bg-purple-700">Gerar PIX da parte informada</button><p class="mt-1 text-xs text-purple-700">O QR Code usará somente o valor destinado ao PIX.</p></div>
+                                <p id="pagamento-dividido-fiado" class="hidden rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">Para usar fiado em uma das partes, selecione o cliente acima. Somente o valor dessa parte ficará pendente.</p>
                             </div>
                             
                             <button onclick="finalizarVenda()" 
@@ -436,7 +457,7 @@
                         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 class="text-xl lg:text-2xl font-semibold">Orçamentos</h2>
-                                <p class="text-sm text-gray-500">Crie propostas com produtos e serviços cadastrados, sem alterar o estoque ou o caixa.</p>
+                                <p class="text-sm text-gray-500">Crie propostas sem mexer no estoque. Quando o cliente aprovar, finalize o pagamento aqui para registrar a venda e dar baixa automaticamente.</p>
                             </div>
                             <button type="button" onclick="novoOrcamento()" class="rounded-lg bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700">+ Novo orçamento</button>
                         </div>
@@ -456,7 +477,12 @@
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                             <div>
                                 <label for="orcamento-cliente-nome" class="mb-1 block text-sm font-medium text-gray-700">Cliente / Empresa *</label>
-                                <input id="orcamento-cliente-nome" class="w-full rounded-lg border p-3" placeholder="Nome completo ou razão social">
+                                <div class="relative">
+                                    <input id="orcamento-cliente-id" type="hidden">
+                                    <input id="orcamento-cliente-nome" class="w-full rounded-lg border p-3" placeholder="Digite para buscar ou cadastrar" autocomplete="off" oninput="buscarClientesOrcamento()" onfocus="buscarClientesOrcamento()" onblur="fecharSugestoesClientesOrcamento()" aria-controls="sugestoes-clientes-orcamento" aria-autocomplete="list">
+                                    <div id="sugestoes-clientes-orcamento" class="absolute z-30 mt-1 hidden max-h-64 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl" role="listbox"></div>
+                                </div>
+                                <p id="orcamento-cliente-status" class="mt-1 text-xs text-gray-500">Busque um cliente cadastrado ou digite os dados de um novo.</p>
                             </div>
                             <div>
                                 <label for="orcamento-cliente-documento" class="mb-1 block text-sm font-medium text-gray-700">CPF / CNPJ</label>
@@ -526,8 +552,9 @@
                             </div>
                             <div class="rounded-xl bg-slate-50 p-4">
                                 <div class="flex items-center justify-between py-2"><span>Subtotal</span><strong id="orcamento-subtotal">R$ 0,00</strong></div>
-                                <label for="orcamento-desconto" class="mt-2 block text-sm font-medium text-gray-700">Desconto (%)</label>
-                                <input id="orcamento-desconto" type="number" min="0" max="100" step="0.01" value="0" class="mt-1 w-full rounded-lg border p-3" oninput="atualizarTotaisOrcamento()">
+                                <label for="orcamento-desconto" class="mt-2 block text-sm font-medium text-gray-700">Desconto</label>
+                                <div class="mt-1 grid grid-cols-[1fr_7rem] gap-2"><select id="orcamento-desconto-tipo" class="rounded-lg border bg-white p-3" onchange="atualizarTotaisOrcamento()"><option value="percentual">Porcentagem</option><option value="valor">Valor (R$)</option></select><input id="orcamento-desconto" type="number" min="0" step="0.01" value="0" class="w-full rounded-lg border p-3 text-right" oninput="atualizarTotaisOrcamento()"></div>
+                                <p id="orcamento-desconto-resumo" class="mt-1 text-right text-xs font-medium text-red-600"></p>
                                 <label for="orcamento-acrescimo" class="mt-3 block text-sm font-medium text-gray-700">Frete / acréscimo (R$)</label>
                                 <input id="orcamento-acrescimo" type="number" min="0" step="0.01" value="0" class="mt-1 w-full rounded-lg border p-3" oninput="atualizarTotaisOrcamento()">
                                 <div class="mt-4 flex items-center justify-between border-t pt-4 text-lg"><span class="font-semibold">Total</span><strong id="orcamento-total" class="text-2xl text-emerald-700">R$ 0,00</strong></div>
@@ -542,7 +569,7 @@
 
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div><h3 class="text-lg font-semibold">Histórico de orçamentos</h3><p class="text-sm text-gray-500">Consulte, edite, duplique ou gere novamente o PDF.</p></div>
+                            <div><h3 class="text-lg font-semibold">Histórico de orçamentos</h3><p class="text-sm text-gray-500">Consulte, aprove, recuse, duplique ou gere novamente o PDF em duas vias.</p></div>
                             <input id="busca-orcamentos" class="rounded-lg border p-3 sm:w-80" placeholder="Buscar cliente ou número..." oninput="atualizarListaOrcamentos()">
                         </div>
                         <div id="lista-orcamentos" class="space-y-3"></div>
@@ -562,7 +589,7 @@
                             <h3 id="titulo-form-cliente" class="font-semibold mb-3">Cadastrar cliente</h3>
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 <div><label for="cliente-nome" class="mb-1 block text-sm font-medium">Nome completo *</label><input id="cliente-nome" maxlength="120" class="w-full rounded-lg border p-3" autocomplete="name"></div>
-                                <div><label for="cliente-cpf" class="mb-1 block text-sm font-medium">CPF</label><input id="cliente-cpf" inputmode="numeric" maxlength="14" class="w-full rounded-lg border p-3" placeholder="000.000.000-00" oninput="formatarCpfCliente(this)"></div>
+                                <div><label for="cliente-cpf" class="mb-1 block text-sm font-medium">CPF / CNPJ</label><input id="cliente-cpf" inputmode="numeric" maxlength="18" class="w-full rounded-lg border p-3" placeholder="CPF ou CNPJ" oninput="formatarDocumentoCliente(this)"></div>
                                 <div><label for="cliente-whatsapp" class="mb-1 block text-sm font-medium">WhatsApp</label><input id="cliente-whatsapp" inputmode="tel" maxlength="20" class="w-full rounded-lg border p-3" placeholder="(00) 00000-0000" oninput="formatarTelefoneCliente(this)"></div>
                                 <div><label for="cliente-email" class="mb-1 block text-sm font-medium">E-mail</label><input id="cliente-email" type="email" maxlength="160" class="w-full rounded-lg border p-3" placeholder="cliente@email.com"></div>
                                 <div><label for="cliente-nascimento" class="mb-1 block text-sm font-medium">Data de nascimento</label><input id="cliente-nascimento" type="date" class="w-full rounded-lg border p-3"></div>
@@ -802,15 +829,19 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 14/09/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 17/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v38" data-atualizacao="2026-09-14" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v40" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Saldo do cliente nas compras</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Cliente integrado ao orçamento</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
-                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">💰 Guarde e acompanhe o saldo de cada cliente</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Clientes</strong>, use <strong>Adicionar saldo</strong> quando um troco ficar com a loja e informe o motivo. O valor, a data e cada uso ou devolução aparecem no histórico do cliente, separados do fiado.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🔎 Busque ou cadastre o cliente no orçamento</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Orçamentos</strong>, comece a digitar o nome e escolha um cliente já cadastrado para preencher CPF/CNPJ, telefone, e-mail e endereço automaticamente. Se for um cliente novo, preencha os dados normalmente: ao clicar em <strong>Finalizar e gerar PDF</strong>, o cadastro será criado no painel de Clientes. O orçamento continua separado da venda até ser aprovado.</p></article>
+                            <article class="rounded-xl border border-indigo-300 bg-indigo-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-indigo-950">💳 Duas formas de pagamento na mesma venda</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, escolha <strong>Dividir em 2 formas de pagamento</strong>, selecione as duas opções e informe os valores. É possível combinar dinheiro, PIX, cartão ou fiado; o comprovante e o caixa mostram cada parte separadamente.</p></article>
+                            <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm"><h4 class="font-bold text-red-950">🏷️ Desconto em porcentagem ou reais</h4><p class="mt-2 text-sm text-slate-700">Ao montar a venda ou o orçamento, escolha <strong>Porcentagem</strong> ou <strong>Valor (R$)</strong>. Mesmo quando o desconto for digitado em reais, o comprovante exibe o valor descontado e a porcentagem equivalente.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">✅ Aprove o orçamento e conclua a venda</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento agora sai em <strong>duas vias iguais</strong>. No histórico, use <strong>Aprovar e vender</strong> para informar uma ou duas formas de pagamento, emitir o comprovante térmico e baixar o estoque. Se o cliente recusar, marque <strong>Não aprovado</strong>.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">💰 Saldo do cliente nas compras</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Clientes</strong>, use <strong>Adicionar saldo</strong> quando um troco ficar com a loja e informe o motivo. O valor, a data e cada uso ou devolução aparecem no histórico do cliente, separados do fiado.</p></article>
                             <article class="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">🧾 Use o saldo na venda sem duplicar a entrada</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, selecione o cliente, marque <strong>Usar saldo</strong> e confirme o valor. O PDV cobra e lança no caixa somente a diferença. O comprovante mostra o total da compra, o saldo utilizado e quanto foi pago naquele momento.</p></article>
                             <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">☰ Menu compacto também no computador — Mais espaço e organização em qualquer tela</h4><p class="mt-2 text-sm text-slate-700">No computador e no celular, os atalhos de <strong>Vendas, Orçamentos, Produtos</strong> e das demais áreas ficam recolhidos no botão de três linhas. Clique em <strong>☰</strong> para abrir o menu em uma faixa própria; o conteúdo é deslocado para baixo, sem opções cobrindo a tela. Ao escolher uma área, o menu fecha automaticamente.</p></article>
                             <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Alertas personalizados de estoque mínimo</h4><p class="mt-2 text-sm text-slate-700">Saiba a hora certa de repor cada produto: ao cadastrar ou editar um item, preencha <strong>Estoque mínimo para alerta</strong> com o limite ideal. Quando o saldo chegar ao limite ou ficar abaixo dele, o botão <strong>Estoque</strong> exibirá um contador. Abra o aviso para conferir os produtos; depois de visualizar, o contador desaparece até surgir um novo alerta ou o saldo cair novamente.</p></article>
@@ -1385,6 +1416,25 @@
         </div>
     </div>
 
+    <!-- Aprovação do orçamento: transforma a proposta em venda e baixa o estoque -->
+    <div id="modal-aprovar-orcamento" class="fixed inset-0 z-[75] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-aprovar-orcamento">
+        <div class="max-h-[95vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 shadow-2xl lg:p-6">
+            <div class="flex items-start justify-between gap-3 border-b pb-4"><div><p class="text-sm font-bold uppercase tracking-wide text-emerald-700">Finalizar como venda</p><h2 id="titulo-aprovar-orcamento" class="text-xl font-bold">Orçamento aprovado</h2><p id="aprovar-orcamento-resumo" class="mt-1 text-sm text-gray-600"></p></div><button type="button" onclick="fecharAprovacaoOrcamento()" class="rounded-lg bg-gray-100 px-3 py-2 text-xl" aria-label="Fechar">&times;</button></div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div><label for="orcamento-pagamento-forma-1" class="block text-sm font-semibold">1ª forma de pagamento</label><select id="orcamento-pagamento-forma-1" class="mt-1 w-full rounded-lg border p-3" onchange="atualizarPagamentoAprovacaoOrcamento()"><option value="dinheiro">Dinheiro</option><option value="pix">PIX</option><option value="cartao">Cartão</option><option value="fiado">Fiado</option></select></div>
+                <div><label for="orcamento-pagamento-valor-1" class="block text-sm font-semibold">Valor na 1ª forma</label><input id="orcamento-pagamento-valor-1" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-3" oninput="ajustarPagamentoAprovacaoOrcamento(1)"></div>
+                <div><label for="orcamento-pagamento-forma-2" class="block text-sm font-semibold">2ª forma (opcional)</label><select id="orcamento-pagamento-forma-2" class="mt-1 w-full rounded-lg border p-3" onchange="atualizarPagamentoAprovacaoOrcamento()"><option value="">Não usar</option><option value="dinheiro">Dinheiro</option><option value="pix">PIX</option><option value="cartao">Cartão</option><option value="fiado">Fiado</option></select></div>
+                <div><label for="orcamento-pagamento-valor-2" class="block text-sm font-semibold">Valor na 2ª forma</label><input id="orcamento-pagamento-valor-2" type="number" min="0" step="0.01" value="0" class="mt-1 w-full rounded-lg border p-3" oninput="ajustarPagamentoAprovacaoOrcamento(2)" disabled></div>
+            </div>
+            <p id="orcamento-pagamento-conferencia" class="mt-3 rounded-lg bg-slate-50 p-3 text-sm font-semibold text-slate-700"></p>
+            <div id="orcamento-aprovacao-cliente" class="mt-3 hidden rounded-lg border border-amber-200 bg-amber-50 p-3"><label for="orcamento-aprovacao-cliente-id" class="block text-sm font-semibold text-amber-950">Cliente do fiado</label><select id="orcamento-aprovacao-cliente-id" class="mt-1 w-full rounded-lg border p-3"></select><label for="orcamento-aprovacao-vencimento" class="mt-2 block text-sm font-semibold text-amber-950">Vencimento</label><input id="orcamento-aprovacao-vencimento" type="date" class="mt-1 w-full rounded-lg border p-3"></div>
+            <div id="orcamento-aprovacao-dinheiro" class="mt-3 hidden rounded-lg border border-green-200 bg-green-50 p-3"><label for="orcamento-aprovacao-recebido" class="block text-sm font-semibold">Valor em dinheiro recebido</label><input id="orcamento-aprovacao-recebido" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border p-3"></div>
+            <div id="orcamento-aprovacao-cartao" class="mt-3 hidden grid gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:grid-cols-2"><div><label for="orcamento-aprovacao-tipo-cartao" class="block text-sm font-semibold">Tipo do cartão</label><select id="orcamento-aprovacao-tipo-cartao" class="mt-1 w-full rounded-lg border p-3"><option value="credito">Crédito</option><option value="debito">Débito</option></select></div><div><label for="orcamento-aprovacao-parcelas" class="block text-sm font-semibold">Parcelas</label><select id="orcamento-aprovacao-parcelas" class="mt-1 w-full rounded-lg border p-3"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="6">6x</option><option value="12">12x</option></select></div></div>
+            <p id="orcamento-aprovacao-pix" class="mt-3 hidden rounded-lg border border-purple-200 bg-purple-50 p-3 text-sm text-purple-900">Confirme o recebimento da parte em PIX no banco antes de concluir.</p>
+            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end"><button type="button" onclick="fecharAprovacaoOrcamento()" class="rounded-lg bg-gray-200 px-5 py-3 font-semibold">Cancelar</button><button type="button" onclick="confirmarAprovacaoOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700">Aprovar, baixar estoque e emitir comprovante</button></div>
+        </div>
+    </div>
+
     <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
@@ -1491,6 +1541,7 @@ if ('serviceWorker' in navigator) {
         let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
         let itensOrcamento = [];
         let orcamentoEditando = null;
+        let orcamentoEmAprovacao = null;
         let clienteFiadoEditando = null;
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
@@ -3041,16 +3092,37 @@ function showInstallButton() {
             calcularTotal();
         }
 
+        function arredondarCentavos(valor) {
+            return Math.round((Number(valor) || 0) * 100) / 100;
+        }
+
+        function calcularDescontoVenda(subtotal) {
+            const tipo = document.getElementById('desconto-tipo')?.value || 'percentual';
+            const informado = Math.max(0, Number(document.getElementById('desconto')?.value || 0));
+            const valorDesconto = arredondarCentavos(Math.min(subtotal, tipo === 'valor' ? informado : subtotal * Math.min(100, informado) / 100));
+            const percentual = subtotal > 0 ? Number((valorDesconto * 100 / subtotal).toFixed(2)) : 0;
+            return { tipo, informado, valorDesconto, percentual };
+        }
+
+        function alterarTipoDesconto() {
+            const campo = document.getElementById('desconto');
+            const tipo = document.getElementById('desconto-tipo').value;
+            campo.max = tipo === 'percentual' ? '100' : '';
+            campo.setAttribute('aria-label', tipo === 'percentual' ? 'Percentual de desconto' : 'Valor do desconto em reais');
+            calcularTotal();
+        }
+
         function calcularTotal() {
             const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-            const valorDesconto = subtotal * (desconto / 100);
-            const total = subtotal - valorDesconto;
+            const desconto = calcularDescontoVenda(subtotal);
+            const total = arredondarCentavos(subtotal - desconto.valorDesconto);
 
             document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
             document.getElementById('total-venda').textContent = `R$ ${total.toFixed(2)}`;
+            document.getElementById('desconto-resumo').textContent = desconto.valorDesconto > 0 ? `- R$ ${desconto.valorDesconto.toFixed(2)} (${desconto.percentual.toLocaleString('pt-BR')}%)` : '';
 
             atualizarUsoSaldoVenda(vendaAtual?.tipo === 'pix');
+            if (vendaAtual?.dividido) ajustarValoresPagamentoDividido(1);
             if (vendaAtual) {
                 calcularTroco();
             }
@@ -3066,6 +3138,8 @@ function showInstallButton() {
             document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => {
                 div.classList.add('hidden');
             });
+            document.getElementById('pagamento-dividido-painel').classList.add('hidden');
+            document.getElementById('btn-pagamento-dividido').textContent = '➕ Dividir em 2 formas de pagamento';
             
             document.getElementById(tipo + '-form').classList.remove('hidden');
             atualizarSelectClientes();
@@ -3077,6 +3151,73 @@ function showInstallButton() {
                 gerarQRCodePix();
             }
             salvarRascunhoVenda();
+        }
+
+        function alternarPagamentoDividido() {
+            if (!exigirCaixaAberto('Abra o caixa antes de selecionar o pagamento.')) return;
+            const ativar = !vendaAtual?.dividido;
+            if (!ativar) {
+                selecionarPagamento(document.getElementById('pagamento-forma-1').value || 'dinheiro');
+                return;
+            }
+            vendaAtual = { tipo: 'misto', dividido: true };
+            document.getElementById('pagamento-detalhes').classList.remove('hidden');
+            document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));
+            document.getElementById('pagamento-dividido-painel').classList.remove('hidden');
+            document.getElementById('btn-pagamento-dividido').textContent = '✕ Voltar para pagamento único';
+            atualizarSelectClientes();
+            atualizarClienteVendaSelecionado();
+            const total = totalReceberAgora();
+            document.getElementById('pagamento-valor-1').value = (total / 2).toFixed(2);
+            document.getElementById('pagamento-valor-2').value = (total - arredondarCentavos(total / 2)).toFixed(2);
+            atualizarPagamentoDividido();
+        }
+
+        function ajustarValoresPagamentoDividido(campoAlterado) {
+            if (!vendaAtual?.dividido) return;
+            const total = totalReceberAgora();
+            const atual = Math.max(0, Number(document.getElementById(`pagamento-valor-${campoAlterado}`).value || 0));
+            const outro = campoAlterado === 1 ? 2 : 1;
+            document.getElementById(`pagamento-valor-${outro}`).value = Math.max(0, arredondarCentavos(total - atual)).toFixed(2);
+            atualizarPagamentoDividido();
+        }
+
+        function atualizarPagamentoDividido() {
+            if (!vendaAtual?.dividido) return;
+            const tipo1 = document.getElementById('pagamento-forma-1').value;
+            const tipo2 = document.getElementById('pagamento-forma-2').value;
+            const tipos = [tipo1, tipo2];
+            const total = totalReceberAgora();
+            const soma = arredondarCentavos(Number(document.getElementById('pagamento-valor-1').value || 0) + Number(document.getElementById('pagamento-valor-2').value || 0));
+            const diferenca = arredondarCentavos(total - soma);
+            const conferencia = document.getElementById('pagamento-dividido-restante');
+            conferencia.textContent = Math.abs(diferenca) <= 0.01 ? `Total distribuído: R$ ${total.toFixed(2)}` : `${diferenca > 0 ? 'Falta' : 'Excedeu'} R$ ${Math.abs(diferenca).toFixed(2)}`;
+            conferencia.className = `text-xs font-bold ${Math.abs(diferenca) <= 0.01 ? 'text-emerald-700' : 'text-red-700'}`;
+            document.getElementById('pagamento-dividido-dinheiro').classList.toggle('hidden', !tipos.includes('dinheiro'));
+            document.getElementById('pagamento-dividido-cartao').classList.toggle('hidden', !tipos.includes('cartao'));
+            document.getElementById('pagamento-dividido-pix').classList.toggle('hidden', !tipos.includes('pix'));
+            document.getElementById('pagamento-dividido-fiado').classList.toggle('hidden', !tipos.includes('fiado'));
+            salvarRascunhoVenda();
+        }
+
+        function formasPagamentoRegistradas(pagamento, valorPadrao = 0) {
+            if (Array.isArray(pagamento?.formas) && pagamento.formas.length) return pagamento.formas;
+            return pagamento?.tipo ? [{ ...pagamento, valor: Number(pagamento.valorCobrado ?? valorPadrao) }] : [];
+        }
+
+        function valorPagamentoPorTipo(venda, tipo) {
+            return formasPagamentoRegistradas(venda?.pagamento, venda?.total).filter(forma => forma.tipo === tipo).reduce((soma, forma) => soma + Number(forma.valor || 0), 0);
+        }
+
+        function descricaoPagamento(pagamento, valorPadrao = 0) {
+            return formasPagamentoRegistradas(pagamento, valorPadrao).map(forma => `${forma.tipo} (${Number(forma.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})`).join(' + ') || 'não informado';
+        }
+
+        function gerarQRCodePixDividido() {
+            const indice = document.getElementById('pagamento-forma-1').value === 'pix' ? 1 : document.getElementById('pagamento-forma-2').value === 'pix' ? 2 : 0;
+            const valor = Number(document.getElementById(`pagamento-valor-${indice}`)?.value || 0);
+            if (!indice || valor <= 0) return mostrarMensagem('Informe um valor maior que zero para a parte em PIX.', 'erro');
+            gerarQRCodePixManual(valor, indice);
         }
 
         function abrirModalPix() {
@@ -3101,8 +3242,7 @@ function showInstallButton() {
 
         function totalAtualDaVenda() {
             const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-            return Math.round((subtotal - subtotal * (desconto / 100)) * 100) / 100;
+            return arredondarCentavos(subtotal - calcularDescontoVenda(subtotal).valorDesconto);
         }
 
         function desenharQrCode(payload) {
@@ -3164,7 +3304,7 @@ function showInstallButton() {
             gerarQRCodePixManual(total);
         }
 
-        function gerarQRCodePixManual(total) {
+        function gerarQRCodePixManual(total, indiceForma = 0) {
             const chavePix = normalizarChavePix(CONFIG_PIX.chavePix);
             if (!chavePix) { mostrarMensagem('Configure uma chave PIX válida no ADM do PDV.', 'erro'); return; }
             const dadosPix = {
@@ -3178,7 +3318,7 @@ function showInstallButton() {
                 const payloadPix = gerarPayloadPix(dadosPix);
                 desenharQrCode(payloadPix);
                 codigoPixAtual = payloadPix;
-                vendaAtual = { ...vendaAtual, tipo: 'pix', pixId: dadosPix.identificador };
+                vendaAtual = { ...vendaAtual, ...(indiceForma ? {} : { tipo: 'pix' }), pixId: dadosPix.identificador, pixFormaIndice: indiceForma || undefined };
                 document.getElementById('btn-copiar-pix').classList.remove('hidden');
                 document.getElementById('pix-id').value = dadosPix.identificador;
                 document.getElementById('pix-valor-display').textContent = `R$ ${total.toFixed(2)}`;
@@ -3318,17 +3458,71 @@ function showInstallButton() {
         }
 
         function calcularTroco() {
-            const total = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-            const valorDesconto = total * (desconto / 100);
-            const totalFinal = Math.max(0, total - valorDesconto - valorSaldoAplicadoVenda());
-            
-            const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
-            const troco = valorRecebido - totalFinal;
+            const totalFinal = totalReceberAgora();
+            const valorDinheiro = vendaAtual?.dividido
+                ? [1, 2].reduce((soma, indice) => soma + (document.getElementById(`pagamento-forma-${indice}`)?.value === 'dinheiro' ? Number(document.getElementById(`pagamento-valor-${indice}`)?.value || 0) : 0), 0)
+                : totalFinal;
+            const valorRecebido = parseFloat(document.getElementById(vendaAtual?.dividido ? 'valor-recebido-dividido' : 'valor-recebido')?.value) || 0;
+            const troco = valorRecebido - valorDinheiro;
             
             document.getElementById('troco').textContent = `R$ ${troco.toFixed(2)}`;
             document.getElementById('troco').className = troco >= 0 ? 'text-green-600' : 'text-red-600';
             salvarRascunhoVenda();
+        }
+
+        function montarPagamentoVenda(valorCobrado, clienteSelecionado) {
+            if (!vendaAtual?.dividido) {
+                const pagamento = { ...vendaAtual, valorCobrado };
+                if (pagamento.tipo === 'dinheiro') {
+                    const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
+                    if (valorRecebido < valorCobrado) return { erro: 'Valor recebido é insuficiente!' };
+                    pagamento.valorRecebido = valorRecebido;
+                    pagamento.troco = arredondarCentavos(valorRecebido - valorCobrado);
+                } else if (pagamento.tipo === 'pix') {
+                    pagamento.pixId = document.getElementById('pix-id').value;
+                } else if (pagamento.tipo === 'cartao') {
+                    pagamento.tipoCartao = document.getElementById('tipo-cartao').value;
+                    pagamento.parcelas = parseInt(document.getElementById('parcelas').value);
+                } else if (pagamento.tipo === 'fiado') {
+                    if (!clienteSelecionado) return { erro: 'Selecione um cliente para a venda fiado.' };
+                    pagamento.clienteId = clienteSelecionado.id;
+                    pagamento.clienteNome = clienteSelecionado.nome;
+                    pagamento.vencimento = document.getElementById('fiado-vencimento').value || '';
+                }
+                return { pagamento };
+            }
+
+            const formas = [1, 2].map(indice => ({
+                tipo: document.getElementById(`pagamento-forma-${indice}`).value,
+                valor: arredondarCentavos(document.getElementById(`pagamento-valor-${indice}`).value)
+            }));
+            if (formas[0].tipo === formas[1].tipo) return { erro: 'Escolha duas formas de pagamento diferentes.' };
+            if (formas.some(forma => forma.valor <= 0)) return { erro: 'Informe um valor maior que zero para cada forma de pagamento.' };
+            const soma = arredondarCentavos(formas.reduce((total, forma) => total + forma.valor, 0));
+            if (Math.abs(soma - valorCobrado) > 0.01) return { erro: `A soma das duas formas precisa ser R$ ${valorCobrado.toFixed(2)}.` };
+
+            const formaDinheiro = formas.find(forma => forma.tipo === 'dinheiro');
+            if (formaDinheiro) {
+                const valorRecebido = Number(document.getElementById('valor-recebido-dividido').value || 0);
+                if (valorRecebido < formaDinheiro.valor) return { erro: 'O valor em dinheiro recebido é insuficiente.' };
+                formaDinheiro.valorRecebido = valorRecebido;
+                formaDinheiro.troco = arredondarCentavos(valorRecebido - formaDinheiro.valor);
+            }
+            const formaPix = formas.find(forma => forma.tipo === 'pix');
+            if (formaPix) formaPix.pixId = document.getElementById('pix-id').value || '';
+            const formaCartao = formas.find(forma => forma.tipo === 'cartao');
+            if (formaCartao) {
+                formaCartao.tipoCartao = document.getElementById('tipo-cartao-dividido').value;
+                formaCartao.parcelas = parseInt(document.getElementById('parcelas-dividido').value);
+            }
+            const formaFiado = formas.find(forma => forma.tipo === 'fiado');
+            if (formaFiado) {
+                if (!clienteSelecionado) return { erro: 'Selecione um cliente para usar fiado em uma das partes.' };
+                formaFiado.clienteId = clienteSelecionado.id;
+                formaFiado.clienteNome = clienteSelecionado.nome;
+                formaFiado.vencimento = document.getElementById('fiado-vencimento').value || '';
+            }
+            return { pagamento: { tipo: 'misto', dividido: true, formas, valorCobrado, clienteId: formaFiado?.clienteId || '', clienteNome: formaFiado?.clienteNome || '' } };
         }
 
         function finalizarVenda() {
@@ -3345,9 +3539,10 @@ function showInstallButton() {
             }
 
             const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
-            const valorDesconto = subtotal * (desconto / 100);
-            const total = subtotal - valorDesconto;
+            const dadosDesconto = calcularDescontoVenda(subtotal);
+            const desconto = dadosDesconto.percentual;
+            const valorDesconto = dadosDesconto.valorDesconto;
+            const total = arredondarCentavos(subtotal - valorDesconto);
             const clienteSelecionado = clientesFiado.find(c => c.id === document.getElementById('cliente-venda').value);
             const saldoUtilizado = valorSaldoAplicadoVenda();
             const valorCobrado = Math.max(0, Math.round((total - saldoUtilizado) * 100) / 100);
@@ -3362,29 +3557,16 @@ function showInstallButton() {
                 return;
             }
 
-            // Validações específicas por tipo de pagamento
-            if (vendaAtual.tipo === 'dinheiro') {
-                const valorRecebido = parseFloat(document.getElementById('valor-recebido').value) || 0;
-                if (valorRecebido < valorCobrado) {
-                    mostrarMensagem('Valor recebido é insuficiente!', 'erro');
-                    return;
-                }
-                vendaAtual.valorRecebido = valorRecebido;
-                vendaAtual.troco = valorRecebido - valorCobrado;
-            } else if (vendaAtual.tipo === 'pix') {
-                vendaAtual.pixId = document.getElementById('pix-id').value;
-            } else if (vendaAtual.tipo === 'cartao') {
-                vendaAtual.tipoCartao = document.getElementById('tipo-cartao').value;
-                vendaAtual.parcelas = parseInt(document.getElementById('parcelas').value);
-            } else if (vendaAtual.tipo === 'fiado') {
-                const cliente = clienteSelecionado;
-                if (!cliente) { mostrarMensagem('Selecione um cliente para a venda fiado.', 'erro'); return; }
-                vendaAtual.clienteId = cliente.id;
-                vendaAtual.clienteNome = cliente.nome;
-                vendaAtual.vencimento = document.getElementById('fiado-vencimento').value || '';
-            }
+            const resultadoPagamento = montarPagamentoVenda(valorCobrado, clienteSelecionado);
+            if (resultadoPagamento.erro) { mostrarMensagem(resultadoPagamento.erro, 'erro'); return; }
+            vendaAtual = resultadoPagamento.pagamento;
             vendaAtual.saldoUtilizado = saldoUtilizado;
             vendaAtual.valorCobrado = valorCobrado;
+            const valorFiado = formasPagamentoRegistradas(vendaAtual, valorCobrado).filter(forma => forma.tipo === 'fiado').reduce((soma, forma) => soma + Number(forma.valor || 0), 0);
+            if (valorFiado > 0 && clienteSelecionado && !clienteSelecionado.semLimite && saldoClienteFiado(clienteSelecionado.id) + valorFiado > Number(clienteSelecionado.limite || 0)) {
+                mostrarMensagem('O valor fiado ultrapassa o limite disponível do cliente.', 'erro');
+                return;
+            }
 
             // Soma todos os itens que consomem o mesmo estoque antes de baixar o saldo.
             const consumoPorEstoque = new Map();
@@ -3409,6 +3591,8 @@ function showInstallButton() {
                 itens: [...carrinho],
                 subtotal: subtotal,
                 desconto: desconto,
+                descontoTipo: dadosDesconto.tipo,
+                descontoInformado: dadosDesconto.informado,
                 valorDesconto: valorDesconto,
                 total: total,
                 pagamento: vendaAtual,
@@ -3442,18 +3626,18 @@ function showInstallButton() {
                 });
             }
             
-            // Vendas à vista entram no caixa; vendas fiado ficam no saldo do cliente.
-            const movimento = {
-                id: 'm_' + Date.now(),
-                data: new Date().toISOString(),
-                tipo: vendaAtual.tipo === 'fiado' ? 'fiado' : 'entrada',
-                valor: valorCobrado,
-                descricao: `Venda #${venda.id} - ${vendaAtual.tipo}${saldoUtilizado > 0 ? ` + saldo do cliente R$ ${saldoUtilizado.toFixed(2)}` : ''}`,
+            // Cada forma recebe seu próprio lançamento; a parte fiada não entra no caixa.
+            formasPagamentoRegistradas(vendaAtual, valorCobrado).forEach((forma, indice) => movimentos.push({
+                id: `m_${Date.now()}_${indice}`,
+                data: venda.data,
+                tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada',
+                formaPagamento: forma.tipo,
+                valor: Number(forma.valor || 0),
+                descricao: `Venda #${venda.id} - ${forma.tipo}${saldoUtilizado > 0 ? ` + saldo do cliente R$ ${saldoUtilizado.toFixed(2)}` : ''}`,
                 vendaId: venda.id,
                 caixaId: caixa.id,
                 vendedor: venda.vendedor
-            };
-            movimentos.push(movimento);
+            }));
 
             salvarDados();
             atualizarFinanceiro();
@@ -3468,6 +3652,8 @@ function showInstallButton() {
             codigoPixAtual = '';
             localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
             document.getElementById('desconto').value = '0';
+            document.getElementById('desconto-tipo').value = 'percentual';
+            document.getElementById('desconto-resumo').textContent = '';
             document.getElementById('valor-recebido').value = '';
             document.getElementById('pix-id').value = '';
             document.getElementById('tipo-cartao').value = 'credito';
@@ -3479,6 +3665,11 @@ function showInstallButton() {
             document.getElementById('saldo-cliente-venda').classList.add('hidden');
             document.getElementById('campos-uso-saldo').classList.add('hidden');
             document.getElementById('pagamento-detalhes').classList.add('hidden');
+            document.getElementById('pagamento-dividido-painel').classList.add('hidden');
+            document.getElementById('btn-pagamento-dividido').textContent = '➕ Dividir em 2 formas de pagamento';
+            document.getElementById('pagamento-valor-1').value = '';
+            document.getElementById('pagamento-valor-2').value = '';
+            document.getElementById('valor-recebido-dividido').value = '';
             
             // Resetar status PIX
             document.getElementById('pix-status').classList.add('hidden');
@@ -3565,29 +3756,18 @@ function showInstallButton() {
             document.getElementById('comprovante-total-final').textContent = `R$ ${venda.total.toFixed(2)}`;
             
             // Informações de pagamento detalhadas
-            let pagamentoTexto = `<strong>Forma de Pagamento:</strong> ${venda.pagamento.tipo.toUpperCase()}`;
+            const formasPagamento = formasPagamentoRegistradas(venda.pagamento, valorCobrado);
+            let pagamentoTexto = `<strong>${formasPagamento.length > 1 ? 'Formas de Pagamento' : 'Forma de Pagamento'}:</strong>`;
             if (venda.clienteNome || venda.pagamento?.clienteNome) {
                 pagamentoTexto = `<strong>Cliente:</strong> ${textoSeguro(venda.clienteNome || venda.pagamento.clienteNome)}<br>` + pagamentoTexto;
             }
             if (saldoUtilizado > 0) pagamentoTexto += `<br><strong>Saldo do cliente utilizado:</strong> R$ ${saldoUtilizado.toFixed(2)}<br><strong>Valor pago agora:</strong> R$ ${valorCobrado.toFixed(2)}`;
-            
-            if (venda.pagamento.tipo === 'dinheiro') {
-                if (venda.pagamento.valorRecebido) {
-                    pagamentoTexto += `<br><strong>Valor Recebido:</strong> R$ ${venda.pagamento.valorRecebido.toFixed(2)}`;
-                }
-                if (venda.pagamento.troco > 0) {
-                    pagamentoTexto += `<br><strong>Troco:</strong> R$ ${venda.pagamento.troco.toFixed(2)}`;
-                }
-            } else if (venda.pagamento.tipo === 'cartao') {
-                const tipoCartao = venda.pagamento.tipoCartao ? venda.pagamento.tipoCartao.toUpperCase() : 'CRÉDITO';
-                const parcelas = venda.pagamento.parcelas || 1;
-                pagamentoTexto += ` ${tipoCartao}`;
-                pagamentoTexto += `<br><strong>Parcelas:</strong> ${parcelas}x de R$ ${(valorCobrado / parcelas).toFixed(2)}`;
-            } else if (venda.pagamento.tipo === 'pix') {
-                if (venda.pagamento.pixId) {
-                    pagamentoTexto += `<br><strong>ID Transação:</strong> ${venda.pagamento.pixId}`;
-                }
-            }
+            formasPagamento.forEach(forma => {
+                pagamentoTexto += `<br><strong>${textoSeguro(forma.tipo.toUpperCase())}:</strong> R$ ${Number(forma.valor || 0).toFixed(2)}`;
+                if (forma.tipo === 'dinheiro' && forma.valorRecebido) pagamentoTexto += ` · recebido R$ ${Number(forma.valorRecebido).toFixed(2)}${Number(forma.troco || 0) > 0 ? ` · troco R$ ${Number(forma.troco).toFixed(2)}` : ''}`;
+                if (forma.tipo === 'cartao') pagamentoTexto += ` · ${(forma.tipoCartao || 'credito').toUpperCase()} · ${forma.parcelas || 1}x de R$ ${(Number(forma.valor || 0) / (forma.parcelas || 1)).toFixed(2)}`;
+                if (forma.tipo === 'pix' && forma.pixId) pagamentoTexto += ` · ID ${textoSeguro(forma.pixId)}`;
+            });
             
             document.getElementById('comprovante-pagamento').innerHTML = pagamentoTexto;
             
@@ -3669,10 +3849,9 @@ function showInstallButton() {
             yPos += 8 + 6 + 5; // total + separador + pagamento título
 
             // formas de pagamento
-            if (venda.pagamento.tipo === 'dinheiro') yPos += 12;
-            else if (venda.pagamento.tipo === 'cartao') yPos += 10;
-            else if (venda.pagamento.tipo === 'pix') yPos += 10;
-            else if (venda.pagamento.tipo === 'fiado') yPos += 4;
+            formasPagamentoRegistradas(venda.pagamento, venda.pagamento?.valorCobrado ?? venda.total).forEach(forma => {
+                yPos += forma.tipo === 'dinheiro' ? 12 : forma.tipo === 'cartao' || forma.tipo === 'pix' ? 10 : 4;
+            });
 
             yPos += 6 + 6 + 8 + 4 + 4; // final
 
@@ -3808,26 +3987,20 @@ function showInstallButton() {
         y += 5;
 
         doc.setFont('helvetica', 'normal');
-        const forma = venda.pagamento.tipo.toUpperCase();
-
-        if (forma === 'DINHEIRO') {
-            doc.text(forma, margemEsquerda, y); y += 4;
-            if (venda.pagamento.valorRecebido)
-                doc.text(`Valor Recebido: R$ ${venda.pagamento.valorRecebido.toFixed(2)}`, margemEsquerda, y), y += 4;
-            if (venda.pagamento.troco > 0)
-                doc.text(`Troco: R$ ${venda.pagamento.troco.toFixed(2)}`, margemEsquerda, y), y += 4;
-        } else if (forma === 'CARTAO') {
-            const tipo = venda.pagamento.tipoCartao?.toUpperCase() || 'CREDITO';
-            const parcelas = venda.pagamento.parcelas || 1;
-            doc.text(`${forma} ${tipo}`, margemEsquerda, y); y += 4;
-            doc.text(`Parcelas: ${parcelas}x de R$ ${(valorCobrado / parcelas).toFixed(2)}`, margemEsquerda, y); y += 4;
-        } else if (forma === 'PIX') {
-            doc.text(forma, margemEsquerda, y); y += 4;
-            if (venda.pagamento.pixId)
-                doc.text(`ID Transacao: ${venda.pagamento.pixId}`, margemEsquerda, y), y += 4;
-        } else if (forma === 'FIADO') {
-            doc.text('FIADO', margemEsquerda, y); y += 4;
-        }
+        formasPagamentoRegistradas(venda.pagamento, valorCobrado).forEach(formaPagamento => {
+            const forma = formaPagamento.tipo.toUpperCase();
+            doc.text(`${forma}: R$ ${Number(formaPagamento.valor || 0).toFixed(2)}`, margemEsquerda, y); y += 4;
+            if (forma === 'DINHEIRO') {
+                if (formaPagamento.valorRecebido) doc.text(`Valor Recebido: R$ ${Number(formaPagamento.valorRecebido).toFixed(2)}`, margemEsquerda, y), y += 4;
+                if (Number(formaPagamento.troco || 0) > 0) doc.text(`Troco: R$ ${Number(formaPagamento.troco).toFixed(2)}`, margemEsquerda, y), y += 4;
+            } else if (forma === 'CARTAO') {
+                const tipo = formaPagamento.tipoCartao?.toUpperCase() || 'CREDITO';
+                const parcelas = formaPagamento.parcelas || 1;
+                doc.text(`${tipo} - ${parcelas}x de R$ ${(Number(formaPagamento.valor || 0) / parcelas).toFixed(2)}`, margemEsquerda, y); y += 4;
+            } else if (forma === 'PIX' && formaPagamento.pixId) {
+                doc.text(`ID Transacao: ${formaPagamento.pixId}`, margemEsquerda, y); y += 4;
+            }
+        });
 
         y += 6;
         doc.text('================================', largura / 2, y, { align: 'center' });
@@ -4104,7 +4277,7 @@ function showInstallButton() {
             if (!caixa) return { caixa: null, mov: [], vendasDia: [], dinheiro: 0, pix: 0, cartao: 0, fiado: 0, entradas: 0, saidas: 0, esperado: 0 };
             const mov = movimentos.filter(m => registroPertenceAoCaixa(m, caixa));
             const vendasDia = vendas.filter(v => registroPertenceAoCaixa(v, caixa));
-            const porTipo = tipo => vendasDia.filter(v => v.pagamento?.tipo === tipo).reduce((s, v) => s + Number(v.pagamento?.valorCobrado ?? v.total ?? 0), 0);
+            const porTipo = tipo => vendasDia.reduce((soma, venda) => soma + valorPagamentoPorTipo(venda, tipo), 0);
             const entradas = mov.filter(m => m.tipo === 'entrada').reduce((s, m) => s + Number(m.valor || 0), 0);
             const saidas = mov.filter(m => m.tipo === 'saida').reduce((s, m) => s + Number(m.valor || 0), 0);
             return { caixa, mov, vendasDia, dinheiro: porTipo('dinheiro'), pix: porTipo('pix'), cartao: porTipo('cartao'), fiado: porTipo('fiado'), entradas, saidas, esperado: Number(caixa.abertura || 0) + entradas - saidas };
@@ -4362,7 +4535,7 @@ function showInstallButton() {
                     <td class="px-4 py-2">${data.toLocaleTimeString('pt-BR')}</td>
                     <td class="px-4 py-2">${itensResumo}</td>
                     <td class="px-4 py-2 text-right">${moedaRelatorio(venda.total)}</td>
-                    <td class="px-4 py-2">${venda.pagamento.tipo}</td>
+                    <td class="px-4 py-2">${descricaoPagamento(venda.pagamento, venda.total)}</td>
                     <td class="px-4 py-2">${nomeVendedorVenda(venda)}</td>
                     <td class="px-4 py-2 text-center">
                         <button onclick="mostrarComprovanteVenda('${venda.id}')" 
@@ -4386,7 +4559,7 @@ function showInstallButton() {
                         <div class="flex-1">
                             <div class="font-semibold text-base">${data.toLocaleTimeString('pt-BR')}</div>
                             <div class="text-sm text-gray-600 mt-1">${itensResumo}</div>
-                            <div class="text-sm text-gray-600 mt-1">Pagamento: ${venda.pagamento.tipo}</div>
+                            <div class="text-sm text-gray-600 mt-1">Pagamento: ${descricaoPagamento(venda.pagamento, venda.total)}</div>
                             <div class="text-sm font-medium text-gray-700 mt-1">Vendedor: ${nomeVendedorVenda(venda)}</div>
                         </div>
                         <div class="text-right">
@@ -4523,6 +4696,8 @@ function showInstallButton() {
             // Remover movimento de caixa relacionado
             movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
             movimentosSaldoCliente = movimentosSaldoCliente.filter(m => m.vendaId !== vendaParaExcluir.id);
+            const orcamentoVinculado = orcamentos.find(orcamento => orcamento.vendaId === vendaParaExcluir.id);
+            if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
             
             // Remover venda
             vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
@@ -4534,6 +4709,7 @@ function showInstallButton() {
             atualizarTabelaProdutos();
             atualizarClientes();
             atualizarFinanceiro();
+            atualizarListaOrcamentos();
             
             mostrarMensagem('Venda excluída com sucesso! Estoque restaurado.', 'sucesso');
             vendaParaExcluir = null;
@@ -4550,6 +4726,8 @@ function showInstallButton() {
                 const venda = vendas.find(v => v.id === movimentoParaExcluir.vendaId);
                 if (venda) {
                     restaurarEstoqueDosItens(venda.itens);
+                    const orcamentoVinculado = orcamentos.find(orcamento => orcamento.vendaId === venda.id);
+                    if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
                     
                     // Remover a venda também
                     vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
@@ -4564,7 +4742,7 @@ function showInstallButton() {
             }
             
             // Remover movimento
-            movimentos = movimentos.filter(m => m.id !== movimentoParaExcluir.id);
+            movimentos = movimentoParaExcluir.vendaId ? movimentos.filter(m => m.vendaId !== movimentoParaExcluir.vendaId) : movimentos.filter(m => m.id !== movimentoParaExcluir.id);
             
             salvarDados();
             atualizarHistoricoMovimentos();
@@ -4574,6 +4752,7 @@ function showInstallButton() {
             atualizarTabelaProdutos();
             atualizarClientes();
             atualizarFinanceiro();
+            atualizarListaOrcamentos();
             
             movimentoParaExcluir = null;
         }
@@ -4597,7 +4776,7 @@ function showInstallButton() {
                 const data = new Date(venda.data);
                 const itens = venda.itens.map(item => `${item.nome}(${item.quantidade})`).join(';');
                 const vendedor = nomeVendedorVenda(venda).replace(/"/g, '""');
-                csv.push(`${data.toLocaleDateString('pt-BR')},${data.toLocaleTimeString('pt-BR')},${venda.total.toFixed(2)},${venda.pagamento.tipo},"${vendedor}","${itens}"`);
+                csv.push(`${data.toLocaleDateString('pt-BR')},${data.toLocaleTimeString('pt-BR')},${venda.total.toFixed(2)},"${descricaoPagamento(venda.pagamento, venda.total)}","${vendedor}","${itens}"`);
             });
             
             baixarCSV(csv.join('\n'), 'vendas.csv');
@@ -5014,7 +5193,7 @@ function showInstallButton() {
         function mostrarFormClienteFiado() { document.getElementById('form-cliente-fiado').classList.remove('hidden'); }
         function cancelarClienteFiado() { document.getElementById('form-cliente-fiado').classList.add('hidden'); ['cliente-fiado-nome','cliente-fiado-telefone','cliente-fiado-limite','cliente-fiado-dia'].forEach(id => document.getElementById(id).value=''); document.getElementById('cliente-fiado-sem-limite').checked=false; clienteFiadoEditando=null; }
         function saldoClienteFiado(clienteId) {
-            const compras = vendas.filter(v => v.pagamento?.tipo === 'fiado' && v.pagamento.clienteId === clienteId).reduce((s,v) => s + Number(v.pagamento?.valorCobrado ?? v.total ?? 0), 0);
+            const compras = vendas.reduce((soma, venda) => soma + formasPagamentoRegistradas(venda.pagamento, venda.total).filter(forma => forma.tipo === 'fiado' && (forma.clienteId || venda.pagamento?.clienteId) === clienteId).reduce((total, forma) => total + Number(forma.valor || 0), 0), 0);
             const pagos = pagamentosFiado.filter(p => p.clienteId === clienteId).reduce((s,p) => s + Number(p.valor || 0), 0);
             return Math.max(0, compras - pagos);
         }
@@ -5056,10 +5235,10 @@ function showInstallButton() {
         }
         function gerarExtratoFiado(clienteId) {
             const cliente=clientesFiado.find(c=>c.id===clienteId); if(!cliente) return;
-            const compras=vendas.filter(v=>v.pagamento?.tipo==='fiado'&&v.pagamento.clienteId===clienteId), pagos=pagamentosFiado.filter(p=>p.clienteId===clienteId); const {jsPDF}=window.jspdf; const pdf=new jsPDF(); let y=16;
+            const compras=vendas.filter(v=>formasPagamentoRegistradas(v.pagamento, v.total).some(forma=>forma.tipo==='fiado'&&(forma.clienteId||v.pagamento?.clienteId)===clienteId)), pagos=pagamentosFiado.filter(p=>p.clienteId===clienteId); const {jsPDF}=window.jspdf; const pdf=new jsPDF(); let y=16;
             pdf.setFontSize(18); pdf.text(configSistema.nomeEmpresa||'PDV - Pro',14,y); y+=10; pdf.setFontSize(14); pdf.text('EXTRATO DE FIADO',14,y); y+=9; pdf.setFontSize(10); pdf.text(`Cliente: ${cliente.nome}`,14,y); y+=6; pdf.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`,14,y); y+=9;
             pdf.setFont('helvetica','bold'); pdf.text('COMPRAS',14,y); y+=6; pdf.setFont('helvetica','normal');
-            compras.forEach(v=>{ if(y>270){pdf.addPage();y=16;} const itens=v.itens.map(i=>`${i.quantidade}x ${i.nome}`).join(', '); pdf.text(`${new Date(v.data).toLocaleString('pt-BR')} — R$ ${v.total.toFixed(2)}`,14,y); y+=5; const linhas=pdf.splitTextToSize(itens,175); pdf.text(linhas,18,y); y+=linhas.length*5+3; });
+            compras.forEach(v=>{ if(y>270){pdf.addPage();y=16;} const itens=v.itens.map(i=>`${i.quantidade}x ${i.nome}`).join(', '); const valorFiado=valorPagamentoPorTipo(v,'fiado'); pdf.text(`${new Date(v.data).toLocaleString('pt-BR')} — R$ ${valorFiado.toFixed(2)}`,14,y); y+=5; const linhas=pdf.splitTextToSize(itens,175); pdf.text(linhas,18,y); y+=linhas.length*5+3; });
             if(y>255){pdf.addPage();y=16;} pdf.setFont('helvetica','bold'); pdf.text('PAGAMENTOS',14,y); y+=6; pdf.setFont('helvetica','normal'); pagos.forEach(p=>{pdf.text(`${new Date(p.data).toLocaleString('pt-BR')} — R$ ${Number(p.valor).toFixed(2)}`,14,y);y+=6;}); y+=4; pdf.setFont('helvetica','bold'); pdf.text(`SALDO PENDENTE: R$ ${saldoClienteFiado(clienteId).toFixed(2)}`,14,y); pdf.save(`extrato-fiado-${cliente.nome.replace(/[^a-z0-9]/gi,'-')}.pdf`);
         }
 
@@ -5114,6 +5293,97 @@ function showInstallButton() {
             }
         }
 
+        function documentoDoCliente(cliente) {
+            return String(cliente?.documento || cliente?.cpf || cliente?.cnpj || '').replace(/\D/g, '');
+        }
+
+        function fecharSugestoesClientesOrcamento() {
+            setTimeout(() => document.getElementById('sugestoes-clientes-orcamento')?.classList.add('hidden'), 150);
+        }
+
+        function buscarClientesOrcamento() {
+            const campo = document.getElementById('orcamento-cliente-nome');
+            const lista = document.getElementById('sugestoes-clientes-orcamento');
+            const status = document.getElementById('orcamento-cliente-status');
+            if (!campo || !lista) return;
+            const termo = campo.value.trim().toLocaleLowerCase('pt-BR');
+            const termoNumerico = termo.replace(/\D/g, '');
+            const campoClienteId = document.getElementById('orcamento-cliente-id');
+            let clienteVinculado = clientesFiado.find(cliente => cliente.id === (campoClienteId.value || campoClienteId.dataset.clienteId));
+            if (clienteVinculado && clienteVinculado.nome !== campo.value.trim()) {
+                campoClienteId.value = '';
+                delete campoClienteId.dataset.clienteId;
+                clienteVinculado = null;
+                status.className = 'mt-1 text-xs text-gray-500';
+            }
+            if (termo.length < 2) {
+                lista.classList.add('hidden');
+                if (!clienteVinculado) status.textContent = 'Busque um cliente cadastrado ou digite os dados de um novo.';
+                return;
+            }
+            const encontrados = [...clientesFiado].filter(cliente => {
+                const textos = [cliente.nome, cliente.email, cliente.whatsapp, cliente.telefone, documentoDoCliente(cliente)].map(valor => String(valor || '').toLocaleLowerCase('pt-BR'));
+                return textos.some(texto => texto.includes(termo) || (termoNumerico && texto.replace(/\D/g, '').includes(termoNumerico)));
+            }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).slice(0, 8);
+            lista.innerHTML = encontrados.map(cliente => {
+                const documento = documentoDoCliente(cliente);
+                const complemento = [documento ? (documento.length === 14 ? formatarCNPJ(documento) : documento.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')) : '', cliente.whatsapp || cliente.telefone, cliente.email].filter(Boolean).join(' · ');
+                return `<button type="button" role="option" onclick="selecionarClienteOrcamento('${escaparHTMLOrcamento(cliente.id)}')" class="block w-full rounded-lg px-3 py-2 text-left hover:bg-emerald-50"><strong class="block text-sm text-slate-900">${escaparHTMLOrcamento(cliente.nome)}</strong><span class="text-xs text-slate-500">${escaparHTMLOrcamento(complemento || 'Sem outros dados cadastrados')}</span></button>`;
+            }).join('') || `<div class="p-3 text-sm text-slate-600"><strong>Nenhum cliente encontrado.</strong><br>Continue preenchendo: ele será cadastrado ao finalizar o orçamento.</div>`;
+            lista.classList.remove('hidden');
+            if (!clienteVinculado) status.textContent = encontrados.length ? 'Escolha um cliente da lista ou continue para cadastrar um novo.' : 'Novo cliente: o cadastro será criado ao finalizar o orçamento.';
+        }
+
+        function selecionarClienteOrcamento(clienteId) {
+            const cliente = clientesFiado.find(item => item.id === clienteId);
+            if (!cliente) return;
+            const campoId = document.getElementById('orcamento-cliente-id');
+            campoId.value = cliente.id;
+            campoId.dataset.clienteId = cliente.id;
+            document.getElementById('orcamento-cliente-nome').value = cliente.nome || '';
+            const documento = document.getElementById('orcamento-cliente-documento');
+            documento.value = documentoDoCliente(cliente);
+            formatarDocumentoOrcamento(documento);
+            document.getElementById('orcamento-cliente-contato').value = cliente.contato || '';
+            document.getElementById('orcamento-cliente-telefone').value = cliente.whatsapp || cliente.telefone || '';
+            const campoEmail = document.getElementById('orcamento-cliente-email');
+            campoEmail.value = cliente.email || '';
+            campoEmail.defaultValue = cliente.email || '';
+            document.getElementById('orcamento-cliente-endereco').value = [cliente.endereco, cliente.cidade].filter(Boolean).join(cliente.endereco && cliente.cidade ? ' · ' : '');
+            document.getElementById('sugestoes-clientes-orcamento').classList.add('hidden');
+            const status = document.getElementById('orcamento-cliente-status');
+            status.textContent = `Cliente cadastrado selecionado: ${cliente.nome}`;
+            status.className = 'mt-1 text-xs font-semibold text-emerald-700';
+        }
+
+        function vincularClienteAoOrcamento(orcamento) {
+            const dados = orcamento.cliente || {};
+            const documento = String(dados.documento || '').replace(/\D/g, '');
+            const telefone = String(dados.telefone || '').replace(/\D/g, '');
+            const email = String(dados.email || '').trim().toLocaleLowerCase('pt-BR');
+            let cliente = clientesFiado.find(item => item.id === orcamento.clienteId);
+            if (!cliente && documento) cliente = clientesFiado.find(item => documentoDoCliente(item) === documento);
+            if (!cliente && email) cliente = clientesFiado.find(item => String(item.email || '').toLocaleLowerCase('pt-BR') === email);
+            if (!cliente && telefone) cliente = clientesFiado.find(item => String(item.whatsapp || item.telefone || '').replace(/\D/g, '') === telefone);
+            if (!cliente && !documento && !email && !telefone) cliente = clientesFiado.find(item => item.nome.trim().toLocaleLowerCase('pt-BR') === dados.nome.trim().toLocaleLowerCase('pt-BR'));
+            let novo = false;
+            if (!cliente) {
+                const agora = new Date().toISOString();
+                cliente = {
+                    id: `cl_${Date.now()}_orc`, tipoCadastro: 'cliente', nome: dados.nome, cpf: documento, documento,
+                    whatsapp: dados.telefone || '', telefone: dados.telefone || '', email, contato: dados.contato || '',
+                    nascimento: '', cidade: '', endereco: dados.endereco || '',
+                    observacoes: `Cadastrado automaticamente pelo orçamento ${orcamento.numero}.`, semLimite: true, limite: 0,
+                    createdAt: agora, atualizadoEm: agora, origemCadastro: 'orcamento', orcamentoOrigemId: orcamento.id
+                };
+                clientesFiado.push(cliente);
+                novo = true;
+            }
+            orcamento.clienteId = cliente.id;
+            orcamento.cliente.id = cliente.id;
+            return { cliente, novo };
+        }
+
         function proximoNumeroOrcamento() {
             const ano = new Date().getFullYear();
             const maior = orcamentos.reduce((numero, orcamento) => {
@@ -5138,8 +5408,15 @@ function showInstallButton() {
             ['orcamento-cliente-nome', 'orcamento-cliente-documento', 'orcamento-cliente-contato', 'orcamento-cliente-telefone',
              'orcamento-cliente-email', 'orcamento-cliente-endereco', 'orcamento-condicoes', 'orcamento-prazo-entrega',
              'orcamento-observacoes', 'busca-item-orcamento'].forEach(id => { document.getElementById(id).value = ''; });
+            document.getElementById('orcamento-cliente-id').value = '';
+            delete document.getElementById('orcamento-cliente-id').dataset.clienteId;
+            document.getElementById('sugestoes-clientes-orcamento').classList.add('hidden');
+            const statusCliente = document.getElementById('orcamento-cliente-status');
+            statusCliente.textContent = 'Busque um cliente cadastrado ou digite os dados de um novo.';
+            statusCliente.className = 'mt-1 text-xs text-gray-500';
             document.getElementById('orcamento-validade').value = validade.toISOString().slice(0, 10);
             document.getElementById('orcamento-desconto').value = '0';
+            document.getElementById('orcamento-desconto-tipo').value = 'percentual';
             document.getElementById('orcamento-acrescimo').value = '0';
             document.getElementById('orcamento-numero').textContent = proximoNumeroOrcamento();
             document.getElementById('editor-orcamento').classList.remove('hidden');
@@ -5220,16 +5497,19 @@ function showInstallButton() {
 
         function calcularTotaisOrcamento() {
             const subtotal = itensOrcamento.reduce((soma, item) => soma + Number(item.quantidade || 0) * Number(item.preco || 0), 0);
-            const descontoPercentual = Math.min(100, Math.max(0, Number(document.getElementById('orcamento-desconto')?.value || 0)));
-            const valorDesconto = subtotal * descontoPercentual / 100;
+            const descontoTipo = document.getElementById('orcamento-desconto-tipo')?.value || 'percentual';
+            const descontoInformado = Math.max(0, Number(document.getElementById('orcamento-desconto')?.value || 0));
+            const valorDesconto = arredondarCentavos(Math.min(subtotal, descontoTipo === 'valor' ? descontoInformado : subtotal * Math.min(100, descontoInformado) / 100));
+            const descontoPercentual = subtotal > 0 ? Number((valorDesconto * 100 / subtotal).toFixed(2)) : 0;
             const acrescimo = Math.max(0, Number(document.getElementById('orcamento-acrescimo')?.value || 0));
-            return { subtotal, descontoPercentual, valorDesconto, acrescimo, total: subtotal - valorDesconto + acrescimo };
+            return { subtotal, descontoTipo, descontoInformado, descontoPercentual, valorDesconto, acrescimo, total: arredondarCentavos(subtotal - valorDesconto + acrescimo) };
         }
 
         function atualizarTotaisOrcamento() {
             const totais = calcularTotaisOrcamento();
             document.getElementById('orcamento-subtotal').textContent = moedaOrcamento(totais.subtotal);
             document.getElementById('orcamento-total').textContent = moedaOrcamento(totais.total);
+            document.getElementById('orcamento-desconto-resumo').textContent = totais.valorDesconto > 0 ? `- ${moedaOrcamento(totais.valorDesconto)} (${totais.descontoPercentual.toLocaleString('pt-BR')}%)` : '';
         }
 
         function dadosFormularioOrcamento(status) {
@@ -5243,6 +5523,7 @@ function showInstallButton() {
                 emitidoEm: orcamentoEditando?.emitidoEm || agora,
                 status,
                 validade: document.getElementById('orcamento-validade').value,
+                clienteId: document.getElementById('orcamento-cliente-id').value || document.getElementById('orcamento-cliente-id').dataset.clienteId || '',
                 cliente: {
                     nome: document.getElementById('orcamento-cliente-nome').value.trim(),
                     documento: document.getElementById('orcamento-cliente-documento').value.replace(/\D/g, ''),
@@ -5273,7 +5554,9 @@ function showInstallButton() {
             if (!orcamento.validade) { mostrarMensagem('Informe a data de validade do orçamento.', 'erro'); return false; }
             if (!orcamento.itens.length) { mostrarMensagem('Adicione ao menos um produto ou serviço.', 'erro'); return false; }
             if (orcamento.cliente.email && !document.getElementById('orcamento-cliente-email').checkValidity()) { mostrarMensagem('Informe um e-mail válido para o cliente.', 'erro'); return false; }
+            if (orcamento.cliente.documento.length === 11 && typeof validarCpfCliente === 'function' && !validarCpfCliente(orcamento.cliente.documento)) { mostrarMensagem('O CPF do cliente é inválido.', 'erro'); return false; }
             if (orcamento.cliente.documento.length === 14 && !validarCNPJ(orcamento.cliente.documento)) { mostrarMensagem('O CNPJ do cliente é inválido.', 'erro'); return false; }
+            if (orcamento.cliente.documento && ![11, 14].includes(orcamento.cliente.documento.length)) { mostrarMensagem('Informe um CPF ou CNPJ completo.', 'erro'); return false; }
             if (finalizando && !orcamento.empresa.cnpj) { mostrarMensagem('Cadastre o CNPJ da empresa em ADM do PDV → Configurações do Sistema antes de finalizar.', 'erro'); return false; }
             if (finalizando && !validarCNPJ(orcamento.empresa.cnpj)) { mostrarMensagem('O CNPJ da empresa salvo no ADM é inválido.', 'erro'); return false; }
             if (finalizando && orcamento.total <= 0) { mostrarMensagem('O total do orçamento precisa ser maior que zero.', 'erro'); return false; }
@@ -5283,14 +5566,17 @@ function showInstallButton() {
         function salvarOrcamento(status = 'rascunho', silencioso = false) {
             const orcamento = dadosFormularioOrcamento(status);
             if (!validarOrcamento(orcamento, status === 'finalizado')) return null;
+            const vinculoCliente = status === 'finalizado' ? vincularClienteAoOrcamento(orcamento) : null;
             const indice = orcamentos.findIndex(item => item.id === orcamento.id);
             if (indice >= 0) orcamentos[indice] = orcamento;
             else orcamentos.push(orcamento);
             orcamentoEditando = orcamento;
             salvarDados();
             atualizarListaOrcamentos();
+            if (vinculoCliente) atualizarClientes();
             document.getElementById('orcamento-numero').textContent = orcamento.numero;
-            if (!silencioso) mostrarMensagem(status === 'finalizado' ? 'Orçamento finalizado com sucesso.' : 'Rascunho do orçamento salvo.', 'sucesso');
+            if (!silencioso) mostrarMensagem(status === 'finalizado' ? `Orçamento finalizado.${vinculoCliente?.novo ? ' Cliente cadastrado automaticamente.' : ' Cliente vinculado ao cadastro existente.'}` : 'Rascunho do orçamento salvo.', 'sucesso');
+            orcamento.clienteNovoCadastrado = !!vinculoCliente?.novo;
             return orcamento;
         }
 
@@ -5299,7 +5585,7 @@ function showInstallButton() {
             if (!orcamento) return;
             gerarPDFOrcamento(orcamento.id);
             document.getElementById('editor-orcamento').classList.add('hidden');
-            mostrarMensagem('Orçamento finalizado e PDF gerado.', 'sucesso');
+            mostrarMensagem(`Orçamento finalizado e PDF gerado. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
         }
 
         function editarOrcamento(id) {
@@ -5318,10 +5604,17 @@ function showInstallButton() {
                 'orcamento-condicoes': orcamento.condicoes,
                 'orcamento-prazo-entrega': orcamento.prazoEntrega,
                 'orcamento-observacoes': orcamento.observacoes,
-                'orcamento-desconto': orcamento.descontoPercentual,
+                'orcamento-desconto': orcamento.descontoInformado ?? orcamento.descontoPercentual,
                 'orcamento-acrescimo': orcamento.acrescimo
             };
             Object.entries(campos).forEach(([idCampo, valor]) => { document.getElementById(idCampo).value = valor ?? ''; });
+            const clienteVinculado = clientesFiado.find(cliente => cliente.id === (orcamento.clienteId || orcamento.cliente?.id)) || clientesFiado.find(cliente => documentoDoCliente(cliente) && documentoDoCliente(cliente) === String(orcamento.cliente?.documento || '').replace(/\D/g, ''));
+            document.getElementById('orcamento-cliente-id').value = clienteVinculado?.id || '';
+            document.getElementById('orcamento-cliente-id').dataset.clienteId = clienteVinculado?.id || '';
+            const statusCliente = document.getElementById('orcamento-cliente-status');
+            statusCliente.textContent = clienteVinculado ? `Cliente cadastrado selecionado: ${clienteVinculado.nome}` : 'Este cliente será cadastrado ao finalizar o orçamento.';
+            statusCliente.className = `mt-1 text-xs ${clienteVinculado ? 'font-semibold text-emerald-700' : 'text-gray-500'}`;
+            document.getElementById('orcamento-desconto-tipo').value = orcamento.descontoTipo || 'percentual';
             const campoDocumento = document.getElementById('orcamento-cliente-documento');
             formatarDocumentoOrcamento(campoDocumento);
             document.getElementById('orcamento-numero').textContent = orcamento.numero;
@@ -5345,6 +5638,7 @@ function showInstallButton() {
 
         function excluirOrcamento(id) {
             const orcamento = orcamentos.find(item => item.id === id);
+            if (orcamento?.status === 'aprovado') { mostrarMensagem('Orçamentos aprovados ficam no histórico e não podem ser excluídos.', 'erro'); return; }
             if (!orcamento || !confirm(`Excluir o orçamento ${orcamento.numero}?`)) return;
             orcamentos = orcamentos.filter(item => item.id !== id);
             if (orcamentoEditando?.id === id) cancelarEdicaoOrcamento();
@@ -5353,8 +5647,138 @@ function showInstallButton() {
             mostrarMensagem('Orçamento excluído.', 'sucesso');
         }
 
+        function aprovarOrcamento(id) {
+            const caixa = exigirCaixaAberto('Abra o caixa antes de aprovar o orçamento.');
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!caixa || !orcamento || orcamento.status !== 'finalizado') return;
+            orcamentoEmAprovacao = orcamento;
+            document.getElementById('aprovar-orcamento-resumo').textContent = `${orcamento.numero} · ${orcamento.cliente?.nome || 'Cliente'} · ${moedaOrcamento(orcamento.total)}`;
+            document.getElementById('orcamento-pagamento-forma-1').value = 'dinheiro';
+            document.getElementById('orcamento-pagamento-forma-2').value = '';
+            document.getElementById('orcamento-pagamento-valor-1').value = Number(orcamento.total || 0).toFixed(2);
+            document.getElementById('orcamento-pagamento-valor-2').value = '0.00';
+            document.getElementById('orcamento-aprovacao-recebido').value = Number(orcamento.total || 0).toFixed(2);
+            const clienteSelect = document.getElementById('orcamento-aprovacao-cliente-id');
+            clienteSelect.innerHTML = '<option value="">Selecione o cliente</option>' + clientesFiado.map(cliente => `<option value="${escaparHTMLOrcamento(cliente.id)}">${escaparHTMLOrcamento(cliente.nome)} · saldo ${moedaOrcamento(saldoClienteFiado(cliente.id))}</option>`).join('');
+            const documentoOrcamento = String(orcamento.cliente?.documento || '').replace(/\D/g, '');
+            const clienteCorrespondente = clientesFiado.find(cliente => cliente.id === (orcamento.clienteId || orcamento.cliente?.id))
+                || clientesFiado.find(cliente => documentoOrcamento && documentoDoCliente(cliente) === documentoOrcamento)
+                || clientesFiado.find(cliente => cliente.nome?.toLocaleLowerCase('pt-BR') === orcamento.cliente?.nome?.toLocaleLowerCase('pt-BR'));
+            clienteSelect.value = clienteCorrespondente?.id || '';
+            const vencimento = new Date(); vencimento.setDate(vencimento.getDate() + 30);
+            document.getElementById('orcamento-aprovacao-vencimento').value = vencimento.toISOString().slice(0, 10);
+            atualizarPagamentoAprovacaoOrcamento();
+            const modal = document.getElementById('modal-aprovar-orcamento');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+        }
+
+        function fecharAprovacaoOrcamento() {
+            const modal = document.getElementById('modal-aprovar-orcamento');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+            orcamentoEmAprovacao = null;
+        }
+
+        function ajustarPagamentoAprovacaoOrcamento(campoAlterado) {
+            if (!orcamentoEmAprovacao) return;
+            const total = Number(orcamentoEmAprovacao.total || 0);
+            const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
+            if (!tipo2) {
+                document.getElementById('orcamento-pagamento-valor-1').value = total.toFixed(2);
+                document.getElementById('orcamento-pagamento-valor-2').value = '0.00';
+            } else {
+                const outro = campoAlterado === 1 ? 2 : 1;
+                const valor = Math.max(0, Number(document.getElementById(`orcamento-pagamento-valor-${campoAlterado}`).value || 0));
+                document.getElementById(`orcamento-pagamento-valor-${outro}`).value = Math.max(0, arredondarCentavos(total - valor)).toFixed(2);
+            }
+            atualizarPagamentoAprovacaoOrcamento();
+        }
+
+        function atualizarPagamentoAprovacaoOrcamento() {
+            if (!orcamentoEmAprovacao) return;
+            const tipo1 = document.getElementById('orcamento-pagamento-forma-1').value;
+            const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
+            const campo2 = document.getElementById('orcamento-pagamento-valor-2');
+            campo2.disabled = !tipo2;
+            if (!tipo2) { campo2.value = '0.00'; document.getElementById('orcamento-pagamento-valor-1').value = Number(orcamentoEmAprovacao.total || 0).toFixed(2); }
+            const tipos = [tipo1, tipo2].filter(Boolean);
+            document.getElementById('orcamento-aprovacao-cliente').classList.toggle('hidden', !tipos.includes('fiado'));
+            document.getElementById('orcamento-aprovacao-dinheiro').classList.toggle('hidden', !tipos.includes('dinheiro'));
+            document.getElementById('orcamento-aprovacao-cartao').classList.toggle('hidden', !tipos.includes('cartao'));
+            document.getElementById('orcamento-aprovacao-pix').classList.toggle('hidden', !tipos.includes('pix'));
+            const soma = arredondarCentavos(Number(document.getElementById('orcamento-pagamento-valor-1').value || 0) + Number(campo2.value || 0));
+            const diferenca = arredondarCentavos(Number(orcamentoEmAprovacao.total || 0) - soma);
+            const conferencia = document.getElementById('orcamento-pagamento-conferencia');
+            conferencia.textContent = Math.abs(diferenca) <= 0.01 ? `Pagamento conferido: ${moedaOrcamento(soma)}` : `${diferenca > 0 ? 'Falta distribuir' : 'Valor excedente'}: ${moedaOrcamento(Math.abs(diferenca))}`;
+            conferencia.className = `mt-3 rounded-lg p-3 text-sm font-semibold ${Math.abs(diferenca) <= 0.01 ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'}`;
+        }
+
+        function confirmarAprovacaoOrcamento() {
+            const orcamento = orcamentoEmAprovacao;
+            const caixa = exigirCaixaAberto('Abra o caixa antes de aprovar o orçamento.');
+            if (!orcamento || !caixa || orcamento.status !== 'finalizado') return;
+            const tipo1 = document.getElementById('orcamento-pagamento-forma-1').value;
+            const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
+            if (tipo2 && tipo1 === tipo2) return mostrarMensagem('Escolha formas de pagamento diferentes.', 'erro');
+            const formas = [{ tipo: tipo1, valor: arredondarCentavos(document.getElementById('orcamento-pagamento-valor-1').value) }];
+            if (tipo2) formas.push({ tipo: tipo2, valor: arredondarCentavos(document.getElementById('orcamento-pagamento-valor-2').value) });
+            if (formas.some(forma => forma.valor <= 0) || Math.abs(formas.reduce((soma, forma) => soma + forma.valor, 0) - Number(orcamento.total || 0)) > 0.01) return mostrarMensagem('Confira os valores: o pagamento precisa somar o total do orçamento.', 'erro');
+
+            const formaDinheiro = formas.find(forma => forma.tipo === 'dinheiro');
+            if (formaDinheiro) {
+                formaDinheiro.valorRecebido = Number(document.getElementById('orcamento-aprovacao-recebido').value || 0);
+                if (formaDinheiro.valorRecebido < formaDinheiro.valor) return mostrarMensagem('O valor em dinheiro recebido é insuficiente.', 'erro');
+                formaDinheiro.troco = arredondarCentavos(formaDinheiro.valorRecebido - formaDinheiro.valor);
+            }
+            const formaCartao = formas.find(forma => forma.tipo === 'cartao');
+            if (formaCartao) { formaCartao.tipoCartao = document.getElementById('orcamento-aprovacao-tipo-cartao').value; formaCartao.parcelas = Number(document.getElementById('orcamento-aprovacao-parcelas').value || 1); }
+            const formaFiado = formas.find(forma => forma.tipo === 'fiado');
+            const cliente = formaFiado ? clientesFiado.find(item => item.id === document.getElementById('orcamento-aprovacao-cliente-id').value) : null;
+            if (formaFiado && !cliente) return mostrarMensagem('Selecione o cliente da parte fiada.', 'erro');
+            if (formaFiado) {
+                formaFiado.clienteId = cliente.id; formaFiado.clienteNome = cliente.nome; formaFiado.vencimento = document.getElementById('orcamento-aprovacao-vencimento').value || '';
+                if (!cliente.semLimite && saldoClienteFiado(cliente.id) + formaFiado.valor > Number(cliente.limite || 0)) return mostrarMensagem('O valor fiado ultrapassa o limite disponível do cliente.', 'erro');
+            }
+
+            const consumoPorEstoque = new Map();
+            const itemAusente = (orcamento.itens || []).find(item => !produtos.some(produto => produto.id === item.produtoId));
+            if (itemAusente) return mostrarMensagem(`O item ${itemAusente.nome} não está mais cadastrado. Edite o orçamento antes de aprovar.`, 'erro');
+            const itensVenda = (orcamento.itens || []).map(item => {
+                const produto = produtos.find(registro => registro.id === item.produtoId);
+                const itemVenda = { produtoId: item.produtoId, nome: item.nome, preco: Number(item.preco), quantidade: Number(item.quantidade), unidade: item.unidade || 'un', tipo: item.tipo || produto.tipo || 'produto' };
+                if (produto.tipo !== 'servico') {
+                    const raiz = produtoRaizEstoque(produto); itemVenda.estoqueOrigemId = raiz.id;
+                    consumoPorEstoque.set(raiz.id, (consumoPorEstoque.get(raiz.id) || 0) + itemVenda.quantidade);
+                }
+                return itemVenda;
+            });
+            for (const [estoqueId, quantidade] of consumoPorEstoque) {
+                const raiz = produtos.find(produto => produto.id === estoqueId);
+                if (!raiz || estoqueDisponivel(raiz) < quantidade) return mostrarMensagem(`Estoque insuficiente para concluir o orçamento ${orcamento.numero}.`, 'erro');
+            }
+
+            const agora = new Date().toISOString();
+            const pagamento = formas.length === 1 ? { ...formas[0], valorCobrado: Number(orcamento.total) } : { tipo: 'misto', dividido: true, formas, valorCobrado: Number(orcamento.total), clienteId: cliente?.id || '', clienteNome: cliente?.nome || '' };
+            const venda = { id: `v_${Date.now()}`, data: agora, itens: itensVenda, subtotal: Number(orcamento.subtotal), desconto: Number(orcamento.descontoPercentual || 0), descontoTipo: orcamento.descontoTipo || 'percentual', descontoInformado: Number(orcamento.descontoInformado ?? orcamento.descontoPercentual ?? 0), valorDesconto: Number(orcamento.valorDesconto || 0), total: Number(orcamento.total), pagamento, clienteId: cliente?.id || '', clienteNome: cliente?.nome || orcamento.cliente?.nome || '', caixaId: caixa.id, vendedor: vendedorAtual(), origem: 'orcamento', orcamentoId: orcamento.id };
+            consumoPorEstoque.forEach((quantidade, estoqueId) => { const raiz = produtos.find(produto => produto.id === estoqueId); raiz.estoque = Number(raiz.estoque || 0) - quantidade; });
+            normalizarEstoquesVinculados();
+            vendas.push(venda);
+            formas.forEach((forma, indice) => movimentos.push({ id: `m_${Date.now()}_orc_${indice}`, data: agora, tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada', formaPagamento: forma.tipo, valor: forma.valor, descricao: `Orçamento ${orcamento.numero} aprovado - ${forma.tipo}`, vendaId: venda.id, orcamentoId: orcamento.id, caixaId: caixa.id, vendedor: venda.vendedor }));
+            orcamento.status = 'aprovado'; orcamento.aprovadoEm = agora; orcamento.vendaId = venda.id; orcamento.pagamento = pagamento; orcamento.atualizadoEm = agora;
+            salvarDados(); atualizarFinanceiro(); atualizarListaOrcamentos(); atualizarListaProdutos(); calcularSaldoCaixa(); atualizarHistoricoMovimentos();
+            fecharAprovacaoOrcamento(); mostrarComprovante(venda); mostrarMensagem('Orçamento aprovado, venda registrada e estoque atualizado.', 'sucesso');
+        }
+
+        function rejeitarOrcamento(id) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento || orcamento.status !== 'finalizado' || !confirm(`Marcar o orçamento ${orcamento.numero} como não aprovado?`)) return;
+            orcamento.status = 'nao_aprovado'; orcamento.naoAprovadoEm = new Date().toISOString(); orcamento.atualizadoEm = orcamento.naoAprovadoEm;
+            salvarDados(); atualizarListaOrcamentos(); mostrarMensagem('Orçamento marcado como não aprovado.', 'sucesso');
+        }
+
         function statusOrcamento(orcamento) {
             if (orcamento.status === 'rascunho') return { texto: 'Rascunho', classe: 'bg-slate-100 text-slate-700' };
+            if (orcamento.status === 'aprovado') return { texto: 'Aprovado / vendido', classe: 'bg-emerald-600 text-white' };
+            if (orcamento.status === 'nao_aprovado') return { texto: 'Não aprovado', classe: 'bg-red-100 text-red-700' };
             const hoje = new Date().toISOString().slice(0, 10);
             if (orcamento.validade && orcamento.validade < hoje) return { texto: 'Expirado', classe: 'bg-red-100 text-red-700' };
             return { texto: 'Finalizado', classe: 'bg-emerald-100 text-emerald-700' };
@@ -5368,11 +5792,16 @@ function showInstallButton() {
                 .join(' ').toLocaleLowerCase('pt-BR').includes(termo)).sort((a, b) => new Date(b.atualizadoEm || b.criadoEm) - new Date(a.atualizadoEm || a.criadoEm));
             lista.innerHTML = filtrados.map(orcamento => {
                 const status = statusOrcamento(orcamento);
-                const botaoPdf = orcamento.status === 'finalizado' ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">PDF</button>` : '';
+                const finalizado = ['finalizado', 'aprovado', 'nao_aprovado'].includes(orcamento.status);
+                const botaoPdf = finalizado ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">PDF 2 vias</button>` : '';
+                const botoesDecisao = orcamento.status === 'finalizado' ? `<button onclick="aprovarOrcamento('${orcamento.id}')" class="rounded bg-emerald-700 px-3 py-2 text-sm font-bold text-white">Aprovar e vender</button><button onclick="rejeitarOrcamento('${orcamento.id}')" class="rounded bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">Não aprovado</button>` : '';
+                const botaoComprovante = orcamento.status === 'aprovado' && orcamento.vendaId ? `<button onclick="mostrarComprovanteVenda('${orcamento.vendaId}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Comprovante</button>` : '';
+                const botaoEditar = ['aprovado', 'nao_aprovado'].includes(orcamento.status) ? '' : `<button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button>`;
+                const botaoExcluir = orcamento.status === 'aprovado' ? '' : `<button onclick="excluirOrcamento('${orcamento.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button>`;
                 return `<article class="rounded-xl border border-gray-200 p-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p></div>
-                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end"><button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button><button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botaoPdf}<button onclick="excluirOrcamento('${orcamento.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button></div></div>
+                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botaoPdf}${botaoExcluir}</div></div>
                     </div>
                 </article>`;
             }).join('') || '<div class="rounded-xl border border-dashed p-8 text-center text-gray-500">Nenhum orçamento encontrado. Clique em “Novo orçamento” para começar.</div>';
@@ -5489,6 +5918,12 @@ function showInstallButton() {
                     pdf.setPage(pagina); pdf.setFontSize(7.5); pdf.setTextColor(100, 116, 139);
                     pdf.text(`${textoSeguro(orcamento.numero)} · Página ${pagina} de ${paginas}`, larguraPagina / 2, 292, { align: 'center' });
                 }
+                // Segunda via idêntica: uma fica com o cliente e a outra com a empresa.
+                const paginasDaPrimeiraVia = Array.from({ length: paginas }, (_, indice) => [...pdf.internal.pages[indice + 1]]);
+                paginasDaPrimeiraVia.forEach(conteudoPagina => {
+                    pdf.addPage('a4', 'portrait');
+                    pdf.internal.pages[pdf.getNumberOfPages()] = [...conteudoPagina];
+                });
                 pdf.save(`orcamento-${String(orcamento.numero).toLowerCase()}-${textoSeguro(cliente.nome).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'cliente'}.pdf`);
             } catch (erro) {
                 console.error('Erro ao gerar PDF do orçamento:', erro);
@@ -5524,6 +5959,7 @@ function showInstallButton() {
                 carrinho,
                 vendaAtual,
                 desconto: document.getElementById('desconto').value,
+                descontoTipo: document.getElementById('desconto-tipo').value,
                 valorRecebido: document.getElementById('valor-recebido').value,
                 pixId: document.getElementById('pix-id').value,
                 tipoCartao: document.getElementById('tipo-cartao').value,
@@ -5531,6 +5967,13 @@ function showInstallButton() {
                 clienteId: document.getElementById('cliente-venda').value,
                 usarSaldoCliente: document.getElementById('usar-saldo-cliente').checked,
                 valorSaldoCliente: document.getElementById('valor-saldo-cliente').value
+                ,pagamentoForma1: document.getElementById('pagamento-forma-1').value
+                ,pagamentoForma2: document.getElementById('pagamento-forma-2').value
+                ,pagamentoValor1: document.getElementById('pagamento-valor-1').value
+                ,pagamentoValor2: document.getElementById('pagamento-valor-2').value
+                ,valorRecebidoDividido: document.getElementById('valor-recebido-dividido').value
+                ,tipoCartaoDividido: document.getElementById('tipo-cartao-dividido').value
+                ,parcelasDividido: document.getElementById('parcelas-dividido').value
             };
             localStorage.setItem(CHAVE_RASCUNHO_VENDA, JSON.stringify(rascunho));
         }
@@ -5542,6 +5985,7 @@ function showInstallButton() {
                 carrinho = rascunho.carrinho;
                 vendaAtual = rascunho.vendaAtual || null;
                 document.getElementById('desconto').value = rascunho.desconto || '0';
+                document.getElementById('desconto-tipo').value = rascunho.descontoTipo || 'percentual';
                 document.getElementById('valor-recebido').value = rascunho.valorRecebido || '';
                 document.getElementById('pix-id').value = rascunho.pixId || '';
                 document.getElementById('tipo-cartao').value = rascunho.tipoCartao || 'credito';
@@ -5551,11 +5995,22 @@ function showInstallButton() {
                 atualizarClienteVendaSelecionado();
                 document.getElementById('usar-saldo-cliente').checked = !!rascunho.usarSaldoCliente;
                 document.getElementById('valor-saldo-cliente').value = rascunho.valorSaldoCliente || '';
+                document.getElementById('pagamento-forma-1').value = rascunho.pagamentoForma1 || 'dinheiro';
+                document.getElementById('pagamento-forma-2').value = rascunho.pagamentoForma2 || 'pix';
+                document.getElementById('pagamento-valor-1').value = rascunho.pagamentoValor1 || '';
+                document.getElementById('pagamento-valor-2').value = rascunho.pagamentoValor2 || '';
+                document.getElementById('valor-recebido-dividido').value = rascunho.valorRecebidoDividido || '';
+                document.getElementById('tipo-cartao-dividido').value = rascunho.tipoCartaoDividido || 'credito';
+                document.getElementById('parcelas-dividido').value = rascunho.parcelasDividido || '1';
                 atualizarUsoSaldoVenda(false);
                 if (vendaAtual?.tipo) {
                     document.getElementById('pagamento-detalhes').classList.remove('hidden');
                     document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));
-                    document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
+                    if (vendaAtual.dividido) {
+                        document.getElementById('pagamento-dividido-painel').classList.remove('hidden');
+                        document.getElementById('btn-pagamento-dividido').textContent = '✕ Voltar para pagamento único';
+                        atualizarPagamentoDividido();
+                    } else document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
                 }
             } catch (erro) {
                 console.warn('Não foi possível restaurar a venda em andamento:', erro);

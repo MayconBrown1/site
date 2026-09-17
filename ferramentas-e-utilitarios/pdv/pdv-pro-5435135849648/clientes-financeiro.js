@@ -61,7 +61,27 @@ function formatarCpf(valor) {
 }
 
 function formatarCpfCliente(campo) {
-    campo.value = formatarCpf(campo.value);
+    formatarDocumentoCliente(campo);
+}
+
+function formatarDocumentoCliente(campo) {
+    const numeros = somenteDigitos(campo.value).slice(0, 14);
+    campo.value = numeros.length <= 11 ? formatarCpf(numeros) : numeros
+        .replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1/$2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
+}
+
+function formatarDocumentoClienteValor(valor) {
+    const numeros = somenteDigitos(valor);
+    if (numeros.length === 14) return numeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+    return formatarCpf(numeros);
+}
+
+function rotuloDocumentoCliente(valor) {
+    const numeros = somenteDigitos(valor);
+    return numeros.length === 14 ? `CNPJ ${formatarDocumentoClienteValor(numeros)}` : numeros ? `CPF ${formatarDocumentoClienteValor(numeros)}` : 'CPF / CNPJ não informado';
 }
 
 function formatarTelefoneCliente(campo) {
@@ -85,19 +105,37 @@ function validarCpfCliente(cpf) {
     return calcular(9) === Number(numeros[9]) && calcular(10) === Number(numeros[10]);
 }
 
+function validarDocumentoCliente(documento) {
+    const numeros = somenteDigitos(documento);
+    if (!numeros) return true;
+    if (numeros.length === 11) return validarCpfCliente(numeros);
+    if (numeros.length === 14 && typeof validarCNPJ === 'function') return validarCNPJ(numeros);
+    return false;
+}
+
 function normalizarClientesLegados() {
     let alterou = false;
     clientesFiado = clientesFiado.map(cliente => {
         const whatsapp = cliente.whatsapp || cliente.telefone || '';
-        if (cliente.whatsapp === whatsapp && cliente.tipoCadastro === 'cliente') return cliente;
+        const documento = somenteDigitos(cliente.documento || cliente.cpf || cliente.cnpj);
+        if (cliente.whatsapp === whatsapp && cliente.tipoCadastro === 'cliente' && cliente.documento === documento) return cliente;
         alterou = true;
-        return { ...cliente, whatsapp, telefone: whatsapp, tipoCadastro: 'cliente', atualizadoEm: cliente.atualizadoEm || cliente.createdAt || new Date().toISOString() };
+        return { ...cliente, cpf: documento, documento, whatsapp, telefone: whatsapp, tipoCadastro: 'cliente', atualizadoEm: cliente.atualizadoEm || cliente.createdAt || new Date().toISOString() };
     });
     return alterou;
 }
 
 function comprasDoCliente(clienteId) {
-    return vendas.filter(venda => venda.clienteId === clienteId || venda.pagamento?.clienteId === clienteId);
+    return vendas.filter(venda => venda.clienteId === clienteId || venda.pagamento?.clienteId === clienteId || formasFinanceiro(venda).some(forma => forma.clienteId === clienteId));
+}
+
+function formasFinanceiro(venda) {
+    if (typeof formasPagamentoRegistradas === 'function') return formasPagamentoRegistradas(venda?.pagamento, venda?.pagamento?.valorCobrado ?? venda?.total);
+    return venda?.pagamento?.tipo ? [{ ...venda.pagamento, valor: Number(venda.pagamento.valorCobrado ?? venda.total ?? 0) }] : [];
+}
+
+function valorFinanceiroPorTipo(venda, tipo) {
+    return formasFinanceiro(venda).filter(forma => forma.tipo === tipo).reduce((total, forma) => total + Number(forma.valor || 0), 0);
 }
 
 function pagamentosDoCliente(clienteId) {
@@ -105,9 +143,7 @@ function pagamentosDoCliente(clienteId) {
 }
 
 function totalPagoPeloCliente(clienteId) {
-    const comprasPagas = comprasDoCliente(clienteId)
-        .filter(venda => venda.pagamento?.tipo !== 'fiado')
-        .reduce((total, venda) => total + Number(venda.total || 0), 0);
+    const comprasPagas = comprasDoCliente(clienteId).reduce((total, venda) => total + formasFinanceiro(venda).filter(forma => forma.tipo !== 'fiado').reduce((soma, forma) => soma + Number(forma.valor || 0), 0) + Number(venda.pagamento?.saldoUtilizado || 0), 0);
     return comprasPagas + pagamentosDoCliente(clienteId).reduce((total, pagamento) => total + Number(pagamento.valor || 0), 0);
 }
 
@@ -233,13 +269,13 @@ function cancelarCliente() {
 
 function salvarCliente() {
     const nome = document.getElementById('cliente-nome').value.trim();
-    const cpf = somenteDigitos(document.getElementById('cliente-cpf').value);
+    const documento = somenteDigitos(document.getElementById('cliente-cpf').value);
     const emailCampo = document.getElementById('cliente-email');
     if (!nome) return mostrarMensagem('Informe o nome do cliente.', 'erro');
-    if (!validarCpfCliente(cpf)) return mostrarMensagem('Informe um CPF válido ou deixe o campo vazio.', 'erro');
+    if (!validarDocumentoCliente(documento)) return mostrarMensagem('Informe um CPF ou CNPJ válido, ou deixe o campo vazio.', 'erro');
     if (emailCampo.value && !emailCampo.checkValidity()) return mostrarMensagem('Informe um e-mail válido.', 'erro');
-    const cpfDuplicado = clientesFiado.some(cliente => somenteDigitos(cliente.cpf) === cpf && cpf && cliente.id !== clienteFiadoEditando?.id);
-    if (cpfDuplicado) return mostrarMensagem('Já existe um cliente cadastrado com este CPF.', 'erro');
+    const documentoDuplicado = clientesFiado.some(cliente => somenteDigitos(cliente.documento || cliente.cpf || cliente.cnpj) === documento && documento && cliente.id !== clienteFiadoEditando?.id);
+    if (documentoDuplicado) return mostrarMensagem('Já existe um cliente cadastrado com este CPF ou CNPJ.', 'erro');
 
     const agora = new Date().toISOString();
     const dados = {
@@ -247,7 +283,8 @@ function salvarCliente() {
         id: clienteFiadoEditando?.id || 'cl_' + Date.now(),
         tipoCadastro: 'cliente',
         nome,
-        cpf,
+        cpf: documento,
+        documento,
         whatsapp: document.getElementById('cliente-whatsapp').value.trim(),
         telefone: document.getElementById('cliente-whatsapp').value.trim(),
         email: emailCampo.value.trim().toLowerCase(),
@@ -276,7 +313,7 @@ function editarCliente(id) {
     document.getElementById('titulo-form-cliente').textContent = 'Editar cliente';
     const valores = {
         'cliente-nome': cliente.nome,
-        'cliente-cpf': formatarCpf(cliente.cpf),
+        'cliente-cpf': formatarDocumentoClienteValor(cliente.documento || cliente.cpf || cliente.cnpj),
         'cliente-whatsapp': cliente.whatsapp || cliente.telefone,
         'cliente-email': cliente.email,
         'cliente-nascimento': cliente.nascimento,
@@ -310,7 +347,8 @@ function atualizarSelectClientes() {
     const opcoes = [...clientesFiado].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
         .map(cliente => {
             const saldo = saldoCreditoCliente(cliente.id);
-            return `<option value="${escaparDado(cliente.id)}">${escaparDado(cliente.nome)}${cliente.cpf ? ` · ${formatarCpf(cliente.cpf)}` : ''}${saldo > 0 ? ` · Saldo ${moedaBR(saldo)}` : ''}</option>`;
+            const documento = cliente.documento || cliente.cpf || cliente.cnpj;
+            return `<option value="${escaparDado(cliente.id)}">${escaparDado(cliente.nome)}${documento ? ` · ${formatarDocumentoClienteValor(documento)}` : ''}${saldo > 0 ? ` · Saldo ${moedaBR(saldo)}` : ''}</option>`;
         }).join('');
     select.innerHTML = '<option value="">Consumidor não identificado</option>' + opcoes;
     if (clientesFiado.some(cliente => cliente.id === atual)) select.value = atual;
@@ -349,7 +387,7 @@ function atualizarClientes() {
     const busca = (document.getElementById('busca-clientes').value || '').trim().toLocaleLowerCase('pt-BR');
     const buscaNumerica = somenteDigitos(busca);
     const filtrados = [...clientesFiado]
-        .filter(cliente => [cliente.nome, cliente.cpf, cliente.whatsapp, cliente.telefone, cliente.email].some(valor => {
+        .filter(cliente => [cliente.nome, cliente.documento, cliente.cpf, cliente.cnpj, cliente.whatsapp, cliente.telefone, cliente.email].some(valor => {
             const texto = String(valor || '').toLocaleLowerCase('pt-BR');
             return texto.includes(busca) || (buscaNumerica && somenteDigitos(texto).includes(buscaNumerica));
         }))
@@ -362,7 +400,7 @@ function atualizarClientes() {
         const contato = [cliente.whatsapp || cliente.telefone, cliente.email].filter(Boolean).map(escaparDado).join(' · ') || 'Contato não informado';
         return `<article class="rounded-xl border border-slate-200 bg-gray-50 p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div class="min-w-0"><h3 class="text-lg font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${contato}</p><p class="mt-1 text-xs text-gray-500">${cliente.cpf ? `CPF ${formatarCpf(cliente.cpf)}` : 'CPF não informado'}${cliente.cidade ? ` · ${escaparDado(cliente.cidade)}` : ''}</p></div>
+                <div class="min-w-0"><h3 class="text-lg font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${contato}</p><p class="mt-1 text-xs text-gray-500">${rotuloDocumentoCliente(cliente.documento || cliente.cpf || cliente.cnpj)}${cliente.cidade ? ` · ${escaparDado(cliente.cidade)}` : ''}</p></div>
                 <div class="sm:text-right"><p class="text-sm text-gray-600">${compras.length} compra(s)</p><p class="font-bold ${credito > 0 ? 'text-emerald-700' : 'text-gray-600'}">Saldo: ${moedaBR(credito)}</p><p class="font-bold ${saldo > 0 ? 'text-amber-700' : 'text-gray-600'}">Fiado: ${moedaBR(saldo)}</p></div>
             </div>
             <div class="mt-4 flex flex-wrap gap-2"><button onclick="abrirHistoricoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">Ver histórico</button><button onclick="registrarSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white">Adicionar saldo</button>${credito > 0 ? `<button onclick="devolverSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Devolver saldo</button>` : ''}${saldo > 0 ? `<button onclick="registrarPagamentoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-green-600 px-3 py-2 text-sm text-white">Receber fiado</button><button onclick="gerarExtratoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">Extrato PDF</button>` : ''}<button onclick="editarCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-slate-600 px-3 py-2 text-sm text-white">Editar</button><button onclick="excluirCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white">Excluir</button></div>
@@ -373,17 +411,20 @@ function atualizarClientes() {
 function abrirHistoricoCliente(clienteId) {
     const cliente = clientesFiado.find(item => item.id === clienteId);
     if (!cliente) return;
+    const documentoCliente = cliente.documento || cliente.cpf || cliente.cnpj;
     const compras = comprasDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
     const pagamentos = pagamentosDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
     const movimentosSaldo = lancamentosSaldoDoCliente(clienteId).sort((a, b) => new Date(b.data) - new Date(a.data));
     const totalCompras = compras.reduce((total, venda) => total + Number(venda.total || 0), 0);
     const container = document.getElementById('historico-cliente');
     const comprasHtml = compras.map(venda => {
-        const fiado = venda.pagamento?.tipo === 'fiado';
+        const valorFiado = valorFinanceiroPorTipo(venda, 'fiado');
+        const fiado = valorFiado > 0;
         const itens = (venda.itens || []).map(item => `${Number(item.quantidade || 0).toLocaleString('pt-BR')}x ${escaparDado(item.nome)}`).join(', ');
         const saldoUsado = Number(venda.pagamento?.saldoUtilizado || 0);
         const pagoAgora = Number(venda.pagamento?.valorCobrado ?? venda.total);
-        return `<article class="rounded-lg border border-slate-200 p-3"><div class="flex flex-wrap items-start justify-between gap-2"><div><strong>${new Date(venda.data).toLocaleString('pt-BR')}</strong><p class="mt-1 text-sm text-gray-600">${itens || 'Itens não informados'}</p><p class="mt-1 text-xs font-semibold uppercase text-slate-500">${fiado ? 'Compra fiado' : `Pago em ${escaparDado(venda.pagamento?.tipo || 'não informado')}`}${saldoUsado > 0 ? ` · ${moedaBR(saldoUsado)} em saldo + ${moedaBR(pagoAgora)} agora` : ''}</p></div><strong class="${fiado ? 'text-amber-700' : 'text-emerald-700'}">${moedaBR(venda.total)}</strong></div></article>`;
+        const formas = formasFinanceiro(venda).map(forma => `${forma.tipo}: ${moedaBR(forma.valor)}`).join(' + ');
+        return `<article class="rounded-lg border border-slate-200 p-3"><div class="flex flex-wrap items-start justify-between gap-2"><div><strong>${new Date(venda.data).toLocaleString('pt-BR')}</strong><p class="mt-1 text-sm text-gray-600">${itens || 'Itens não informados'}</p><p class="mt-1 text-xs font-semibold uppercase text-slate-500">${fiado ? `Inclui ${moedaBR(valorFiado)} fiado · ` : ''}${escaparDado(formas || 'Pagamento não informado')}${saldoUsado > 0 ? ` · ${moedaBR(saldoUsado)} em saldo + ${moedaBR(pagoAgora)} agora` : ''}</p></div><strong class="${fiado ? 'text-amber-700' : 'text-emerald-700'}">${moedaBR(venda.total)}</strong></div></article>`;
     }).join('') || '<p class="text-sm text-gray-500">Este cliente ainda não possui compras registradas.</p>';
     const pagamentosHtml = pagamentos.map(pagamento => `<li class="flex justify-between gap-3 border-b py-2 text-sm"><span>${new Date(pagamento.data).toLocaleString('pt-BR')}</span><strong class="text-emerald-700">${moedaBR(pagamento.valor)}</strong></li>`).join('') || '<li class="text-sm text-gray-500">Nenhum pagamento de fiado registrado.</li>';
     const saldoHtml = movimentosSaldo.map(movimento => {
@@ -391,7 +432,7 @@ function abrirHistoricoCliente(clienteId) {
         const rotulo = movimento.origem === 'venda' ? 'Usado em compra' : movimento.origem === 'devolucao' ? 'Devolvido ao cliente' : 'Saldo adicionado';
         return `<li class="border-b py-3 text-sm"><div class="flex justify-between gap-3"><span>${new Date(movimento.data).toLocaleString('pt-BR')}<small class="block text-gray-500">${rotulo} · ${escaparDado(movimento.motivo || 'Sem observação')}</small></span><strong class="${entrada ? 'text-emerald-700' : 'text-red-600'}">${entrada ? '+' : '-'}${moedaBR(movimento.valor)}</strong></div></li>`;
     }).join('') || '<li class="text-sm text-gray-500">Nenhuma movimentação de saldo registrada.</li>';
-    container.innerHTML = `<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Histórico do cliente</p><h3 class="text-2xl font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${[cliente.whatsapp || cliente.telefone, cliente.email, cliente.cpf ? `CPF ${formatarCpf(cliente.cpf)}` : ''].filter(Boolean).map(escaparDado).join(' · ')}</p></div><button onclick="fecharHistoricoCliente()" class="self-start rounded-lg border px-3 py-2 text-sm">Fechar</button></div>
+    container.innerHTML = `<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Histórico do cliente</p><h3 class="text-2xl font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${[cliente.whatsapp || cliente.telefone, cliente.email, documentoCliente ? rotuloDocumentoCliente(documentoCliente) : ''].filter(Boolean).map(escaparDado).join(' · ')}</p></div><button onclick="fecharHistoricoCliente()" class="self-start rounded-lg border px-3 py-2 text-sm">Fechar</button></div>
         <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5"><div class="rounded-lg bg-blue-50 p-3"><span class="text-sm text-blue-800">Compras</span><strong class="block text-lg text-blue-700">${compras.length}</strong></div><div class="rounded-lg bg-emerald-50 p-3"><span class="text-sm text-emerald-800">Total comprado</span><strong class="block text-lg text-emerald-700">${moedaBR(totalCompras)}</strong></div><div class="rounded-lg bg-teal-50 p-3"><span class="text-sm text-teal-800">Total pago</span><strong class="block text-lg text-teal-700">${moedaBR(totalPagoPeloCliente(clienteId))}</strong></div><div class="rounded-lg bg-emerald-100 p-3"><span class="text-sm text-emerald-900">Saldo disponível</span><strong class="block text-lg text-emerald-800">${moedaBR(saldoCreditoCliente(clienteId))}</strong></div><div class="rounded-lg bg-amber-50 p-3"><span class="text-sm text-amber-800">Saldo fiado</span><strong class="block text-lg text-amber-700">${moedaBR(saldoClienteFiado(clienteId))}</strong></div></div>
         <div class="mt-5 grid gap-5 lg:grid-cols-3"><div><h4 class="mb-3 font-semibold">Compras</h4><div class="space-y-2">${comprasHtml}</div></div><div><h4 class="mb-3 font-semibold">Histórico do saldo</h4><ul>${saldoHtml}</ul></div><div><h4 class="mb-3 font-semibold">Pagamentos de fiado</h4><ul>${pagamentosHtml}</ul></div></div>`;
     container.classList.remove('hidden');
@@ -436,27 +477,32 @@ function periodoFinanceiroAtual() {
 }
 
 function clienteDaVenda(venda) {
-    return clientesFiado.find(cliente => cliente.id === (venda.clienteId || venda.pagamento?.clienteId));
+    const clienteId = venda.clienteId || venda.pagamento?.clienteId || formasFinanceiro(venda).find(forma => forma.clienteId)?.clienteId;
+    return clientesFiado.find(cliente => cliente.id === clienteId);
 }
 
 function todosLancamentosFinanceiros() {
     const pagamentosDisponiveis = new Map();
     pagamentosFiado.forEach(pagamento => pagamentosDisponiveis.set(pagamento.clienteId, (pagamentosDisponiveis.get(pagamento.clienteId) || 0) + Number(pagamento.valor || 0)));
     const saldoPendentePorVenda = new Map();
-    vendas.filter(venda => venda.pagamento?.tipo === 'fiado').sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(venda => {
-        const clienteId = venda.clienteId || venda.pagamento?.clienteId;
+    vendas.filter(venda => valorFinanceiroPorTipo(venda, 'fiado') > 0).sort((a, b) => new Date(a.data) - new Date(b.data)).forEach(venda => {
+        const formaFiado = formasFinanceiro(venda).find(forma => forma.tipo === 'fiado');
+        const clienteId = formaFiado?.clienteId || venda.clienteId || venda.pagamento?.clienteId;
         const disponivel = pagamentosDisponiveis.get(clienteId) || 0;
-        const totalVenda = Number(venda.pagamento?.valorCobrado ?? venda.total ?? 0);
+        const totalVenda = valorFinanceiroPorTipo(venda, 'fiado');
         const abatido = Math.min(disponivel, totalVenda);
         saldoPendentePorVenda.set(venda.id, Math.max(0, totalVenda - abatido));
         pagamentosDisponiveis.set(clienteId, Math.max(0, disponivel - abatido));
     });
     const vendasAutomaticas = vendas.flatMap(venda => {
-        const fiado = venda.pagamento?.tipo === 'fiado';
+        const valorFiado = valorFinanceiroPorTipo(venda, 'fiado');
+        const valorPago = formasFinanceiro(venda).filter(forma => forma.tipo !== 'fiado').reduce((soma, forma) => soma + Number(forma.valor || 0), 0);
         const cliente = clienteDaVenda(venda);
-        const valor = fiado ? saldoPendentePorVenda.get(venda.id) || 0 : Number(venda.pagamento?.valorCobrado ?? venda.total ?? 0);
-        if (fiado && valor <= 0) return [];
-        return [{ id: `venda_${venda.id}`, data: venda.data, tipo: 'receita', categoria: 'Venda', valor, descricao: `${fiado ? 'Saldo fiado' : 'Venda'} #${venda.id}${cliente ? ` · ${cliente.nome}` : ''}`, origem: 'venda', automatico: true, pendente: fiado }];
+        const registros = [];
+        if (valorPago > 0) registros.push({ id: `venda_${venda.id}`, data: venda.data, tipo: 'receita', categoria: 'Venda', valor: valorPago, descricao: `Venda #${venda.id}${cliente ? ` · ${cliente.nome}` : ''}`, origem: 'venda', automatico: true });
+        const pendente = saldoPendentePorVenda.get(venda.id) || 0;
+        if (valorFiado > 0 && pendente > 0) registros.push({ id: `${valorPago > 0 ? 'venda_fiado' : 'venda'}_${venda.id}`, data: venda.data, tipo: 'receita', categoria: 'Venda', valor: pendente, descricao: `Saldo fiado #${venda.id}${cliente ? ` · ${cliente.nome}` : ''}`, origem: 'venda', automatico: true, pendente: true });
+        return registros;
     });
     const recebimentos = pagamentosFiado.map(pagamento => {
         const cliente = clientesFiado.find(item => item.id === pagamento.clienteId);
