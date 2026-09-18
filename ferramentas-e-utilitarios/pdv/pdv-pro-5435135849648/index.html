@@ -166,6 +166,7 @@
                     </button>
                     <button data-owner-only onclick="abrirPainelTema(); fecharMenuPdv()" class="bg-slate-700 hover:bg-slate-800 px-3 py-2 rounded transition-colors text-sm">🎨 Tema</button>
                     <button data-owner-only onclick="acessarAdm(); fecharMenuPdv()" class="rounded border border-amber-400/60 bg-slate-900 px-3 py-2 text-sm font-bold text-[#f6c453] transition-colors hover:bg-black hover:text-yellow-300">ADM do PDV</button>
+                    <button id="btn-informacoes" type="button" onclick="abrirInformacoes(); fecharMenuPdv()" class="bg-cyan-700 hover:bg-cyan-800 px-3 py-2 rounded transition-colors text-sm">ℹ️ Informações</button>
                 </div>
             </div>
         </header>
@@ -215,6 +216,10 @@
                             <div class="flex justify-between items-center text-lg lg:text-xl font-bold text-green-600">
                                 <span>Total:</span>
                                 <span id="total-venda">R$ 0,00</span>
+                            </div>
+                            <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                                <button id="btn-suspender-venda" type="button" onclick="suspenderVenda()" class="rounded-lg bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-700">⏸ Suspender venda</button>
+                                <button id="btn-vendas-suspensas" type="button" onclick="abrirVendasSuspensas()" class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100">Vendas suspensas: <span id="contador-vendas-suspensas">0</span></button>
                             </div>
                         </div>
                     </div>
@@ -325,9 +330,10 @@
                 <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-6">
                         <h2 class="text-xl lg:text-2xl font-semibold">Produtos e Serviços</h2>
-                        <button onclick="mostrarFormProduto()" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
-                            Novo item
-                        </button>
+                        <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                            <button type="button" onclick="gerarPDFProdutos()" class="w-full rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-800 sm:w-auto">📄 Baixar planilha em PDF</button>
+                            <button onclick="mostrarFormProduto()" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">Novo item</button>
+                        </div>
                     </div>
                     
                     <div id="form-produto" class="hidden mb-4 lg:mb-6 p-4 bg-gray-50 rounded-lg">
@@ -614,7 +620,7 @@
             <div id="caixa-section" class="section hidden">
                 <div class="flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6">
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-1">
-                        <div id="aviso-caixa-operador" class="mb-4 hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">Como operador, você pode abrir e fechar o caixa e acompanhar entradas e saídas. Para registrar uma entrada ou retirada, será exigida a senha do titular da empresa.</div>
+                        <div id="aviso-caixa-operador" class="mb-4 hidden rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900"></div>
                         <h2 id="titulo-movimentacao-caixa" class="text-lg lg:text-xl font-semibold mb-4">Movimentação de Caixa</h2>
                         <div id="form-movimentacao-caixa" class="space-y-4">
                             <div>
@@ -769,9 +775,10 @@
                                 </div>
                             </div>
                             <div id="resumo-vendedores" class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></div>
+                            <button data-owner-only type="button" onclick="abrirModalComissao()" class="mt-4 rounded-lg bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800">💰 Calcular comissão</button>
                         </div>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                        <div data-owner-only class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                             <button 
     onclick="exportarBackup()" 
     class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition-colors text-sm lg:text-base">
@@ -831,12 +838,18 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 17/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v40" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v41" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Cliente integrado ao orçamento</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Gerência, produtividade e controle de vendas</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-violet-300 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🧑‍💼 Novo acesso de gerente</h4><p class="mt-2 text-sm text-slate-700">No <strong>ADM do PDV → Operadores e gerentes</strong>, o titular pode criar um acesso de gerente. O gerente usa a própria senha para movimentar o caixa, pode organizar produtos e estoque e consultar relatórios, mas não entra no Financeiro, no ADM, no catálogo administrativo nem nos backups.</p></article>
+                            <article class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm"><h4 class="font-bold text-amber-950">🏷️ Limites seguros de desconto</h4><p class="mt-2 text-sm text-slate-700">O operador concede até <strong>5%</strong>. Acima disso, precisa da senha do titular. O gerente concede até 5% normalmente, confirma com a própria senha descontos de até <strong>20%</strong> e, acima desse limite, precisa da senha do titular. A regra também vale para orçamentos.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">💰 Comissão mensal por funcionário</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Relatórios</strong>, o titular clica em <strong>Calcular comissão</strong>, escolhe operador ou gerente, mês e porcentagem. O pop-up mostra quantas vendas entraram no período, o total vendido e o valor da comissão.</p></article>
+                            <article class="rounded-xl border border-orange-300 bg-orange-50 p-4 shadow-sm"><h4 class="font-bold text-orange-950">⏸️ Suspenda e retome uma venda</h4><p class="mt-2 text-sm text-slate-700">Use <strong>Suspender venda</strong> para guardar o carrinho, desconto, cliente e pagamento enquanto atende outra pessoa. Depois abra <strong>Vendas suspensas</strong>, escolha o registro e clique em <strong>Retomar</strong>.</p></article>
+                            <article class="rounded-xl border border-cyan-300 bg-cyan-50 p-4 shadow-sm"><h4 class="font-bold text-cyan-950">⌨️ Atalhos e tela de Informações</h4><p class="mt-2 text-sm text-slate-700">O novo botão <strong>Informações</strong>, antes de Sair, reúne orientações e todos os atalhos. Use <strong>Alt + 1 até Alt + 5</strong> para navegar e <strong>Alt + 6 até Alt + 0</strong> para escolher dinheiro, PIX, cartão, fiado ou pagamento dividido.</p></article>
+                            <article class="rounded-xl border border-teal-300 bg-teal-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-teal-950">📄 Relatório completo de produtos em PDF</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Produtos</strong>, clique em <strong>Baixar planilha em PDF</strong>. O arquivo reúne produto ou serviço, código, categoria, estoque, unidade, preços de venda e custo, estoque mínimo e vínculo de estoque.</p></article>
                             <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🔎 Busque ou cadastre o cliente no orçamento</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Orçamentos</strong>, comece a digitar o nome e escolha um cliente já cadastrado para preencher CPF/CNPJ, telefone, e-mail e endereço automaticamente. Se for um cliente novo, preencha os dados normalmente: ao clicar em <strong>Finalizar e gerar PDF</strong>, o cadastro será criado no painel de Clientes. O orçamento continua separado da venda até ser aprovado.</p></article>
                             <article class="rounded-xl border border-indigo-300 bg-indigo-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-indigo-950">💳 Duas formas de pagamento na mesma venda</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, escolha <strong>Dividir em 2 formas de pagamento</strong>, selecione as duas opções e informe os valores. É possível combinar dinheiro, PIX, cartão ou fiado; o comprovante e o caixa mostram cada parte separadamente.</p></article>
                             <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm"><h4 class="font-bold text-red-950">🏷️ Desconto em porcentagem ou reais</h4><p class="mt-2 text-sm text-slate-700">Ao montar a venda ou o orçamento, escolha <strong>Porcentagem</strong> ou <strong>Valor (R$)</strong>. Mesmo quando o desconto for digitado em reais, o comprovante exibe o valor descontado e a porcentagem equivalente.</p></article>
@@ -953,15 +966,16 @@
                     <div class="space-y-6">
                         <div class="border rounded-lg p-4">
                             <div class="mb-4">
-                                <h3 class="text-lg font-semibold text-blue-700">👥 Operadores</h3>
-                                <p class="mt-1 text-sm text-gray-600">Crie um login individual para cada funcionário. As vendas sairão com o nome do operador.</p>
+                                <h3 class="text-lg font-semibold text-blue-700">👥 Operadores e gerentes</h3>
+                                <p class="mt-1 text-sm text-gray-600">Crie acessos individuais de operador ou gerente. As vendas sairão com o nome do funcionário.</p>
                             </div>
-                            <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+                            <div class="grid grid-cols-1 gap-3 lg:grid-cols-4">
                                 <div><label for="operador-nome" class="mb-1 block text-sm font-medium text-gray-700">Nome *</label><input id="operador-nome" maxlength="80" class="w-full rounded-lg border p-3" placeholder="Nome do funcionário"></div>
                                 <div><label for="operador-email" class="mb-1 block text-sm font-medium text-gray-700">E-mail de acesso *</label><input id="operador-email" type="email" maxlength="160" autocapitalize="none" autocomplete="off" class="w-full rounded-lg border p-3" placeholder="operador@empresa.com"></div>
                                 <div><label for="operador-senha" class="mb-1 block text-sm font-medium text-gray-700">Senha inicial *</label><input id="operador-senha" type="password" minlength="6" autocomplete="new-password" class="w-full rounded-lg border p-3" placeholder="Mínimo de 6 caracteres"></div>
+                                <div><label for="operador-funcao" class="mb-1 block text-sm font-medium text-gray-700">Função *</label><select id="operador-funcao" class="w-full rounded-lg border bg-white p-3"><option value="operator">Operador</option><option value="manager">Gerente</option></select></div>
                             </div>
-                            <button id="btn-salvar-operador" type="button" onclick="salvarOperador()" class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto">Adicionar operador</button>
+                            <button id="btn-salvar-operador" type="button" onclick="salvarOperador()" class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto">Adicionar acesso</button>
                             <p id="operadores-status" class="mt-3 text-sm text-slate-600" role="status"></p>
                             <div id="lista-operadores" class="mt-4 grid gap-3 lg:grid-cols-2"></div>
                         </div>
@@ -1239,7 +1253,7 @@
     </div>
 
     <!-- Modal de Confirmação de Senha -->
-    <div id="modal-senha" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+    <div id="modal-senha" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[100] p-4">
         <div class="bg-white p-4 lg:p-6 rounded-lg max-w-md w-full">
             <h3 class="text-lg font-semibold mb-4">🔒 Confirmação Necessária</h3>
             <p class="text-gray-600 mb-4">Digite a mesma senha usada para entrar no PDV:</p>
@@ -1435,6 +1449,34 @@
         </div>
     </div>
 
+    <div id="modal-informacoes" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-informacoes">
+        <div class="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-5 text-slate-800 shadow-2xl lg:p-6">
+            <div class="flex items-start justify-between gap-4 border-b pb-4"><div><p class="text-sm font-bold uppercase tracking-wider text-cyan-700">Ajuda rápida</p><h2 id="titulo-informacoes" class="text-2xl font-bold">Informações do PDV</h2></div><button type="button" onclick="fecharInformacoes()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none" aria-label="Fechar informações">×</button></div>
+            <div class="mt-5 grid gap-5 lg:grid-cols-2">
+                <section><h3 class="text-lg font-bold text-slate-900">Atalhos de navegação</h3><ul class="mt-3 space-y-2 text-sm"><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 1</kbd> Vendas</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 2</kbd> Orçamentos</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 3</kbd> Produtos</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 4</kbd> Clientes</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 5</kbd> Caixa</li></ul></section>
+                <section><h3 class="text-lg font-bold text-slate-900">Atalhos de pagamento</h3><ul class="mt-3 space-y-2 text-sm"><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 6</kbd> Dinheiro</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 7</kbd> PIX</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 8</kbd> Cartão</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 9</kbd> Fiado</li><li><kbd class="rounded bg-slate-900 px-2 py-1 font-mono text-white">Alt + 0</kbd> Dividir em duas formas</li></ul></section>
+            </div>
+            <section class="mt-6 rounded-xl bg-cyan-50 p-4"><h3 class="font-bold text-cyan-950">Orientações rápidas</h3><ul class="mt-2 list-disc space-y-2 pl-5 text-sm text-slate-700"><li>Abra o caixa antes de iniciar uma venda.</li><li>Use <strong>Suspender venda</strong> quando precisar atender outra pessoa sem perder o carrinho atual.</li><li>Operadores concedem até 5% de desconto; gerentes podem autorizar até 20% com a própria senha.</li><li>Acima do limite da função, será solicitada a senha do titular.</li><li>Orçamentos só baixam o estoque depois de aprovados e concluídos como venda.</li><li>Confira os alertas de estoque e faça backups periódicos.</li></ul></section>
+            <button type="button" onclick="fecharInformacoes()" class="mt-5 w-full rounded-lg bg-cyan-700 px-4 py-3 font-bold text-white hover:bg-cyan-800">Entendi</button>
+        </div>
+    </div>
+
+    <div id="modal-vendas-suspensas" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-vendas-suspensas">
+        <div class="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white text-slate-800 shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b p-5"><div><p class="text-sm font-bold uppercase tracking-wider text-amber-700">Carrinhos guardados</p><h2 id="titulo-vendas-suspensas" class="text-2xl font-bold">Vendas suspensas</h2><p class="mt-1 text-sm text-slate-500">Retome a venda quando o cliente estiver pronto para pagar.</p></div><button type="button" onclick="fecharVendasSuspensas()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none" aria-label="Fechar vendas suspensas">×</button></div>
+            <div id="lista-vendas-suspensas" class="max-h-[65vh] space-y-3 overflow-y-auto p-5"></div>
+        </div>
+    </div>
+
+    <div id="modal-comissao" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-comissao">
+        <div class="w-full max-w-xl rounded-2xl bg-white p-5 text-slate-800 shadow-2xl lg:p-6">
+            <div class="flex items-start justify-between gap-4 border-b pb-4"><div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Relatório mensal</p><h2 id="titulo-comissao" class="text-2xl font-bold">Calcular comissão</h2></div><button type="button" onclick="fecharModalComissao()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none" aria-label="Fechar comissão">×</button></div>
+            <div class="mt-5 grid gap-4 sm:grid-cols-2"><div class="sm:col-span-2"><label for="comissao-operador" class="block text-sm font-semibold">Operador ou gerente</label><select id="comissao-operador" class="mt-1 w-full rounded-lg border bg-white p-3"></select></div><div><label for="comissao-mes" class="block text-sm font-semibold">Mês das vendas</label><input id="comissao-mes" type="month" class="mt-1 w-full rounded-lg border p-3"></div><div><label for="comissao-percentual" class="block text-sm font-semibold">Comissão (%)</label><input id="comissao-percentual" type="number" min="0" max="100" step="0.01" value="5" class="mt-1 w-full rounded-lg border p-3"></div></div>
+            <button type="button" onclick="calcularComissaoOperador()" class="mt-5 w-full rounded-lg bg-emerald-700 px-4 py-3 font-bold text-white hover:bg-emerald-800">Calcular comissão</button>
+            <div id="resultado-comissao" class="mt-4 hidden rounded-xl border border-emerald-200 bg-emerald-50 p-4" role="status"></div>
+        </div>
+    </div>
+
     <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
@@ -1528,6 +1570,7 @@ if ('serviceWorker' in navigator) {
         let vendaAtual = null;
         let codigoPixAtual = '';
         const CHAVE_RASCUNHO_VENDA = 'pdv_rascunho_venda';
+        let vendasSuspensas = JSON.parse(localStorage.getItem('pdv_vendas_suspensas') || '[]');
         let produtoEditando = null;
         let movimentoEditando = null;
         let vendaParaComprovante = null;
@@ -1546,6 +1589,7 @@ if ('serviceWorker' in navigator) {
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
             vendas: { get: () => vendas, set: v => { vendas = v; } },
+            vendasSuspensas: { get: () => vendasSuspensas, set: v => { vendasSuspensas = Array.isArray(v) ? v : []; } },
             movimentos: { get: () => movimentos, set: v => { movimentos = v; } },
             caixas: { get: () => caixas, set: v => { caixas = v; } },
             categorias: { get: () => categorias, set: v => { categorias = v; } },
@@ -1561,36 +1605,46 @@ if ('serviceWorker' in navigator) {
         });
 
         function ehOperadorAtual() { return window.usuarioPdv?.role === 'operator'; }
+        function ehGerenteAtual() { return window.usuarioPdv?.role === 'manager'; }
+        function ehEquipeAtual() { return ehOperadorAtual() || ehGerenteAtual(); }
         function vendedorAtual() {
             const usuario = window.usuarioPdv || {};
             return {
                 id: usuario.uid || 'titular',
                 nome: usuario.nome || 'Titular',
                 email: usuario.email || '',
-                tipo: ehOperadorAtual() ? 'operador' : 'titular'
+                tipo: ehGerenteAtual() ? 'gerente' : ehOperadorAtual() ? 'operador' : 'titular'
             };
         }
 
         function exigirTitular(mensagem = 'Esta ação está disponível somente para o titular da empresa.') {
-            if (!ehOperadorAtual()) return true;
+            if (!ehEquipeAtual()) return true;
             mostrarMensagem(mensagem, 'erro');
             return false;
         }
 
         function aplicarPermissoesUsuario() {
             const operador = ehOperadorAtual();
-            const permitidas = new Set(['vendas', 'orcamentos', 'clientes', 'caixa']);
+            const gerente = ehGerenteAtual();
+            const equipe = operador || gerente;
+            const permitidas = new Set(gerente
+                ? ['vendas', 'orcamentos', 'produtos', 'clientes', 'caixa', 'relatorios', 'novidades']
+                : ['vendas', 'orcamentos', 'clientes', 'caixa', 'novidades']);
             document.querySelectorAll('#menu-pdv [data-section]').forEach(botao => {
-                botao.classList.toggle('hidden', operador && !permitidas.has(botao.dataset.section));
+                botao.classList.toggle('hidden', equipe && !permitidas.has(botao.dataset.section));
             });
-            document.querySelectorAll('#menu-pdv [data-owner-only]').forEach(botao => botao.classList.toggle('hidden', operador));
-            document.getElementById('aviso-caixa-operador')?.classList.toggle('hidden', !operador);
+            document.querySelectorAll('[data-owner-only]').forEach(elemento => elemento.classList.toggle('hidden', equipe));
+            const avisoCaixa = document.getElementById('aviso-caixa-operador');
+            avisoCaixa?.classList.toggle('hidden', !equipe);
+            if (avisoCaixa) avisoCaixa.textContent = gerente
+                ? 'Como gerente, você pode movimentar o caixa usando a sua própria senha. Financeiro e ADM continuam exclusivos do titular.'
+                : 'Como operador, você pode abrir e fechar o caixa e acompanhar entradas e saídas. Para registrar uma entrada ou retirada, será exigida a senha do titular.';
             const identificacao = document.getElementById('usuario-pdv-atual');
             if (identificacao && window.usuarioPdv) {
-                identificacao.textContent = operador ? `Operador: ${window.usuarioPdv.nome}` : `Titular: ${window.usuarioPdv.nome}`;
+                identificacao.textContent = gerente ? `Gerente: ${window.usuarioPdv.nome}` : operador ? `Operador: ${window.usuarioPdv.nome}` : `Titular: ${window.usuarioPdv.nome}`;
                 identificacao.classList.remove('hidden');
             }
-            if (operador) {
+            if (equipe) {
                 const visivel = document.querySelector('.section:not(.hidden)')?.id?.replace('-section', '');
                 if (visivel && !permitidas.has(visivel)) showSection('vendas');
             }
@@ -1606,6 +1660,7 @@ if ('serviceWorker' in navigator) {
             restaurarRascunhoVenda();
             atualizarInterface();
             configurarAtalhos();
+            atualizarVendasSuspensas();
             atualizarInfoPix();
             atualizarCamposMovimento();
             showSection('vendas');
@@ -1613,6 +1668,9 @@ if ('serviceWorker' in navigator) {
                 if (event.key === 'Escape') {
                     fecharModalPix();
                     fecharAlertasEstoque();
+                    fecharInformacoes();
+                    fecharVendasSuspensas();
+                    fecharModalComissao();
                 }
             });
         });
@@ -1658,18 +1716,46 @@ if ('serviceWorker' in navigator) {
         // Configurar atalhos de teclado
         function configurarAtalhos() {
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'F2') {
-                    e.preventDefault();
-                    if (ehOperadorAtual()) return mostrarMensagem('Cadastro de produtos disponível somente para o titular.', 'erro');
-                    showSection('produtos');
-                    mostrarFormProduto();
-                } else if (e.key === 'F4') {
-                    e.preventDefault();
-                    if (carrinho.length > 0 && vendaAtual) {
-                        finalizarVenda();
-                    }
-                }
+                if (!e.altKey || e.ctrlKey || e.shiftKey || e.metaKey || e.repeat) return;
+                const modalAberto = [...document.querySelectorAll('.fixed.inset-0')].some(modal => !modal.classList.contains('hidden'));
+                if (modalAberto) return;
+                const acoes = {
+                    '1': () => showSection('vendas'),
+                    '2': () => showSection('orcamentos'),
+                    '3': () => showSection('produtos'),
+                    '4': () => showSection('clientes'),
+                    '5': () => showSection('caixa'),
+                    '6': () => executarAtalhoPagamento('dinheiro'),
+                    '7': () => executarAtalhoPagamento('pix'),
+                    '8': () => executarAtalhoPagamento('cartao'),
+                    '9': () => executarAtalhoPagamento('fiado'),
+                    '0': () => executarAtalhoPagamento('misto')
+                };
+                const acao = acoes[e.key];
+                if (!acao) return;
+                e.preventDefault();
+                acao();
             });
+        }
+
+        function executarAtalhoPagamento(tipo) {
+            if (document.getElementById('vendas-section').classList.contains('hidden')) showSection('vendas');
+            if (tipo === 'misto') alternarPagamentoDividido();
+            else selecionarPagamento(tipo);
+        }
+
+        function abrirInformacoes() {
+            const modal = document.getElementById('modal-informacoes');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            modal.querySelector('button')?.focus();
+        }
+
+        function fecharInformacoes() {
+            const modal = document.getElementById('modal-informacoes');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         // Navegação entre seções
@@ -1690,7 +1776,10 @@ if ('serviceWorker' in navigator) {
         }
 
         function showSection(sectionName) {
-            if (ehOperadorAtual() && !['vendas', 'orcamentos', 'clientes', 'caixa'].includes(sectionName)) {
+            const permitidasEquipe = ehGerenteAtual()
+                ? ['vendas', 'orcamentos', 'produtos', 'clientes', 'caixa', 'relatorios', 'novidades']
+                : ['vendas', 'orcamentos', 'clientes', 'caixa', 'novidades'];
+            if (ehEquipeAtual() && !permitidasEquipe.includes(sectionName)) {
                 mostrarMensagem('Esta área está disponível somente para o titular da empresa.', 'erro');
                 sectionName = 'vendas';
             }
@@ -2255,7 +2344,7 @@ if ('serviceWorker' in navigator) {
 
         // Gerenciamento de produtos
         function mostrarFormProduto() {
-            if (!exigirTitular('Cadastro de produtos disponível somente para o titular.')) return;
+            if (ehOperadorAtual()) return mostrarMensagem('Cadastro de produtos disponível somente para o gerente ou titular.', 'erro');
             atualizarOpcoesVinculoEstoque(produtoEditando?.estoqueVinculadoId || '');
             document.getElementById('form-produto').classList.remove('hidden');
             document.getElementById('produto-nome').focus();
@@ -2469,19 +2558,21 @@ if ('serviceWorker' in navigator) {
         let acaoPendente = null;
         let produtoParaAcao = null;
         let movimentoAutorizadoPorSenha = false;
+        let tipoSenhaPendente = 'titular';
+        let descontoAutorizadoTemporariamente = false;
 
         function editarProduto(id) {
-            if (!exigirTitular('Edição de produtos disponível somente para o titular.')) return;
+            if (ehOperadorAtual()) return mostrarMensagem('Edição de produtos disponível somente para o gerente ou titular.', 'erro');
             produtoParaAcao = id;
             acaoPendente = 'editar_produto';
-            solicitarSenhaAcao('Digite a senha para editar este produto:');
+            solicitarSenhaAcao('Digite a senha para editar este produto:', ehGerenteAtual() ? 'usuario' : 'titular');
         }
 
         function removerProduto(id) {
-            if (!exigirTitular('Remoção de produtos disponível somente para o titular.')) return;
+            if (ehOperadorAtual()) return mostrarMensagem('Remoção de produtos disponível somente para o gerente ou titular.', 'erro');
             produtoParaAcao = id;
             acaoPendente = 'remover_produto';
-            solicitarSenhaAcao('Digite a senha para remover este produto:');
+            solicitarSenhaAcao('Digite a senha para remover este produto:', ehGerenteAtual() ? 'usuario' : 'titular');
         }
 
         function executarEdicaoProduto(id) {
@@ -3104,6 +3195,24 @@ function showInstallButton() {
             return { tipo, informado, valorDesconto, percentual };
         }
 
+        function autorizacaoNecessariaDesconto(percentual) {
+            const valor = Number(percentual || 0);
+            if (!ehEquipeAtual() || valor <= 5) return null;
+            if (ehGerenteAtual() && valor <= 20) {
+                return { tipoSenha: 'usuario', mensagem: `Confirme a senha do gerente para autorizar ${valor.toLocaleString('pt-BR')}% de desconto.` };
+            }
+            return { tipoSenha: 'titular', mensagem: `${ehGerenteAtual() ? 'Descontos acima de 20%' : 'Descontos acima de 5%'} exigem a senha do titular.` };
+        }
+
+        function solicitarAutorizacaoDesconto(percentual, proximaAcao) {
+            if (descontoAutorizadoTemporariamente) return false;
+            const autorizacao = autorizacaoNecessariaDesconto(percentual);
+            if (!autorizacao) return false;
+            acaoPendente = proximaAcao;
+            solicitarSenhaAcao(autorizacao.mensagem, autorizacao.tipoSenha);
+            return true;
+        }
+
         function alterarTipoDesconto() {
             const campo = document.getElementById('desconto');
             const tipo = document.getElementById('desconto-tipo').value;
@@ -3543,6 +3652,7 @@ function showInstallButton() {
             const desconto = dadosDesconto.percentual;
             const valorDesconto = dadosDesconto.valorDesconto;
             const total = arredondarCentavos(subtotal - valorDesconto);
+            if (solicitarAutorizacaoDesconto(desconto, 'finalizar_venda_desconto')) return;
             const clienteSelecionado = clientesFiado.find(c => c.id === document.getElementById('cliente-venda').value);
             const saldoUtilizado = valorSaldoAplicadoVenda();
             const valorCobrado = Math.max(0, Math.round((total - saldoUtilizado) * 100) / 100);
@@ -4145,14 +4255,16 @@ function showInstallButton() {
         function registrarMovimento() {
             if (!exigirCaixaAberto('Abra o caixa antes de registrar uma movimentação.')) return;
             acaoPendente = 'registrar_movimento';
-            solicitarSenhaAcao(ehOperadorAtual()
-                ? 'Digite a senha do titular para registrar esta entrada ou retirada:'
-                : 'Digite a senha para registrar este movimento:');
+            solicitarSenhaAcao(ehGerenteAtual()
+                ? 'Digite a sua senha de gerente para registrar esta entrada ou retirada:'
+                : ehOperadorAtual()
+                    ? 'Digite a senha do titular para registrar esta entrada ou retirada:'
+                    : 'Digite a senha para registrar este movimento:', ehGerenteAtual() ? 'usuario' : 'titular');
         }
 
         function executarRegistroMovimento() {
             if (!movimentoAutorizadoPorSenha) {
-                mostrarMensagem('Confirme a senha do titular antes de registrar a movimentação.', 'erro');
+                mostrarMensagem('Confirme a senha solicitada antes de registrar a movimentação.', 'erro');
                 return;
             }
             const caixa = exigirCaixaAberto('O caixa foi fechado. Abra um caixa para registrar a movimentação.');
@@ -4232,7 +4344,7 @@ function showInstallButton() {
                         </div>
                         <div class="font-semibold ${cor}">${sinal}R$ ${movimento.valor.toFixed(2)}</div>
                     </div>
-                    <div class="${ehOperadorAtual() ? 'hidden' : 'flex'} gap-2 mt-2">
+                    <div class="${ehEquipeAtual() ? 'hidden' : 'flex'} gap-2 mt-2">
                         <button onclick="excluirMovimento('${movimento.id}')" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-colors">
                             🗑️ Excluir
                         </button>
@@ -4459,6 +4571,58 @@ function showInstallButton() {
             return Number(valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        function mesAtualRelatorio() {
+            const agora = new Date();
+            return `${agora.getFullYear()}-${String(agora.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function abrirModalComissao() {
+            if (!exigirTitular('O cálculo de comissão está disponível somente para o titular.')) return;
+            const vendedores = new Map();
+            vendas.forEach(venda => {
+                const chave = chaveVendedorVenda(venda);
+                if (chave !== 'titular' && venda.vendedor?.tipo !== 'titular') vendedores.set(chave, nomeVendedorVenda(venda));
+            });
+            const select = document.getElementById('comissao-operador');
+            select.replaceChildren(new Option(vendedores.size ? 'Selecione o funcionário' : 'Nenhum funcionário com vendas', ''));
+            [...vendedores.entries()].sort((a, b) => a[1].localeCompare(b[1], 'pt-BR')).forEach(([id, nome]) => select.add(new Option(nome, id)));
+            const selecionadoNoRelatorio = document.getElementById('filtro-vendedor-relatorio')?.value || '';
+            if (vendedores.has(selecionadoNoRelatorio)) select.value = selecionadoNoRelatorio;
+            document.getElementById('comissao-mes').value = mesAtualRelatorio();
+            document.getElementById('comissao-percentual').value = '5';
+            document.getElementById('resultado-comissao').classList.add('hidden');
+            const modal = document.getElementById('modal-comissao');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            select.focus();
+        }
+
+        function fecharModalComissao() {
+            const modal = document.getElementById('modal-comissao');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function calcularComissaoOperador() {
+            if (!exigirTitular('O cálculo de comissão está disponível somente para o titular.')) return;
+            const vendedorId = document.getElementById('comissao-operador').value;
+            const mes = document.getElementById('comissao-mes').value;
+            const percentual = Number(document.getElementById('comissao-percentual').value);
+            if (!vendedorId) return mostrarMensagem('Selecione o operador ou gerente.', 'erro');
+            if (!/^\d{4}-\d{2}$/.test(mes)) return mostrarMensagem('Escolha o mês das vendas.', 'erro');
+            if (!Number.isFinite(percentual) || percentual < 0 || percentual > 100) return mostrarMensagem('Informe uma porcentagem entre 0 e 100.', 'erro');
+            const vendasDoMes = vendas.filter(venda => chaveVendedorVenda(venda) === vendedorId && chaveDataRelatorio(venda.data).slice(0, 7) === mes);
+            const totalVendido = vendasDoMes.reduce((soma, venda) => soma + Number(venda.total || 0), 0);
+            const comissao = arredondarCentavos(totalVendido * percentual / 100);
+            const nome = document.getElementById('comissao-operador').selectedOptions[0]?.textContent || 'Funcionário';
+            const [ano, numeroMes] = mes.split('-').map(Number);
+            const periodo = new Date(ano, numeroMes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const resultado = document.getElementById('resultado-comissao');
+            resultado.innerHTML = `<p class="text-sm font-semibold uppercase text-emerald-800">${textoSeguro(nome)} · ${textoSeguro(periodo)}</p><div class="mt-3 grid grid-cols-3 gap-2 text-center"><div><span class="block text-xs text-slate-600">Vendas</span><strong class="text-lg">${vendasDoMes.length}</strong></div><div><span class="block text-xs text-slate-600">Total vendido</span><strong class="text-lg">${moedaRelatorio(totalVendido)}</strong></div><div><span class="block text-xs text-slate-600">Comissão (${percentual.toLocaleString('pt-BR')}%)</span><strong class="text-lg text-emerald-700">${moedaRelatorio(comissao)}</strong></div></div>`;
+            resultado.classList.remove('hidden');
+        }
+
         function atualizarFiltroVendedores(vendasDaData) {
             const filtro = document.getElementById('filtro-vendedor-relatorio');
             const resumo = document.getElementById('resumo-vendedores');
@@ -4542,10 +4706,10 @@ function showInstallButton() {
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mr-1 transition-colors">
                             Ver Comprovante
                         </button>
-                        <button onclick="excluirVenda('${venda.id}')" 
+                        ${ehEquipeAtual() ? '' : `<button onclick="excluirVenda('${venda.id}')" 
                                 class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm transition-colors">
                             Excluir
-                        </button>
+                        </button>`}
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -4571,10 +4735,10 @@ function showInstallButton() {
                                 class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm transition-colors">
                             Ver Comprovante
                         </button>
-                        <button onclick="excluirVenda('${venda.id}')" 
+                        ${ehEquipeAtual() ? '' : `<button onclick="excluirVenda('${venda.id}')" 
                                 class="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm transition-colors">
                             Excluir
-                        </button>
+                        </button>`}
                     </div>
                 `;
                 cardsContainer.appendChild(card);
@@ -4611,16 +4775,19 @@ function showInstallButton() {
         }
 
         // Sistema unificado de solicitação de senha
-        function solicitarSenhaAcao(mensagem) {
+        function solicitarSenhaAcao(mensagem, tipoSenha = 'titular') {
+            tipoSenhaPendente = tipoSenha;
             const modal = document.getElementById('modal-senha');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
             // Alterar o texto do modal
             modal.querySelector('h3').textContent = '🔒 Confirmação Necessária';
-            modal.querySelector('p').textContent = ehOperadorAtual()
-                ? `${mensagem} A senha do operador não autoriza esta movimentação.`
-                : `${mensagem} Use a mesma senha utilizada no login do PDV.`;
+            modal.querySelector('p').textContent = tipoSenha === 'usuario'
+                ? `${mensagem} Use a mesma senha deste gerente no login do PDV.`
+                : ehEquipeAtual()
+                    ? `${mensagem} A senha do funcionário não substitui a autorização do titular.`
+                    : `${mensagem} Use a mesma senha utilizada no login do PDV.`;
             
             // Focar no campo de senha
             document.getElementById('senha-exclusao').focus();
@@ -4635,12 +4802,15 @@ function showInstallButton() {
 
         async function confirmarSenhaAcao() {
     const senhaDigitada = document.getElementById('senha-exclusao').value;
-    if (!window.validarSenhaAdm) {
+    const validarSenha = tipoSenhaPendente === 'usuario'
+        ? window.validarSenhaUsuarioAtual
+        : (window.validarSenhaTitularPdv || window.validarSenhaAdm);
+    if (!validarSenha) {
         mostrarMensagem('A senha administrativa ainda está sendo carregada. Tente novamente.', 'erro');
         return;
     }
     let senhaValida = false;
-    try { senhaValida = await window.validarSenhaAdm(senhaDigitada); }
+    try { senhaValida = await validarSenha(senhaDigitada); }
     catch (erro) { console.error(erro); mostrarMensagem('Não foi possível confirmar a senha de login. Verifique sua conexão.', 'erro'); return; }
     if (!senhaValida) {
         mostrarMensagem('Senha incorreta!', 'erro');
@@ -4652,25 +4822,24 @@ function showInstallButton() {
     // A autorização vale somente durante a execução desta confirmação.
     movimentoAutorizadoPorSenha = acaoPendente === 'registrar_movimento';
 
-    // Executar ação pendente
-    switch (acaoPendente) {
-        case 'editar_produto':
-            executarEdicaoProduto(produtoParaAcao);
-            break;
-        case 'remover_produto':
-            executarRemocaoProduto(produtoParaAcao);
-            break;
-        case 'registrar_movimento':
-            executarRegistroMovimento();
-            break;
-        case 'excluir_venda':
-            executarExclusaoVenda();
-            break;
-        case 'excluir_movimento':
-            executarExclusaoMovimento();
-            break;
+    // Executar ação pendente; a autorização de desconto vale somente nesta retomada.
+    descontoAutorizadoTemporariamente = acaoPendente?.includes('_desconto');
+    try {
+        switch (acaoPendente) {
+            case 'editar_produto': executarEdicaoProduto(produtoParaAcao); break;
+            case 'remover_produto': executarRemocaoProduto(produtoParaAcao); break;
+            case 'registrar_movimento': executarRegistroMovimento(); break;
+            case 'excluir_venda': executarExclusaoVenda(); break;
+            case 'excluir_movimento': executarExclusaoMovimento(); break;
+            case 'finalizar_venda_desconto': finalizarVenda(); break;
+            case 'finalizar_orcamento_desconto': finalizarOrcamento(); break;
+            case 'aprovar_orcamento_desconto': confirmarAprovacaoOrcamento(); break;
+        }
+    } finally {
+        descontoAutorizadoTemporariamente = false;
     }
     movimentoAutorizadoPorSenha = false;
+    tipoSenhaPendente = 'titular';
 
     // Limpar variáveis
     acaoPendente = null;
@@ -4761,6 +4930,9 @@ function showInstallButton() {
             vendaParaExcluir = null;
             movimentoParaExcluir = null;
             movimentoAutorizadoPorSenha = false;
+            descontoAutorizadoTemporariamente = false;
+            tipoSenhaPendente = 'titular';
+            acaoPendente = null;
             document.getElementById('senha-exclusao').value = '';
             
             const modal = document.getElementById('modal-senha');
@@ -4794,10 +4966,81 @@ function showInstallButton() {
             mostrarMensagem('Produtos exportados com sucesso!', 'sucesso');
         }
 
+        function gerarPDFProdutos() {
+            if (!produtos.length) return mostrarMensagem('Não há produtos cadastrados para gerar o relatório.', 'erro');
+            if (!window.jspdf?.jsPDF) return mostrarMensagem('O gerador de PDF ainda não foi carregado. Verifique a conexão e tente novamente.', 'erro');
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                const largura = pdf.internal.pageSize.getWidth();
+                const altura = pdf.internal.pageSize.getHeight();
+                const margem = 10;
+                const colunas = [
+                    { titulo: 'Tipo', largura: 18 }, { titulo: 'Produto / Serviço', largura: 53 },
+                    { titulo: 'Código', largura: 29 }, { titulo: 'Categoria', largura: 31 },
+                    { titulo: 'Estoque', largura: 22 }, { titulo: 'Un.', largura: 12 },
+                    { titulo: 'Venda', largura: 25 }, { titulo: 'Custo', largura: 25 },
+                    { titulo: 'Mín.', largura: 18 }, { titulo: 'Estoque vinculado', largura: 34 }
+                ];
+                let y = 0;
+                const moeda = valor => Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const desenharCabecalho = () => {
+                    pdf.setFillColor(15, 118, 110); pdf.rect(0, 0, largura, 25, 'F');
+                    pdf.setTextColor(255, 255, 255); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(16);
+                    pdf.text(configSistema.nomeEmpresa || 'PDV - Pro', margem, 10);
+                    pdf.setFontSize(11); pdf.text('Relatório completo de produtos e serviços', margem, 18);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8);
+                    pdf.text(`Gerado em ${new Date().toLocaleString('pt-BR')} · ${produtos.length} item(ns)`, largura - margem, 10, { align: 'right' });
+                    const itensEstoque = produtos.filter(item => item.tipo !== 'servico');
+                    const valorEstoque = itensEstoque.reduce((soma, item) => soma + Number(estoqueDisponivel(item) || 0) * Number(item.custo || 0), 0);
+                    pdf.text(`Valor de custo em estoque: R$ ${moeda(valorEstoque)}`, largura - margem, 18, { align: 'right' });
+                    y = 31;
+                    pdf.setDrawColor(148, 163, 184);
+                    let x = margem;
+                    colunas.forEach(coluna => { pdf.setFillColor(226, 232, 240); pdf.rect(x, y, coluna.largura, 8, 'FD'); x += coluna.largura; });
+                    pdf.setTextColor(15, 23, 42); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7.5);
+                    x = margem;
+                    colunas.forEach(coluna => { pdf.text(coluna.titulo, x + 1.5, y + 5); x += coluna.largura; });
+                    y += 8;
+                };
+                desenharCabecalho();
+                [...produtos].sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')).forEach((produto, indice) => {
+                    const servico = produto.tipo === 'servico';
+                    const raiz = servico ? null : produtoRaizEstoque(produto);
+                    const valores = [
+                        servico ? 'Serviço' : 'Produto', String(produto.nome || ''), String(produto.codigo || '—'),
+                        String(produto.categoria || '—'), servico ? '—' : String(estoqueDisponivel(produto)), String(produto.unidade || 'un'),
+                        `R$ ${moeda(produto.preco)}`, `R$ ${moeda(produto.custo)}`, servico ? '—' : String(estoqueMinimoProduto(produto)),
+                        servico || raiz?.id === produto.id ? 'Próprio' : String(raiz?.nome || 'Próprio')
+                    ];
+                    const linhas = valores.map((valor, coluna) => pdf.splitTextToSize(valor.replace(/[\r\n]+/g, ' '), colunas[coluna].largura - 3));
+                    const alturaLinha = Math.max(8, Math.max(...linhas.map(partes => partes.length)) * 3.5 + 3);
+                    if (y + alturaLinha > altura - 15) { pdf.addPage('a4', 'landscape'); desenharCabecalho(); }
+                    let x = margem;
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7.2); pdf.setTextColor(30, 41, 59);
+                    if (indice % 2) { pdf.setFillColor(248, 250, 252); pdf.rect(margem, y, colunas.reduce((soma, coluna) => soma + coluna.largura, 0), alturaLinha, 'F'); }
+                    linhas.forEach((partes, coluna) => { pdf.setDrawColor(203, 213, 225); pdf.rect(x, y, colunas[coluna].largura, alturaLinha); pdf.text(partes, x + 1.5, y + 4); x += colunas[coluna].largura; });
+                    y += alturaLinha;
+                });
+                const paginas = pdf.getNumberOfPages();
+                for (let pagina = 1; pagina <= paginas; pagina++) {
+                    pdf.setPage(pagina); pdf.setFontSize(7.5); pdf.setTextColor(100, 116, 139);
+                    pdf.text(`Página ${pagina} de ${paginas}`, largura - margem, altura - 6, { align: 'right' });
+                    pdf.text('Relatório de estoque - PDV Pro', margem, altura - 6);
+                }
+                pdf.save(`produtos-estoque-${chaveDataRelatorio(new Date())}.pdf`);
+                mostrarMensagem('Planilha de produtos em PDF gerada com sucesso.', 'sucesso');
+            } catch (erro) {
+                console.error('Erro ao gerar PDF de produtos:', erro);
+                mostrarMensagem('Não foi possível gerar a planilha de produtos em PDF.', 'erro');
+            }
+        }
+
         async function exportarBackup() {
     const backup = {
         produtos: produtos,
         vendas: vendas,
+        vendasSuspensas: vendasSuspensas,
         movimentos: movimentos,
         caixas: caixas,
         clientesFiado: clientesFiado,
@@ -5076,6 +5319,7 @@ function showInstallButton() {
             
             produtos = [];
             vendas = [];
+            vendasSuspensas = [];
             movimentos = [];
             caixas = [];
             clientesFiado = [];
@@ -5094,6 +5338,7 @@ function showInstallButton() {
             // Limpar cópias locais para reconstruí-las a partir do estado zerado.
             localStorage.removeItem('pdv_produtos');
             localStorage.removeItem('pdv_vendas');
+            localStorage.removeItem('pdv_vendas_suspensas');
             localStorage.removeItem('pdv_movimentos');
             localStorage.removeItem('pdv_caixas');
             localStorage.removeItem('pdv_categorias');
@@ -5143,6 +5388,7 @@ function showInstallButton() {
                     // Restaurar dados
                     produtos = backup.produtos || [];
                     vendas = backup.vendas || [];
+                    vendasSuspensas = backup.vendasSuspensas || [];
                     movimentos = backup.movimentos || [];
                     caixas = backup.caixas || [];
                     clientesFiado = backup.clientesFiado || [];
@@ -5581,6 +5827,8 @@ function showInstallButton() {
         }
 
         function finalizarOrcamento() {
+            const desconto = totaisOrcamento().descontoPercentual;
+            if (solicitarAutorizacaoDesconto(desconto, 'finalizar_orcamento_desconto')) return;
             const orcamento = salvarOrcamento('finalizado', true);
             if (!orcamento) return;
             gerarPDFOrcamento(orcamento.id);
@@ -5716,6 +5964,7 @@ function showInstallButton() {
             const orcamento = orcamentoEmAprovacao;
             const caixa = exigirCaixaAberto('Abra o caixa antes de aprovar o orçamento.');
             if (!orcamento || !caixa || orcamento.status !== 'finalizado') return;
+            if (solicitarAutorizacaoDesconto(Number(orcamento.descontoPercentual || 0), 'aprovar_orcamento_desconto')) return;
             const tipo1 = document.getElementById('orcamento-pagamento-forma-1').value;
             const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
             if (tipo2 && tipo1 === tipo2) return mostrarMensagem('Escolha formas de pagamento diferentes.', 'erro');
@@ -5936,6 +6185,7 @@ function showInstallButton() {
             normalizarEstoquesVinculados();
             localStorage.setItem('pdv_produtos', JSON.stringify(produtos));
             localStorage.setItem('pdv_vendas', JSON.stringify(vendas));
+            localStorage.setItem('pdv_vendas_suspensas', JSON.stringify(vendasSuspensas));
             localStorage.setItem('pdv_movimentos', JSON.stringify(movimentos));
             localStorage.setItem('pdv_caixas', JSON.stringify(caixas));
             localStorage.setItem('pdv_categorias', JSON.stringify(categorias));
@@ -5948,16 +6198,13 @@ function showInstallButton() {
             localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(saldosIniciaisFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
             atualizarNotificacaoEstoque();
+            atualizarVendasSuspensas();
         }
 
-        function salvarRascunhoVenda() {
-            if (!carrinho.length) {
-                localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
-                return;
-            }
-            const rascunho = {
-                carrinho,
-                vendaAtual,
+        function capturarEstadoVenda() {
+            return {
+                carrinho: JSON.parse(JSON.stringify(carrinho)),
+                vendaAtual: vendaAtual ? JSON.parse(JSON.stringify(vendaAtual)) : null,
                 desconto: document.getElementById('desconto').value,
                 descontoTipo: document.getElementById('desconto-tipo').value,
                 valorRecebido: document.getElementById('valor-recebido').value,
@@ -5966,56 +6213,145 @@ function showInstallButton() {
                 parcelas: document.getElementById('parcelas').value,
                 clienteId: document.getElementById('cliente-venda').value,
                 usarSaldoCliente: document.getElementById('usar-saldo-cliente').checked,
-                valorSaldoCliente: document.getElementById('valor-saldo-cliente').value
-                ,pagamentoForma1: document.getElementById('pagamento-forma-1').value
-                ,pagamentoForma2: document.getElementById('pagamento-forma-2').value
-                ,pagamentoValor1: document.getElementById('pagamento-valor-1').value
-                ,pagamentoValor2: document.getElementById('pagamento-valor-2').value
-                ,valorRecebidoDividido: document.getElementById('valor-recebido-dividido').value
-                ,tipoCartaoDividido: document.getElementById('tipo-cartao-dividido').value
-                ,parcelasDividido: document.getElementById('parcelas-dividido').value
+                valorSaldoCliente: document.getElementById('valor-saldo-cliente').value,
+                fiadoVencimento: document.getElementById('fiado-vencimento').value,
+                pagamentoForma1: document.getElementById('pagamento-forma-1').value,
+                pagamentoForma2: document.getElementById('pagamento-forma-2').value,
+                pagamentoValor1: document.getElementById('pagamento-valor-1').value,
+                pagamentoValor2: document.getElementById('pagamento-valor-2').value,
+                valorRecebidoDividido: document.getElementById('valor-recebido-dividido').value,
+                tipoCartaoDividido: document.getElementById('tipo-cartao-dividido').value,
+                parcelasDividido: document.getElementById('parcelas-dividido').value
             };
+        }
+
+        function salvarRascunhoVenda() {
+            if (!carrinho.length) {
+                localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
+                return;
+            }
+            const rascunho = capturarEstadoVenda();
             localStorage.setItem(CHAVE_RASCUNHO_VENDA, JSON.stringify(rascunho));
+        }
+
+        function aplicarEstadoVenda(rascunho) {
+            if (!rascunho || !Array.isArray(rascunho.carrinho) || !rascunho.carrinho.length) return false;
+            carrinho = JSON.parse(JSON.stringify(rascunho.carrinho));
+            vendaAtual = rascunho.vendaAtual ? JSON.parse(JSON.stringify(rascunho.vendaAtual)) : null;
+            document.getElementById('desconto').value = rascunho.desconto || '0';
+            document.getElementById('desconto-tipo').value = rascunho.descontoTipo || 'percentual';
+            document.getElementById('valor-recebido').value = rascunho.valorRecebido || '';
+            document.getElementById('pix-id').value = rascunho.pixId || '';
+            document.getElementById('tipo-cartao').value = rascunho.tipoCartao || 'credito';
+            document.getElementById('parcelas').value = rascunho.parcelas || '1';
+            atualizarSelectClientes();
+            document.getElementById('cliente-venda').value = rascunho.clienteId || '';
+            atualizarClienteVendaSelecionado();
+            document.getElementById('usar-saldo-cliente').checked = !!rascunho.usarSaldoCliente;
+            document.getElementById('valor-saldo-cliente').value = rascunho.valorSaldoCliente || '';
+            document.getElementById('fiado-vencimento').value = rascunho.fiadoVencimento || '';
+            document.getElementById('pagamento-forma-1').value = rascunho.pagamentoForma1 || 'dinheiro';
+            document.getElementById('pagamento-forma-2').value = rascunho.pagamentoForma2 || 'pix';
+            document.getElementById('pagamento-valor-1').value = rascunho.pagamentoValor1 || '';
+            document.getElementById('pagamento-valor-2').value = rascunho.pagamentoValor2 || '';
+            document.getElementById('valor-recebido-dividido').value = rascunho.valorRecebidoDividido || '';
+            document.getElementById('tipo-cartao-dividido').value = rascunho.tipoCartaoDividido || 'credito';
+            document.getElementById('parcelas-dividido').value = rascunho.parcelasDividido || '1';
+            atualizarCarrinho();
+            atualizarUsoSaldoVenda(false);
+            document.getElementById('pagamento-detalhes').classList.toggle('hidden', !vendaAtual?.tipo);
+            document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));
+            document.getElementById('pagamento-dividido-painel').classList.add('hidden');
+            if (vendaAtual?.dividido) {
+                document.getElementById('pagamento-dividido-painel').classList.remove('hidden');
+                document.getElementById('btn-pagamento-dividido').textContent = '✕ Voltar para pagamento único';
+                atualizarPagamentoDividido();
+            } else if (vendaAtual?.tipo) {
+                document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
+                document.getElementById('btn-pagamento-dividido').textContent = '➕ Dividir em 2 formas de pagamento';
+            }
+            salvarRascunhoVenda();
+            return true;
         }
 
         function restaurarRascunhoVenda() {
             try {
                 const rascunho = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO_VENDA) || 'null');
                 if (!rascunho || !Array.isArray(rascunho.carrinho) || !rascunho.carrinho.length) return;
-                carrinho = rascunho.carrinho;
-                vendaAtual = rascunho.vendaAtual || null;
-                document.getElementById('desconto').value = rascunho.desconto || '0';
-                document.getElementById('desconto-tipo').value = rascunho.descontoTipo || 'percentual';
-                document.getElementById('valor-recebido').value = rascunho.valorRecebido || '';
-                document.getElementById('pix-id').value = rascunho.pixId || '';
-                document.getElementById('tipo-cartao').value = rascunho.tipoCartao || 'credito';
-                document.getElementById('parcelas').value = rascunho.parcelas || '1';
-                atualizarSelectClientes();
-                document.getElementById('cliente-venda').value = rascunho.clienteId || '';
-                atualizarClienteVendaSelecionado();
-                document.getElementById('usar-saldo-cliente').checked = !!rascunho.usarSaldoCliente;
-                document.getElementById('valor-saldo-cliente').value = rascunho.valorSaldoCliente || '';
-                document.getElementById('pagamento-forma-1').value = rascunho.pagamentoForma1 || 'dinheiro';
-                document.getElementById('pagamento-forma-2').value = rascunho.pagamentoForma2 || 'pix';
-                document.getElementById('pagamento-valor-1').value = rascunho.pagamentoValor1 || '';
-                document.getElementById('pagamento-valor-2').value = rascunho.pagamentoValor2 || '';
-                document.getElementById('valor-recebido-dividido').value = rascunho.valorRecebidoDividido || '';
-                document.getElementById('tipo-cartao-dividido').value = rascunho.tipoCartaoDividido || 'credito';
-                document.getElementById('parcelas-dividido').value = rascunho.parcelasDividido || '1';
-                atualizarUsoSaldoVenda(false);
-                if (vendaAtual?.tipo) {
-                    document.getElementById('pagamento-detalhes').classList.remove('hidden');
-                    document.querySelectorAll('#pagamento-detalhes > [id$="-form"]').forEach(div => div.classList.add('hidden'));
-                    if (vendaAtual.dividido) {
-                        document.getElementById('pagamento-dividido-painel').classList.remove('hidden');
-                        document.getElementById('btn-pagamento-dividido').textContent = '✕ Voltar para pagamento único';
-                        atualizarPagamentoDividido();
-                    } else document.getElementById(vendaAtual.tipo + '-form')?.classList.remove('hidden');
-                }
+                aplicarEstadoVenda(rascunho);
             } catch (erro) {
                 console.warn('Não foi possível restaurar a venda em andamento:', erro);
                 localStorage.removeItem(CHAVE_RASCUNHO_VENDA);
             }
+        }
+
+        function atualizarVendasSuspensas() {
+            const contador = document.getElementById('contador-vendas-suspensas');
+            if (contador) contador.textContent = vendasSuspensas.length;
+            const lista = document.getElementById('lista-vendas-suspensas');
+            if (!lista) return;
+            const ordenadas = [...vendasSuspensas].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+            lista.innerHTML = ordenadas.map(venda => {
+                const estado = venda.estado || {};
+                const itens = Array.isArray(estado.carrinho) ? estado.carrinho : [];
+                const subtotal = itens.reduce((soma, item) => soma + Number(item.preco || 0) * Number(item.quantidade || 0), 0);
+                const tipoDesconto = estado.descontoTipo || 'percentual';
+                const informado = Math.max(0, Number(estado.desconto || 0));
+                const desconto = Math.min(subtotal, tipoDesconto === 'valor' ? informado : subtotal * Math.min(100, informado) / 100);
+                const cliente = clientesFiado.find(item => item.id === estado.clienteId);
+                return `<article class="rounded-xl border border-amber-200 bg-amber-50 p-4"><div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h3 class="font-bold text-amber-950">${textoSeguro(venda.nome || 'Venda suspensa')}</h3><p class="mt-1 text-sm text-slate-600">${itens.length} item(ns) · ${moedaRelatorio(subtotal - desconto)}${cliente ? ` · ${textoSeguro(cliente.nome)}` : ''}</p><p class="mt-1 text-xs text-slate-500">Suspensa em ${new Date(venda.criadoEm).toLocaleString('pt-BR')} por ${textoSeguro(venda.suspensaPor?.nome || 'Titular')}</p></div><div class="flex flex-wrap gap-2"><button type="button" onclick="retomarVendaSuspensa('${textoSeguro(venda.id)}')" class="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white">Retomar</button><button type="button" onclick="excluirVendaSuspensa('${textoSeguro(venda.id)}')" class="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button></div></div></article>`;
+            }).join('') || '<p class="rounded-xl border border-dashed p-6 text-center text-slate-500">Nenhuma venda está suspensa.</p>';
+        }
+
+        function suspenderVenda() {
+            if (!carrinho.length) return mostrarMensagem('Adicione pelo menos um item antes de suspender a venda.', 'erro');
+            const referencia = prompt('Informe um nome ou referência para identificar esta venda:', `Venda ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`);
+            if (referencia === null) return;
+            vendasSuspensas.push({
+                id: `vs_${Date.now()}`,
+                nome: referencia.trim() || `Venda suspensa ${vendasSuspensas.length + 1}`,
+                criadoEm: new Date().toISOString(),
+                suspensaPor: vendedorAtual(),
+                estado: capturarEstadoVenda()
+            });
+            salvarDados();
+            limparVenda();
+            atualizarVendasSuspensas();
+            mostrarMensagem('Venda suspensa. O carrinho ficou guardado para continuar depois.', 'sucesso');
+        }
+
+        function abrirVendasSuspensas() {
+            atualizarVendasSuspensas();
+            const modal = document.getElementById('modal-vendas-suspensas');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function fecharVendasSuspensas() {
+            const modal = document.getElementById('modal-vendas-suspensas');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function retomarVendaSuspensa(id) {
+            if (carrinho.length) return mostrarMensagem('Finalize ou suspenda a venda atual antes de retomar outra.', 'erro');
+            const suspensa = vendasSuspensas.find(venda => venda.id === id);
+            if (!suspensa || !aplicarEstadoVenda(suspensa.estado)) return mostrarMensagem('Não foi possível recuperar esta venda suspensa.', 'erro');
+            vendasSuspensas = vendasSuspensas.filter(venda => venda.id !== id);
+            salvarDados();
+            fecharVendasSuspensas();
+            showSection('vendas');
+            mostrarMensagem('Venda retomada. Confira os itens e finalize normalmente.', 'sucesso');
+        }
+
+        function excluirVendaSuspensa(id) {
+            const suspensa = vendasSuspensas.find(venda => venda.id === id);
+            if (!suspensa || !confirm(`Excluir a venda suspensa "${suspensa.nome}"?`)) return;
+            vendasSuspensas = vendasSuspensas.filter(venda => venda.id !== id);
+            salvarDados();
+            atualizarVendasSuspensas();
+            mostrarMensagem('Venda suspensa excluída.', 'sucesso');
         }
 
         function carregarDados() {
@@ -6085,6 +6421,7 @@ function showInstallButton() {
             atualizarFinanceiro();
             atualizarCamposMovimento();
             atualizarNotificacaoEstoque();
+            atualizarVendasSuspensas();
         }
     </script>
     <script src="./clientes-financeiro.js"></script>

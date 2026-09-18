@@ -28,9 +28,9 @@ function friendlyError(error) {
   if (code.includes('invalid-email')) return 'Informe um e-mail válido.';
   if (code.includes('weak-password')) return 'A senha precisa ter pelo menos 6 caracteres.';
   if (code.includes('operation-not-allowed')) return 'Ative o provedor E-mail/senha no Firebase Authentication.';
-  if (code.includes('not-found')) return 'Este operador não foi encontrado ou já foi excluído.';
+  if (code.includes('not-found')) return 'Este funcionário não foi encontrado ou já foi excluído.';
   if (code.includes('unauthenticated')) return 'Sua sessão expirou. Entre novamente.';
-  if (code.includes('permission-denied')) return 'As permissões de operadores ainda não foram publicadas no Firebase.';
+  if (code.includes('permission-denied')) return 'As permissões da equipe ainda não foram publicadas no Firebase.';
   if (code.includes('network-request-failed')) return 'Sem conexão com o Firebase. Verifique a internet e tente novamente.';
   return error?.message?.replace(/^FirebaseError:\s*/i, '') || 'Não foi possível concluir a operação.';
 }
@@ -55,7 +55,10 @@ function operatorCard(operator) {
   const badge = document.createElement('span');
   badge.className = `mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${operator.status === 'ativo' ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-700'}`;
   badge.textContent = operator.status === 'ativo' ? 'Acesso ativo' : 'Acesso pausado';
-  info.append(name, email, badge);
+  const role = document.createElement('span');
+  role.className = `ml-2 mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${operator.role === 'manager' ? 'bg-violet-100 text-violet-800' : 'bg-blue-100 text-blue-800'}`;
+  role.textContent = operator.role === 'manager' ? 'Gerente' : 'Operador';
+  info.append(name, email, badge, role);
 
   const actions = document.createElement('div');
   actions.className = 'flex flex-wrap gap-2';
@@ -85,18 +88,18 @@ async function loadOperators() {
   if (!canManage || !auth.currentUser) return;
   const list = document.getElementById('lista-operadores');
   if (!list) return;
-  list.innerHTML = '<p class="text-sm text-slate-500">Carregando operadores...</p>';
+  list.innerHTML = '<p class="text-sm text-slate-500">Carregando operadores e gerentes...</p>';
   try {
-    const snapshot = await getDocs(query(
+    const snapshots = await Promise.all(['operator', 'manager'].map(role => getDocs(query(
       collection(db, 'users'),
       where('ownerUid', '==', auth.currentUser.uid),
-      where('role', '==', 'operator')
-    ));
-    const operators = snapshot.docs
+      where('role', '==', role)
+    ))));
+    const operators = snapshots.flatMap(snapshot => snapshot.docs)
       .map(item => ({ uid: item.id, ...item.data() }))
       .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'pt-BR'));
     list.replaceChildren(...operators.map(operatorCard));
-    if (!operators.length) list.innerHTML = '<p class="rounded-lg border border-dashed p-4 text-sm text-slate-500">Nenhum operador cadastrado ainda.</p>';
+    if (!operators.length) list.innerHTML = '<p class="rounded-lg border border-dashed p-4 text-sm text-slate-500">Nenhum operador ou gerente cadastrado ainda.</p>';
     setStatus('');
   } catch (error) {
     console.error(error);
@@ -105,11 +108,11 @@ async function loadOperators() {
   }
 }
 
-async function createOperatorAccount({ name, email, password }) {
+async function createOperatorAccount({ name, email, password, role }) {
   const owner = auth.currentUser;
   if (!owner) throw Object.assign(new Error('Sua sessão expirou.'), { code: 'auth/unauthenticated' });
 
-  const secondaryApp = initializeApp(app.options, `operator-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const secondaryApp = initializeApp(app.options, `staff-${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const secondaryAuth = getAuth(secondaryApp);
   let operatorUser = null;
   try {
@@ -119,7 +122,7 @@ async function createOperatorAccount({ name, email, password }) {
     await setDoc(doc(db, 'users', operatorUser.uid), {
       name,
       email: operatorUser.email.toLowerCase(),
-      role: 'operator',
+      role,
       status: 'ativo',
       ownerUid: owner.uid,
       createdBy: owner.uid,
@@ -141,17 +144,20 @@ async function createOperator() {
   const name = document.getElementById('operador-nome')?.value.trim();
   const email = document.getElementById('operador-email')?.value.trim().toLowerCase();
   const password = document.getElementById('operador-senha')?.value || '';
+  const role = document.getElementById('operador-funcao')?.value || 'operator';
+  if (!['operator', 'manager'].includes(role)) return setStatus('Escolha uma função válida.', 'error');
   if (!name || !email || password.length < 6) return setStatus('Informe nome, e-mail e uma senha com pelo menos 6 caracteres.', 'error');
   const button = document.getElementById('btn-salvar-operador');
   button.disabled = true;
-  setStatus('Criando acesso do operador...');
+  setStatus(`Criando acesso de ${role === 'manager' ? 'gerente' : 'operador'}...`);
   try {
-    await createOperatorAccount({ name, email, password });
+    await createOperatorAccount({ name, email, password, role });
     document.getElementById('operador-nome').value = '';
     document.getElementById('operador-email').value = '';
     document.getElementById('operador-senha').value = '';
+    document.getElementById('operador-funcao').value = 'operator';
     await loadOperators();
-    setStatus('Operador cadastrado. Ele já pode entrar pela tela normal de login.', 'success');
+    setStatus(`${role === 'manager' ? 'Gerente' : 'Operador'} cadastrado. O acesso já pode ser usado na tela normal de login.`, 'success');
   } catch (error) {
     console.error(error);
     setStatus(friendlyError(error), 'error');
@@ -179,7 +185,7 @@ async function requestPasswordChange(operator) {
   setStatus('Enviando e-mail de troca de senha...');
   try {
     await sendPasswordResetEmail(auth, operator.email);
-    setStatus('E-mail de troca de senha enviado ao operador.', 'success');
+    setStatus(`E-mail de troca de senha enviado ao ${operator.role === 'manager' ? 'gerente' : 'operador'}.`, 'success');
   } catch (error) {
     console.error(error);
     setStatus(friendlyError(error), 'error');
@@ -188,13 +194,13 @@ async function requestPasswordChange(operator) {
 
 async function deleteOperator(operator) {
   if (!canManage) return;
-  const confirmed = confirm(`Excluir o operador ${operator.name}?\n\nEle perderá o acesso ao PDV e desaparecerá desta lista. Esta ação não pode ser desfeita.`);
+  const confirmed = confirm(`Excluir ${operator.role === 'manager' ? 'o gerente' : 'o operador'} ${operator.name}?\n\nA pessoa perderá o acesso ao PDV e desaparecerá desta lista. Esta ação não pode ser desfeita.`);
   if (!confirmed) return;
   setStatus(`Excluindo ${operator.name}...`);
   try {
     await deleteDoc(doc(db, 'users', operator.uid));
     await loadOperators();
-    setStatus('Operador excluído. O acesso ao PDV foi removido.', 'success');
+    setStatus(`${operator.role === 'manager' ? 'Gerente' : 'Operador'} excluído. O acesso ao PDV foi removido.`, 'success');
   } catch (error) {
     console.error(error);
     setStatus(friendlyError(error), 'error');
@@ -202,7 +208,7 @@ async function deleteOperator(operator) {
 }
 
 export function inicializarOperadores(profile) {
-  canManage = profile?.role !== 'operator';
+  canManage = !['operator', 'manager'].includes(profile?.role);
   window.carregarOperadores = loadOperators;
   window.salvarOperador = createOperator;
 }

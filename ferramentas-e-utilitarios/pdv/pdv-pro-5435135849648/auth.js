@@ -34,7 +34,7 @@ export async function entrar(email, senha) {
     if (status === 'pendente') throw new Error('Seu acesso ainda está aguardando confirmação do pagamento.');
     throw new Error('Seu acesso não está ativo. Entre em contato com o administrador.');
   }
-  if (dadosPerfil.role === 'operator') {
+  if (['operator', 'manager'].includes(dadosPerfil.role)) {
     const titular = dadosPerfil.ownerUid ? await getDoc(doc(db, 'users', dadosPerfil.ownerUid)) : null;
     if (!titular?.exists() || titular.data().status !== 'ativo') {
       await signOut(auth);
@@ -80,7 +80,7 @@ export function protegerPagina(callback) {
       const perfil = await buscar(doc(db, 'users', user.uid));
       if (!perfil.exists() || perfil.data().status !== 'ativo') throw new Error('acesso-restrito');
       const dadosPerfil = perfil.data();
-      if (dadosPerfil.role === 'operator') {
+      if (['operator', 'manager'].includes(dadosPerfil.role)) {
         const titular = dadosPerfil.ownerUid ? await buscar(doc(db, 'users', dadosPerfil.ownerUid)) : null;
         if (!titular?.exists() || titular.data().status !== 'ativo') throw new Error('acesso-restrito');
       }

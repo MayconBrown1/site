@@ -57,7 +57,18 @@ for (const marker of [
   'function vincularClienteAoOrcamento',
   "origemCadastro: 'orcamento'",
   'PDF 2 vias',
-  "orcamento.status = 'aprovado'"
+  "orcamento.status = 'aprovado'",
+  'btn-suspender-venda',
+  'modal-vendas-suspensas',
+  'function suspenderVenda',
+  'function retomarVendaSuspensa',
+  'modal-comissao',
+  'function calcularComissaoOperador',
+  'modal-informacoes',
+  'function configurarAtalhos',
+  'function gerarPDFProdutos',
+  'operador-funcao',
+  'function autorizacaoNecessariaDesconto'
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
@@ -75,7 +86,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Busque ou cadastre o cliente no orçamento', 'Duas formas de pagamento na mesma venda', 'Desconto em porcentagem ou reais', 'Aprove o orçamento e conclua a venda', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Novo acesso de gerente', 'Limites seguros de desconto', 'Comissão mensal por funcionário', 'Suspenda e retome uma venda', 'Atalhos e tela de Informações', 'Relatório completo de produtos em PDF', 'Busque ou cadastre o cliente no orçamento', 'Duas formas de pagamento na mesma venda', 'Desconto em porcentagem ou reais', 'Aprove o orçamento e conclua a venda', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -99,6 +110,7 @@ for (const marker of ['function abrirHistoricoCliente', 'function atualizarFinan
   if (!customerFinanceSource.includes(marker)) throw new Error(`Clientes/financeiro incompleto: ${marker}`);
 }
 if (!firestoreRules.includes('match /app/financeiro')) throw new Error('As regras privadas do Financeiro não foram encontradas.');
+if (!firestoreRules.includes("data.role != 'manager'")) throw new Error('O Financeiro precisa permanecer bloqueado para gerentes nas regras do Firebase.');
 
 for (const marker of ['modal-tema', 'tema-cor-fundo', 'tema-cor-texto', 'tema-cor-botao', 'tema-formato-botao', 'tema-imagem-url', 'function abrirPainelTema', 'function salvarTema', 'function restaurarTemaPadrao', 'function garantirContrasteTema', 'body.tema-personalizado', '#historico-movimentos > div']) {
   if (!html.includes(marker)) throw new Error(`Painel de Tema incompleto: ${marker}`);
@@ -228,6 +240,7 @@ const vendaContext = {
   calcularDescontoVenda: () => ({ tipo: 'percentual', informado: 0, percentual: 0, valorDesconto: 0 }),
   arredondarCentavos: valor => Math.round(Number(valor) * 100) / 100,
   montarPagamentoVenda: valor => ({ pagamento: { tipo: 'dinheiro', valorRecebido: valor, troco: 0, valorCobrado: valor } }),
+  solicitarAutorizacaoDesconto: () => false,
   formasPagamentoRegistradas: (pagamento, valor) => [{ ...pagamento, valor: Number(pagamento.valorCobrado ?? valor) }],
   saldoClienteFiado: () => 0,
   mostrarMensagem: () => {},
@@ -243,6 +256,35 @@ if (vendaContext.vendas.length !== 1 || vendaContext.vendas[0].pagamento.saldoUt
 if (vendaContext.movimentos.length !== 1 || vendaContext.movimentos[0].valor !== 5) throw new Error('O caixa recebeu novamente o valor usado do saldo do cliente.');
 if (vendaContext.movimentosSaldoCliente.length !== 1 || vendaContext.movimentosSaldoCliente[0].tipo !== 'debito' || vendaContext.movimentosSaldoCliente[0].valor !== 5) throw new Error('O saldo usado na venda não foi debitado do cliente.');
 
+const descontoAutorizacaoStart = html.indexOf('function autorizacaoNecessariaDesconto');
+const descontoAutorizacaoEnd = html.indexOf('function solicitarAutorizacaoDesconto', descontoAutorizacaoStart);
+if (descontoAutorizacaoStart < 0 || descontoAutorizacaoEnd < 0) throw new Error('Não foi possível localizar os limites de desconto por função.');
+const criarRegraDesconto = new Function('ehEquipeAtual', 'ehGerenteAtual', `${html.slice(descontoAutorizacaoStart, descontoAutorizacaoEnd)}; return autorizacaoNecessariaDesconto;`);
+const regraOperador = criarRegraDesconto(() => true, () => false);
+const regraGerente = criarRegraDesconto(() => true, () => true);
+const regraTitular = criarRegraDesconto(() => false, () => false);
+if (regraOperador(5) !== null || regraOperador(5.01)?.tipoSenha !== 'titular') throw new Error('O limite de 5% do operador não foi aplicado corretamente.');
+if (regraGerente(5) !== null || regraGerente(20)?.tipoSenha !== 'usuario' || regraGerente(20.01)?.tipoSenha !== 'titular') throw new Error('Os limites de desconto do gerente não foram aplicados corretamente.');
+if (regraTitular(100) !== null) throw new Error('O titular não pode depender de uma segunda autorização de desconto.');
+
+const suspenderStart = html.indexOf('function suspenderVenda()');
+const suspenderEnd = html.indexOf('function abrirVendasSuspensas()', suspenderStart);
+if (suspenderStart < 0 || suspenderEnd < 0) throw new Error('Não foi possível localizar a suspensão de vendas.');
+const suspenderContext = {
+  carrinho: [{ produtoId: 'p-1', nome: 'Produto', quantidade: 2, preco: 5 }],
+  vendasSuspensas: [],
+  prompt: () => 'Cliente aguardando',
+  vendedorAtual: () => ({ id: 'op-1', nome: 'Operador Teste' }),
+  capturarEstadoVenda: () => ({ carrinho: [{ produtoId: 'p-1', quantidade: 2, preco: 5 }] }),
+  salvarDados: () => {},
+  limparVenda: () => {},
+  atualizarVendasSuspensas: () => {},
+  mostrarMensagem: () => {}
+};
+vm.runInNewContext(html.slice(suspenderStart, suspenderEnd), suspenderContext);
+suspenderContext.suspenderVenda();
+if (suspenderContext.vendasSuspensas.length !== 1 || suspenderContext.vendasSuspensas[0].nome !== 'Cliente aguardando' || suspenderContext.vendasSuspensas[0].estado.carrinho.length !== 1) throw new Error('A venda suspensa não guardou o carrinho e sua identificação.');
+
 const reportStart = html.indexOf('function chaveDataRelatorio');
 const reportEnd = html.indexOf('function atualizarFiltroVendedores', reportStart);
 if (reportStart < 0 || reportEnd < 0) throw new Error('Não foi possível localizar as funções do relatório por data.');
@@ -256,6 +298,35 @@ const reportHelpers = makeReportHelpers(reportSales, {});
 if (reportHelpers.vendasDaDataRelatorio('2026-09-10').map(venda => venda.id).join(',') !== 'ontem') {
   throw new Error('O relatório não separou corretamente as vendas por data local.');
 }
+
+const comissaoStart = html.indexOf('function calcularComissaoOperador');
+const comissaoEnd = html.indexOf('function atualizarFiltroVendedores', comissaoStart);
+if (comissaoStart < 0 || comissaoEnd < 0) throw new Error('Não foi possível localizar o cálculo de comissão.');
+const resultadoComissao = { innerHTML: '', classList: { remove() {} } };
+const camposComissao = {
+  'comissao-operador': { value: 'op-1', selectedOptions: [{ textContent: 'Operador Teste' }] },
+  'comissao-mes': { value: '2026-09' },
+  'comissao-percentual': { value: '10' },
+  'resultado-comissao': resultadoComissao
+};
+const criarCalculoComissao = new Function('vendas', 'document', 'exigirTitular', 'chaveVendedorVenda', 'chaveDataRelatorio', 'arredondarCentavos', 'textoSeguro', 'moedaRelatorio', 'mostrarMensagem', `${html.slice(comissaoStart, comissaoEnd)}; return calcularComissaoOperador;`);
+criarCalculoComissao(
+  [
+    { data: '2026-09-01T10:00:00', total: 100, vendedor: { id: 'op-1' } },
+    { data: '2026-09-20T10:00:00', total: 50, vendedor: { id: 'op-1' } },
+    { data: '2026-08-20T10:00:00', total: 999, vendedor: { id: 'op-1' } },
+    { data: '2026-09-20T10:00:00', total: 999, vendedor: { id: 'op-2' } }
+  ],
+  { getElementById: id => camposComissao[id] },
+  () => true,
+  venda => venda.vendedor.id,
+  data => data.slice(0, 10),
+  valor => Math.round(valor * 100) / 100,
+  String,
+  valor => `R$ ${Number(valor).toFixed(2)}`,
+  () => {}
+)();
+if (!resultadoComissao.innerHTML.includes('R$ 150.00') || !resultadoComissao.innerHTML.includes('R$ 15.00')) throw new Error('O cálculo mensal de comissão por funcionário está incorreto.');
 
 const start = html.indexOf('function produtoRaizEstoque');
 const end = html.indexOf('function atualizarOpcoesVinculoEstoque', start);
@@ -297,14 +368,14 @@ if (alertasEstoque.length !== 1 || alertasEstoque[0].id !== 'pb' || alertasEstoq
 if (html.includes("produtos.filter(p => p.estoque <= 5)")) throw new Error('O relatório ainda usa um limite fixo de estoque baixo.');
 
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
-for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática', 'movimentosSaldoCliente']) {
+for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática', 'movimentosSaldoCliente', 'vendasSuspensas', "['operator', 'manager'].includes"]) {
   if (!cloudSource.includes(marker)) throw new Error(`Fila de sincronização offline incompleta: ${marker}`);
 }
 const mergeStart = cloudSource.indexOf('const same =');
 const mergeEnd = cloudSource.indexOf('async function salvarNuvem', mergeStart);
 const makeCloudHelpers = new Function('uid', `${cloudSource.slice(mergeStart, mergeEnd)}; return { mergeState, cloneState };`);
 const { mergeState, cloneState } = makeCloudHelpers('empresa-1');
-const emptyCollections = { movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
+const emptyCollections = { vendasSuspensas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
 const base = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2200 }], vendas: [] };
 const local = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2100 }], vendas: [{ id: 'v-local', total: 10 }] };
 const remote = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2125 }], vendas: [{ id: 'v-remota', total: 20 }] };
@@ -334,6 +405,9 @@ if (!firestoreRules.includes("resource.data.ownerUid == request.auth.uid")) thro
 if (operatorAdmin.includes('httpsCallable')) throw new Error('A gestão de operadores não pode depender de uma Cloud Function.');
 if (!html.includes('text-[#f6c453]') || !html.includes('>ADM do PDV</button>')) throw new Error('O botão ADM do PDV precisa manter o texto dourado.');
 if (!firestoreRules.includes("request.resource.data.role == 'operator'")) throw new Error('As regras de criação de operadores não foram encontradas.');
+if (!operatorAdmin.includes("['operator', 'manager'].includes(role)") || !operatorAdmin.includes("operator.role === 'manager'")) throw new Error('O cadastro de gerente está incompleto no ADM.');
+if (!authSource.includes("['operator', 'manager'].includes(dadosPerfil.role)")) throw new Error('O login não reconhece o perfil de gerente.');
+if (!firestoreRules.includes("request.resource.data.role == 'manager'") || !firestoreRules.includes('activeStaffFor')) throw new Error('As regras do Firebase não reconhecem o gerente como membro da empresa.');
 
 if (html.includes("getElementById('form-movimentacao-caixa')?.classList.toggle('hidden', operador)")) {
   throw new Error('O formulário de movimentação não pode ser ocultado do operador.');
@@ -342,7 +416,7 @@ if (html.includes("document.getElementById('btn-registrar-movimento').disabled =
   || html.includes("document.getElementById(id).disabled = !caixa || ehOperadorAtual()")) {
   throw new Error('Os campos de movimentação precisam permanecer habilitados para o operador quando o caixa estiver aberto.');
 }
-for (const marker of ['movimentoAutorizadoPorSenha', 'A senha do operador não autoriza esta movimentação.']) {
+for (const marker of ['movimentoAutorizadoPorSenha', 'Confirme a senha solicitada antes de registrar a movimentação.']) {
   if (!html.includes(marker)) throw new Error(`Proteção da movimentação do operador ausente: ${marker}`);
 }
 if (!authSource.includes('validarSenhaTitular') || !cloudSource.includes('validarSenhaTitular(emailTitular, uid, senha)')) {

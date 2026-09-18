@@ -18,7 +18,7 @@ function state() {
   const { senha, ...configSemSenha } = window.configSistema || {};
   return {
     ownerUid: uid,
-    produtos: window.produtos || [], vendas: window.vendas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
+    produtos: window.produtos || [], vendas: window.vendas || [], vendasSuspensas: window.vendasSuspensas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
     clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [], movimentosSaldoCliente: window.movimentosSaldoCliente || [],
     orcamentos: window.orcamentos || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
@@ -72,7 +72,7 @@ function mergeRecords(field, baseState, localState, remoteState) {
 
 function mergeState(baseState, localState, remoteState) {
   const merged = { ...remoteState, ownerUid: uid };
-  ['produtos', 'vendas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'movimentosSaldoCliente', 'orcamentos']
+  ['produtos', 'vendas', 'vendasSuspensas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'movimentosSaldoCliente', 'orcamentos']
     .forEach(field => { merged[field] = mergeRecords(field, baseState, localState, remoteState); });
   ['categorias', 'categoriasOcultas', 'configSistema', 'configPix'].forEach(field => {
     merged[field] = same(localState[field], baseState?.[field]) ? (remoteState?.[field] ?? localState[field]) : localState[field];
@@ -124,7 +124,7 @@ function guardarCopiaFinanceira(valor) {
 function aplicarEstado(valor) {
   const d = cloneState(valor || {});
   writing = true;
-  window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
+  window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.vendasSuspensas = d.vendasSuspensas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
   window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || []; window.movimentosSaldoCliente = d.movimentosSaldoCliente || [];
   window.orcamentos = d.orcamentos || [];
   window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
@@ -215,7 +215,7 @@ async function salvarNuvem() {
 
 async function sincronizarFinanceiro() {
   const pending = pendenciaFinanceira();
-  if (!uid || !pending || window.usuarioPdv?.role === 'operator') { emitirStatus(); return true; }
+  if (!uid || !pending || ['operator', 'manager'].includes(window.usuarioPdv?.role)) { emitirStatus(); return true; }
   if (!navigator.onLine) { emitirStatus(); return false; }
   try {
     const ref = doc(db, 'users', uid, 'app', 'financeiro');
@@ -246,7 +246,7 @@ async function sincronizarFinanceiro() {
 }
 
 async function salvarFinanceiroNuvem() {
-  if (!uid || window.usuarioPdv?.role === 'operator') return false;
+  if (!uid || ['operator', 'manager'].includes(window.usuarioPdv?.role)) return false;
   registrarPendenciaFinanceira(cloneState(financeState()));
   financeQueue = financeQueue.then(sincronizarFinanceiro, sincronizarFinanceiro);
   return financeQueue;
@@ -254,18 +254,19 @@ async function salvarFinanceiroNuvem() {
 
 function iniciarContaVazia() {
   aplicarEstado({
-    ownerUid: uid, produtos: [], vendas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [],
+    ownerUid: uid, produtos: [], vendas: [], vendasSuspensas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [],
     orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao
   });
   salvarNuvem();
 }
 
 protegerPagina(async (user, perfil) => {
-  uid = perfil.role === 'operator' ? perfil.ownerUid : user.uid;
+  const membroEquipe = ['operator', 'manager'].includes(perfil.role);
+  uid = membroEquipe ? perfil.ownerUid : user.uid;
   if (!uid) { sair(); return; }
   originalSalvarDados = window.salvarDados;
   let emailTitular = user.email || perfil.email || '';
-  if (perfil.role === 'operator') {
+  if (membroEquipe) {
     try {
       const titular = await getDoc(doc(db, 'users', uid));
       emailTitular = titular.exists() ? titular.data().email || '' : '';
@@ -279,25 +280,28 @@ protegerPagina(async (user, perfil) => {
     nome: perfil.name || user.displayName || user.email?.split('@')[0] || 'Usuário',
     email: user.email || perfil.email || '', role: perfil.role || 'client'
   };
-  if (perfil.role === 'operator') {
+  if (membroEquipe) {
     window.lancamentosFinanceiros = [];
     window.saldosIniciaisFinanceiros = {};
     localStorage.removeItem('pdv_lancamentos_financeiros');
     localStorage.removeItem('pdv_saldos_iniciais_financeiros');
   }
   window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
+  window.ehGerentePdv = () => window.usuarioPdv?.role === 'manager';
   inicializarCatalogoAdmin(uid);
   inicializarOperadores(perfil);
-  window.validarSenhaAdm = perfil.role === 'operator'
+  window.validarSenhaUsuarioAtual = validarSenhaAtual;
+  window.validarSenhaTitularPdv = membroEquipe
     ? senha => validarSenhaTitular(emailTitular, uid, senha)
     : validarSenhaAtual;
+  window.validarSenhaAdm = window.validarSenhaTitularPdv;
   localStorage.removeItem('pdv_senha_adm_local');
-  if (perfil.role !== 'operator') deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
+  if (!membroEquipe) deleteDoc(doc(db, 'users', uid, 'app', 'security')).catch(() => {});
 
   const copiaLocal = lerJson(chaveLocal('state'))?.data;
   if (copiaLocal) aplicarEstado(copiaLocal);
   else aplicarEstado({ ownerUid: uid, configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao });
-  if (perfil.role !== 'operator') {
+  if (!membroEquipe) {
     const copiaFinanceira = lerJson(chaveLocal('finance'))?.data;
     if (copiaFinanceira) aplicarFinanceiro(copiaFinanceira);
   }
@@ -305,7 +309,7 @@ protegerPagina(async (user, perfil) => {
   document.body.style.visibility = 'visible';
   window.aplicarPermissoesUsuario?.();
   setTimeout(() => window.focarBuscaProduto?.(), 0);
-  document.title = perfil.role === 'operator' ? `PDV - Pro · ${window.usuarioPdv.nome}` : 'PDV - Pro';
+  document.title = membroEquipe ? `PDV - Pro · ${window.usuarioPdv.nome}` : 'PDV - Pro';
   const header = document.querySelector('#menu-pdv');
   if (header && !document.querySelector('#btn-sair')) header.insertAdjacentHTML('beforeend', '<button id="btn-sair" class="bg-black px-3 py-2 rounded text-sm">Sair</button>');
   document.querySelector('#btn-sair')?.addEventListener('click', sair);
@@ -337,7 +341,7 @@ protegerPagina(async (user, perfil) => {
     emitirStatus('● Trabalhando com a cópia salva neste aparelho');
   });
 
-  if (perfil.role !== 'operator') {
+  if (!membroEquipe) {
     onSnapshot(doc(db, 'users', uid, 'app', 'financeiro'), snap => {
       if (!snap.exists()) { window.atualizarFinanceiro?.(); return; }
       const recebido = cloneState(snap.data());
@@ -372,7 +376,7 @@ protegerPagina(async (user, perfil) => {
   window.sincronizarCatalogoAgora = () => sincronizarCatalogoPublico(uid);
 
   const chavesQueAlteramEstado = new Set([
-    'pdv_produtos', 'pdv_vendas', 'pdv_movimentos', 'pdv_caixas', 'pdv_categorias', 'pdv_categorias_ocultas',
+    'pdv_produtos', 'pdv_vendas', 'pdv_vendas_suspensas', 'pdv_movimentos', 'pdv_caixas', 'pdv_categorias', 'pdv_categorias_ocultas',
     'pdv_config_sistema', 'pdv_clientes_fiado', 'pdv_pagamentos_fiado', 'pdv_movimentos_saldo_cliente', 'pdv_orcamentos', 'pdv_config_pix'
   ]);
   const storageSet = Storage.prototype.setItem;
