@@ -1,7 +1,7 @@
-import { db } from './firebase-config.js';
-import { protegerPagina, sair, validarSenhaAtual, validarSenhaTitular } from './auth.js';
-import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from './catalogo-admin.js';
-import { inicializarOperadores } from './operator-admin.js';
+import { db } from '/firebase-config.js';
+import { protegerPagina, sair, validarSenhaAtual, validarSenhaTitular } from '/auth.js';
+import { inicializarCatalogoAdmin, sincronizarCatalogoPublico } from '/catalogo-admin.js';
+import { inicializarOperadores } from '/operator-admin.js';
 import { deleteDoc, doc, getDoc, onSnapshot, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 let uid;

@@ -12,6 +12,11 @@ const pwaInstallSource = fs.readFileSync(new URL('../pwa-install.js', import.met
 const catalogAdminSource = fs.readFileSync(new URL('../catalogo-admin.js', import.meta.url), 'utf8');
 const publicCatalogSource = fs.readFileSync(new URL('../catalogo/catalogo.js', import.meta.url), 'utf8');
 const publicCatalogCss = fs.readFileSync(new URL('../catalogo/catalogo.css', import.meta.url), 'utf8');
+const loginSource = fs.readFileSync(new URL('../login.html', import.meta.url), 'utf8');
+const cadastroSource = fs.readFileSync(new URL('../cadastro.html', import.meta.url), 'utf8');
+const adminSource = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
+const manifestSource = fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8');
+const publicCatalogHtml = fs.readFileSync(new URL('../catalogo/index.html', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -67,6 +72,9 @@ for (const marker of [
   'modal-informacoes',
   'function configurarAtalhos',
   'function gerarPDFProdutos',
+  'busca-produtos-cadastro',
+  'function validarDuplicidadeProduto',
+  'function ordenarProdutosPorMaisVendidos',
   'operador-funcao',
   'function autorizacaoNecessariaDesconto'
 ]) {
@@ -86,7 +94,7 @@ for (const marker of [
 }
 if (html.includes('financeiro-saldo-inicial-input')) throw new Error('O saldo inicial não pode mais ser editado manualmente por mês.');
 if (html.includes('Saldo previsto') || html.includes('financeiro-saldo-previsto')) throw new Error('O saldo principal não pode continuar identificado como previsto.');
-for (const marker of ['Última atualização', 'Controle financeiro somente no lugar correto', 'Novo acesso de gerente', 'Limites seguros de desconto', 'Comissão mensal por funcionário', 'Suspenda e retome uma venda', 'Atalhos e tela de Informações', 'Relatório completo de produtos em PDF', 'Busque ou cadastre o cliente no orçamento', 'Duas formas de pagamento na mesma venda', 'Desconto em porcentagem ou reais', 'Aprove o orçamento e conclua a venda', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
+for (const marker of ['Última atualização', 'Login e cadastro com caminhos seguros', 'Pesquisa na tela de Produtos', 'Nome e código sem repetição', 'Mais vendidos aparecem primeiro', 'Controle financeiro somente no lugar correto', 'Novo acesso de gerente', 'Limites seguros de desconto', 'Comissão mensal por funcionário', 'Suspenda e retome uma venda', 'Atalhos e tela de Informações', 'Relatório completo de produtos em PDF', 'Busque ou cadastre o cliente no orçamento', 'Duas formas de pagamento na mesma venda', 'Desconto em porcentagem ou reais', 'Aprove o orçamento e conclua a venda', 'Saldo do cliente nas compras', 'Adicionar saldo', 'Usar saldo', 'Pago nesta venda', 'Menu compacto também no computador', 'Mais espaço e organização em qualquer tela', 'Alertas personalizados de estoque mínimo', 'Saiba a hora certa de repor cada produto', 'Temas para mais tipos de comércio', 'Mais contraste e formatos de botão', 'PDV funcionando offline com sincronização automática', 'Continue vendendo mesmo sem internet', 'Sincronização automática', 'Instale para usar com mais segurança', 'Gráfica, Informática, Futurista e Neon', 'Uma identidade visual em todo lugar', 'Cinco temas comerciais com imagem', 'O tema padrão continua disponível', 'Exclusão de operadores no ADM', 'Cadastro completo de clientes', 'Financeiro exclusivo do titular', 'Relatórios de dias anteriores']) {
   if (!html.includes(marker)) throw new Error(`Novidades recentes ausentes: ${marker}`);
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
@@ -94,6 +102,54 @@ const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];
 if (!cacheAtual || !cacheDasNovidades || cacheAtual !== cacheDasNovidades) {
   throw new Error(`ATUALIZE A ÁREA NOVIDADES: o cache do aplicativo (${cacheAtual || 'não encontrado'}) precisa ser igual ao registro mais recente (${cacheDasNovidades || 'não encontrado'}).`);
 }
+
+for (const [nome, fonte, marcadores] of [
+  ['PDV principal', html, ['src="/pdv-cloud.js"', 'href="/login.html"', 'src="/clientes-financeiro.js"']],
+  ['login', loginSource, ['href="/cadastro.html"', "from'/auth.js'", 'src="/pwa-install.js"']],
+  ['cadastro', cadastroSource, ['href="/login.html"', "from'/firebase-config.js'", 'src="/pwa-install.js"']],
+  ['administração', adminSource, ["from'/firebase-config.js'", "from'/auth.js'", "location.replace('/login.html')"]],
+  ['autenticação', authSource, ["from '/firebase-config.js'", "location.replace('/index.html')", "location.replace('/login.html')"]],
+  ['catálogo público', publicCatalogHtml, ['href="/catalogo/catalogo.css"', 'src="/catalogo/catalogo.js"']],
+  ['publicação do catálogo', catalogAdminSource, ["from '/firebase-config.js'", "new URL('/catalogo/'"]],
+  ['instalação PWA', pwaInstallSource, ["register('/sw.js')"]],
+  ['service worker', serviceWorkerSource, ["'/login.html'", "'/cadastro.html'", "caches.match('/index.html')"]]
+]) {
+  for (const marcador of marcadores) {
+    if (!fonte.includes(marcador)) throw new Error(`Caminho absoluto do Cloudflare ausente em ${nome}: ${marcador}`);
+  }
+}
+const manifest = JSON.parse(manifestSource);
+if (manifest.start_url !== '/' || manifest.scope !== '/' || manifest.icons?.[0]?.src !== '/favicon.svg') {
+  throw new Error('O manifesto não está apontando para a raiz da hospedagem Cloudflare.');
+}
+for (const [nome, fonte] of [['login', loginSource], ['cadastro', cadastroSource], ['administração', adminSource]]) {
+  const modulo = fonte.match(/<script type="module">([\s\S]*?)<\/script>/)?.[1];
+  if (!modulo) throw new Error(`Script de ${nome} não encontrado.`);
+  new Function(modulo.replace(/import[^;]+from['"][^'"]+['"];/g, ''));
+}
+
+const duplicidadeStart = html.indexOf('function normalizarNomeProduto');
+const duplicidadeEnd = html.indexOf('function definirErroDuplicidadeProduto', duplicidadeStart);
+if (duplicidadeStart < 0 || duplicidadeEnd < 0) throw new Error('Não foi possível localizar a validação de produtos repetidos.');
+const criarValidadorDuplicidade = new Function('produtos', `${html.slice(duplicidadeStart, duplicidadeEnd)}; return encontrarDuplicidadesProduto;`);
+const validarDuplicidade = criarValidadorDuplicidade([
+  { id: 'p-1', nome: 'Café Especial', codigo: '789 123' },
+  { id: 'p-2', nome: 'Bolo', codigo: '456' }
+]);
+if (validarDuplicidade('  CAFE   especial ', '', 'produto', '').nome?.id !== 'p-1') throw new Error('A validação permitiu repetir o nome de um produto.');
+if (validarDuplicidade('Outro', '789123', 'produto', '').codigo?.id !== 'p-1') throw new Error('A validação permitiu repetir um código de barras.');
+if (validarDuplicidade('Café Especial', '789123', 'produto', 'p-1').nome || validarDuplicidade('Café Especial', '789123', 'produto', 'p-1').codigo) throw new Error('A edição do próprio produto foi marcada como duplicada.');
+
+const rankingStart = html.indexOf('function totaisVendidosPorProduto');
+const rankingEnd = html.indexOf('function atualizarListaProdutos', rankingStart);
+if (rankingStart < 0 || rankingEnd < 0) throw new Error('Não foi possível localizar o ranking de produtos vendidos.');
+const criarRankingProdutos = new Function('vendas', 'produtos', `${html.slice(rankingStart, rankingEnd)}; return ordenarProdutosPorMaisVendidos;`);
+const produtosRanking = [{ id: 'p-1', nome: 'Primeiro' }, { id: 'p-2', nome: 'Segundo' }, { id: 'p-3', nome: 'Terceiro' }];
+const ordenarRanking = criarRankingProdutos([
+  { itens: [{ produtoId: 'p-2', quantidade: 2 }, { produtoId: 'p-1', quantidade: 1 }] },
+  { itens: [{ produtoId: 'p-2', quantidade: 3 }, { produtoId: 'p-3', quantidade: 2 }] }
+], produtosRanking);
+if (ordenarRanking().map(produto => produto.id).join(',') !== 'p-2,p-3,p-1') throw new Error('Os produtos não foram ordenados pela quantidade vendida.');
 for (const marker of ['persistentLocalCache', 'persistentMultipleTabManager']) {
   if (!firebaseConfigSource.includes(marker)) throw new Error(`Persistência offline do Firebase ausente: ${marker}`);
 }
@@ -122,7 +178,7 @@ for (const marker of ['data-tema-preset="petshop"', 'data-tema-preset="adega"', 
 }
 for (const asset of ['pet-shop.webp', 'adega.webp', 'conveniencia.webp', 'doceria.webp', 'hortifruti.webp', 'grafica-tecnologia.webp', 'informatica.webp', 'futurista.webp', 'neon-laranja.webp', 'neon-verde.webp', 'borracharia.webp', 'oficina-motos.webp', 'oficina-carros.webp', 'autopecas.webp', 'mercado.webp', 'moda.webp', 'beleza.webp', 'material-construcao.webp', 'papelaria.webp', 'farmacia.webp']) {
   if (!fs.existsSync(new URL(`../assets/temas/${asset}`, import.meta.url))) throw new Error(`Imagem do tema ausente: ${asset}`);
-  if (!serviceWorkerSource.includes(`'./assets/temas/${asset}'`)) throw new Error(`Imagem do tema fora do cache offline: ${asset}`);
+  if (!serviceWorkerSource.includes(`'/assets/temas/${asset}'`)) throw new Error(`Imagem do tema fora do cache offline: ${asset}`);
 }
 if (html.includes('onclick="alternarTema()"')) throw new Error('O botão Tema não pode mais alternar cores sem abrir o painel.');
 const themeStart = html.indexOf('const TEMA_PADRAO');
@@ -130,7 +186,8 @@ const themeEnd = html.indexOf('function produtoRaizEstoque', themeStart);
 if (themeStart < 0 || themeEnd < 0) throw new Error('Não foi possível localizar os controles de tema.');
 const themeHelpers = new Function(`${html.slice(themeStart, themeEnd)}; return { normalizarUrlImagemTema, normalizarTema, TEMAS_PREDEFINIDOS, razaoContrasteTema };`)();
 if (themeHelpers.normalizarUrlImagemTema('https://exemplo.com/fundo.jpg') !== 'https://exemplo.com/fundo.jpg') throw new Error('O link HTTPS da imagem do tema não foi aceito.');
-if (themeHelpers.normalizarUrlImagemTema('./assets/temas/pet-shop.webp') !== './assets/temas/pet-shop.webp') throw new Error('A imagem local dos temas prontos não foi aceita.');
+if (themeHelpers.normalizarUrlImagemTema('/assets/temas/pet-shop.webp') !== '/assets/temas/pet-shop.webp') throw new Error('A imagem local dos temas prontos não foi aceita.');
+if (themeHelpers.normalizarUrlImagemTema('./assets/temas/pet-shop.webp') !== '/assets/temas/pet-shop.webp') throw new Error('O caminho antigo da imagem não foi migrado para a raiz.');
 let imagemInseguraAceita = false;
 try { themeHelpers.normalizarUrlImagemTema('javascript:alert(1)'); imagemInseguraAceita = true; } catch (_) {}
 if (imagemInseguraAceita) throw new Error('O tema aceitou um protocolo de imagem inseguro.');
@@ -154,10 +211,11 @@ const catalogThemeStart = publicCatalogSource.indexOf('const TEMA_CATALOGO_PADRA
 const catalogThemeEnd = publicCatalogSource.indexOf('const elementos', catalogThemeStart);
 if (catalogThemeStart < 0 || catalogThemeEnd < 0) throw new Error('Não foi possível localizar os controles de tema do catálogo.');
 const catalogThemeHelpers = new Function(`${publicCatalogSource.slice(catalogThemeStart, catalogThemeEnd)}; return { caminhoImagemTemaCatalogo, normalizarTemaCatalogo };`)();
-if (catalogThemeHelpers.caminhoImagemTemaCatalogo('./assets/temas/pet-shop.webp') !== '../assets/temas/pet-shop.webp') throw new Error('O catálogo não resolveu a imagem local do tema.');
+if (catalogThemeHelpers.caminhoImagemTemaCatalogo('/assets/temas/pet-shop.webp') !== '/assets/temas/pet-shop.webp') throw new Error('O catálogo não resolveu a imagem local do tema.');
+if (catalogThemeHelpers.caminhoImagemTemaCatalogo('./assets/temas/pet-shop.webp') !== '/assets/temas/pet-shop.webp') throw new Error('O catálogo não converteu o caminho antigo do tema.');
 if (catalogThemeHelpers.caminhoImagemTemaCatalogo('javascript:alert(1)') !== '') throw new Error('O catálogo aceitou um protocolo de imagem inseguro.');
-const temaCatalogoTeste = catalogThemeHelpers.normalizarTemaCatalogo({ fundo: '#16090d', botao: '#c18a2d', imagem: './assets/temas/adega.webp' });
-if (temaCatalogoTeste.fundo !== '#16090d' || temaCatalogoTeste.botao !== '#c18a2d' || temaCatalogoTeste.imagem !== '../assets/temas/adega.webp') throw new Error('A aparência do tema não chegou corretamente ao catálogo.');
+const temaCatalogoTeste = catalogThemeHelpers.normalizarTemaCatalogo({ fundo: '#16090d', botao: '#c18a2d', imagem: '/assets/temas/adega.webp' });
+if (temaCatalogoTeste.fundo !== '#16090d' || temaCatalogoTeste.botao !== '#c18a2d' || temaCatalogoTeste.imagem !== '/assets/temas/adega.webp') throw new Error('A aparência do tema não chegou corretamente ao catálogo.');
 
 const featureContext = {
   console,

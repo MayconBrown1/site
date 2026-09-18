@@ -1,4 +1,4 @@
-import { db } from '../firebase-config.js';
+import { db } from '/firebase-config.js';
 import { collection, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
 
 // Altere somente este valor para mudar quando o aviso de estoque baixo aparece.
@@ -26,7 +26,7 @@ function corTemaCatalogo(valor, padrao) {
 function caminhoImagemTemaCatalogo(valor) {
   const texto = String(valor || '').trim();
   if (!texto) return '';
-  if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return `../${texto.slice(2)}`;
+  if (/^(?:\.\/|\/)assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto.replace(/^\.\//, '/');
   try {
     const url = new URL(texto);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : '';

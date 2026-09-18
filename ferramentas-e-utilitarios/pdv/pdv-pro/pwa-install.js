@@ -56,7 +56,7 @@
   window.addEventListener('pdv-sync-status', event => atualizarStatus(event.detail || {}));
   window.addEventListener('DOMContentLoaded', () => {
     criarBotao();
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(console.error);
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.error);
     const isiOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (!standalone) document.getElementById(installId).style.display = 'block';

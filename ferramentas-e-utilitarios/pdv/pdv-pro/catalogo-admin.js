@@ -1,4 +1,4 @@
-import { db } from './firebase-config.js';
+import { db } from '/firebase-config.js';
 import {
   collection,
   deleteDoc,
@@ -55,7 +55,7 @@ function corTemaPublico(valor, padrao) {
 function imagemTemaPublico(valor) {
   const texto = String(valor || '').trim();
   if (!texto) return '';
-  if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto;
+  if (/^(?:\.\/|\/)assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto.replace(/^\.\//, '/');
   try {
     const url = new URL(texto);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
@@ -94,7 +94,7 @@ function temaPublicoAtual() {
 }
 
 function linkDoCatalogo(slug) {
-  const url = new URL('./catalogo/', window.location.href);
+  const url = new URL('/catalogo/', window.location.href);
   url.search = '';
   url.hash = '';
   url.searchParams.set('loja', slug);

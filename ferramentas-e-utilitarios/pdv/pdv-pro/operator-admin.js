@@ -1,4 +1,4 @@
-import { app, auth, db } from './firebase-config.js';
+import { app, auth, db } from '/firebase-config.js';
 import { deleteApp, initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
 import {
   createUserWithEmailAndPassword,

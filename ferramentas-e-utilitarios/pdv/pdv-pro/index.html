@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDV - Pro</title>
-    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#050505">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script type="module" src="./pdv-cloud.js"></script>
-    <script src="./pwa-install.js"></script>
+    <script type="module" src="/pdv-cloud.js"></script>
+    <script src="/pwa-install.js"></script>
 
 
     <style>
@@ -348,14 +348,16 @@
                             </div>
                             <div>
                                 <label for="produto-nome" class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
-                                <input type="text" id="produto-nome" required class="w-full p-3 border rounded-lg text-base">
+                                <input type="text" id="produto-nome" required class="w-full p-3 border rounded-lg text-base" oninput="validarDuplicidadeProduto()" aria-describedby="produto-nome-erro">
+                                <p id="produto-nome-erro" class="mt-1 hidden text-sm font-semibold text-red-600" role="alert"></p>
                             </div>
                             <div>
                                 <label for="produto-codigo" class="block text-sm font-medium text-gray-700 mb-1">Código de Barras</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="produto-codigo" class="min-w-0 flex-1 p-3 border rounded-lg text-base">
+                                    <input type="text" id="produto-codigo" class="min-w-0 flex-1 p-3 border rounded-lg text-base" oninput="validarDuplicidadeProduto()" aria-describedby="produto-codigo-erro">
                                     <button type="button" onclick="abrirLeitorCodigoBarras('cadastro')" class="md:hidden shrink-0 rounded-lg bg-teal-600 px-4 text-xl text-white shadow-sm hover:bg-teal-700" aria-label="Ler código de barras com a câmera" title="Ler código de barras">📷</button>
                                 </div>
+                                <p id="produto-codigo-erro" class="mt-1 hidden text-sm font-semibold text-red-600" role="alert"></p>
                             </div>
                             <div>
                                 <label for="produto-preco" class="block text-sm font-medium text-gray-700 mb-1" id="label-produto-preco">Preço de Venda *</label>
@@ -429,6 +431,15 @@
                         </div>
                     </div>
                     
+                    <div class="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-3 lg:mb-5">
+                        <label for="busca-produtos-cadastro" class="mb-2 block text-sm font-semibold text-slate-700">Pesquisar produto ou serviço</label>
+                        <div class="relative">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400" aria-hidden="true">🔎</span>
+                            <input type="search" id="busca-produtos-cadastro" class="w-full rounded-lg border border-slate-300 bg-white py-3 pl-10 pr-3 text-base" placeholder="Digite o nome ou o código de barras..." autocomplete="off" oninput="atualizarTabelaProdutos()">
+                        </div>
+                        <p id="resultado-busca-produtos" class="mt-2 text-xs text-slate-500" aria-live="polite"></p>
+                    </div>
+
                     <!-- Tabela responsiva para mobile -->
                     <div class="block lg:hidden">
                         <div id="produtos-cards" class="space-y-3"></div>
@@ -836,14 +847,18 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 17/09/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 18/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v42" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v44" data-atualizacao="2026-09-18" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Financeiro separado da tela de vendas</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Acesso preparado para a hospedagem Cloudflare</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-indigo-300 bg-indigo-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-indigo-950">☁️ Login e cadastro com caminhos seguros</h4><p class="mt-2 text-sm text-slate-700">Os links, módulos, redirecionamentos e arquivos do aplicativo agora usam a raiz do domínio Cloudflare. Assim, <strong>Entrar</strong>, <strong>Solicitar acesso / Assinar agora</strong>, catálogo e instalação do PDV continuam abrindo corretamente mesmo quando o endereço usa uma rota diferente.</p></article>
+                            <article class="rounded-xl border border-sky-300 bg-sky-50 p-4 shadow-sm"><h4 class="font-bold text-sky-950">🔎 Pesquisa na tela de Produtos</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Produtos</strong>, use a nova barra acima da lista para pesquisar pelo nome ou pelo código de barras e encontrar rapidamente o item que deseja editar.</p></article>
+                            <article class="rounded-xl border border-red-300 bg-red-50 p-4 shadow-sm"><h4 class="font-bold text-red-950">🛑 Nome e código sem repetição</h4><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar, o PDV avisa enquanto você digita se já existe um item com o mesmo nome ou código de barras e impede salvar o cadastro repetido.</p></article>
+                            <article class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-amber-950">🏆 Mais vendidos aparecem primeiro</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, a lista de produtos agora usa o histórico de quantidades vendidas: o campeão de vendas aparece primeiro, seguido pelo segundo, terceiro e demais itens.</p></article>
                             <article class="rounded-xl border border-blue-300 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">✅ Controle financeiro somente no lugar correto</h4><p class="mt-2 text-sm text-slate-700">Ao abrir ou atualizar o PDV, a tela de <strong>Vendas</strong> não exibe mais o Controle Financeiro abaixo do carrinho. O painel financeiro continua disponível exclusivamente pelo botão <strong>Financeiro</strong> no menu do titular.</p></article>
                             <article class="rounded-xl border border-violet-300 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🧑‍💼 Novo acesso de gerente</h4><p class="mt-2 text-sm text-slate-700">No <strong>ADM do PDV → Operadores e gerentes</strong>, o titular pode criar um acesso de gerente. O gerente usa a própria senha para movimentar o caixa, pode organizar produtos e estoque e consultar relatórios, mas não entra no Financeiro, no ADM, no catálogo administrativo nem nos backups.</p></article>
                             <article class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm"><h4 class="font-bold text-amber-950">🏷️ Limites seguros de desconto</h4><p class="mt-2 text-sm text-slate-700">O operador concede até <strong>5%</strong>. Acima disso, precisa da senha do titular. O gerente concede até 5% normalmente, confirma com a própria senha descontos de até <strong>20%</strong> e, acima desse limite, precisa da senha do titular. A regra também vale para orçamentos.</p></article>
@@ -1099,64 +1114,64 @@
                             <span class="block h-20 bg-gradient-to-br from-amber-100 via-amber-300 to-yellow-600"></span><span class="block p-3"><strong class="block text-sm text-slate-900">Dourado</strong><small class="text-slate-500">Elegante e luminoso</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="petshop" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('petshop')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/pet-shop.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🐾 Pet Shop</strong><small class="text-slate-500">Casa de ração e pets</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/pet-shop.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🐾 Pet Shop</strong><small class="text-slate-500">Casa de ração e pets</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="adega" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('adega')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/adega.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🍷 Adega</strong><small class="text-slate-500">Vinhos e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/adega.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🍷 Adega</strong><small class="text-slate-500">Vinhos e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="conveniencia" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('conveniencia')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/conveniencia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛒 Conveniência</strong><small class="text-slate-500">Lanches e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/conveniencia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛒 Conveniência</strong><small class="text-slate-500">Lanches e bebidas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="doceria" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('doceria')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/doceria.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🧁 Doceria</strong><small class="text-slate-500">Rosa e delicado</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/doceria.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🧁 Doceria</strong><small class="text-slate-500">Rosa e delicado</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="hortifruti" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('hortifruti')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/hortifruti.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🥕 Hortifruti</strong><small class="text-slate-500">Feira e produtos frescos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/hortifruti.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🥕 Hortifruti</strong><small class="text-slate-500">Feira e produtos frescos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="grafica" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('grafica')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/grafica-tecnologia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🎨 Gráfica &amp; Tecnologia</strong><small class="text-slate-500">CMYK vivo e criativo</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/grafica-tecnologia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🎨 Gráfica &amp; Tecnologia</strong><small class="text-slate-500">CMYK vivo e criativo</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="informatica" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('informatica')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/informatica.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🖥️ Técnico de Informática</strong><small class="text-slate-500">Hardware e circuitos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/informatica.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🖥️ Técnico de Informática</strong><small class="text-slate-500">Hardware e circuitos</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="futurista" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('futurista')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/futurista.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🚀 Futurista</strong><small class="text-slate-500">Azul, violeta e holografia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/futurista.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🚀 Futurista</strong><small class="text-slate-500">Azul, violeta e holografia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="neon-laranja" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('neon-laranja')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/neon-laranja.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟠 Neon Laranja</strong><small class="text-slate-500">Laranja elétrico e preto</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/neon-laranja.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟠 Neon Laranja</strong><small class="text-slate-500">Laranja elétrico e preto</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="neon-verde" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('neon-verde')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/neon-verde.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟢 Neon Verde</strong><small class="text-slate-500">Verde elétrico e tecnologia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/neon-verde.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🟢 Neon Verde</strong><small class="text-slate-500">Verde elétrico e tecnologia</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="borracharia" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('borracharia')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/borracharia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛞 Borracharia</strong><small class="text-slate-500">Pneus, rodas e serviços</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/borracharia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛞 Borracharia</strong><small class="text-slate-500">Pneus, rodas e serviços</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="oficina-motos" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('oficina-motos')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/oficina-motos.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🏍️ Oficina de Motos</strong><small class="text-slate-500">Peças e manutenção</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/oficina-motos.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🏍️ Oficina de Motos</strong><small class="text-slate-500">Peças e manutenção</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="oficina-carros" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('oficina-carros')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/oficina-carros.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🚗 Oficina de Carros</strong><small class="text-slate-500">Mecânica automotiva</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/oficina-carros.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🚗 Oficina de Carros</strong><small class="text-slate-500">Mecânica automotiva</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="autopecas" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('autopecas')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/autopecas.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">⚙️ Autopeças</strong><small class="text-slate-500">Estoque e balcão</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/autopecas.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">⚙️ Autopeças</strong><small class="text-slate-500">Estoque e balcão</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="mercado" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('mercado')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/mercado.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛍️ Mercado/Mercearia</strong><small class="text-slate-500">Alimentos e varejo</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/mercado.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🛍️ Mercado/Mercearia</strong><small class="text-slate-500">Alimentos e varejo</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="moda" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('moda')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/moda.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">👗 Moda</strong><small class="text-slate-500">Roupas e acessórios</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/moda.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">👗 Moda</strong><small class="text-slate-500">Roupas e acessórios</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="beleza" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('beleza')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/beleza.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">💄 Beleza/Cosméticos</strong><small class="text-slate-500">Perfumaria e cuidados</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/beleza.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">💄 Beleza/Cosméticos</strong><small class="text-slate-500">Perfumaria e cuidados</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="construcao" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('construcao')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/material-construcao.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🧰 Material de Construção</strong><small class="text-slate-500">Ferragens e ferramentas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/material-construcao.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">🧰 Material de Construção</strong><small class="text-slate-500">Ferragens e ferramentas</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="papelaria" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('papelaria')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/papelaria.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">✏️ Papelaria</strong><small class="text-slate-500">Escola e escritório</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/papelaria.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">✏️ Papelaria</strong><small class="text-slate-500">Escola e escritório</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                         <button data-tema-preservar data-tema-preset="farmacia" aria-pressed="false" type="button" onclick="aplicarPredefinicaoTema('farmacia')" class="overflow-hidden rounded-xl border-2 border-slate-200 bg-white text-left shadow-sm">
-                            <span class="block h-20 bg-cover bg-center" style="background-image:url('./assets/temas/farmacia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">⚕️ Farmácia</strong><small class="text-slate-500">Saúde e bem-estar</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
+                            <span class="block h-20 bg-cover bg-center" style="background-image:url('/assets/temas/farmacia.webp')"></span><span class="block p-3"><strong class="block text-sm text-slate-900">⚕️ Farmácia</strong><small class="text-slate-500">Saúde e bem-estar</small></span><span class="tema-preset-check" aria-hidden="true">✓</span>
                         </button>
                     </div>
                 </div>
@@ -1264,7 +1279,7 @@
                     <input type="password" id="senha-exclusao" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="./login.html"
+    <a href="/login.html"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
         Recuperar senha de login
     </a>
@@ -1292,7 +1307,7 @@
                     <input type="password" id="senha-adm" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="./login.html"
+    <a href="/login.html"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
         Recuperar senha de login
     </a>
@@ -1480,7 +1495,7 @@
 
     <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
+  navigator.serviceWorker.register('/sw.js')
     .then(() => console.log('Service Worker registrado'))
     .catch(err => console.error('Erro ao registrar SW:', err));
 }
@@ -1850,26 +1865,26 @@ if ('serviceWorker' in navigator) {
             claro: { ...TEMA_PADRAO },
             escuro: { ...TEMA_PADRAO, fundo: '#090909', texto: '#f5f5f5', cartao: '#171717', botao: '#d4af37', textoBotao: '#111111', barra: '#050505', textoBarra: '#ffffff', formatoBotao: 'reto' },
             dourado: { ...TEMA_PADRAO, fundo: '#fff8e7', texto: '#291f0b', cartao: '#fffdf7', botao: '#d4af37', textoBotao: '#17120a', barra: '#17120a', textoBarra: '#f8d76b', bordas: 'amplo', formatoBotao: 'capsula' },
-            petshop: { ...TEMA_PADRAO, fundo: '#e7f3eb', texto: '#173b36', cartao: '#fffdf7', botao: '#147d72', textoBotao: '#ffffff', barra: '#174f49', textoBarra: '#ffffff', bordas: 'amplo', formatoBotao: 'capsula', imagem: './assets/temas/pet-shop.webp', sobreposicao: 5 },
-            adega: { ...TEMA_PADRAO, fundo: '#16090d', texto: '#fff7ed', cartao: '#2a161b', botao: '#c18a2d', textoBotao: '#1b0c08', barra: '#12070a', textoBarra: '#f5d58a', fonte: 'georgia', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/adega.webp', sobreposicao: 10 },
-            conveniencia: { ...TEMA_PADRAO, fundo: '#07182e', texto: '#f8fafc', cartao: '#122a49', botao: '#f97316', textoBotao: '#ffffff', barra: '#061222', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'discreto', imagem: './assets/temas/conveniencia.webp', sobreposicao: 10 },
-            doceria: { ...TEMA_PADRAO, fundo: '#fff0f5', texto: '#5b2944', cartao: '#fffafa', botao: '#db5b8f', textoBotao: '#ffffff', barra: '#7b3659', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: './assets/temas/doceria.webp', sobreposicao: 0 },
-            hortifruti: { ...TEMA_PADRAO, fundo: '#edf7e8', texto: '#183b24', cartao: '#fffdf2', botao: '#2f855a', textoBotao: '#ffffff', barra: '#164e32', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'arredondado', imagem: './assets/temas/hortifruti.webp', sobreposicao: 5 },
-            grafica: { ...TEMA_PADRAO, fundo: '#f4fbff', texto: '#16324f', cartao: '#ffffff', botao: '#e6007e', textoBotao: '#ffffff', barra: '#006fb9', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: './assets/temas/grafica-tecnologia.webp', sobreposicao: 0 },
-            informatica: { ...TEMA_PADRAO, fundo: '#07111f', texto: '#e8f4ff', cartao: '#10243a', botao: '#0ea5e9', textoBotao: '#03131f', barra: '#050b14', textoBarra: '#7dd3fc', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/informatica.webp', sobreposicao: 10 },
-            futurista: { ...TEMA_PADRAO, fundo: '#0c1231', texto: '#f4f3ff', cartao: '#171f4a', botao: '#8b5cf6', textoBotao: '#ffffff', barra: '#080d24', textoBarra: '#dbeafe', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: './assets/temas/futurista.webp', sobreposicao: 10 },
-            'neon-laranja': { ...TEMA_PADRAO, fundo: '#080808', texto: '#fff7ed', cartao: '#1b120e', botao: '#ff6a00', textoBotao: '#140700', barra: '#050505', textoBarra: '#ff9a3d', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/neon-laranja.webp', sobreposicao: 10 },
-            'neon-verde': { ...TEMA_PADRAO, fundo: '#020a05', texto: '#ecfdf5', cartao: '#0b1a10', botao: '#39ff14', textoBotao: '#031405', barra: '#010503', textoBarra: '#8aff75', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'chanfrado', imagem: './assets/temas/neon-verde.webp', sobreposicao: 10 },
-            borracharia: { ...TEMA_PADRAO, fundo: '#11100e', texto: '#f8fafc', cartao: '#211d18', botao: '#f59e0b', textoBotao: '#17100a', barra: '#090806', textoBarra: '#fef3c7', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/borracharia.webp', sobreposicao: 15 },
-            'oficina-motos': { ...TEMA_PADRAO, fundo: '#07111f', texto: '#f8fafc', cartao: '#111c2f', botao: '#dc2626', textoBotao: '#ffffff', barra: '#050810', textoBarra: '#dbeafe', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'chanfrado', imagem: './assets/temas/oficina-motos.webp', sobreposicao: 15 },
-            'oficina-carros': { ...TEMA_PADRAO, fundo: '#111827', texto: '#f8fafc', cartao: '#1f2937', botao: '#ef4444', textoBotao: '#ffffff', barra: '#030712', textoBarra: '#ffffff', bordas: 'discreto', formatoBotao: 'discreto', imagem: './assets/temas/oficina-carros.webp', sobreposicao: 15 },
-            autopecas: { ...TEMA_PADRAO, fundo: '#e8f0fa', texto: '#10233f', cartao: '#ffffff', botao: '#1d4ed8', textoBotao: '#ffffff', barra: '#0b2d5c', textoBarra: '#ffffff', fonte: 'arial', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/autopecas.webp', sobreposicao: 5 },
-            mercado: { ...TEMA_PADRAO, fundo: '#edf4e8', texto: '#19351f', cartao: '#fffdf7', botao: '#166534', textoBotao: '#ffffff', barra: '#174d2c', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'capsula', imagem: './assets/temas/mercado.webp', sobreposicao: 5 },
-            moda: { ...TEMA_PADRAO, fundo: '#f4e7e3', texto: '#3b1619', cartao: '#fffaf5', botao: '#7f1d1d', textoBotao: '#ffffff', barra: '#3f1118', textoBarra: '#fff7ed', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: './assets/temas/moda.webp', sobreposicao: 5 },
-            beleza: { ...TEMA_PADRAO, fundo: '#f8e9f0', texto: '#431431', cartao: '#fffafb', botao: '#7a285f', textoBotao: '#ffffff', barra: '#3b102f', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: './assets/temas/beleza.webp', sobreposicao: 0 },
-            construcao: { ...TEMA_PADRAO, fundo: '#151b20', texto: '#f8fafc', cartao: '#26333b', botao: '#facc15', textoBotao: '#171717', barra: '#111827', textoBarra: '#fef9c3', fonte: 'arial', bordas: 'discreto', formatoBotao: 'reto', imagem: './assets/temas/material-construcao.webp', sobreposicao: 15 },
-            papelaria: { ...TEMA_PADRAO, fundo: '#f2f7ff', texto: '#17305c', cartao: '#ffffff', botao: '#2563eb', textoBotao: '#ffffff', barra: '#173b78', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: './assets/temas/papelaria.webp', sobreposicao: 0 },
-            farmacia: { ...TEMA_PADRAO, fundo: '#e8f7f7', texto: '#12343b', cartao: '#ffffff', botao: '#087f8c', textoBotao: '#ffffff', barra: '#07535c', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'arredondado', imagem: './assets/temas/farmacia.webp', sobreposicao: 0 }
+            petshop: { ...TEMA_PADRAO, fundo: '#e7f3eb', texto: '#173b36', cartao: '#fffdf7', botao: '#147d72', textoBotao: '#ffffff', barra: '#174f49', textoBarra: '#ffffff', bordas: 'amplo', formatoBotao: 'capsula', imagem: '/assets/temas/pet-shop.webp', sobreposicao: 5 },
+            adega: { ...TEMA_PADRAO, fundo: '#16090d', texto: '#fff7ed', cartao: '#2a161b', botao: '#c18a2d', textoBotao: '#1b0c08', barra: '#12070a', textoBarra: '#f5d58a', fonte: 'georgia', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/adega.webp', sobreposicao: 10 },
+            conveniencia: { ...TEMA_PADRAO, fundo: '#07182e', texto: '#f8fafc', cartao: '#122a49', botao: '#f97316', textoBotao: '#ffffff', barra: '#061222', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'discreto', imagem: '/assets/temas/conveniencia.webp', sobreposicao: 10 },
+            doceria: { ...TEMA_PADRAO, fundo: '#fff0f5', texto: '#5b2944', cartao: '#fffafa', botao: '#db5b8f', textoBotao: '#ffffff', barra: '#7b3659', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: '/assets/temas/doceria.webp', sobreposicao: 0 },
+            hortifruti: { ...TEMA_PADRAO, fundo: '#edf7e8', texto: '#183b24', cartao: '#fffdf2', botao: '#2f855a', textoBotao: '#ffffff', barra: '#164e32', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'arredondado', imagem: '/assets/temas/hortifruti.webp', sobreposicao: 5 },
+            grafica: { ...TEMA_PADRAO, fundo: '#f4fbff', texto: '#16324f', cartao: '#ffffff', botao: '#e6007e', textoBotao: '#ffffff', barra: '#006fb9', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: '/assets/temas/grafica-tecnologia.webp', sobreposicao: 0 },
+            informatica: { ...TEMA_PADRAO, fundo: '#07111f', texto: '#e8f4ff', cartao: '#10243a', botao: '#0ea5e9', textoBotao: '#03131f', barra: '#050b14', textoBarra: '#7dd3fc', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/informatica.webp', sobreposicao: 10 },
+            futurista: { ...TEMA_PADRAO, fundo: '#0c1231', texto: '#f4f3ff', cartao: '#171f4a', botao: '#8b5cf6', textoBotao: '#ffffff', barra: '#080d24', textoBarra: '#dbeafe', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: '/assets/temas/futurista.webp', sobreposicao: 10 },
+            'neon-laranja': { ...TEMA_PADRAO, fundo: '#080808', texto: '#fff7ed', cartao: '#1b120e', botao: '#ff6a00', textoBotao: '#140700', barra: '#050505', textoBarra: '#ff9a3d', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/neon-laranja.webp', sobreposicao: 10 },
+            'neon-verde': { ...TEMA_PADRAO, fundo: '#020a05', texto: '#ecfdf5', cartao: '#0b1a10', botao: '#39ff14', textoBotao: '#031405', barra: '#010503', textoBarra: '#8aff75', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'chanfrado', imagem: '/assets/temas/neon-verde.webp', sobreposicao: 10 },
+            borracharia: { ...TEMA_PADRAO, fundo: '#11100e', texto: '#f8fafc', cartao: '#211d18', botao: '#f59e0b', textoBotao: '#17100a', barra: '#090806', textoBarra: '#fef3c7', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/borracharia.webp', sobreposicao: 15 },
+            'oficina-motos': { ...TEMA_PADRAO, fundo: '#07111f', texto: '#f8fafc', cartao: '#111c2f', botao: '#dc2626', textoBotao: '#ffffff', barra: '#050810', textoBarra: '#dbeafe', fonte: 'verdana', bordas: 'discreto', formatoBotao: 'chanfrado', imagem: '/assets/temas/oficina-motos.webp', sobreposicao: 15 },
+            'oficina-carros': { ...TEMA_PADRAO, fundo: '#111827', texto: '#f8fafc', cartao: '#1f2937', botao: '#ef4444', textoBotao: '#ffffff', barra: '#030712', textoBarra: '#ffffff', bordas: 'discreto', formatoBotao: 'discreto', imagem: '/assets/temas/oficina-carros.webp', sobreposicao: 15 },
+            autopecas: { ...TEMA_PADRAO, fundo: '#e8f0fa', texto: '#10233f', cartao: '#ffffff', botao: '#1d4ed8', textoBotao: '#ffffff', barra: '#0b2d5c', textoBarra: '#ffffff', fonte: 'arial', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/autopecas.webp', sobreposicao: 5 },
+            mercado: { ...TEMA_PADRAO, fundo: '#edf4e8', texto: '#19351f', cartao: '#fffdf7', botao: '#166534', textoBotao: '#ffffff', barra: '#174d2c', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'capsula', imagem: '/assets/temas/mercado.webp', sobreposicao: 5 },
+            moda: { ...TEMA_PADRAO, fundo: '#f4e7e3', texto: '#3b1619', cartao: '#fffaf5', botao: '#7f1d1d', textoBotao: '#ffffff', barra: '#3f1118', textoBarra: '#fff7ed', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: '/assets/temas/moda.webp', sobreposicao: 5 },
+            beleza: { ...TEMA_PADRAO, fundo: '#f8e9f0', texto: '#431431', cartao: '#fffafb', botao: '#7a285f', textoBotao: '#ffffff', barra: '#3b102f', textoBarra: '#fff7fb', fonte: 'georgia', bordas: 'amplo', formatoBotao: 'capsula', imagem: '/assets/temas/beleza.webp', sobreposicao: 0 },
+            construcao: { ...TEMA_PADRAO, fundo: '#151b20', texto: '#f8fafc', cartao: '#26333b', botao: '#facc15', textoBotao: '#171717', barra: '#111827', textoBarra: '#fef9c3', fonte: 'arial', bordas: 'discreto', formatoBotao: 'reto', imagem: '/assets/temas/material-construcao.webp', sobreposicao: 15 },
+            papelaria: { ...TEMA_PADRAO, fundo: '#f2f7ff', texto: '#17305c', cartao: '#ffffff', botao: '#2563eb', textoBotao: '#ffffff', barra: '#173b78', textoBarra: '#ffffff', fonte: 'verdana', bordas: 'amplo', formatoBotao: 'chanfrado', imagem: '/assets/temas/papelaria.webp', sobreposicao: 0 },
+            farmacia: { ...TEMA_PADRAO, fundo: '#e8f7f7', texto: '#12343b', cartao: '#ffffff', botao: '#087f8c', textoBotao: '#ffffff', barra: '#07535c', textoBarra: '#ffffff', bordas: 'arredondado', formatoBotao: 'arredondado', imagem: '/assets/temas/farmacia.webp', sobreposicao: 0 }
         });
         const FONTES_TEMA = Object.freeze({
             sistema: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -1912,7 +1927,7 @@ if ('serviceWorker' in navigator) {
         function normalizarUrlImagemTema(valor, estrito = true) {
             const texto = String(valor || '').trim();
             if (!texto) return '';
-            if (/^\.\/assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto;
+            if (/^(?:\.\/|\/)assets\/temas\/[a-z0-9-]+\.webp$/i.test(texto)) return texto.replace(/^\.\//, '/');
             try {
                 const url = new URL(texto);
                 if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Protocolo inválido');
@@ -2348,6 +2363,46 @@ if ('serviceWorker' in navigator) {
         }
 
         // Gerenciamento de produtos
+        function normalizarNomeProduto(valor) {
+            return String(valor || '').trim().replace(/\s+/g, ' ').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-BR');
+        }
+
+        function normalizarCodigoProduto(valor) {
+            return String(valor || '').replace(/\s+/g, '').toLocaleLowerCase('pt-BR');
+        }
+
+        function encontrarDuplicidadesProduto(nome, codigo, tipo = 'produto', produtoIgnoradoId = '') {
+            const nomeNormalizado = normalizarNomeProduto(nome);
+            const codigoNormalizado = tipo === 'servico' ? '' : normalizarCodigoProduto(codigo);
+            const demaisProdutos = produtos.filter(produto => produto.id !== produtoIgnoradoId);
+            return {
+                nome: nomeNormalizado ? demaisProdutos.find(produto => normalizarNomeProduto(produto.nome) === nomeNormalizado) : null,
+                codigo: codigoNormalizado ? demaisProdutos.find(produto => normalizarCodigoProduto(produto.codigo) === codigoNormalizado) : null
+            };
+        }
+
+        function definirErroDuplicidadeProduto(campoId, mensagem) {
+            const campo = document.getElementById(campoId);
+            const aviso = document.getElementById(`${campoId}-erro`);
+            campo.setCustomValidity(mensagem);
+            campo.setAttribute('aria-invalid', mensagem ? 'true' : 'false');
+            campo.classList.toggle('border-red-500', Boolean(mensagem));
+            campo.classList.toggle('ring-2', Boolean(mensagem));
+            campo.classList.toggle('ring-red-100', Boolean(mensagem));
+            aviso.textContent = mensagem;
+            aviso.classList.toggle('hidden', !mensagem);
+        }
+
+        function validarDuplicidadeProduto() {
+            const campoNome = document.getElementById('produto-nome');
+            const campoCodigo = document.getElementById('produto-codigo');
+            const tipo = document.getElementById('produto-tipo').value;
+            const duplicidades = encontrarDuplicidadesProduto(campoNome.value, campoCodigo.value, tipo, produtoEditando?.id || '');
+            definirErroDuplicidadeProduto('produto-nome', duplicidades.nome ? 'Já existe um produto ou serviço com este nome.' : '');
+            definirErroDuplicidadeProduto('produto-codigo', duplicidades.codigo ? 'Já existe um produto com este código de barras.' : '');
+            return duplicidades;
+        }
+
         function mostrarFormProduto() {
             if (ehOperadorAtual()) return mostrarMensagem('Cadastro de produtos disponível somente para o gerente ou titular.', 'erro');
             atualizarOpcoesVinculoEstoque(produtoEditando?.estoqueVinculadoId || '');
@@ -2376,6 +2431,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-imagem').value = '';
             document.getElementById('produto-visivel-catalogo').checked = true;
             atualizarCamposTipoItem();
+            validarDuplicidadeProduto();
         }
 
         function atualizarCamposTipoItem() {
@@ -2394,6 +2450,7 @@ if ('serviceWorker' in navigator) {
             document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
             document.getElementById('produto-preco').required = !ehServico;
             atualizarVinculoEstoqueForm();
+            validarDuplicidadeProduto();
         }
 
         function salvarProduto() {
@@ -2402,6 +2459,18 @@ if ('serviceWorker' in navigator) {
             const preco = parseFloat(document.getElementById('produto-preco').value);
             const tipo = document.getElementById('produto-tipo').value;
             const imagem = document.getElementById('produto-imagem').value.trim();
+            const codigo = tipo === 'servico' ? '' : document.getElementById('produto-codigo').value.trim();
+
+            const duplicidades = validarDuplicidadeProduto();
+            if (duplicidades.nome || duplicidades.codigo) {
+                const campoDuplicado = duplicidades.nome ? document.getElementById('produto-nome') : document.getElementById('produto-codigo');
+                const mensagem = duplicidades.nome
+                    ? 'Não foi possível salvar: já existe um produto ou serviço com este nome.'
+                    : 'Não foi possível salvar: já existe um produto com este código de barras.';
+                mostrarMensagem(mensagem, 'erro');
+                campoDuplicado.focus();
+                return;
+            }
             
             if (!nome || Number.isNaN(preco) || preco < 0 || (tipo === 'produto' && preco <= 0)) {
                 mostrarMensagem(tipo === 'servico' ? 'Informe o nome e um valor-base válido para o serviço.' : 'Nome e preço são obrigatórios e o preço deve ser maior que zero!', 'erro');
@@ -2430,7 +2499,7 @@ if ('serviceWorker' in navigator) {
                 id: produtoEditando ? produtoEditando.id : 'p_' + Date.now(),
                 tipo: tipo,
                 nome: nome,
-                codigo: tipo === 'servico' ? '' : document.getElementById('produto-codigo').value.trim(),
+                codigo: codigo,
                 preco: preco,
                 custo: tipo === 'servico' ? 0 : (parseFloat(document.getElementById('produto-custo').value) || 0),
                 unidade: tipo === 'servico' ? 'serviço' : (raizSelecionada?.unidade || document.getElementById('produto-unidade').value),
@@ -2626,7 +2695,28 @@ if ('serviceWorker' in navigator) {
             const cardsContainer = document.getElementById('produtos-cards');
             cardsContainer.innerHTML = '';
 
-            produtos.forEach(produto => {
+            const campoBusca = document.getElementById('busca-produtos-cadastro');
+            const termo = campoBusca?.value || '';
+            const termoNome = normalizarNomeProduto(termo);
+            const termoCodigo = normalizarCodigoProduto(termo);
+            const produtosFiltrados = termoNome || termoCodigo
+                ? produtos.filter(produto => normalizarNomeProduto(produto.nome).includes(termoNome) || normalizarCodigoProduto(produto.codigo).includes(termoCodigo))
+                : produtos;
+            const resultadoBusca = document.getElementById('resultado-busca-produtos');
+            if (resultadoBusca) {
+                resultadoBusca.textContent = termo.trim()
+                    ? `${produtosFiltrados.length} de ${produtos.length} item(ns) encontrado(s).`
+                    : `${produtos.length} item(ns) cadastrado(s).`;
+            }
+
+            if (!produtosFiltrados.length) {
+                const mensagem = termo.trim() ? 'Nenhum produto ou serviço encontrado para esta pesquisa.' : 'Nenhum produto ou serviço cadastrado.';
+                tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-sm text-gray-500">${mensagem}</td></tr>`;
+                cardsContainer.innerHTML = `<div class="rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-gray-500">${mensagem}</div>`;
+                return;
+            }
+
+            produtosFiltrados.forEach(produto => {
                 const ehServico = produto.tipo === 'servico';
                 const saldoEstoque = ehServico ? null : estoqueDisponivel(produto);
                 const estoqueMinimo = ehServico ? null : estoqueMinimoProduto(produto);
@@ -2795,7 +2885,8 @@ function showInstallButton() {
                             status.textContent = `Código lido: ${codigo}`;
                             fecharLeitorCodigoBarras(false);
                             document.getElementById('produto-codigo').focus();
-                            mostrarMensagem('Código de barras preenchido no cadastro.', 'sucesso');
+                            const duplicidades = validarDuplicidadeProduto();
+                            mostrarMensagem(duplicidades.codigo ? 'Já existe um produto com este código de barras.' : 'Código de barras preenchido no cadastro.', duplicidades.codigo ? 'erro' : 'sucesso');
                             return;
                         }
                         const produto = produtos.find(item => String(item.codigo || '') === codigo);
@@ -2864,10 +2955,12 @@ function showInstallButton() {
                 return;
             }
 
-            const produtosFiltrados = produtos.filter(p => 
-                p.nome.toLowerCase().includes(termo.toLowerCase()) ||
-                (p.codigo && p.codigo.includes(termo))
-            );
+            const termoNome = normalizarNomeProduto(termo);
+            const termoCodigo = normalizarCodigoProduto(termo);
+            const produtosFiltrados = ordenarProdutosPorMaisVendidos(produtos.filter(produto =>
+                normalizarNomeProduto(produto.nome).includes(termoNome) ||
+                normalizarCodigoProduto(produto.codigo).includes(termoCodigo)
+            ));
 
             produtosFiltrados.forEach(produto => {
                 const div = document.createElement('div');
@@ -2886,11 +2979,32 @@ function showInstallButton() {
             });
         }
 
+        function totaisVendidosPorProduto(vendasRegistradas = vendas) {
+            const totais = new Map();
+            vendasRegistradas.forEach(venda => {
+                (venda.itens || []).forEach(item => {
+                    if (!item.produtoId) return;
+                    const quantidade = Number(item.quantidade || 0);
+                    if (!Number.isFinite(quantidade) || quantidade <= 0) return;
+                    totais.set(item.produtoId, (totais.get(item.produtoId) || 0) + quantidade);
+                });
+            });
+            return totais;
+        }
+
+        function ordenarProdutosPorMaisVendidos(listaProdutos = produtos, vendasRegistradas = vendas) {
+            const totais = totaisVendidosPorProduto(vendasRegistradas);
+            return [...listaProdutos].sort((produtoA, produtoB) => {
+                const diferencaQuantidade = (totais.get(produtoB.id) || 0) - (totais.get(produtoA.id) || 0);
+                return diferencaQuantidade || String(produtoA.nome || '').localeCompare(String(produtoB.nome || ''), 'pt-BR');
+            });
+        }
+
         function atualizarListaProdutos() {
             const lista = document.getElementById('produtos-lista');
             lista.innerHTML = '';
 
-            produtos.slice(0, 10).forEach(produto => {
+            ordenarProdutosPorMaisVendidos().slice(0, 10).forEach(produto => {
                 const div = document.createElement('div');
                 div.className = 'p-3 border rounded-lg cursor-pointer hover:bg-blue-50 transition-colors';
                 div.onclick = () => adicionarAoCarrinho(produto.id);
@@ -6429,6 +6543,6 @@ function showInstallButton() {
             atualizarVendasSuspensas();
         }
     </script>
-    <script src="./clientes-financeiro.js"></script>
+    <script src="/clientes-financeiro.js"></script>
 </body>
 </html>

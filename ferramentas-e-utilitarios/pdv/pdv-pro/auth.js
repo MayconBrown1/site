@@ -1,4 +1,4 @@
-import { app, auth, db } from './firebase-config.js';
+import { app, auth, db } from '/firebase-config.js';
 import { deleteApp, initializeApp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js';
 import { EmailAuthProvider, getAuth, reauthenticateWithCredential, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js';
 import { doc, getDoc, getDocFromServer, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js';
@@ -22,7 +22,7 @@ export async function entrar(email, senha) {
     await setDoc(doc(db, 'users', cred.user.uid), {
       email: OWNER_EMAIL, role: 'owner', status: 'ativo', updatedAt: serverTimestamp()
     }, { merge: true });
-    location.replace('./admin.html');
+    location.replace('/admin.html');
     return;
   }
   const perfil = await getDoc(doc(db, 'users', cred.user.uid));
@@ -41,7 +41,7 @@ export async function entrar(email, senha) {
       throw new Error('O acesso da empresa está indisponível. Entre em contato com o titular.');
     }
   }
-  location.replace('./index.html');
+  location.replace('/index.html');
 }
 export async function recuperarSenha(email) { await sendPasswordResetEmail(auth, email); }
 export async function validarSenhaAtual(senha) {
@@ -71,10 +71,10 @@ export async function validarSenhaTitular(emailTitular, uidTitular, senha) {
     await deleteApp(appValidacao).catch(() => {});
   }
 }
-export async function sair() { await signOut(auth); location.replace('./login.html'); }
+export async function sair() { await signOut(auth); location.replace('/login.html'); }
 export function protegerPagina(callback) {
   return onAuthStateChanged(auth, async user => {
-    if (!user) return location.replace('./login.html');
+    if (!user) return location.replace('/login.html');
     const validar = async (somenteServidor = false) => {
       const buscar = somenteServidor ? getDocFromServer : getDoc;
       const perfil = await buscar(doc(db, 'users', user.uid));
@@ -96,7 +96,7 @@ export function protegerPagina(callback) {
       else {
         console.error('Não foi possível validar o acesso.', erro);
         await signOut(auth);
-        location.replace('./login.html?status=restrito');
+        location.replace('/login.html?status=restrito');
         return;
       }
     }
@@ -109,7 +109,7 @@ export function protegerPagina(callback) {
         console.error('O acesso não pôde ser revalidado.', erro);
         if (erro.message === 'acesso-restrito') {
           await signOut(auth);
-          location.replace('./login.html?status=restrito');
+          location.replace('/login.html?status=restrito');
         }
       }
     });
