@@ -838,12 +838,13 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 17/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v41" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v42" data-atualizacao="2026-09-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Gerência, produtividade e controle de vendas</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Financeiro separado da tela de vendas</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-blue-300 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">✅ Controle financeiro somente no lugar correto</h4><p class="mt-2 text-sm text-slate-700">Ao abrir ou atualizar o PDV, a tela de <strong>Vendas</strong> não exibe mais o Controle Financeiro abaixo do carrinho. O painel financeiro continua disponível exclusivamente pelo botão <strong>Financeiro</strong> no menu do titular.</p></article>
                             <article class="rounded-xl border border-violet-300 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🧑‍💼 Novo acesso de gerente</h4><p class="mt-2 text-sm text-slate-700">No <strong>ADM do PDV → Operadores e gerentes</strong>, o titular pode criar um acesso de gerente. O gerente usa a própria senha para movimentar o caixa, pode organizar produtos e estoque e consultar relatórios, mas não entra no Financeiro, no ADM, no catálogo administrativo nem nos backups.</p></article>
                             <article class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm"><h4 class="font-bold text-amber-950">🏷️ Limites seguros de desconto</h4><p class="mt-2 text-sm text-slate-700">O operador concede até <strong>5%</strong>. Acima disso, precisa da senha do titular. O gerente concede até 5% normalmente, confirma com a própria senha descontos de até <strong>20%</strong> e, acima desse limite, precisa da senha do titular. A regra também vale para orçamentos.</p></article>
                             <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">💰 Comissão mensal por funcionário</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Relatórios</strong>, o titular clica em <strong>Calcular comissão</strong>, escolhe operador ou gerente, mês e porcentagem. O pop-up mostra quantas vendas entraram no período, o total vendido e o valor da comissão.</p></article>
@@ -1633,7 +1634,11 @@ if ('serviceWorker' in navigator) {
             document.querySelectorAll('#menu-pdv [data-section]').forEach(botao => {
                 botao.classList.toggle('hidden', equipe && !permitidas.has(botao.dataset.section));
             });
-            document.querySelectorAll('[data-owner-only]').forEach(elemento => elemento.classList.toggle('hidden', equipe));
+            // Botões exclusivos podem ser exibidos ao titular, mas as seções continuam
+            // sob controle de showSection(). Isso impede o Financeiro de aparecer junto
+            // com Vendas durante o carregamento inicial.
+            document.querySelectorAll('[data-owner-only]:not(.section)').forEach(elemento => elemento.classList.toggle('hidden', equipe));
+            if (equipe) document.querySelectorAll('.section[data-owner-only]').forEach(elemento => elemento.classList.add('hidden'));
             const avisoCaixa = document.getElementById('aviso-caixa-operador');
             avisoCaixa?.classList.toggle('hidden', !equipe);
             if (avisoCaixa) avisoCaixa.textContent = gerente
