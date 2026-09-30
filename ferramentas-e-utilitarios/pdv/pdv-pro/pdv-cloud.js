@@ -43,6 +43,22 @@ function cloneState(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function financeiroVazio() {
+  return { ownerUid: uid, lancamentosFinanceiros: [], saldosIniciaisFinanceiros: {} };
+}
+
+function normalizarFinanceiroDoTitular(valor) {
+  const recebido = cloneState(valor || {});
+  if (recebido.ownerUid && recebido.ownerUid !== uid) return financeiroVazio();
+  return {
+    ownerUid: uid,
+    lancamentosFinanceiros: Array.isArray(recebido.lancamentosFinanceiros) ? recebido.lancamentosFinanceiros : [],
+    saldosIniciaisFinanceiros: recebido.saldosIniciaisFinanceiros && typeof recebido.saldosIniciaisFinanceiros === 'object' && !Array.isArray(recebido.saldosIniciaisFinanceiros)
+      ? recebido.saldosIniciaisFinanceiros
+      : {}
+  };
+}
+
 function mergeRecords(field, baseState, localState, remoteState) {
   const base = new Map((baseState?.[field] || []).map(item => [item.id, item]));
   const local = new Map((localState?.[field] || []).map(item => [item.id, item]));
@@ -81,11 +97,14 @@ function mergeState(baseState, localState, remoteState) {
 }
 
 function mergeFinanceState(baseState, localState, remoteState) {
-  const merged = { ...remoteState, ownerUid: uid };
-  merged.lancamentosFinanceiros = mergeRecords('lancamentosFinanceiros', baseState, localState, remoteState);
-  const base = baseState?.saldosIniciaisFinanceiros || {};
-  const local = localState?.saldosIniciaisFinanceiros || {};
-  const remote = remoteState?.saldosIniciaisFinanceiros || {};
+  const baseSeguro = normalizarFinanceiroDoTitular(baseState);
+  const localSeguro = normalizarFinanceiroDoTitular(localState);
+  const remotoSeguro = normalizarFinanceiroDoTitular(remoteState);
+  const merged = { ...remotoSeguro, ownerUid: uid };
+  merged.lancamentosFinanceiros = mergeRecords('lancamentosFinanceiros', baseSeguro, localSeguro, remotoSeguro);
+  const base = baseSeguro.saldosIniciaisFinanceiros;
+  const local = localSeguro.saldosIniciaisFinanceiros;
+  const remote = remotoSeguro.saldosIniciaisFinanceiros;
   merged.saldosIniciaisFinanceiros = { ...remote };
   new Set([...Object.keys(base), ...Object.keys(local)]).forEach(chave => {
     if (!(chave in local)) delete merged.saldosIniciaisFinanceiros[chave];
@@ -141,16 +160,11 @@ function aplicarEstado(valor) {
 }
 
 function aplicarFinanceiro(valor) {
-  const d = cloneState(valor || {});
-  window.lancamentosFinanceiros = d.lancamentosFinanceiros || [];
-  window.saldosIniciaisFinanceiros = d.saldosIniciaisFinanceiros || {};
-  writingLocalStorage = true;
-  try {
-    localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(window.lancamentosFinanceiros));
-    localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(window.saldosIniciaisFinanceiros));
-  } finally { writingLocalStorage = false; }
+  const d = normalizarFinanceiroDoTitular(valor);
+  window.lancamentosFinanceiros = d.lancamentosFinanceiros;
+  window.saldosIniciaisFinanceiros = d.saldosIniciaisFinanceiros;
   window.atualizarFinanceiro?.();
-  guardarCopiaFinanceira(financeState());
+  guardarCopiaFinanceira(d);
 }
 
 function registrarPendenciaPrincipal(localState) {
@@ -283,9 +297,11 @@ protegerPagina(async (user, perfil) => {
   if (membroEquipe) {
     window.lancamentosFinanceiros = [];
     window.saldosIniciaisFinanceiros = {};
-    localStorage.removeItem('pdv_lancamentos_financeiros');
-    localStorage.removeItem('pdv_saldos_iniciais_financeiros');
   }
+  // Remove apenas as chaves antigas e compartilhadas. As cópias atuais usam o
+  // UID no nome da chave e permanecem totalmente separadas por titular.
+  localStorage.removeItem('pdv_lancamentos_financeiros');
+  localStorage.removeItem('pdv_saldos_iniciais_financeiros');
   window.ehOperadorPdv = () => window.usuarioPdv?.role === 'operator';
   window.ehGerentePdv = () => window.usuarioPdv?.role === 'manager';
   inicializarCatalogoAdmin(uid);
@@ -303,7 +319,7 @@ protegerPagina(async (user, perfil) => {
   else aplicarEstado({ ownerUid: uid, configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao });
   if (!membroEquipe) {
     const copiaFinanceira = lerJson(chaveLocal('finance'))?.data;
-    if (copiaFinanceira) aplicarFinanceiro(copiaFinanceira);
+    aplicarFinanceiro(copiaFinanceira || financeiroVazio());
   }
 
   document.body.style.visibility = 'visible';
@@ -343,8 +359,21 @@ protegerPagina(async (user, perfil) => {
 
   if (!membroEquipe) {
     onSnapshot(doc(db, 'users', uid, 'app', 'financeiro'), snap => {
-      if (!snap.exists()) { window.atualizarFinanceiro?.(); return; }
-      const recebido = cloneState(snap.data());
+      if (!snap.exists()) {
+        const pending = pendenciaFinanceira();
+        const copiaFinanceira = lerJson(chaveLocal('finance'))?.data;
+        if (pending) aplicarFinanceiro(pending.local);
+        else if (snap.metadata.fromCache && copiaFinanceira) aplicarFinanceiro(copiaFinanceira);
+        else aplicarFinanceiro(financeiroVazio());
+        if (!snap.metadata.fromCache) {
+          const vazio = financeiroVazio();
+          lastCloudFinance = cloneState(vazio);
+          gravarJson(chaveLocal('finance_base'), vazio);
+        }
+        emitirStatus();
+        return;
+      }
+      const recebido = normalizarFinanceiroDoTitular(snap.data());
       const pending = pendenciaFinanceira();
       let exibir = recebido;
       if (pending && snap.metadata.fromCache) {

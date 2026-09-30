@@ -618,7 +618,15 @@
                             <div class="mt-4 flex flex-wrap gap-3"><button onclick="salvarCliente()" class="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">Salvar cliente</button><button onclick="cancelarCliente()" class="rounded-lg bg-gray-500 px-4 py-2 text-white hover:bg-gray-600">Cancelar</button></div>
                         </div>
                         <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <input id="busca-clientes" class="w-full rounded-lg border p-3 sm:max-w-md" placeholder="Buscar por nome, CPF, WhatsApp ou e-mail" oninput="atualizarClientes()">
+                            <div class="flex w-full flex-col gap-3 sm:max-w-2xl sm:flex-row">
+                                <input id="busca-clientes" class="w-full rounded-lg border p-3 sm:flex-1" placeholder="Buscar por nome, CPF, WhatsApp ou e-mail" oninput="atualizarClientes()">
+                                <label for="filtro-situacao-clientes" class="sr-only">Filtrar clientes por situação financeira</label>
+                                <select id="filtro-situacao-clientes" class="rounded-lg border bg-white p-3 sm:w-44" onchange="atualizarClientes()">
+                                    <option value="todos">Todos os clientes</option>
+                                    <option value="divida">Com dívida</option>
+                                    <option value="saldo">Com saldo</option>
+                                </select>
+                            </div>
                             <span id="total-clientes" class="text-sm font-medium text-slate-600"></span>
                         </div>
                         <div id="lista-clientes" class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2"></div>
@@ -702,7 +710,7 @@
                     <div class="rounded-xl bg-gradient-to-br from-slate-950 to-emerald-950 p-5 text-white shadow-lg lg:p-7">
                         <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                             <div><p class="text-sm font-semibold uppercase tracking-wider text-emerald-300">Área exclusiva do titular</p><h2 class="mt-1 text-2xl font-bold lg:text-3xl">Controle financeiro</h2><p class="mt-2 max-w-2xl text-sm text-slate-300">O saldo continua de um mês para o outro. Vendas entram automaticamente e somente retiradas classificadas como despesa afetam o resultado.</p></div>
-                            <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="atualizarFinanceiro()"></label>
+                            <label class="text-sm font-medium">Período<input id="financeiro-periodo" type="month" class="mt-1 block w-full rounded-lg border border-white/20 bg-white/10 p-3 text-white" onchange="alterarPeriodoFinanceiro()"></label>
                         </div>
                         <div class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
                             <div class="col-span-2 rounded-2xl bg-white p-5 text-slate-950 shadow-xl ring-2 ring-emerald-300/70 lg:col-span-4 lg:p-6">
@@ -722,7 +730,8 @@
                     </div>
                     <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,.55fr)]">
                         <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
-                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 class="text-lg font-semibold">Lançamentos</h3><p class="text-sm text-gray-500">Vendas, recebimentos, receitas, despesas e transferências da carteira.</p></div><div class="flex flex-wrap gap-2"><button onclick="mostrarFormFinanceiro('receita')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">+ Receita</button><button onclick="mostrarFormFinanceiro('despesa')" class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white">+ Despesa</button><button onclick="mostrarFormFinanceiro('transferencia')" class="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white">+ Transferência</button></div></div>
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 id="titulo-lista-financeiro" class="text-lg font-semibold">Lançamentos de hoje</h3><p id="resumo-lista-financeiro" class="text-sm text-gray-500">Somente as movimentações registradas hoje ficam visíveis.</p></div><div class="flex flex-wrap gap-2"><button onclick="mostrarFormFinanceiro('receita')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">+ Receita</button><button onclick="mostrarFormFinanceiro('despesa')" class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white">+ Despesa</button><button onclick="mostrarFormFinanceiro('transferencia')" class="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white">+ Transferência</button></div></div>
+                            <div class="mt-4 flex justify-end"><button id="btn-historico-financeiro" type="button" onclick="alternarHistoricoFinanceiro()" aria-expanded="false" class="rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Ver histórico do período</button></div>
                             <div id="lista-financeiro" class="mt-4 space-y-2"></div>
                         </div>
                         <div class="space-y-4">
@@ -732,7 +741,7 @@
                                     <div><label for="financeiro-tipo" class="mb-1 block text-sm font-medium">Tipo</label><select id="financeiro-tipo" class="w-full rounded-lg border p-3" onchange="atualizarCategoriasFinanceiro()"><option value="receita">Receita</option><option value="despesa">Despesa</option><option value="transferencia">Transferência</option></select></div>
                                     <div id="financeiro-campo-direcao" class="hidden"><label for="financeiro-direcao" class="mb-1 block text-sm font-medium">Movimento da carteira</label><select id="financeiro-direcao" class="w-full rounded-lg border p-3"><option value="entrada">Adicionar dinheiro à carteira</option><option value="saida">Retirar dinheiro da carteira</option></select></div>
                                     <div><label id="financeiro-label-categoria" for="financeiro-categoria" class="mb-1 block text-sm font-medium">Categoria</label><select id="financeiro-categoria" class="w-full rounded-lg border p-3"></select></div>
-                                    <div><label for="financeiro-descricao" class="mb-1 block text-sm font-medium">Descrição *</label><input id="financeiro-descricao" maxlength="160" class="w-full rounded-lg border p-3"></div>
+                                    <div class="relative"><label for="financeiro-descricao" class="mb-1 block text-sm font-medium">Descrição *</label><input id="financeiro-descricao" maxlength="160" autocomplete="off" aria-autocomplete="list" aria-controls="financeiro-sugestoes-descricao" class="w-full rounded-lg border p-3" placeholder="Digite ou escolha um lançamento anterior" oninput="atualizarSugestoesFinanceiro()" onfocus="atualizarSugestoesFinanceiro()" onkeydown="navegarSugestoesFinanceiro(event)" onblur="setTimeout(fecharSugestoesFinanceiro, 150)"><div id="financeiro-sugestoes-descricao" class="absolute z-30 mt-1 hidden max-h-64 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl" role="listbox" aria-label="Lançamentos anteriores"></div><p class="mt-1 text-xs text-gray-500">Escolha uma sugestão para preencher automaticamente a categoria e o último valor usado.</p></div>
                                     <div><label for="financeiro-valor" class="mb-1 block text-sm font-medium">Valor *</label><input id="financeiro-valor" type="text" inputmode="decimal" class="w-full rounded-lg border p-3" placeholder="Ex.: 1,15" onblur="formatarCampoMonetario(this)"><p class="mt-1 text-xs text-gray-500">Aceita centavos com vírgula ou ponto.</p></div>
                                     <div><label for="financeiro-data" class="mb-1 block text-sm font-medium">Data *</label><input id="financeiro-data" type="date" class="w-full rounded-lg border p-3"></div>
                                     <label class="flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-sm"><input id="financeiro-considerar" type="checkbox" class="mt-1" checked><span><strong>Considerar nos cálculos</strong><span class="block text-xs text-gray-500">Desmarque para guardar no histórico sem alterar resultado nem saldo da carteira.</span></span></label>
@@ -847,14 +856,24 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 18/09/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 20/09/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v44" data-atualizacao="2026-09-18" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v52" data-atualizacao="2026-09-20" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Acesso preparado para a hospedagem Cloudflare</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Aviso visível nas vendas sem estoque</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-amber-400 bg-amber-100 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-amber-950">⚠️ Venda liberada, mas com alerta na tela</h4><p class="mt-2 text-sm text-slate-700">Quando a quantidade ultrapassar o saldo disponível, o PDV mostra um aviso amarelo informando o produto e a previsão do estoque negativo. Ao finalizar, o alerta aparece novamente com os produtos e seus saldos finais, sem impedir a venda.</p></article>
+                            <article class="rounded-xl border border-orange-300 bg-orange-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-orange-950">📦 Estoque pode ficar negativo</h4><p class="mt-2 text-sm text-slate-700">Produtos agora podem ser adicionados e vendidos mesmo quando o saldo estiver zerado ou abaixo da quantidade necessária. A baixa continua normalmente: por exemplo, ao vender uma unidade com saldo zero, o estoque passa para <strong>-1</strong>. A regra também vale para produtos por peso, estoque compartilhado e vendas aprovadas a partir de orçamentos.</p></article>
+                            <article class="rounded-xl border border-sky-300 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">👆 Histórico aparece somente ao clicar na descrição</h4><p class="mt-2 text-sm text-slate-700">Ao abrir <strong>Receita</strong> ou <strong>Despesa</strong>, o formulário não posiciona mais o cursor nem abre sugestões sozinho. Clique no campo <strong>Descrição</strong> quando quiser consultar os lançamentos anteriores e preencher categoria e valor automaticamente.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📅 Somente os lançamentos de hoje na tela</h4><p class="mt-2 text-sm text-slate-700">A lista do Financeiro agora começa mostrando apenas as movimentações registradas no dia. Para consultar registros anteriores, clique em <strong>Ver histórico do período</strong>; depois use <strong>Mostrar somente hoje</strong> para recolher a lista novamente.</p></article>
+                            <article class="rounded-xl border border-cyan-300 bg-cyan-50 p-4 shadow-sm"><h4 class="font-bold text-cyan-950">⚡ Reutilize receitas e despesas anteriores</h4><p class="mt-2 text-sm text-slate-700">Ao digitar a descrição de uma receita ou despesa, o PDV mostra os nomes usados anteriormente naquela conta. Escolha uma sugestão para preencher automaticamente a categoria e o último valor, podendo alterá-los antes de salvar.</p></article>
+                            <article class="rounded-xl border border-violet-300 bg-violet-50 p-4 shadow-sm"><h4 class="font-bold text-violet-950">🗂️ Mais categorias financeiras</h4><p class="mt-2 text-sm text-slate-700">As listas agora incluem opções como investimentos, lazer, educação, marketing, salários, taxas bancárias, seguros, equipamentos, viagens, comissões, reembolsos e outras categorias de receitas e despesas.</p></article>
+                            <article class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm"><h4 class="font-bold text-amber-950">📌 Pendências aparecem primeiro</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Clientes</strong>, quem possui dívida agora aparece no topo, seguido por quem tem saldo disponível. Os demais clientes ficam logo abaixo, e os nomes continuam em ordem alfabética dentro de cada grupo.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">🔎 Filtro por dívida ou saldo</h4><p class="mt-2 text-sm text-slate-700">Ao lado da busca de clientes, selecione <strong>Com dívida</strong> para acompanhar quem precisa pagar ou <strong>Com saldo</strong> para ver quem tem crédito disponível. Escolha <strong>Todos os clientes</strong> para voltar à lista completa.</p></article>
+                            <article class="rounded-xl border border-rose-300 bg-rose-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-rose-950">🔒 Cada conta vê somente o próprio Financeiro</h4><p class="mt-2 text-sm text-slate-700">Despesas, receitas, transferências, resultado do mês e economia mensal agora são carregados exclusivamente para o titular conectado. Mesmo ao trocar de conta no mesmo computador ou celular, o novo usuário começa com o próprio histórico, sem informações de outro estabelecimento.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📱 Acesso corrigido no computador e no celular</h4><p class="mt-2 text-sm text-slate-700">O aplicativo instalado agora usa os endereços oficiais do Cloudflare e mantém uma cópia segura das telas de entrada. Se a conexão oscilar, o PDV procura a rota equivalente no cache em vez de mostrar <strong>ERR_FAILED</strong>.</p></article>
                             <article class="rounded-xl border border-indigo-300 bg-indigo-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-indigo-950">☁️ Login e cadastro com caminhos seguros</h4><p class="mt-2 text-sm text-slate-700">Os links, módulos, redirecionamentos e arquivos do aplicativo agora usam a raiz do domínio Cloudflare. Assim, <strong>Entrar</strong>, <strong>Solicitar acesso / Assinar agora</strong>, catálogo e instalação do PDV continuam abrindo corretamente mesmo quando o endereço usa uma rota diferente.</p></article>
                             <article class="rounded-xl border border-sky-300 bg-sky-50 p-4 shadow-sm"><h4 class="font-bold text-sky-950">🔎 Pesquisa na tela de Produtos</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Produtos</strong>, use a nova barra acima da lista para pesquisar pelo nome ou pelo código de barras e encontrar rapidamente o item que deseja editar.</p></article>
                             <article class="rounded-xl border border-red-300 bg-red-50 p-4 shadow-sm"><h4 class="font-bold text-red-950">🛑 Nome e código sem repetição</h4><p class="mt-2 text-sm text-slate-700">Ao cadastrar ou editar, o PDV avisa enquanto você digita se já existe um item com o mesmo nome ou código de barras e impede salvar o cadastro repetido.</p></article>
@@ -1279,7 +1298,7 @@
                     <input type="password" id="senha-exclusao" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="/login.html"
+    <a href="/login"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
         Recuperar senha de login
     </a>
@@ -1307,7 +1326,7 @@
                     <input type="password" id="senha-adm" autocomplete="current-password" class="w-full p-3 border rounded-lg text-base" placeholder="Senha de login do PDV">
                 </div>
                 <div class="text-center mt-2">
-    <a href="/login.html"
+    <a href="/login"
        class="text-blue-600 hover:text-blue-800 text-sm underline">
         Recuperar senha de login
     </a>
@@ -1495,7 +1514,7 @@
 
     <script>
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
+  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
     .then(() => console.log('Service Worker registrado'))
     .catch(err => console.error('Erro ao registrar SW:', err));
 }
@@ -1595,8 +1614,10 @@ if ('serviceWorker' in navigator) {
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
         let movimentosSaldoCliente = JSON.parse(localStorage.getItem('pdv_movimentos_saldo_cliente') || '[]');
-        let lancamentosFinanceiros = JSON.parse(localStorage.getItem('pdv_lancamentos_financeiros') || '[]');
-        let saldosIniciaisFinanceiros = JSON.parse(localStorage.getItem('pdv_saldos_iniciais_financeiros') || '{}');
+        // O Financeiro só é preenchido depois da autenticação, usando a cópia
+        // vinculada ao UID do titular. Nunca carregue dados financeiros globais.
+        let lancamentosFinanceiros = [];
+        let saldosIniciaisFinanceiros = {};
         let orcamentos = JSON.parse(localStorage.getItem('pdv_orcamentos') || '[]');
         let itensOrcamento = [];
         let orcamentoEditando = null;
@@ -2183,6 +2204,32 @@ if ('serviceWorker' in navigator) {
                 const itemProduto = produtos.find(produtoAtual => produtoAtual.id === item.produtoId);
                 return itemProduto && chaveEstoque(itemProduto) === chave ? total + Number(item.quantidade || 0) : total;
             }, 0);
+        }
+
+        function formatarSaldoEstoque(valor) {
+            return Number(valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 3 });
+        }
+
+        function avisarEstoqueInsuficienteNoCarrinho(produto, quantidadeReservada) {
+            if (!produto || produto.tipo === 'servico') return false;
+            const saldoAtual = estoqueDisponivel(produto);
+            const saldoAposVenda = saldoAtual - Number(quantidadeReservada || 0);
+            if (saldoAposVenda >= 0) return false;
+            mostrarMensagem(`⚠️ Produto sem estoque suficiente: ${produto.nome}. A venda continua liberada e o saldo ficará em ${formatarSaldoEstoque(saldoAposVenda)} ${produto.unidade || 'un'}.`, 'aviso');
+            return true;
+        }
+
+        function estoquesNegativosAposConsumo(consumoPorEstoque) {
+            return [...consumoPorEstoque.entries()].flatMap(([estoqueId, quantidade]) => {
+                const raiz = produtos.find(produto => produto.id === estoqueId);
+                if (!raiz) return [];
+                const saldoFinal = estoqueDisponivel(raiz) - Number(quantidade || 0);
+                return saldoFinal < 0 ? [{ nome: raiz.nome, saldo: saldoFinal, unidade: raiz.unidade || 'un' }] : [];
+            });
+        }
+
+        function mensagemEstoqueNegativo(itens) {
+            return `Venda finalizada. ⚠️ Produto(s) sem estoque: ${itens.map(item => `${item.nome} (saldo ${formatarSaldoEstoque(item.saldo)} ${item.unidade})`).join(', ')}.`;
         }
 
         function restaurarEstoqueDosItens(itens = []) {
@@ -3084,13 +3131,6 @@ function showInstallButton() {
             
             const pesoKg = pesoGramas / 1000;
             const precoUnitario = produtoParaPesagem.preco; // Preço por kg
-            const saldoDisponivel = estoqueDisponivel(produtoParaPesagem);
-            
-            // Verificar se há estoque suficiente
-            if (totalReservadoNoEstoque(produtoParaPesagem) + pesoKg > saldoDisponivel) {
-                mostrarMensagem(`Estoque compartilhado insuficiente! Disponível: ${saldoDisponivel}kg`, 'erro');
-                return;
-            }
             
             // Verificar se já existe item do mesmo produto no carrinho
             const itemExistente = carrinho.find(item => item.produtoId === produtoParaPesagem.id);
@@ -3098,12 +3138,6 @@ function showInstallButton() {
             if (itemExistente) {
                 // Somar o peso ao item existente
                 const novaQuantidade = itemExistente.quantidade + pesoKg;
-                
-                if (totalReservadoNoEstoque(produtoParaPesagem, produtoParaPesagem.id) + novaQuantidade > saldoDisponivel) {
-                    mostrarMensagem('Quantidade total excede o estoque disponível!', 'erro');
-                    return;
-                }
-                
                 itemExistente.quantidade = novaQuantidade;
             } else {
                 // Criar novo item no carrinho
@@ -3117,10 +3151,11 @@ function showInstallButton() {
                     estoqueOrigemId: chaveEstoque(produtoParaPesagem)
                 });
             }
+            const estoqueInsuficiente = avisarEstoqueInsuficienteNoCarrinho(produtoParaPesagem, totalReservadoNoEstoque(produtoParaPesagem));
+            if (!estoqueInsuficiente) mostrarMensagem(`${pesoGramas}g de ${produtoParaPesagem.nome} adicionado ao carrinho!`, 'sucesso');
             
             cancelarPesagem();
             atualizarCarrinho();
-            mostrarMensagem(`${pesoGramas}g de ${produtoParaPesagem.nome} adicionado ao carrinho!`, 'sucesso');
             document.getElementById('busca-produto').focus();
         }
 
@@ -3156,11 +3191,6 @@ function showInstallButton() {
             if (!produto) return false;
 
             const ehServico = produto.tipo === 'servico';
-            const saldoDisponivel = ehServico ? null : estoqueDisponivel(produto);
-            if (!ehServico && saldoDisponivel <= 0) {
-                mostrarMensagem('Produto sem estoque!', 'erro');
-                return false;
-            }
 
             // Se for produto por kg, mostrar modal para inserir peso
             if (!ehServico && produto.unidade === 'kg') {
@@ -3168,18 +3198,9 @@ function showInstallButton() {
                 return false;
             }
 
-            if (!ehServico && totalReservadoNoEstoque(produto) + 1 > saldoDisponivel) {
-                mostrarMensagem('Quantidade não disponível no estoque compartilhado!', 'erro');
-                return false;
-            }
-
             const itemExistente = carrinho.find(item => item.produtoId === produtoId);
             
             if (itemExistente) {
-                if (!ehServico && totalReservadoNoEstoque(produto) + 1 > saldoDisponivel) {
-                    mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
-                    return false;
-                }
                 itemExistente.quantidade += 1;
             } else {
                 carrinho.push({
@@ -3192,6 +3213,8 @@ function showInstallButton() {
                     ...(ehServico ? {} : { estoqueOrigemId: chaveEstoque(produto) })
                 });
             }
+
+            avisarEstoqueInsuficienteNoCarrinho(produto, totalReservadoNoEstoque(produto));
 
             atualizarCarrinho();
             document.getElementById('busca-produto').value = '';
@@ -3210,12 +3233,8 @@ function showInstallButton() {
                 return;
             }
 
-            if (produto.tipo !== 'servico' && totalReservadoNoEstoque(produto, produtoId) + novaQuantidade > estoqueDisponivel(produto)) {
-                mostrarMensagem('Quantidade não disponível em estoque!', 'erro');
-                return;
-            }
-
             item.quantidade = novaQuantidade;
+            avisarEstoqueInsuficienteNoCarrinho(produto, totalReservadoNoEstoque(produto));
             atualizarCarrinho();
         }
 
@@ -3807,11 +3826,8 @@ function showInstallButton() {
                 item.estoqueOrigemId = raiz.id;
                 const consumo = (consumoPorEstoque.get(raiz.id) || 0) + Number(item.quantidade || 0);
                 consumoPorEstoque.set(raiz.id, consumo);
-                if (estoqueDisponivel(raiz) < consumo) {
-                    mostrarMensagem(`Estoque compartilhado insuficiente para ${produto.nome}!`, 'erro');
-                    return;
-                }
             }
+            const estoquesNegativos = estoquesNegativosAposConsumo(consumoPorEstoque);
 
             // Criar venda
             const venda = {
@@ -3872,7 +3888,7 @@ function showInstallButton() {
             atualizarFinanceiro();
             mostrarComprovante(venda);
             limparVenda();
-            mostrarMensagem('Venda finalizada com sucesso!', 'sucesso');
+            mostrarMensagem(estoquesNegativos.length ? mensagemEstoqueNegativo(estoquesNegativos) : 'Venda finalizada com sucesso!', estoquesNegativos.length ? 'aviso' : 'sucesso');
         }
 
         function limparVenda() {
@@ -5227,16 +5243,17 @@ function showInstallButton() {
         // Sistema de mensagens
         function mostrarMensagem(texto, tipo) {
             const container = document.createElement('div');
-            container.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
-                tipo === 'sucesso' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            container.className = `fixed right-4 top-4 z-[110] max-w-md rounded-lg p-4 font-semibold shadow-xl ${
+                tipo === 'sucesso' ? 'bg-green-500 text-white' : tipo === 'aviso' ? 'border-2 border-amber-800 bg-amber-300 text-amber-950' : 'bg-red-500 text-white'
             }`;
+            container.setAttribute('role', tipo === 'erro' ? 'alert' : 'status');
             container.textContent = texto;
             
             document.body.appendChild(container);
             
             setTimeout(() => {
                 container.remove();
-            }, 3000);
+            }, tipo === 'aviso' ? 6000 : 3000);
         }
 
         function confirmarAcao(mensagem) {
@@ -6119,11 +6136,7 @@ function showInstallButton() {
                 }
                 return itemVenda;
             });
-            for (const [estoqueId, quantidade] of consumoPorEstoque) {
-                const raiz = produtos.find(produto => produto.id === estoqueId);
-                if (!raiz || estoqueDisponivel(raiz) < quantidade) return mostrarMensagem(`Estoque insuficiente para concluir o orçamento ${orcamento.numero}.`, 'erro');
-            }
-
+            const estoquesNegativos = estoquesNegativosAposConsumo(consumoPorEstoque);
             const agora = new Date().toISOString();
             const pagamento = formas.length === 1 ? { ...formas[0], valorCobrado: Number(orcamento.total) } : { tipo: 'misto', dividido: true, formas, valorCobrado: Number(orcamento.total), clienteId: cliente?.id || '', clienteNome: cliente?.nome || '' };
             const venda = { id: `v_${Date.now()}`, data: agora, itens: itensVenda, subtotal: Number(orcamento.subtotal), desconto: Number(orcamento.descontoPercentual || 0), descontoTipo: orcamento.descontoTipo || 'percentual', descontoInformado: Number(orcamento.descontoInformado ?? orcamento.descontoPercentual ?? 0), valorDesconto: Number(orcamento.valorDesconto || 0), total: Number(orcamento.total), pagamento, clienteId: cliente?.id || '', clienteNome: cliente?.nome || orcamento.cliente?.nome || '', caixaId: caixa.id, vendedor: vendedorAtual(), origem: 'orcamento', orcamentoId: orcamento.id };
@@ -6133,7 +6146,7 @@ function showInstallButton() {
             formas.forEach((forma, indice) => movimentos.push({ id: `m_${Date.now()}_orc_${indice}`, data: agora, tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada', formaPagamento: forma.tipo, valor: forma.valor, descricao: `Orçamento ${orcamento.numero} aprovado - ${forma.tipo}`, vendaId: venda.id, orcamentoId: orcamento.id, caixaId: caixa.id, vendedor: venda.vendedor }));
             orcamento.status = 'aprovado'; orcamento.aprovadoEm = agora; orcamento.vendaId = venda.id; orcamento.pagamento = pagamento; orcamento.atualizadoEm = agora;
             salvarDados(); atualizarFinanceiro(); atualizarListaOrcamentos(); atualizarListaProdutos(); calcularSaldoCaixa(); atualizarHistoricoMovimentos();
-            fecharAprovacaoOrcamento(); mostrarComprovante(venda); mostrarMensagem('Orçamento aprovado, venda registrada e estoque atualizado.', 'sucesso');
+            fecharAprovacaoOrcamento(); mostrarComprovante(venda); mostrarMensagem(estoquesNegativos.length ? mensagemEstoqueNegativo(estoquesNegativos) : 'Orçamento aprovado, venda registrada e estoque atualizado.', estoquesNegativos.length ? 'aviso' : 'sucesso');
         }
 
         function rejeitarOrcamento(id) {
@@ -6313,8 +6326,6 @@ function showInstallButton() {
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
             localStorage.setItem('pdv_movimentos_saldo_cliente', JSON.stringify(movimentosSaldoCliente));
-            localStorage.setItem('pdv_lancamentos_financeiros', JSON.stringify(lancamentosFinanceiros));
-            localStorage.setItem('pdv_saldos_iniciais_financeiros', JSON.stringify(saldosIniciaisFinanceiros));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
             atualizarNotificacaoEstoque();
             atualizarVendasSuspensas();
