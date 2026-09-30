@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
 import { categoryUrl, formatPrice, getCatalogConfig, getCategoryFromPage, getFirebaseApp, getPrimaryAdminApp, productUrl, setupMenu, siteHeader } from "./firebase.js";
+=======
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-storage.js";
+import { categoryUrl, formatPrice, getCatalogConfig, getCategoryFromPage, getFirebaseApp, productUrl, setupMenu, siteHeader } from "./firebase.js";
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
 
 const category = getCategoryFromPage();
 const catalog = getCatalogConfig();
@@ -16,7 +23,10 @@ if (!category) {
 } else {
   const app = getFirebaseApp();
   const auth = getAuth(app);
+<<<<<<< HEAD
   const primaryAuth = getAuth(getPrimaryAdminApp());
+=======
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
   const db = getFirestore(app);
   const storage = getStorage(app);
   const meta = catalog.categories[category];
@@ -27,8 +37,21 @@ if (!category) {
   document.body.innerHTML = `
     ${siteHeader({ admin: true })}
     <main id="conteudo" class="container admin-shell">
+<<<<<<< HEAD
       <section id="session-view" class="panel login-card">
         <div class="state"><div class="spinner"></div>Validando o acesso administrativo…</div>
+=======
+      <section id="login-view" class="panel login-card" hidden>
+        <span class="eyebrow">Acesso protegido</span>
+        <h1 style="font-size:2rem">Entrar no catálogo</h1>
+        <p style="color:var(--muted);line-height:1.6">Use o usuário administrador do projeto Firebase <strong>${catalog.firebaseConfig.projectId}</strong>.</p>
+        <form id="login-form" class="form-grid">
+          <div class="field field-full"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" autocomplete="username" required></div>
+          <div class="field field-full"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" autocomplete="current-password" required></div>
+          <div class="field-full"><button class="button button-primary" type="submit" style="width:100%">Entrar</button></div>
+        </form>
+        <p id="login-status" class="status-message" aria-live="polite"></p>
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
       </section>
 
       <div id="admin-view" hidden>
@@ -72,8 +95,15 @@ if (!category) {
     </main>`;
 
   setupMenu();
+<<<<<<< HEAD
   const sessionView = document.querySelector("#session-view");
   const adminView = document.querySelector("#admin-view");
+=======
+  const loginView = document.querySelector("#login-view");
+  const adminView = document.querySelector("#admin-view");
+  const loginForm = document.querySelector("#login-form");
+  const loginStatus = document.querySelector("#login-status");
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
   const productForm = document.querySelector("#product-form");
   const formTitle = document.querySelector("#form-title");
   const formStatus = document.querySelector("#form-status");
@@ -199,6 +229,25 @@ if (!category) {
     }
   }
 
+<<<<<<< HEAD
+=======
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = loginForm.querySelector("button");
+    button.disabled = true;
+    setStatus(loginStatus, "Entrando…");
+    try {
+      await signInWithEmailAndPassword(auth, loginForm.email.value.trim(), loginForm.password.value);
+      loginForm.reset();
+    } catch (error) {
+      console.error(error);
+      setStatus(loginStatus, "E-mail ou senha inválidos para este projeto Firebase.", "error");
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
   productForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     saveButton.disabled = true;
@@ -241,6 +290,7 @@ if (!category) {
   });
 
   cancelButton.addEventListener("click", resetForm);
+<<<<<<< HEAD
   document.querySelector("#logout").addEventListener("click", async () => {
     await Promise.all([signOut(auth), signOut(primaryAuth)]);
     window.location.replace("/admin/login.html");
@@ -273,12 +323,27 @@ if (!category) {
 
       sessionView.hidden = true;
       adminView.hidden = false;
+=======
+  document.querySelector("#logout").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, async (user) => {
+    loginView.hidden = Boolean(user);
+    adminView.hidden = !user;
+    if (user) {
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
       try {
         await loadProducts();
       } catch (error) {
         console.error(error);
         list.innerHTML = `<div class="state">Não foi possível carregar ${catalog.itemLabel === "matriz" ? "as matrizes" : "os produtos"}. Confirme as regras do Firestore.</div>`;
       }
+<<<<<<< HEAD
     });
+=======
+    } else {
+      products = [];
+      render();
+    }
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
   });
 }
