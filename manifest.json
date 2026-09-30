@@ -4,8 +4,8 @@
     "description": "Soluções Digitais para o Seu Dia a Dia",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#FFFFFF",
-    "theme_color": "#FFFFFF",
+    "background_color": "#0A0F14",
+    "theme_color": "#0A0F14",
     "icons": [
       {
         "src": "img/icone.png",
