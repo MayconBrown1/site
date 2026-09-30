@@ -1,5 +1,9 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5dc60df7e0e07efff8bfb586881bfedbf59c1051
 const primaryAdminFirebaseConfig = Object.freeze({
   apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
   authDomain: "mayconbrown-bda8c.firebaseapp.com",
@@ -10,6 +14,11 @@ const primaryAdminFirebaseConfig = Object.freeze({
   measurementId: "G-Y1BTTK576V"
 });
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
+>>>>>>> 5dc60df7e0e07efff8bfb586881bfedbf59c1051
 const softwareCategories = Object.freeze({
   coreldraw: { label: "CorelDRAW", description: "Criação gráfica, vetorização e produção profissional." },
   adobe: { label: "Adobe", description: "Ferramentas criativas para imagem, vídeo, áudio e documentos." },
@@ -87,6 +96,10 @@ export function getFirebaseApp() {
   return getApps().find((app) => app.name === catalog.appName) || initializeApp(catalog.firebaseConfig, catalog.appName);
 }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 5dc60df7e0e07efff8bfb586881bfedbf59c1051
 export function getPrimaryAdminApp() {
   return getApps().find((app) => app.name === "[DEFAULT]") || initializeApp(primaryAdminFirebaseConfig);
 }
@@ -98,6 +111,11 @@ export function getCatalogFirebaseApps() {
   ));
 }
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> e9834ea03941b1cb5c980eab37cbd31d24c7e9ee
+>>>>>>> 5dc60df7e0e07efff8bfb586881bfedbf59c1051
 export function getCategoryFromPage() {
   const fromData = document.body?.dataset?.category;
   const fromQuery = new URLSearchParams(location.search).get("categoria");
