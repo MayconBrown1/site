@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function validProduct() {
+      return request.resource.data.keys().hasAll([
+          'nome', 'descricao', 'valor', 'link', 'imagem', 'promocao'
+        ])
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() <= 120
+        && request.resource.data.descricao is string
+        && request.resource.data.descricao.size() <= 2500
+        && request.resource.data.valor is string
+        && request.resource.data.valor.size() <= 40
+        && request.resource.data.link is string
+        && request.resource.data.link.size() <= 2000
+        && request.resource.data.imagem is string
+        && request.resource.data.imagem.size() <= 2000
+        && request.resource.data.promocao is bool;
+    }
+
+    match /{category}/{productId} {
+      allow read: if category in [
+        'coreldraw', 'adobe', 'autodesk', 'microsoft', 'wondershare',
+        'lightburn', 'wilcom', 'rhinoceros', 'sketchup'
+      ];
+      allow create, update: if isSignedIn() && validProduct();
+      allow delete: if isSignedIn();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
