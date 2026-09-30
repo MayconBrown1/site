@@ -25,35 +25,82 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import {
+      createUserWithEmailAndPassword,
+      getAuth,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+    import {
+      getCatalogFirebaseApps,
+      getPrimaryAdminApp
+    } from "/software/assets/firebase.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDrt1bbLUjT8uzILn_cLgeRSDdMAM2ZHmI",
-      authDomain: "mayconbrown-bda8c.firebaseapp.com",
-      projectId: "mayconbrown-bda8c",
-      storageBucket: "mayconbrown-bda8c.firebasestorage.app",
-      messagingSenderId: "226624962636",
-      appId: "1:226624962636:web:410ad40aa6099ca57474e9",
-      measurementId: "G-Y1BTTK576V"
-    };
+    const auth = getAuth(getPrimaryAdminApp());
+    const catalogApps = getCatalogFirebaseApps();
+    const loginButton = document.getElementById("login");
+    const errorElement = document.getElementById("erro");
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    function getDestination() {
+      const next = new URLSearchParams(location.search).get("next");
+      return next && next.startsWith("/") && !next.startsWith("//")
+        ? next
+        : "/admin/index.html";
+    }
 
-    document.getElementById("login").addEventListener("click", () => {
-      const email = document.getElementById("email").value;
-      const senha = document.getElementById("senha").value;
+    async function signInOrCreateCatalogUser(app, email, password) {
+      const catalogAuth = getAuth(app);
+      try {
+        await signInWithEmailAndPassword(catalogAuth, email, password);
+      } catch (signInError) {
+        const canCreateMissingUser = [
+          "auth/invalid-credential",
+          "auth/user-not-found",
+          "auth/wrong-password"
+        ].includes(signInError.code);
+        if (!canCreateMissingUser) throw signInError;
 
-      signInWithEmailAndPassword(auth, email, senha)
-        .then(() => {
-          window.location.href = "/admin/index.html"; // ou a página que tu quiser
-        })
-        .catch((error) => {
-          const erroEl = document.getElementById("erro");
-          erroEl.textContent = "Erro: " + error.message;
-          erroEl.classList.remove("hidden");
-        });
+        try {
+          await createUserWithEmailAndPassword(catalogAuth, email, password);
+        } catch (createError) {
+          await signOut(catalogAuth).catch(() => {});
+          if (createError.code === "auth/email-already-in-use") {
+            throw new Error(`A conta de ${email} já existe no projeto ${app.options.projectId}, mas usa outra senha. Redefina essa conta no Firebase Authentication para usar a mesma senha do acesso geral.`);
+          }
+          throw signInError;
+        }
+      }
+    }
+
+    async function submitLogin() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("senha").value;
+      errorElement.classList.add("hidden");
+
+      if (!email || !password) {
+        errorElement.textContent = "Informe o e-mail e a senha.";
+        errorElement.classList.remove("hidden");
+        return;
+      }
+
+      loginButton.disabled = true;
+      loginButton.textContent = "Entrando…";
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        loginButton.textContent = "Preparando catálogos…";
+        await Promise.all(catalogApps.map((app) => signInOrCreateCatalogUser(app, email, password)));
+        window.location.replace(getDestination());
+      } catch (error) {
+        errorElement.textContent = error.message || "Não foi possível entrar.";
+        errorElement.classList.remove("hidden");
+        loginButton.disabled = false;
+        loginButton.textContent = "Entrar";
+      }
+    }
+
+    loginButton.addEventListener("click", submitLogin);
+    document.getElementById("senha").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") submitLogin();
     });
   </script>
 </body>
