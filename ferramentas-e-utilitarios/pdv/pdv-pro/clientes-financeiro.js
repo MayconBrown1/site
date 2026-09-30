@@ -1,5 +1,5 @@
-const CATEGORIAS_RECEITA = ['Venda', 'Salário', 'Freelance', 'Serviços', 'Rendimentos', 'Outras receitas'];
-const CATEGORIAS_DESPESA = ['Alimentação', 'Saúde', 'Transporte', 'Estoque e fornecedores', 'Aluguel', 'Contas e serviços', 'Impostos', 'Manutenção', 'Outros'];
+const CATEGORIAS_RECEITA = ['Venda', 'Salário', 'Freelance', 'Serviços', 'Comissões', 'Aluguéis recebidos', 'Rendimentos', 'Reembolsos', 'Bonificações e prêmios', 'Empréstimos recebidos', 'Resgate de investimentos', 'Outras receitas'];
+const CATEGORIAS_DESPESA = ['Alimentação', 'Saúde', 'Transporte', 'Estoque e fornecedores', 'Aluguel', 'Contas e serviços', 'Impostos', 'Manutenção', 'Investimentos', 'Lazer e entretenimento', 'Educação e cursos', 'Marketing e publicidade', 'Funcionários e salários', 'Encargos trabalhistas', 'Taxas bancárias', 'Seguros', 'Equipamentos', 'Materiais de escritório', 'Limpeza e segurança', 'Empréstimos e juros', 'Viagens', 'Doações', 'Outros'];
 const CATEGORIAS_TRANSFERENCIA = ['Saldo inicial', 'Conta bancária', 'Dinheiro em espécie', 'Outra carteira', 'Ajuste de saldo'];
 
 function escaparDado(valor) {
@@ -379,6 +379,23 @@ function atualizarClienteVendaSelecionado() {
     if (trocouCliente && vendaAtual?.tipo === 'pix') gerarQRCodePix();
 }
 
+function prioridadeClienteFinanceiro(divida, saldo) {
+    if (divida > 0) return 0;
+    if (saldo > 0) return 1;
+    return 2;
+}
+
+function clienteCorrespondeFiltroFinanceiro(divida, saldo, filtro) {
+    if (filtro === 'divida') return divida > 0;
+    if (filtro === 'saldo') return saldo > 0;
+    return true;
+}
+
+function compararClientesPorSituacaoFinanceira(a, b) {
+    return prioridadeClienteFinanceiro(a.divida, a.saldo) - prioridadeClienteFinanceiro(b.divida, b.saldo)
+        || a.cliente.nome.localeCompare(b.cliente.nome, 'pt-BR');
+}
+
 function atualizarClientes() {
     if (!document.getElementById('lista-clientes')) return;
     const migrou = normalizarClientesLegados();
@@ -386,24 +403,31 @@ function atualizarClientes() {
     atualizarSelectClientes();
     const busca = (document.getElementById('busca-clientes').value || '').trim().toLocaleLowerCase('pt-BR');
     const buscaNumerica = somenteDigitos(busca);
+    const filtroSituacao = document.getElementById('filtro-situacao-clientes')?.value || 'todos';
     const filtrados = [...clientesFiado]
-        .filter(cliente => [cliente.nome, cliente.documento, cliente.cpf, cliente.cnpj, cliente.whatsapp, cliente.telefone, cliente.email].some(valor => {
-            const texto = String(valor || '').toLocaleLowerCase('pt-BR');
-            return texto.includes(busca) || (buscaNumerica && somenteDigitos(texto).includes(buscaNumerica));
+        .map(cliente => ({
+            cliente,
+            divida: saldoClienteFiado(cliente.id),
+            saldo: saldoCreditoCliente(cliente.id)
         }))
-        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        .filter(({ cliente, divida, saldo }) => {
+            if (!clienteCorrespondeFiltroFinanceiro(divida, saldo, filtroSituacao)) return false;
+            return [cliente.nome, cliente.documento, cliente.cpf, cliente.cnpj, cliente.whatsapp, cliente.telefone, cliente.email].some(valor => {
+                const texto = String(valor || '').toLocaleLowerCase('pt-BR');
+                return texto.includes(busca) || (buscaNumerica && somenteDigitos(texto).includes(buscaNumerica));
+            });
+        })
+        .sort(compararClientesPorSituacaoFinanceira);
     document.getElementById('total-clientes').textContent = `${filtrados.length} de ${clientesFiado.length} cliente(s)`;
-    document.getElementById('lista-clientes').innerHTML = filtrados.map(cliente => {
+    document.getElementById('lista-clientes').innerHTML = filtrados.map(({ cliente, divida, saldo }) => {
         const compras = comprasDoCliente(cliente.id).sort((a, b) => new Date(b.data) - new Date(a.data));
-        const saldo = saldoClienteFiado(cliente.id);
-        const credito = saldoCreditoCliente(cliente.id);
         const contato = [cliente.whatsapp || cliente.telefone, cliente.email].filter(Boolean).map(escaparDado).join(' · ') || 'Contato não informado';
         return `<article class="rounded-xl border border-slate-200 bg-gray-50 p-4">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div class="min-w-0"><h3 class="text-lg font-bold">${escaparDado(cliente.nome)}</h3><p class="text-sm text-gray-600">${contato}</p><p class="mt-1 text-xs text-gray-500">${rotuloDocumentoCliente(cliente.documento || cliente.cpf || cliente.cnpj)}${cliente.cidade ? ` · ${escaparDado(cliente.cidade)}` : ''}</p></div>
-                <div class="sm:text-right"><p class="text-sm text-gray-600">${compras.length} compra(s)</p><p class="font-bold ${credito > 0 ? 'text-emerald-700' : 'text-gray-600'}">Saldo: ${moedaBR(credito)}</p><p class="font-bold ${saldo > 0 ? 'text-amber-700' : 'text-gray-600'}">Fiado: ${moedaBR(saldo)}</p></div>
+                <div class="sm:text-right"><p class="text-sm text-gray-600">${compras.length} compra(s)</p><p class="font-bold ${saldo > 0 ? 'text-emerald-700' : 'text-gray-600'}">Saldo: ${moedaBR(saldo)}</p><p class="font-bold ${divida > 0 ? 'text-amber-700' : 'text-gray-600'}">Fiado: ${moedaBR(divida)}</p></div>
             </div>
-            <div class="mt-4 flex flex-wrap gap-2"><button onclick="abrirHistoricoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">Ver histórico</button><button onclick="registrarSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white">Adicionar saldo</button>${credito > 0 ? `<button onclick="devolverSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Devolver saldo</button>` : ''}${saldo > 0 ? `<button onclick="registrarPagamentoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-green-600 px-3 py-2 text-sm text-white">Receber fiado</button><button onclick="gerarExtratoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">Extrato PDF</button>` : ''}<button onclick="editarCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-slate-600 px-3 py-2 text-sm text-white">Editar</button><button onclick="excluirCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white">Excluir</button></div>
+            <div class="mt-4 flex flex-wrap gap-2"><button onclick="abrirHistoricoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white">Ver histórico</button><button onclick="registrarSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-emerald-600 px-3 py-2 text-sm text-white">Adicionar saldo</button>${saldo > 0 ? `<button onclick="devolverSaldoCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-teal-700 px-3 py-2 text-sm text-white">Devolver saldo</button>` : ''}${divida > 0 ? `<button onclick="registrarPagamentoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-green-600 px-3 py-2 text-sm text-white">Receber fiado</button><button onclick="gerarExtratoFiado('${escaparDado(cliente.id)}')" class="rounded-lg bg-amber-600 px-3 py-2 text-sm text-white">Extrato PDF</button>` : ''}<button onclick="editarCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-slate-600 px-3 py-2 text-sm text-white">Editar</button><button onclick="excluirCliente('${escaparDado(cliente.id)}')" class="rounded-lg bg-red-600 px-3 py-2 text-sm text-white">Excluir</button></div>
         </article>`;
     }).join('') || '<p class="rounded-xl border border-dashed p-6 text-center text-gray-500 lg:col-span-2">Nenhum cliente encontrado.</p>';
 }
@@ -451,8 +475,126 @@ function categoriasDoTipo(tipo) {
 
 function preencherCategorias(select, tipo, valorAtual = '') {
     if (!select) return;
-    select.innerHTML = categoriasDoTipo(tipo).map(categoria => `<option value="${escaparDado(categoria)}">${escaparDado(categoria)}</option>`).join('');
-    if (categoriasDoTipo(tipo).includes(valorAtual)) select.value = valorAtual;
+    const categorias = categoriasDoTipo(tipo);
+    select.innerHTML = categorias.map(categoria => `<option value="${escaparDado(categoria)}">${escaparDado(categoria)}</option>`).join('');
+    if (categorias.includes(valorAtual)) select.value = valorAtual;
+}
+
+function normalizarDescricaoFinanceira(valor) {
+    return String(valor || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ');
+}
+
+function modelosFinanceirosAnteriores(tipo, termo = '') {
+    if (!['receita', 'despesa'].includes(tipo)) return [];
+    const busca = normalizarDescricaoFinanceira(termo);
+    const vistos = new Set();
+    return [...lancamentosFinanceiros]
+        .filter(item => item?.tipo === tipo && item.descricao && Number(item.valor) > 0)
+        .sort((a, b) => new Date(b.criadoEm || b.data || 0) - new Date(a.criadoEm || a.data || 0))
+        .filter(item => {
+            const descricao = normalizarDescricaoFinanceira(item.descricao);
+            if (!descricao || vistos.has(descricao) || (busca && !descricao.includes(busca))) return false;
+            vistos.add(descricao);
+            return true;
+        })
+        .sort((a, b) => {
+            if (!busca) return 0;
+            return Number(normalizarDescricaoFinanceira(b.descricao).startsWith(busca)) - Number(normalizarDescricaoFinanceira(a.descricao).startsWith(busca));
+        })
+        .slice(0, 8);
+}
+
+let indiceSugestaoFinanceiro = -1;
+
+function fecharSugestoesFinanceiro() {
+    const painel = document.getElementById('financeiro-sugestoes-descricao');
+    if (!painel) return;
+    painel.classList.add('hidden');
+    painel.replaceChildren();
+    indiceSugestaoFinanceiro = -1;
+}
+
+function selecionarSugestaoFinanceiro(modelo) {
+    if (!modelo) return;
+    const descricao = document.getElementById('financeiro-descricao');
+    const valor = document.getElementById('financeiro-valor');
+    const categoria = document.getElementById('financeiro-categoria');
+    const tipo = document.getElementById('financeiro-tipo')?.value || 'receita';
+    descricao.value = modelo.descricao;
+    valor.value = Number(modelo.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    preencherCategorias(categoria, tipo, modelo.categoria || 'Outros');
+    fecharSugestoesFinanceiro();
+    valor.focus();
+    valor.select();
+}
+
+function atualizarSugestoesFinanceiro() {
+    const painel = document.getElementById('financeiro-sugestoes-descricao');
+    const campo = document.getElementById('financeiro-descricao');
+    const tipo = document.getElementById('financeiro-tipo')?.value || 'receita';
+    if (!painel || !campo || document.activeElement !== campo || !['receita', 'despesa'].includes(tipo)) {
+        fecharSugestoesFinanceiro();
+        return;
+    }
+    const modelos = modelosFinanceirosAnteriores(tipo, campo.value);
+    painel.replaceChildren();
+    indiceSugestaoFinanceiro = -1;
+    if (!modelos.length) {
+        painel.classList.add('hidden');
+        return;
+    }
+    modelos.forEach(modelo => {
+        const botao = document.createElement('button');
+        botao.type = 'button';
+        botao.className = 'financeiro-sugestao flex w-full items-center justify-between gap-3 border-b border-slate-100 px-3 py-2 text-left last:border-0 hover:bg-emerald-50 focus:bg-emerald-50 focus:outline-none';
+        botao.setAttribute('role', 'option');
+        const texto = document.createElement('span');
+        texto.className = 'min-w-0';
+        const nome = document.createElement('strong');
+        nome.className = 'block truncate text-sm text-slate-800';
+        nome.textContent = modelo.descricao;
+        const categoria = document.createElement('small');
+        categoria.className = 'block truncate text-xs text-slate-500';
+        categoria.textContent = modelo.categoria || 'Outros';
+        const valor = document.createElement('strong');
+        valor.className = 'shrink-0 text-sm text-emerald-700';
+        valor.textContent = moedaBR(modelo.valor);
+        texto.append(nome, categoria);
+        botao.append(texto, valor);
+        botao.addEventListener('mousedown', evento => evento.preventDefault());
+        botao.addEventListener('click', () => selecionarSugestaoFinanceiro(modelo));
+        painel.appendChild(botao);
+    });
+    painel.classList.remove('hidden');
+}
+
+function navegarSugestoesFinanceiro(evento) {
+    const painel = document.getElementById('financeiro-sugestoes-descricao');
+    const opcoes = [...(painel?.querySelectorAll('.financeiro-sugestao') || [])];
+    if (!opcoes.length || painel.classList.contains('hidden')) {
+        if (evento.key === 'ArrowDown') atualizarSugestoesFinanceiro();
+        return;
+    }
+    if (evento.key === 'Escape') {
+        fecharSugestoesFinanceiro();
+        return;
+    }
+    if (evento.key === 'Enter' && indiceSugestaoFinanceiro >= 0) {
+        evento.preventDefault();
+        opcoes[indiceSugestaoFinanceiro].click();
+        return;
+    }
+    if (!['ArrowDown', 'ArrowUp'].includes(evento.key)) return;
+    evento.preventDefault();
+    indiceSugestaoFinanceiro = evento.key === 'ArrowDown'
+        ? (indiceSugestaoFinanceiro + 1) % opcoes.length
+        : (indiceSugestaoFinanceiro - 1 + opcoes.length) % opcoes.length;
+    opcoes.forEach((opcao, indice) => {
+        const ativa = indice === indiceSugestaoFinanceiro;
+        opcao.classList.toggle('bg-emerald-50', ativa);
+        opcao.setAttribute('aria-selected', String(ativa));
+    });
+    opcoes[indiceSugestaoFinanceiro].scrollIntoView({ block: 'nearest' });
 }
 
 function atualizarCamposMovimento() {
@@ -522,7 +664,7 @@ function mostrarFormFinanceiro(tipo) {
     document.getElementById('financeiro-data').value = dataLocalISO();
     document.getElementById('financeiro-considerar').checked = true;
     atualizarCategoriasFinanceiro();
-    document.getElementById('financeiro-descricao').focus();
+    fecharSugestoesFinanceiro();
 }
 
 function atualizarCategoriasFinanceiro() {
@@ -531,12 +673,14 @@ function atualizarCategoriasFinanceiro() {
     document.getElementById('financeiro-campo-direcao').classList.toggle('hidden', tipo !== 'transferencia');
     document.getElementById('financeiro-label-categoria').textContent = tipo === 'transferencia' ? 'Origem ou destino' : 'Categoria';
     document.getElementById('titulo-form-financeiro').textContent = tipo === 'receita' ? 'Adicionar receita' : tipo === 'despesa' ? 'Adicionar despesa' : 'Adicionar transferência';
+    atualizarSugestoesFinanceiro();
 }
 
 function cancelarFormFinanceiro() {
     document.getElementById('form-financeiro').classList.add('hidden');
     ['financeiro-descricao', 'financeiro-valor'].forEach(id => { document.getElementById(id).value = ''; });
     document.getElementById('financeiro-considerar').checked = true;
+    fecharSugestoesFinanceiro();
 }
 
 function salvarLancamentoFinanceiro() {
@@ -630,6 +774,28 @@ function saldoAntesDoPeriodo(lancamentos, periodo) {
     return lancamentos.filter(item => periodoDaData(item.data) < periodo).reduce((saldo, item) => saldo + impactoNoSaldo(item), 0);
 }
 
+let historicoFinanceiroCompleto = false;
+
+function chaveDiaFinanceiro(data) {
+    const valor = new Date(data);
+    if (Number.isNaN(valor.getTime())) return '';
+    return dataLocalISO(valor);
+}
+
+function lancamentosFinanceirosVisiveis(lancamentos, exibirHistorico = false, hoje = dataLocalISO()) {
+    return exibirHistorico ? lancamentos : lancamentos.filter(item => chaveDiaFinanceiro(item.data) === hoje);
+}
+
+function alterarPeriodoFinanceiro() {
+    historicoFinanceiroCompleto = false;
+    atualizarFinanceiro();
+}
+
+function alternarHistoricoFinanceiro() {
+    historicoFinanceiroCompleto = !historicoFinanceiroCompleto;
+    atualizarFinanceiro();
+}
+
 function atualizarFinanceiro() {
     if (!document.getElementById('financeiro-section') || ehOperadorAtual()) return;
     migrarSaldoInicialLegado();
@@ -638,6 +804,8 @@ function atualizarFinanceiro() {
     const periodo = campoPeriodo.value;
     const todosLancamentos = todosLancamentosFinanceiros();
     const lancamentos = todosLancamentos.filter(item => periodoDaData(item.data) === periodo).sort((a, b) => new Date(b.data) - new Date(a.data));
+    const lancamentosHoje = lancamentosFinanceirosVisiveis(lancamentos, false);
+    const lancamentosVisiveis = lancamentosFinanceirosVisiveis(lancamentos, historicoFinanceiroCompleto);
     const saldoInicial = saldoAntesDoPeriodo(todosLancamentos, periodo);
     const { considerados, receitas, despesas, transferencias, resultado, saldoPrevisto, economia } = calcularResumoFinanceiro(lancamentos, saldoInicial);
     const aReceber = clientesFiado.reduce((total, cliente) => total + saldoClienteFiado(cliente.id), 0);
@@ -658,13 +826,26 @@ function atualizarFinanceiro() {
     campoEconomia.className = `mt-1 block text-xl ${economia >= 0 ? 'text-emerald-300' : 'text-rose-300'}`;
     document.getElementById('financeiro-a-receber').textContent = moedaBR(aReceber);
 
+    const tituloLista = document.getElementById('titulo-lista-financeiro');
+    const resumoLista = document.getElementById('resumo-lista-financeiro');
+    const botaoHistorico = document.getElementById('btn-historico-financeiro');
+    const quantidadeAnterior = Math.max(0, lancamentos.length - lancamentosHoje.length);
+    const rotuloPeriodo = new Date(`${periodo}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+    tituloLista.textContent = historicoFinanceiroCompleto ? `Histórico de ${rotuloPeriodo}` : 'Lançamentos de hoje';
+    resumoLista.textContent = historicoFinanceiroCompleto
+        ? `${lancamentos.length} movimentação(ões) no período selecionado.`
+        : `${lancamentosHoje.length} movimentação(ões) de hoje. Os lançamentos anteriores ficam recolhidos.`;
+    botaoHistorico.textContent = historicoFinanceiroCompleto ? 'Mostrar somente hoje' : `Ver histórico do período${quantidadeAnterior ? ` (${quantidadeAnterior})` : ''}`;
+    botaoHistorico.setAttribute('aria-expanded', String(historicoFinanceiroCompleto));
+    botaoHistorico.hidden = !historicoFinanceiroCompleto && quantidadeAnterior === 0;
+
     const rotulosOrigem = { venda: 'Venda automática', recebimento: 'Fiado recebido', caixa: 'Despesa do caixa', manual: 'Lançamento manual' };
-    document.getElementById('lista-financeiro').innerHTML = lancamentos.map(item => {
+    document.getElementById('lista-financeiro').innerHTML = lancamentosVisiveis.map(item => {
         const transferencia = item.tipo === 'transferencia';
         const saida = item.tipo === 'despesa' || (transferencia && item.direcao === 'saida');
         const classeValor = transferencia ? item.direcao === 'saida' ? 'text-rose-700' : 'text-sky-700' : item.tipo === 'receita' ? item.pendente ? 'text-amber-700' : 'text-emerald-700' : 'text-rose-700';
         return `<article class="flex flex-col gap-2 rounded-lg border border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between ${item.considerado === false ? 'bg-slate-50 opacity-60' : ''}"><div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong>${escaparDado(item.descricao)}</strong>${item.pendente ? '<span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-800">A receber</span>' : ''}${transferencia ? `<span class="rounded-full bg-sky-100 px-2 py-1 text-xs font-semibold text-sky-800">Transferência ${item.direcao === 'saida' ? 'de saída' : 'de entrada'}</span>` : ''}${item.considerado === false ? '<span class="rounded-full bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700">Não considerado</span>' : ''}</div><p class="text-xs text-gray-500">${new Date(item.data).toLocaleDateString('pt-BR')} · ${escaparDado(item.categoria)} · ${rotulosOrigem[item.origem] || 'Lançamento'}</p></div><div class="flex flex-wrap items-center justify-between gap-2 sm:justify-end"><strong class="${classeValor}">${saida ? '-' : '+'}${moedaBR(item.valor)}</strong>${!item.automatico ? `<button onclick="alternarConsideracaoLancamento('${escaparDado(item.id)}')" class="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">${item.considerado === false ? 'Considerar' : 'Desconsiderar'}</button><button onclick="excluirLancamentoFinanceiro('${escaparDado(item.id)}')" class="rounded-lg bg-red-50 px-2 py-1 text-xs font-semibold text-red-700">Excluir</button>` : ''}</div></article>`;
-    }).join('') || '<p class="rounded-lg border border-dashed p-6 text-center text-gray-500">Nenhum lançamento neste período.</p>';
+    }).join('') || `<p class="rounded-lg border border-dashed p-6 text-center text-gray-500">${historicoFinanceiroCompleto ? 'Nenhum lançamento neste período.' : 'Nenhum lançamento registrado hoje.'}</p>`;
 
     const totaisCategoria = new Map();
     considerados.forEach(item => {
@@ -701,10 +882,15 @@ window.atualizarCamposMovimento = atualizarCamposMovimento;
 window.atualizarCamposEdicaoMovimento = atualizarCamposEdicaoMovimento;
 window.mostrarFormFinanceiro = mostrarFormFinanceiro;
 window.atualizarCategoriasFinanceiro = atualizarCategoriasFinanceiro;
+window.atualizarSugestoesFinanceiro = atualizarSugestoesFinanceiro;
+window.navegarSugestoesFinanceiro = navegarSugestoesFinanceiro;
+window.fecharSugestoesFinanceiro = fecharSugestoesFinanceiro;
 window.cancelarFormFinanceiro = cancelarFormFinanceiro;
 window.salvarLancamentoFinanceiro = salvarLancamentoFinanceiro;
 window.excluirLancamentoFinanceiro = excluirLancamentoFinanceiro;
 window.alternarConsideracaoLancamento = alternarConsideracaoLancamento;
+window.alterarPeriodoFinanceiro = alterarPeriodoFinanceiro;
+window.alternarHistoricoFinanceiro = alternarHistoricoFinanceiro;
 window.parseValorMonetario = parseValorMonetario;
 window.formatarCampoMonetario = formatarCampoMonetario;
 window.atualizarFinanceiro = atualizarFinanceiro;
