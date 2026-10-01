@@ -25,10 +25,54 @@
             visibility: hidden;
         }
         
+        #comprovante-impressao-termica,
+        #orcamento-impressao-termica { display: none; }
+
+        @page { margin: 0; }
         @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area { position: absolute; left: 0; top: 0; }
+            html,
+            body {
+                width: 80mm !important;
+                height: auto !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                background: #fff !important;
+            }
+            body.imprimindo-comprovante,
+            body.imprimindo-orcamento { visibility: visible !important; }
+            body.imprimindo-comprovante > *,
+            body.imprimindo-orcamento > * { display: none !important; }
+            body.imprimindo-comprovante > #comprovante-impressao-termica,
+            body.imprimindo-orcamento > #orcamento-impressao-termica {
+                display: block !important;
+                visibility: visible !important;
+                box-sizing: border-box !important;
+                width: 80mm !important;
+                max-width: 80mm !important;
+                height: auto !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 2mm 4mm 1mm !important;
+                overflow: visible !important;
+                color: #000 !important;
+                background: #fff !important;
+                font-family: monospace !important;
+                break-after: avoid-page;
+                page-break-after: avoid;
+            }
+            body.imprimindo-comprovante #comprovante-impressao-termica *,
+            body.imprimindo-orcamento #orcamento-impressao-termica * { visibility: visible !important; }
+            #orcamento-impressao-termica { font-size: 10px !important; line-height: 1.35 !important; }
+            #orcamento-impressao-termica .termico-centro { text-align: center; }
+            #orcamento-impressao-termica .termico-titulo { margin: 0 0 2mm; font-size: 16px; font-weight: 800; }
+            #orcamento-impressao-termica .termico-secao { margin-top: 2.5mm; padding-top: 2mm; border-top: 1px dashed #000; }
+            #orcamento-impressao-termica .termico-linha { display: flex; justify-content: space-between; gap: 3mm; }
+            #orcamento-impressao-termica .termico-item { padding: 1.5mm 0; border-bottom: 1px dotted #777; break-inside: avoid; }
+            #orcamento-impressao-termica .termico-texto { white-space: pre-wrap; overflow-wrap: anywhere; }
+            #orcamento-impressao-termica .termico-total { margin-top: 2mm; padding-top: 2mm; border-top: 1px solid #000; font-size: 13px; font-weight: 800; }
+            #orcamento-impressao-termica .termico-assinatura { margin-top: 9mm; padding-top: 2mm; border-top: 1px solid #000; text-align: center; }
         }
         
         .fade-in { animation: fadeIn 0.3s ease-in; }
@@ -123,7 +167,6 @@
         button:hover { box-shadow: 0 4px 12px rgba(15,23,42,.12); }
         #total-venda, #comprovante-total-final { letter-spacing: -.025em; }
         .pdv-cnpj-hint { font-size: .75rem; color: #64748b; margin-top: .35rem; }
-        @media print { .print-area { width: 72mm; font-family: monospace; } }
         @media (max-width: 640px) {
             main { padding: .625rem !important; }
             header { position: sticky; top: 0; z-index: 40; padding: .65rem !important; }
@@ -578,15 +621,16 @@
                             </div>
                         </div>
 
-                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                        <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                             <button type="button" onclick="salvarOrcamento('rascunho')" class="rounded-lg bg-slate-600 px-5 py-3 font-semibold text-white hover:bg-slate-700">Salvar rascunho</button>
-                            <button type="button" onclick="finalizarOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700">Finalizar e gerar PDF</button>
+                            <button type="button" onclick="finalizarOrcamento('pdf')" class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700">Finalizar e baixar PDF A4</button>
+                            <button type="button" onclick="finalizarOrcamento('termica')" class="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Finalizar e imprimir térmica</button>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div><h3 class="text-lg font-semibold">Histórico de orçamentos</h3><p class="text-sm text-gray-500">Consulte, aprove, recuse, duplique ou gere novamente o PDF em duas vias.</p></div>
+                            <div><h3 class="text-lg font-semibold">Histórico de orçamentos</h3><p class="text-sm text-gray-500">Escolha entre baixar o PDF A4 ou imprimir uma via na impressora térmica.</p></div>
                             <input id="busca-orcamentos" class="rounded-lg border p-3 sm:w-80" placeholder="Buscar cliente ou número..." oninput="atualizarListaOrcamentos()">
                         </div>
                         <div id="lista-orcamentos" class="space-y-3"></div>
@@ -856,14 +900,18 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 20/09/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 01/10/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v52" data-atualizacao="2026-09-20" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v56" data-atualizacao="2026-10-01" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Aviso visível nas vendas sem estoque</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Orçamento em PDF A4 ou impressora térmica</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-violet-400 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🖨️ Escolha o tamanho do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao finalizar ou consultar um orçamento, escolha <strong>Baixar PDF A4</strong> para documentos comuns ou <strong>Imprimir térmica</strong> para gerar uma via compacta em bobina de 80 mm. As duas opções incluem empresa, cliente, itens, valores, validade e observações.</p></article>
+                            <article class="rounded-xl border border-blue-400 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">📄 Orçamento gera somente uma via</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento não duplica mais suas páginas. Ao gerar ou imprimir, sai apenas <strong>uma via</strong>. Se precisar entregar uma cópia adicional, gere ou imprima o orçamento novamente.</p></article>
+                            <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">1️⃣ Uma impressão por clique</h4><p class="mt-2 text-sm text-slate-700">O comprovante de venda sai em apenas <strong>uma via</strong>. O botão fica protegido contra clique duplo enquanto a impressão está aberta. Se precisar de outra cópia, feche ou conclua a primeira impressão e clique em <strong>Imprimir</strong> novamente.</p></article>
+                            <article class="rounded-xl border border-cyan-400 bg-cyan-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-cyan-950">🧾 Impressão termina junto com o comprovante</h4><p class="mt-2 text-sm text-slate-700">Ao escolher <strong>Imprimir</strong>, o PDV agora envia somente o conteúdo do comprovante em uma área própria de 80 mm, sem reservar o espaço invisível dos menus e das demais telas. Assim, a impressão termina logo após a última linha; em impressoras com corte automático habilitado no driver, o papel é cortado ao fim do trabalho.</p></article>
                             <article class="rounded-xl border border-amber-400 bg-amber-100 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-amber-950">⚠️ Venda liberada, mas com alerta na tela</h4><p class="mt-2 text-sm text-slate-700">Quando a quantidade ultrapassar o saldo disponível, o PDV mostra um aviso amarelo informando o produto e a previsão do estoque negativo. Ao finalizar, o alerta aparece novamente com os produtos e seus saldos finais, sem impedir a venda.</p></article>
                             <article class="rounded-xl border border-orange-300 bg-orange-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-orange-950">📦 Estoque pode ficar negativo</h4><p class="mt-2 text-sm text-slate-700">Produtos agora podem ser adicionados e vendidos mesmo quando o saldo estiver zerado ou abaixo da quantidade necessária. A baixa continua normalmente: por exemplo, ao vender uma unidade com saldo zero, o estoque passa para <strong>-1</strong>. A regra também vale para produtos por peso, estoque compartilhado e vendas aprovadas a partir de orçamentos.</p></article>
                             <article class="rounded-xl border border-sky-300 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">👆 Histórico aparece somente ao clicar na descrição</h4><p class="mt-2 text-sm text-slate-700">Ao abrir <strong>Receita</strong> ou <strong>Despesa</strong>, o formulário não posiciona mais o cursor nem abre sugestões sozinho. Clique no campo <strong>Descrição</strong> quando quiser consultar os lançamentos anteriores e preencher categoria e valor automaticamente.</p></article>
@@ -885,10 +933,10 @@
                             <article class="rounded-xl border border-orange-300 bg-orange-50 p-4 shadow-sm"><h4 class="font-bold text-orange-950">⏸️ Suspenda e retome uma venda</h4><p class="mt-2 text-sm text-slate-700">Use <strong>Suspender venda</strong> para guardar o carrinho, desconto, cliente e pagamento enquanto atende outra pessoa. Depois abra <strong>Vendas suspensas</strong>, escolha o registro e clique em <strong>Retomar</strong>.</p></article>
                             <article class="rounded-xl border border-cyan-300 bg-cyan-50 p-4 shadow-sm"><h4 class="font-bold text-cyan-950">⌨️ Atalhos e tela de Informações</h4><p class="mt-2 text-sm text-slate-700">O novo botão <strong>Informações</strong>, antes de Sair, reúne orientações e todos os atalhos. Use <strong>Alt + 1 até Alt + 5</strong> para navegar e <strong>Alt + 6 até Alt + 0</strong> para escolher dinheiro, PIX, cartão, fiado ou pagamento dividido.</p></article>
                             <article class="rounded-xl border border-teal-300 bg-teal-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-teal-950">📄 Relatório completo de produtos em PDF</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Produtos</strong>, clique em <strong>Baixar planilha em PDF</strong>. O arquivo reúne produto ou serviço, código, categoria, estoque, unidade, preços de venda e custo, estoque mínimo e vínculo de estoque.</p></article>
-                            <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🔎 Busque ou cadastre o cliente no orçamento</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Orçamentos</strong>, comece a digitar o nome e escolha um cliente já cadastrado para preencher CPF/CNPJ, telefone, e-mail e endereço automaticamente. Se for um cliente novo, preencha os dados normalmente: ao clicar em <strong>Finalizar e gerar PDF</strong>, o cadastro será criado no painel de Clientes. O orçamento continua separado da venda até ser aprovado.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-white p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🔎 Busque ou cadastre o cliente no orçamento</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Orçamentos</strong>, comece a digitar o nome e escolha um cliente já cadastrado para preencher CPF/CNPJ, telefone, e-mail e endereço automaticamente. Se for um cliente novo, preencha os dados normalmente e finalize em PDF A4 ou impressão térmica: o cadastro será criado no painel de Clientes. O orçamento continua separado da venda até ser aprovado.</p></article>
                             <article class="rounded-xl border border-indigo-300 bg-indigo-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-indigo-950">💳 Duas formas de pagamento na mesma venda</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, escolha <strong>Dividir em 2 formas de pagamento</strong>, selecione as duas opções e informe os valores. É possível combinar dinheiro, PIX, cartão ou fiado; o comprovante e o caixa mostram cada parte separadamente.</p></article>
                             <article class="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm"><h4 class="font-bold text-red-950">🏷️ Desconto em porcentagem ou reais</h4><p class="mt-2 text-sm text-slate-700">Ao montar a venda ou o orçamento, escolha <strong>Porcentagem</strong> ou <strong>Valor (R$)</strong>. Mesmo quando o desconto for digitado em reais, o comprovante exibe o valor descontado e a porcentagem equivalente.</p></article>
-                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">✅ Aprove o orçamento e conclua a venda</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento agora sai em <strong>duas vias iguais</strong>. No histórico, use <strong>Aprovar e vender</strong> para informar uma ou duas formas de pagamento, emitir o comprovante térmico e baixar o estoque. Se o cliente recusar, marque <strong>Não aprovado</strong>.</p></article>
+                            <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm"><h4 class="font-bold text-emerald-950">✅ Aprove o orçamento e conclua a venda</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento sai em <strong>uma via por geração</strong>. No histórico, use <strong>Aprovar e vender</strong> para informar uma ou duas formas de pagamento, emitir o comprovante térmico e baixar o estoque. Se o cliente recusar, marque <strong>Não aprovado</strong>.</p></article>
                             <article class="rounded-xl border border-emerald-300 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">💰 Saldo do cliente nas compras</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Clientes</strong>, use <strong>Adicionar saldo</strong> quando um troco ficar com a loja e informe o motivo. O valor, a data e cada uso ou devolução aparecem no histórico do cliente, separados do fiado.</p></article>
                             <article class="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">🧾 Use o saldo na venda sem duplicar a entrada</h4><p class="mt-2 text-sm text-slate-700">Na tela de <strong>Vendas</strong>, selecione o cliente, marque <strong>Usar saldo</strong> e confirme o valor. O PDV cobra e lança no caixa somente a diferença. O comprovante mostra o total da compra, o saldo utilizado e quanto foi pago naquele momento.</p></article>
                             <article class="rounded-xl border border-sky-200 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">☰ Menu compacto também no computador — Mais espaço e organização em qualquer tela</h4><p class="mt-2 text-sm text-slate-700">No computador e no celular, os atalhos de <strong>Vendas, Orçamentos, Produtos</strong> e das demais áreas ficam recolhidos no botão de três linhas. Clique em <strong>☰</strong> para abrir o menu em uma faixa própria; o conteúdo é deslocado para baixo, sem opções cobrindo a tela. Ao escolher uma área, o menu fecha automaticamente.</p></article>
@@ -4039,7 +4087,7 @@ function showInstallButton() {
                     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
                         <h3 class="text-lg font-semibold mb-4">Como deseja o comprovante?</h3>
                         <div class="space-y-3">
-                            <button onclick="window.print(); fecharOpcoes()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors">
+                            <button onclick="imprimirComprovanteTermico()" class="w-full bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg transition-colors">
                                 🖨️ Imprimir (se tiver impressora)
                             </button>
                             <button onclick="gerarPDFComprovante(); fecharOpcoes()" class="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg transition-colors">
@@ -4061,6 +4109,46 @@ function showInstallButton() {
                 // Fallback para outros navegadores
                 gerarPDFComprovante();
             }
+        }
+
+        let impressaoComprovanteEmAndamento = false;
+
+        function limparImpressaoComprovante() {
+            impressaoComprovanteEmAndamento = false;
+            document.body.classList.remove('imprimindo-comprovante');
+            document.getElementById('comprovante-impressao-termica')?.remove();
+        }
+
+        function imprimirComprovanteTermico() {
+            if (impressaoComprovanteEmAndamento) return;
+
+            const origem = document.querySelector('#modal-comprovante .print-area');
+            if (!origem) {
+                mostrarMensagem('Não foi possível preparar o comprovante para impressão.', 'erro');
+                return;
+            }
+
+            if (typeof window.fecharOpcoes === 'function') window.fecharOpcoes();
+            limparImpressaoComprovante();
+            impressaoComprovanteEmAndamento = true;
+
+            const areaImpressao = document.createElement('section');
+            areaImpressao.id = 'comprovante-impressao-termica';
+            areaImpressao.setAttribute('aria-hidden', 'true');
+            areaImpressao.innerHTML = origem.innerHTML;
+            areaImpressao.querySelectorAll('[id]').forEach(elemento => elemento.removeAttribute('id'));
+            document.body.appendChild(areaImpressao);
+            document.body.classList.add('imprimindo-comprovante');
+
+            window.addEventListener('afterprint', limparImpressaoComprovante, { once: true });
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                try {
+                    window.print();
+                } catch (_) {
+                    limparImpressaoComprovante();
+                    mostrarMensagem('Não foi possível abrir a impressão neste navegador.', 'erro');
+                }
+            }));
         }
 
         function gerarPDFComprovante() {
@@ -5962,14 +6050,16 @@ function showInstallButton() {
             return orcamento;
         }
 
-        function finalizarOrcamento() {
+        function finalizarOrcamento(formato = 'pdf') {
             const desconto = totaisOrcamento().descontoPercentual;
             if (solicitarAutorizacaoDesconto(desconto, 'finalizar_orcamento_desconto')) return;
             const orcamento = salvarOrcamento('finalizado', true);
             if (!orcamento) return;
-            gerarPDFOrcamento(orcamento.id);
+            if (formato === 'termica') imprimirOrcamentoTermico(orcamento.id);
+            else gerarPDFOrcamento(orcamento.id);
             document.getElementById('editor-orcamento').classList.add('hidden');
-            mostrarMensagem(`Orçamento finalizado e PDF gerado. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
+            const destino = formato === 'termica' ? 'enviado para impressão térmica' : 'gerado em PDF A4';
+            mostrarMensagem(`Orçamento finalizado e ${destino}. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
         }
 
         function editarOrcamento(id) {
@@ -6174,7 +6264,7 @@ function showInstallButton() {
             lista.innerHTML = filtrados.map(orcamento => {
                 const status = statusOrcamento(orcamento);
                 const finalizado = ['finalizado', 'aprovado', 'nao_aprovado'].includes(orcamento.status);
-                const botaoPdf = finalizado ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">PDF 2 vias</button>` : '';
+                const botoesImpressao = finalizado ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Baixar PDF A4</button><button onclick="imprimirOrcamentoTermico('${orcamento.id}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Imprimir térmica</button>` : '';
                 const botoesDecisao = orcamento.status === 'finalizado' ? `<button onclick="aprovarOrcamento('${orcamento.id}')" class="rounded bg-emerald-700 px-3 py-2 text-sm font-bold text-white">Aprovar e vender</button><button onclick="rejeitarOrcamento('${orcamento.id}')" class="rounded bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">Não aprovado</button>` : '';
                 const botaoComprovante = orcamento.status === 'aprovado' && orcamento.vendaId ? `<button onclick="mostrarComprovanteVenda('${orcamento.vendaId}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Comprovante</button>` : '';
                 const botaoEditar = ['aprovado', 'nao_aprovado'].includes(orcamento.status) ? '' : `<button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button>`;
@@ -6182,7 +6272,7 @@ function showInstallButton() {
                 return `<article class="rounded-xl border border-gray-200 p-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p></div>
-                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botaoPdf}${botaoExcluir}</div></div>
+                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botoesImpressao}${botaoExcluir}</div></div>
                     </div>
                 </article>`;
             }).join('') || '<div class="rounded-xl border border-dashed p-8 text-center text-gray-500">Nenhum orçamento encontrado. Clique em “Novo orçamento” para começar.</div>';
@@ -6299,17 +6389,98 @@ function showInstallButton() {
                     pdf.setPage(pagina); pdf.setFontSize(7.5); pdf.setTextColor(100, 116, 139);
                     pdf.text(`${textoSeguro(orcamento.numero)} · Página ${pagina} de ${paginas}`, larguraPagina / 2, 292, { align: 'center' });
                 }
-                // Segunda via idêntica: uma fica com o cliente e a outra com a empresa.
-                const paginasDaPrimeiraVia = Array.from({ length: paginas }, (_, indice) => [...pdf.internal.pages[indice + 1]]);
-                paginasDaPrimeiraVia.forEach(conteudoPagina => {
-                    pdf.addPage('a4', 'portrait');
-                    pdf.internal.pages[pdf.getNumberOfPages()] = [...conteudoPagina];
-                });
                 pdf.save(`orcamento-${String(orcamento.numero).toLowerCase()}-${textoSeguro(cliente.nome).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'cliente'}.pdf`);
             } catch (erro) {
                 console.error('Erro ao gerar PDF do orçamento:', erro);
                 mostrarMensagem('Não foi possível gerar o PDF do orçamento.', 'erro');
             }
+        }
+
+        let impressaoOrcamentoEmAndamento = false;
+
+        function limparImpressaoOrcamento() {
+            impressaoOrcamentoEmAndamento = false;
+            document.body.classList.remove('imprimindo-orcamento');
+            document.getElementById('orcamento-impressao-termica')?.remove();
+        }
+
+        function imprimirOrcamentoTermico(id) {
+            if (impressaoOrcamentoEmAndamento) return;
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento) {
+                mostrarMensagem('Orçamento não encontrado.', 'erro');
+                return;
+            }
+
+            limparImpressaoOrcamento();
+            impressaoOrcamentoEmAndamento = true;
+            const empresa = orcamento.empresa || configSistema || {};
+            const cliente = orcamento.cliente || {};
+            const seguro = escaparHTMLOrcamento;
+            const documentoCliente = String(cliente.documento || '');
+            const documentoClienteFormatado = documentoCliente.length === 14
+                ? formatarCNPJ(documentoCliente)
+                : documentoCliente.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            const itens = (orcamento.itens || []).map((item, indice) => {
+                const quantidade = Number(item.quantidade || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
+                const totalItem = Number(item.quantidade || 0) * Number(item.preco || 0);
+                return `<article class="termico-item"><strong>${indice + 1}. ${seguro(item.nome)}${item.tipo === 'servico' ? ' (Serviço)' : ''}</strong><div class="termico-linha"><span>${seguro(quantidade)} ${seguro(item.unidade || '')} × ${seguro(moedaOrcamento(item.preco))}</span><strong>${seguro(moedaOrcamento(totalItem))}</strong></div></article>`;
+            }).join('');
+            const secaoTexto = (titulo, valor) => valor ? `<section class="termico-secao"><strong>${seguro(titulo)}</strong><div class="termico-texto">${seguro(valor)}</div></section>` : '';
+            const dadosEmpresa = [
+                empresa.cnpj ? `CNPJ: ${formatarCNPJ(empresa.cnpj)}` : '',
+                empresa.telefone || '',
+                empresa.email || '',
+                empresa.endereco || ''
+            ].filter(Boolean).map(valor => `<div>${seguro(valor)}</div>`).join('');
+            const dadosCliente = [
+                documentoClienteFormatado ? `${documentoCliente.length === 14 ? 'CNPJ' : 'CPF'}: ${documentoClienteFormatado}` : '',
+                cliente.contato ? `Contato: ${cliente.contato}` : '',
+                cliente.telefone || '',
+                cliente.email || '',
+                cliente.endereco || ''
+            ].filter(Boolean).map(valor => `<div class="termico-texto">${seguro(valor)}</div>`).join('');
+
+            const areaImpressao = document.createElement('section');
+            areaImpressao.id = 'orcamento-impressao-termica';
+            areaImpressao.className = 'documento-termico';
+            areaImpressao.setAttribute('aria-hidden', 'true');
+            areaImpressao.innerHTML = `
+                <header class="termico-centro">
+                    <h1 class="termico-titulo">ORÇAMENTO</h1>
+                    <strong>${seguro(empresa.nomeEmpresa || 'PDV - Pro')}</strong>
+                    ${dadosEmpresa}
+                </header>
+                <section class="termico-secao termico-centro">
+                    <strong>${seguro(orcamento.numero)}</strong>
+                    <div>Emissão: ${seguro(dataOrcamentoBR(orcamento.emitidoEm))}</div>
+                    <div>Validade: ${seguro(dataOrcamentoBR(orcamento.validade))}</div>
+                </section>
+                <section class="termico-secao"><strong>CLIENTE</strong><div class="termico-texto">${seguro(cliente.nome || 'Não informado')}</div>${dadosCliente}</section>
+                <section class="termico-secao"><strong>ITENS</strong>${itens}</section>
+                <section class="termico-secao">
+                    <div class="termico-linha"><span>Subtotal</span><span>${seguro(moedaOrcamento(orcamento.subtotal))}</span></div>
+                    ${Number(orcamento.valorDesconto) > 0 ? `<div class="termico-linha"><span>Desconto (${seguro(Number(orcamento.descontoPercentual).toLocaleString('pt-BR'))}%)</span><span>- ${seguro(moedaOrcamento(orcamento.valorDesconto))}</span></div>` : ''}
+                    ${Number(orcamento.acrescimo) > 0 ? `<div class="termico-linha"><span>Frete / acréscimo</span><span>${seguro(moedaOrcamento(orcamento.acrescimo))}</span></div>` : ''}
+                    <div class="termico-linha termico-total"><span>TOTAL</span><span>${seguro(moedaOrcamento(orcamento.total))}</span></div>
+                </section>
+                ${secaoTexto('CONDIÇÕES DE PAGAMENTO', orcamento.condicoes)}
+                ${secaoTexto('PRAZO DE ENTREGA / EXECUÇÃO', orcamento.prazoEntrega)}
+                ${secaoTexto('OBSERVAÇÕES', orcamento.observacoes)}
+                <div class="termico-assinatura">Aceite do cliente</div>
+            `;
+            document.body.appendChild(areaImpressao);
+            document.body.classList.add('imprimindo-orcamento');
+
+            window.addEventListener('afterprint', limparImpressaoOrcamento, { once: true });
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                try {
+                    window.print();
+                } catch (_) {
+                    limparImpressaoOrcamento();
+                    mostrarMensagem('Não foi possível abrir a impressão térmica neste navegador.', 'erro');
+                }
+            }));
         }
 
         // Persistência

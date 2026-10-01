@@ -61,7 +61,7 @@ for (const marker of [
   'function selecionarClienteOrcamento',
   'function vincularClienteAoOrcamento',
   "origemCadastro: 'orcamento'",
-  'PDF 2 vias',
+  'Baixar PDF A4',
   "orcamento.status = 'aprovado'",
   'btn-suspender-venda',
   'modal-vendas-suspensas',
@@ -110,6 +110,25 @@ if (!html.includes('Somente os lançamentos de hoje na tela')) throw new Error('
 if (!html.includes('Histórico aparece somente ao clicar na descrição')) throw new Error('A novidade da abertura manual das sugestões não foi registrada.');
 if (!html.includes('Estoque pode ficar negativo')) throw new Error('A novidade da venda sem estoque não foi registrada.');
 if (!html.includes('Venda liberada, mas com alerta na tela')) throw new Error('A novidade do alerta de estoque negativo não foi registrada.');
+if (!html.includes('Impressão termina junto com o comprovante')) throw new Error('A correção do papel em branco não foi registrada nas Novidades.');
+for (const marker of ['#comprovante-impressao-termica', 'body.imprimindo-comprovante > *', 'function imprimirComprovanteTermico', 'function limparImpressaoComprovante', 'onclick="imprimirComprovanteTermico()"']) {
+  if (!html.includes(marker)) throw new Error(`Correção da impressão térmica ausente: ${marker}`);
+}
+if (html.includes('onclick="window.print(); fecharOpcoes()"')) throw new Error('A impressão ainda está sendo iniciada antes de fechar a janela de opções.');
+if (!html.includes('Uma impressão por clique')) throw new Error('A impressão do comprovante em uma única via não foi registrada nas Novidades.');
+if (!html.includes('let impressaoComprovanteEmAndamento = false;') || !html.includes('if (impressaoComprovanteEmAndamento) return;')) {
+  throw new Error('A impressão do comprovante não está protegida contra clique duplo.');
+}
+if ((html.match(/window\.print\(\)/g) || []).length !== 2) throw new Error('Comprovante e orçamento devem possuir uma chamada de impressão térmica cada um.');
+if (!html.includes('Orçamento gera somente uma via')) {
+  throw new Error('A geração do orçamento em uma única via não foi registrada nas Novidades.');
+}
+for (const marker of ['paginasDaPrimeiraVia', 'Segunda via idêntica', 'PDF 2 vias', 'duas vias iguais']) {
+  if (html.includes(marker)) throw new Error(`O orçamento ainda contém duplicação de vias: ${marker}`);
+}
+for (const marker of ['Orçamento em PDF A4 ou impressora térmica', 'Escolha o tamanho do orçamento', "finalizarOrcamento('pdf')", "finalizarOrcamento('termica')", 'function imprimirOrcamentoTermico', 'orcamento-impressao-termica', 'Imprimir térmica']) {
+  if (!html.includes(marker)) throw new Error(`Formato térmico do orçamento ausente: ${marker}`);
+}
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
 const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];
 if (!cacheAtual || !cacheDasNovidades || cacheAtual !== cacheDasNovidades) {
