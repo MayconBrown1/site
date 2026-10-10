@@ -126,8 +126,39 @@ if (!html.includes('Orçamento gera somente uma via')) {
 for (const marker of ['paginasDaPrimeiraVia', 'Segunda via idêntica', 'PDF 2 vias', 'duas vias iguais']) {
   if (html.includes(marker)) throw new Error(`O orçamento ainda contém duplicação de vias: ${marker}`);
 }
-for (const marker of ['Orçamento em PDF A4 ou impressora térmica', 'Escolha o tamanho do orçamento', "finalizarOrcamento('pdf')", "finalizarOrcamento('termica')", 'function imprimirOrcamentoTermico', 'orcamento-impressao-termica', 'Imprimir térmica']) {
+for (const marker of ['Escolha o tamanho do orçamento', "finalizarOrcamento('pdf')", "finalizarOrcamento('termica')", 'function imprimirOrcamentoTermico', 'orcamento-impressao-termica', 'Imprimir térmica']) {
   if (!html.includes(marker)) throw new Error(`Formato térmico do orçamento ausente: ${marker}`);
+}
+for (const marker of ['Fluxo completo do orçamento corrigido', 'Finalize, imprima ou transforme o rascunho em venda', 'function finalizarOrcamentoSalvo', 'function aprovarRascunhoOrcamento', 'Finalizar orçamento', 'Cliente aprovou / vender', 'calcularTotaisOrcamento().descontoPercentual']) {
+  if (!html.includes(marker)) throw new Error(`Fluxo de finalização do orçamento incompleto: ${marker}`);
+}
+if (html.includes('totaisOrcamento()')) throw new Error('A finalização do orçamento ainda chama a função inexistente totaisOrcamento.');
+if (html.includes("finalizando && !orcamento.empresa.cnpj")) throw new Error('O orçamento não pode exigir CNPJ do emitente quando esse dado não foi informado.');
+const finalizarOrcamentoStart = html.indexOf('function finalizarOrcamento(formato');
+const finalizarOrcamentoEnd = html.indexOf('let orcamentoRascunhoPendenteId', finalizarOrcamentoStart);
+if (finalizarOrcamentoStart < 0 || finalizarOrcamentoEnd < 0) throw new Error('Não foi possível localizar a finalização do orçamento.');
+const destinosOrcamentoTeste = [];
+const criarFinalizacaoOrcamento = new Function('calcularTotaisOrcamento', 'solicitarAutorizacaoDesconto', 'salvarOrcamento', 'imprimirOrcamentoTermico', 'gerarPDFOrcamento', 'document', 'mostrarMensagem', `${html.slice(finalizarOrcamentoStart, finalizarOrcamentoEnd)}; return finalizarOrcamento;`);
+const finalizarOrcamentoTeste = criarFinalizacaoOrcamento(
+  () => ({ descontoPercentual: 0 }),
+  () => false,
+  () => ({ id: 'orc-teste', clienteNovoCadastrado: false }),
+  id => destinosOrcamentoTeste.push(`termica:${id}`),
+  id => destinosOrcamentoTeste.push(`pdf:${id}`),
+  { getElementById: () => ({ classList: { add() {} } }) },
+  () => {}
+);
+finalizarOrcamentoTeste('pdf');
+finalizarOrcamentoTeste('termica');
+if (destinosOrcamentoTeste.join(',') !== 'pdf:orc-teste,termica:orc-teste') {
+  throw new Error('Os botões de finalização não encaminharam o orçamento para PDF A4 e impressão térmica.');
+}
+const validarOrcamentoStart = html.indexOf('function validarOrcamento');
+const validarOrcamentoEnd = html.indexOf('function salvarOrcamento', validarOrcamentoStart);
+const criarValidacaoOrcamento = new Function('mostrarMensagem', 'validarCpfCliente', 'validarCNPJ', `${html.slice(validarOrcamentoStart, validarOrcamentoEnd)}; return validarOrcamento;`);
+const validarOrcamentoTeste = criarValidacaoOrcamento(() => {}, () => true, () => true);
+if (!validarOrcamentoTeste({ cliente: { nome: 'Cliente', email: '', documento: '' }, validade: '2026-10-10', itens: [{ id: 'i' }], empresa: { cnpj: '' }, total: 10 }, true)) {
+  throw new Error('Um orçamento válido sem CNPJ do emitente não pôde ser finalizado.');
 }
 const cacheAtual = serviceWorkerSource.match(/const CACHE_NAME = '([^']+)'/)?.[1];
 const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];

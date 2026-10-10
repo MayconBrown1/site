@@ -902,12 +902,13 @@
                         </div>
                         <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 01/10/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v56" data-atualizacao="2026-10-01" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v57" data-atualizacao="2026-10-01" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Orçamento em PDF A4 ou impressora térmica</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Fluxo completo do orçamento corrigido</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">✅ Finalize, imprima ou transforme o rascunho em venda</h4><p class="mt-2 text-sm text-slate-700">Os botões de PDF A4 e impressão térmica voltaram a funcionar. No histórico, até o rascunho pode ser impresso, finalizado ou enviado diretamente para <strong>Cliente aprovou / vender</strong>. Depois de finalizado, use <strong>Aprovar e vender</strong> para escolher o pagamento, baixar o estoque e registrar a venda.</p></article>
                             <article class="rounded-xl border border-violet-400 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🖨️ Escolha o tamanho do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao finalizar ou consultar um orçamento, escolha <strong>Baixar PDF A4</strong> para documentos comuns ou <strong>Imprimir térmica</strong> para gerar uma via compacta em bobina de 80 mm. As duas opções incluem empresa, cliente, itens, valores, validade e observações.</p></article>
                             <article class="rounded-xl border border-blue-400 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">📄 Orçamento gera somente uma via</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento não duplica mais suas páginas. Ao gerar ou imprimir, sai apenas <strong>uma via</strong>. Se precisar entregar uma cópia adicional, gere ou imprima o orçamento novamente.</p></article>
                             <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">1️⃣ Uma impressão por clique</h4><p class="mt-2 text-sm text-slate-700">O comprovante de venda sai em apenas <strong>uma via</strong>. O botão fica protegido contra clique duplo enquanto a impressão está aberta. Se precisar de outra cópia, feche ou conclua a primeira impressão e clique em <strong>Imprimir</strong> novamente.</p></article>
@@ -5055,7 +5056,9 @@ function showInstallButton() {
             case 'excluir_venda': executarExclusaoVenda(); break;
             case 'excluir_movimento': executarExclusaoMovimento(); break;
             case 'finalizar_venda_desconto': finalizarVenda(); break;
-            case 'finalizar_orcamento_desconto': finalizarOrcamento(); break;
+            case 'finalizar_orcamento_pdf_desconto': finalizarOrcamento('pdf'); break;
+            case 'finalizar_orcamento_termica_desconto': finalizarOrcamento('termica'); break;
+            case 'finalizar_orcamento_salvo_desconto': concluirFinalizacaoOrcamentoSalvo(orcamentoRascunhoPendenteId); orcamentoRascunhoPendenteId = null; break;
             case 'aprovar_orcamento_desconto': confirmarAprovacaoOrcamento(); break;
         }
     } finally {
@@ -6023,12 +6026,11 @@ function showInstallButton() {
             if (!orcamento.cliente.nome) { mostrarMensagem('Informe o nome do cliente ou da empresa.', 'erro'); return false; }
             if (!orcamento.validade) { mostrarMensagem('Informe a data de validade do orçamento.', 'erro'); return false; }
             if (!orcamento.itens.length) { mostrarMensagem('Adicione ao menos um produto ou serviço.', 'erro'); return false; }
-            if (orcamento.cliente.email && !document.getElementById('orcamento-cliente-email').checkValidity()) { mostrarMensagem('Informe um e-mail válido para o cliente.', 'erro'); return false; }
+            if (orcamento.cliente.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(orcamento.cliente.email)) { mostrarMensagem('Informe um e-mail válido para o cliente.', 'erro'); return false; }
             if (orcamento.cliente.documento.length === 11 && typeof validarCpfCliente === 'function' && !validarCpfCliente(orcamento.cliente.documento)) { mostrarMensagem('O CPF do cliente é inválido.', 'erro'); return false; }
             if (orcamento.cliente.documento.length === 14 && !validarCNPJ(orcamento.cliente.documento)) { mostrarMensagem('O CNPJ do cliente é inválido.', 'erro'); return false; }
             if (orcamento.cliente.documento && ![11, 14].includes(orcamento.cliente.documento.length)) { mostrarMensagem('Informe um CPF ou CNPJ completo.', 'erro'); return false; }
-            if (finalizando && !orcamento.empresa.cnpj) { mostrarMensagem('Cadastre o CNPJ da empresa em ADM do PDV → Configurações do Sistema antes de finalizar.', 'erro'); return false; }
-            if (finalizando && !validarCNPJ(orcamento.empresa.cnpj)) { mostrarMensagem('O CNPJ da empresa salvo no ADM é inválido.', 'erro'); return false; }
+            if (finalizando && orcamento.empresa.cnpj && !validarCNPJ(orcamento.empresa.cnpj)) { mostrarMensagem('O CNPJ da empresa salvo no ADM é inválido.', 'erro'); return false; }
             if (finalizando && orcamento.total <= 0) { mostrarMensagem('O total do orçamento precisa ser maior que zero.', 'erro'); return false; }
             return true;
         }
@@ -6051,8 +6053,9 @@ function showInstallButton() {
         }
 
         function finalizarOrcamento(formato = 'pdf') {
-            const desconto = totaisOrcamento().descontoPercentual;
-            if (solicitarAutorizacaoDesconto(desconto, 'finalizar_orcamento_desconto')) return;
+            const desconto = calcularTotaisOrcamento().descontoPercentual;
+            const acaoAutorizada = formato === 'termica' ? 'finalizar_orcamento_termica_desconto' : 'finalizar_orcamento_pdf_desconto';
+            if (solicitarAutorizacaoDesconto(desconto, acaoAutorizada)) return;
             const orcamento = salvarOrcamento('finalizado', true);
             if (!orcamento) return;
             if (formato === 'termica') imprimirOrcamentoTermico(orcamento.id);
@@ -6060,6 +6063,37 @@ function showInstallButton() {
             document.getElementById('editor-orcamento').classList.add('hidden');
             const destino = formato === 'termica' ? 'enviado para impressão térmica' : 'gerado em PDF A4';
             mostrarMensagem(`Orçamento finalizado e ${destino}. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
+        }
+
+        let orcamentoRascunhoPendenteId = null;
+
+        function concluirFinalizacaoOrcamentoSalvo(id, silencioso = false) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento || orcamento.status !== 'rascunho') return null;
+            if (!validarOrcamento(orcamento, true)) return null;
+            const vinculoCliente = vincularClienteAoOrcamento(orcamento);
+            orcamento.status = 'finalizado';
+            orcamento.atualizadoEm = new Date().toISOString();
+            salvarDados();
+            atualizarClientes();
+            atualizarListaOrcamentos();
+            if (!silencioso) mostrarMensagem(`Orçamento finalizado. Agora ele pode ser aprovado e transformado em venda.${vinculoCliente?.novo ? ' O cliente foi cadastrado automaticamente.' : ''}`, 'sucesso');
+            return orcamento;
+        }
+
+        function finalizarOrcamentoSalvo(id) {
+            const orcamento = orcamentos.find(item => item.id === id);
+            if (!orcamento || orcamento.status !== 'rascunho') return;
+            orcamentoRascunhoPendenteId = id;
+            if (solicitarAutorizacaoDesconto(Number(orcamento.descontoPercentual || 0), 'finalizar_orcamento_salvo_desconto')) return;
+            concluirFinalizacaoOrcamentoSalvo(id);
+            orcamentoRascunhoPendenteId = null;
+        }
+
+        function aprovarRascunhoOrcamento(id) {
+            if (!exigirCaixaAberto('Abra o caixa antes de transformar o orçamento em venda.')) return;
+            const orcamento = concluirFinalizacaoOrcamentoSalvo(id, true);
+            if (orcamento) aprovarOrcamento(id);
         }
 
         function editarOrcamento(id) {
@@ -6263,8 +6297,8 @@ function showInstallButton() {
                 .join(' ').toLocaleLowerCase('pt-BR').includes(termo)).sort((a, b) => new Date(b.atualizadoEm || b.criadoEm) - new Date(a.atualizadoEm || a.criadoEm));
             lista.innerHTML = filtrados.map(orcamento => {
                 const status = statusOrcamento(orcamento);
-                const finalizado = ['finalizado', 'aprovado', 'nao_aprovado'].includes(orcamento.status);
-                const botoesImpressao = finalizado ? `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Baixar PDF A4</button><button onclick="imprimirOrcamentoTermico('${orcamento.id}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Imprimir térmica</button>` : '';
+                const botoesImpressao = `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Baixar PDF A4</button><button onclick="imprimirOrcamentoTermico('${orcamento.id}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Imprimir térmica</button>`;
+                const botoesRascunho = orcamento.status === 'rascunho' ? `<button onclick="finalizarOrcamentoSalvo('${orcamento.id}')" class="rounded bg-cyan-700 px-3 py-2 text-sm font-bold text-white">Finalizar orçamento</button><button onclick="aprovarRascunhoOrcamento('${orcamento.id}')" class="rounded bg-emerald-800 px-3 py-2 text-sm font-bold text-white">Cliente aprovou / vender</button>` : '';
                 const botoesDecisao = orcamento.status === 'finalizado' ? `<button onclick="aprovarOrcamento('${orcamento.id}')" class="rounded bg-emerald-700 px-3 py-2 text-sm font-bold text-white">Aprovar e vender</button><button onclick="rejeitarOrcamento('${orcamento.id}')" class="rounded bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">Não aprovado</button>` : '';
                 const botaoComprovante = orcamento.status === 'aprovado' && orcamento.vendaId ? `<button onclick="mostrarComprovanteVenda('${orcamento.vendaId}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Comprovante</button>` : '';
                 const botaoEditar = ['aprovado', 'nao_aprovado'].includes(orcamento.status) ? '' : `<button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button>`;
@@ -6272,7 +6306,7 @@ function showInstallButton() {
                 return `<article class="rounded-xl border border-gray-200 p-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p></div>
-                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botoesImpressao}${botaoExcluir}</div></div>
+                        <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesRascunho}${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botoesImpressao}${botaoExcluir}</div></div>
                     </div>
                 </article>`;
             }).join('') || '<div class="rounded-xl border border-dashed p-8 text-center text-gray-500">Nenhum orçamento encontrado. Clique em “Novo orçamento” para começar.</div>';
