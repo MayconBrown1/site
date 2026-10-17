@@ -202,7 +202,10 @@
                     <button data-owner-only data-section="financeiro" onclick="showSection('financeiro')" class="bg-emerald-700 hover:bg-emerald-800 px-3 py-2 rounded transition-colors text-sm">Financeiro</button>
                     <button data-section="relatorios" onclick="showSection('relatorios')" class="bg-blue-500 hover:bg-blue-700 px-3 py-2 rounded transition-colors text-sm">Relatórios</button>
                     <button data-section="catalogo" onclick="showSection('catalogo')" class="bg-teal-600 hover:bg-teal-700 px-3 py-2 rounded transition-colors text-sm">Meu Catálogo</button>
-                    <button data-section="novidades" onclick="showSection('novidades')" class="bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm">Novidades</button>
+                    <button id="btn-novidades" data-section="novidades" onclick="showSection('novidades')" class="relative bg-amber-500 hover:bg-amber-600 px-3 py-2 rounded transition-colors text-sm" aria-label="Abrir novidades">
+                        Novidades
+                        <span id="contador-novidades" class="absolute -right-2 -top-2 hidden min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-xs font-black leading-4 text-white shadow-lg" aria-hidden="true">0</span>
+                    </button>
                     <button id="btn-alertas-estoque" type="button" onclick="abrirAlertasEstoque(); fecharMenuPdv()" class="relative bg-orange-600 hover:bg-orange-700 px-3 py-2 rounded transition-colors text-sm" aria-label="Abrir alertas de estoque">
                         🔔 Estoque
                         <span id="contador-alertas-estoque" class="absolute -right-2 -top-2 hidden min-w-5 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-xs font-black leading-4 text-white shadow-lg" aria-hidden="true">0</span>
@@ -900,14 +903,16 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 01/10/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 16/10/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v57" data-atualizacao="2026-10-01" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v59" data-atualizacao="2026-10-16" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Fluxo completo do orçamento corrigido</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Novidades agora avisam quando há atualização</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-red-300 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Contador de atualizações no menu</h4><p class="mt-2 text-sm text-slate-700">Quando o PDV receber uma nova versão, o botão <strong>Novidades</strong> mostra uma bolinha vermelha com a quantidade de atualizações ainda não vistas. O número continua aumentando a cada nova versão e só desaparece quando o usuário abre <strong>Novidades</strong>.</p></article>
+                            <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📱 PIX pronto no PDF do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao baixar o <strong>PDF A4</strong> de um orçamento, o documento agora inclui o QR Code PIX com o valor total, usando os dados cadastrados em <strong>ADM do PDV → Configuração PIX</strong>. Logo abaixo aparecem o recebedor, o banco e a chave PIX; se o cliente não conseguir escanear o código, pode digitar essa chave no aplicativo do banco.</p></article>
                             <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">✅ Finalize, imprima ou transforme o rascunho em venda</h4><p class="mt-2 text-sm text-slate-700">Os botões de PDF A4 e impressão térmica voltaram a funcionar. No histórico, até o rascunho pode ser impresso, finalizado ou enviado diretamente para <strong>Cliente aprovou / vender</strong>. Depois de finalizado, use <strong>Aprovar e vender</strong> para escolher o pagamento, baixar o estoque e registrar a venda.</p></article>
                             <article class="rounded-xl border border-violet-400 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🖨️ Escolha o tamanho do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao finalizar ou consultar um orçamento, escolha <strong>Baixar PDF A4</strong> para documentos comuns ou <strong>Imprimir térmica</strong> para gerar uma via compacta em bobina de 80 mm. As duas opções incluem empresa, cliente, itens, valores, validade e observações.</p></article>
                             <article class="rounded-xl border border-blue-400 bg-blue-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-blue-950">📄 Orçamento gera somente uma via</h4><p class="mt-2 text-sm text-slate-700">O PDF do orçamento não duplica mais suas páginas. Ao gerar ou imprimir, sai apenas <strong>uma via</strong>. Se precisar entregar uma cópia adicional, gere ou imprima o orçamento novamente.</p></article>
@@ -1739,6 +1744,7 @@ if ('serviceWorker' in navigator) {
                 if (visivel && !permitidas.has(visivel)) showSection('vendas');
             }
             atualizarNotificacaoEstoque();
+            atualizarNotificacaoNovidades();
         }
         window.aplicarPermissoesUsuario = aplicarPermissoesUsuario;
 
@@ -1865,6 +1871,75 @@ if ('serviceWorker' in navigator) {
             setTimeout(aplicarFoco, 120);
         }
 
+        function numeroVersaoNovidades(identificador) {
+            const correspondencia = String(identificador || '').match(/v(\d+)$/i);
+            return correspondencia ? Number(correspondencia[1]) : null;
+        }
+
+        function calcularQuantidadeNovidades(versaoAtual, ultimaVersaoVista) {
+            if (!Number.isFinite(versaoAtual) || !Number.isFinite(ultimaVersaoVista)) return 0;
+            return Math.max(0, versaoAtual - ultimaVersaoVista);
+        }
+
+        function chaveNovidadesVistas() {
+            return `pdv_novidades_vistas_${window.usuarioPdv?.uid || 'local'}`;
+        }
+
+        function dadosVersaoNovidades() {
+            const bloco = document.querySelector('#novidades-section section[data-novidades-cache]');
+            const cacheAtual = bloco?.dataset.novidadesCache || '';
+            return { cacheAtual, versaoAtual: numeroVersaoNovidades(cacheAtual) };
+        }
+
+        function lerEstadoNovidades() {
+            try {
+                const estado = JSON.parse(localStorage.getItem(chaveNovidadesVistas()) || 'null');
+                return estado && typeof estado === 'object' && !Array.isArray(estado) ? estado : null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        function salvarEstadoNovidades(estado) {
+            try {
+                localStorage.setItem(chaveNovidadesVistas(), JSON.stringify(estado));
+            } catch (_) {}
+        }
+
+        function atualizarNotificacaoNovidades() {
+            const botao = document.getElementById('btn-novidades');
+            const contador = document.getElementById('contador-novidades');
+            if (!botao || !contador) return 0;
+            const { cacheAtual, versaoAtual } = dadosVersaoNovidades();
+            let estado = lerEstadoNovidades();
+            if (!estado) {
+                estado = {
+                    ultimaVersaoVista: Number.isFinite(versaoAtual) ? Math.max(0, versaoAtual - 1) : null,
+                    cacheVisto: ''
+                };
+                salvarEstadoNovidades(estado);
+            }
+            const quantidade = Number.isFinite(versaoAtual) && Number.isFinite(estado.ultimaVersaoVista)
+                ? calcularQuantidadeNovidades(versaoAtual, estado.ultimaVersaoVista)
+                : cacheAtual && estado.cacheVisto !== cacheAtual ? 1 : 0;
+            contador.textContent = quantidade > 99 ? '99+' : String(quantidade);
+            contador.classList.toggle('hidden', quantidade === 0);
+            botao.classList.toggle('ring-2', quantidade > 0);
+            botao.classList.toggle('ring-red-400', quantidade > 0);
+            botao.setAttribute('aria-label', quantidade
+                ? `${quantidade} atualização(ões) nova(s). Abrir novidades.`
+                : 'Abrir novidades. Nenhuma atualização nova.');
+            return quantidade;
+        }
+
+        function marcarNovidadesComoVistas() {
+            const { cacheAtual, versaoAtual } = dadosVersaoNovidades();
+            salvarEstadoNovidades({ ultimaVersaoVista: versaoAtual, cacheVisto: cacheAtual });
+            atualizarNotificacaoNovidades();
+        }
+
+        window.atualizarNotificacaoNovidades = atualizarNotificacaoNovidades;
+
         function showSection(sectionName) {
             const permitidasEquipe = ehGerenteAtual()
                 ? ['vendas', 'orcamentos', 'produtos', 'clientes', 'caixa', 'relatorios', 'novidades']
@@ -1901,6 +1976,8 @@ if ('serviceWorker' in navigator) {
                 atualizarFinanceiro();
             } else if (sectionName === 'catalogo') {
                 window.carregarMeuCatalogo?.();
+            } else if (sectionName === 'novidades') {
+                marcarNovidadesComoVistas();
             } else if (sectionName === 'adm') {
                 carregarConfiguracoesAdm();
                 window.carregarOperadores?.();
@@ -3541,9 +3618,7 @@ function showInstallButton() {
             return arredondarCentavos(subtotal - calcularDescontoVenda(subtotal).valorDesconto);
         }
 
-        function desenharQrCode(payload) {
-            const container = document.getElementById('qr-code-container');
-            container.innerHTML = '';
+        function criarCanvasQrCode(payload, tamanho = 320) {
             const qr = qrcode(0, 'M');
             qr.addData(payload);
             qr.make();
@@ -3562,10 +3637,17 @@ function showInstallButton() {
                 }
             }
             const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = finalCanvas.height = 320;
+            finalCanvas.width = finalCanvas.height = tamanho;
             const finalCtx = finalCanvas.getContext('2d');
             finalCtx.imageSmoothingEnabled = false;
-            finalCtx.drawImage(canvas, 0, 0, 320, 320);
+            finalCtx.drawImage(canvas, 0, 0, tamanho, tamanho);
+            return finalCanvas;
+        }
+
+        function desenharQrCode(payload) {
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            const finalCanvas = criarCanvasQrCode(payload);
             finalCanvas.className = 'h-auto w-full max-w-[320px]';
             container.appendChild(finalCanvas);
         }
@@ -3600,20 +3682,24 @@ function showInstallButton() {
             gerarQRCodePixManual(total);
         }
 
-        function gerarQRCodePixManual(total, indiceForma = 0) {
+        function montarCobrancaPix(valor, identificador) {
             const chavePix = normalizarChavePix(CONFIG_PIX.chavePix);
-            if (!chavePix) { mostrarMensagem('Configure uma chave PIX válida no ADM do PDV.', 'erro'); return; }
+            if (!chavePix) throw new Error('Configure uma chave PIX válida no ADM do PDV.');
             const dadosPix = {
                 chavePix,
                 nomeRecebedor: normalizarTextoPix(CONFIG_PIX.nomeRecebedor, 25),
                 cidade: normalizarTextoPix(CONFIG_PIX.cidade, 15),
-                valor: total.toFixed(2),
-                identificador: 'PDV' + Date.now().toString().slice(-8)
+                valor: Number(valor).toFixed(2),
+                identificador
             };
+            return { ...dadosPix, payload: gerarPayloadPix(dadosPix) };
+        }
+
+        function gerarQRCodePixManual(total, indiceForma = 0) {
             try {
-                const payloadPix = gerarPayloadPix(dadosPix);
-                desenharQrCode(payloadPix);
-                codigoPixAtual = payloadPix;
+                const dadosPix = montarCobrancaPix(total, 'PDV' + Date.now().toString().slice(-8));
+                desenharQrCode(dadosPix.payload);
+                codigoPixAtual = dadosPix.payload;
                 vendaAtual = { ...vendaAtual, ...(indiceForma ? {} : { tipo: 'pix' }), pixId: dadosPix.identificador, pixFormaIndice: indiceForma || undefined };
                 document.getElementById('btn-copiar-pix').classList.remove('hidden');
                 document.getElementById('pix-id').value = dadosPix.identificador;
@@ -3627,6 +3713,7 @@ function showInstallButton() {
             } catch (error) {
                 document.getElementById('qr-code-container').innerHTML = `<div class="text-red-500">Erro ao gerar QR Code: ${error.message}</div>`;
                 console.error('Erro QR Code:', error);
+                mostrarMensagem(error.message || 'Não foi possível gerar o QR Code PIX.', 'erro');
             }
         }
 
@@ -6320,6 +6407,9 @@ function showInstallButton() {
                 const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
                 const empresa = orcamento.empresa || configSistema;
                 const cliente = orcamento.cliente || {};
+                const identificadorPix = `ORC${String(orcamento.numero || orcamento.id || Date.now()).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-22)}`;
+                const cobrancaPix = montarCobrancaPix(orcamento.total, identificadorPix);
+                const imagemQrCodePix = criarCanvasQrCode(cobrancaPix.payload, 720).toDataURL('image/png');
                 const margem = 15, larguraPagina = 210, larguraUtil = 180;
                 let y = 16;
 
@@ -6415,6 +6505,30 @@ function showInstallButton() {
                     pdf.setFont('helvetica', 'normal'); textoQuebrado(conteudo, margem, larguraUtil, 9, 4.5); y += 4;
                 });
 
+                const nomeRecebedorPix = textoSeguro(CONFIG_PIX.nomeRecebedor || cobrancaPix.nomeRecebedor);
+                const bancoPix = textoSeguro(CONFIG_PIX.nomeBanco || '');
+                const linhasRecebedorPix = pdf.splitTextToSize(`Recebedor: ${nomeRecebedorPix}${bancoPix ? ` · Banco: ${bancoPix}` : ''}`, larguraUtil - 12);
+                const linhasInstrucaoPix = pdf.splitTextToSize('Se não conseguir escanear o QR Code, use a chave PIX abaixo no aplicativo do seu banco.', larguraUtil - 12);
+                const linhasChavePix = pdf.splitTextToSize(`Chave PIX: ${formatarChavePix(cobrancaPix.chavePix)}`, larguraUtil - 12);
+                const alturaBlocoPix = 72 + (linhasRecebedorPix.length + linhasInstrucaoPix.length + linhasChavePix.length) * 4;
+                verificarPagina(alturaBlocoPix + 8);
+                const inicioBlocoPix = y;
+                pdf.setFillColor(240, 253, 250); pdf.setDrawColor(110, 231, 183);
+                pdf.roundedRect(margem, inicioBlocoPix, larguraUtil, alturaBlocoPix, 2, 2, 'FD');
+                y += 7;
+                pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(5, 150, 105);
+                pdf.text('PAGAMENTO VIA PIX', larguraPagina / 2, y, { align: 'center' });
+                y += 4;
+                pdf.addImage(imagemQrCodePix, 'PNG', (larguraPagina - 44) / 2, y, 44, 44);
+                y += 50;
+                pdf.setFontSize(11); pdf.text(`Valor: ${moedaOrcamento(orcamento.total)}`, larguraPagina / 2, y, { align: 'center' });
+                y += 6;
+                pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(15, 23, 42);
+                pdf.text(linhasRecebedorPix, margem + 6, y); y += linhasRecebedorPix.length * 4;
+                pdf.text(linhasInstrucaoPix, margem + 6, y); y += linhasInstrucaoPix.length * 4 + 1;
+                pdf.setFont('helvetica', 'bold'); pdf.text(linhasChavePix, margem + 6, y);
+                y = inicioBlocoPix + alturaBlocoPix + 8;
+
                 verificarPagina(35);
                 y += 8; pdf.setDrawColor(148, 163, 184); pdf.line(margem, y, 88, y); pdf.line(122, y, larguraPagina - margem, y); y += 5;
                 pdf.setFontSize(8); pdf.setTextColor(71, 85, 105); pdf.text('Responsável pela empresa', 51, y, { align: 'center' }); pdf.text('Aceite do cliente', 158, y, { align: 'center' });
@@ -6426,7 +6540,7 @@ function showInstallButton() {
                 pdf.save(`orcamento-${String(orcamento.numero).toLowerCase()}-${textoSeguro(cliente.nome).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'cliente'}.pdf`);
             } catch (erro) {
                 console.error('Erro ao gerar PDF do orçamento:', erro);
-                mostrarMensagem('Não foi possível gerar o PDF do orçamento.', 'erro');
+                mostrarMensagem(erro.message || 'Não foi possível gerar o PDF do orçamento.', 'erro');
             }
         }
 
@@ -6756,6 +6870,7 @@ function showInstallButton() {
             atualizarFinanceiro();
             atualizarCamposMovimento();
             atualizarNotificacaoEstoque();
+            atualizarNotificacaoNovidades();
             atualizarVendasSuspensas();
         }
     </script>

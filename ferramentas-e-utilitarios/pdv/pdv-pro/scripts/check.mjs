@@ -76,7 +76,16 @@ for (const marker of [
   'function validarDuplicidadeProduto',
   'function ordenarProdutosPorMaisVendidos',
   'operador-funcao',
-  'function autorizacaoNecessariaDesconto'
+  'function autorizacaoNecessariaDesconto',
+  'function montarCobrancaPix',
+  'function criarCanvasQrCode',
+  "pdf.addImage(imagemQrCodePix, 'PNG'",
+  'Chave PIX:',
+  'btn-novidades',
+  'contador-novidades',
+  'function atualizarNotificacaoNovidades',
+  'function marcarNovidadesComoVistas',
+  'pdv_novidades_vistas_'
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
@@ -129,7 +138,7 @@ for (const marker of ['paginasDaPrimeiraVia', 'Segunda via idêntica', 'PDF 2 vi
 for (const marker of ['Escolha o tamanho do orçamento', "finalizarOrcamento('pdf')", "finalizarOrcamento('termica')", 'function imprimirOrcamentoTermico', 'orcamento-impressao-termica', 'Imprimir térmica']) {
   if (!html.includes(marker)) throw new Error(`Formato térmico do orçamento ausente: ${marker}`);
 }
-for (const marker of ['Fluxo completo do orçamento corrigido', 'Finalize, imprima ou transforme o rascunho em venda', 'function finalizarOrcamentoSalvo', 'function aprovarRascunhoOrcamento', 'Finalizar orçamento', 'Cliente aprovou / vender', 'calcularTotaisOrcamento().descontoPercentual']) {
+for (const marker of ['Novidades agora avisam quando há atualização', 'Contador de atualizações no menu', 'PIX pronto no PDF do orçamento', 'Finalize, imprima ou transforme o rascunho em venda', 'function finalizarOrcamentoSalvo', 'function aprovarRascunhoOrcamento', 'Finalizar orçamento', 'Cliente aprovou / vender', 'calcularTotaisOrcamento().descontoPercentual']) {
   if (!html.includes(marker)) throw new Error(`Fluxo de finalização do orçamento incompleto: ${marker}`);
 }
 if (html.includes('totaisOrcamento()')) throw new Error('A finalização do orçamento ainda chama a função inexistente totaisOrcamento.');
@@ -152,6 +161,79 @@ finalizarOrcamentoTeste('pdf');
 finalizarOrcamentoTeste('termica');
 if (destinosOrcamentoTeste.join(',') !== 'pdf:orc-teste,termica:orc-teste') {
   throw new Error('Os botões de finalização não encaminharam o orçamento para PDF A4 e impressão térmica.');
+}
+const versaoNovidadesStart = html.indexOf('function numeroVersaoNovidades');
+const versaoNovidadesEnd = html.indexOf('function chaveNovidadesVistas', versaoNovidadesStart);
+if (versaoNovidadesStart < 0 || versaoNovidadesEnd < 0) throw new Error('Não foi possível localizar o contador de novas atualizações.');
+const criarContadorNovidades = new Function(`${html.slice(versaoNovidadesStart, versaoNovidadesEnd)}; return { numeroVersaoNovidades, calcularQuantidadeNovidades };`);
+const contadorNovidadesTeste = criarContadorNovidades();
+if (contadorNovidadesTeste.numeroVersaoNovidades('pdv-pro-v59') !== 59) throw new Error('A versão das Novidades não foi identificada corretamente.');
+if (contadorNovidadesTeste.calcularQuantidadeNovidades(59, 58) !== 1 || contadorNovidadesTeste.calcularQuantidadeNovidades(61, 58) !== 3 || contadorNovidadesTeste.calcularQuantidadeNovidades(59, 59) !== 0) {
+  throw new Error('O contador de Novidades não acumulou ou zerou as atualizações corretamente.');
+}
+for (const marker of ["Math.max(0, versaoAtual - 1)", "sectionName === 'novidades'", 'marcarNovidadesComoVistas();']) {
+  if (!html.includes(marker)) throw new Error(`Leitura das Novidades incompleta: ${marker}`);
+}
+const criarListaClasses = (...iniciais) => {
+  const classes = new Set(iniciais);
+  return {
+    contains: classe => classes.has(classe),
+    toggle(classe, forcar) {
+      const ativar = forcar === undefined ? !classes.has(classe) : !!forcar;
+      if (ativar) classes.add(classe); else classes.delete(classe);
+      return ativar;
+    }
+  };
+};
+const armazenamentoNovidades = new Map();
+const botaoNovidadesTeste = { classList: criarListaClasses(), setAttribute(nome, valor) { this[nome] = valor; } };
+const contadorNovidadesElementoTeste = { textContent: '0', classList: criarListaClasses('hidden') };
+const blocoNovidadesTeste = { dataset: { novidadesCache: 'pdv-pro-v59' } };
+const contextoNotificacaoNovidades = vm.createContext({
+  window: { usuarioPdv: { uid: 'usuario-teste' } },
+  document: {
+    getElementById: id => id === 'btn-novidades' ? botaoNovidadesTeste : id === 'contador-novidades' ? contadorNovidadesElementoTeste : null,
+    querySelector: seletor => seletor === '#novidades-section section[data-novidades-cache]' ? blocoNovidadesTeste : null
+  },
+  localStorage: {
+    getItem: chave => armazenamentoNovidades.get(chave) ?? null,
+    setItem: (chave, valor) => armazenamentoNovidades.set(chave, valor)
+  },
+  JSON, Math, Number, String
+});
+const showSectionNovidadesStart = html.indexOf('function showSection', versaoNovidadesStart);
+vm.runInContext(html.slice(versaoNovidadesStart, showSectionNovidadesStart), contextoNotificacaoNovidades);
+if (contextoNotificacaoNovidades.atualizarNotificacaoNovidades() !== 1 || contadorNovidadesElementoTeste.textContent !== '1' || contadorNovidadesElementoTeste.classList.contains('hidden')) {
+  throw new Error('A primeira atualização ainda não vista não exibiu o contador 1 em Novidades.');
+}
+blocoNovidadesTeste.dataset.novidadesCache = 'pdv-pro-v60';
+if (contextoNotificacaoNovidades.atualizarNotificacaoNovidades() !== 2 || contadorNovidadesElementoTeste.textContent !== '2') {
+  throw new Error('O contador de Novidades não acumulou duas atualizações sem leitura.');
+}
+contextoNotificacaoNovidades.marcarNovidadesComoVistas();
+if (contextoNotificacaoNovidades.atualizarNotificacaoNovidades() !== 0 || !contadorNovidadesElementoTeste.classList.contains('hidden')) {
+  throw new Error('O contador de Novidades não desapareceu depois da abertura da seção.');
+}
+const montarPixStart = html.indexOf('function montarCobrancaPix');
+const montarPixEnd = html.indexOf('function gerarQRCodePixManual', montarPixStart);
+const payloadPixStart = html.indexOf('function gerarPayloadPix');
+const payloadPixEnd = html.indexOf('function calcularTroco', payloadPixStart);
+const normalizadoresPixStart = html.indexOf('function normalizarTextoPix');
+const normalizadoresPixEnd = html.indexOf('function atualizarStatusCaixa', normalizadoresPixStart);
+if ([montarPixStart, montarPixEnd, payloadPixStart, payloadPixEnd, normalizadoresPixStart, normalizadoresPixEnd].some(indice => indice < 0)) {
+  throw new Error('Não foi possível localizar a cobrança PIX compartilhada entre venda e orçamento.');
+}
+const criarCobrancaPixTeste = new Function('CONFIG_PIX', `${html.slice(normalizadoresPixStart, normalizadoresPixEnd)}${html.slice(payloadPixStart, payloadPixEnd)}${html.slice(montarPixStart, montarPixEnd)}; return { montarCobrancaPix, calcularCRC16 };`);
+const cobrancaPixTeste = criarCobrancaPixTeste({ chavePix: 'financeiro@empresa.com.br', nomeRecebedor: 'Empresa Teste', cidade: 'São Paulo', nomeBanco: 'Banco Teste' });
+const pixOrcamentoTeste = cobrancaPixTeste.montarCobrancaPix(123.45, 'ORC20260001');
+if (pixOrcamentoTeste.chavePix !== 'financeiro@empresa.com.br' || pixOrcamentoTeste.valor !== '123.45' || !pixOrcamentoTeste.payload.includes('financeiro@empresa.com.br') || !pixOrcamentoTeste.payload.includes('123.45')) {
+  throw new Error('O PIX do orçamento não reutilizou a chave e o valor da cobrança da venda.');
+}
+if (cobrancaPixTeste.calcularCRC16(pixOrcamentoTeste.payload.slice(0, -4)) !== pixOrcamentoTeste.payload.slice(-4)) {
+  throw new Error('O payload PIX do orçamento foi gerado com CRC inválido.');
+}
+if ((html.match(/montarCobrancaPix\(/g) || []).length < 3) {
+  throw new Error('Venda e orçamento precisam usar a mesma função de cobrança PIX.');
 }
 const validarOrcamentoStart = html.indexOf('function validarOrcamento');
 const validarOrcamentoEnd = html.indexOf('function salvarOrcamento', validarOrcamentoStart);
