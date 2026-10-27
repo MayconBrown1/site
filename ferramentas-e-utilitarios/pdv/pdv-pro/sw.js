@@ -1,4 +1,5 @@
-const CACHE_NAME = 'pdv-pro-v59';
+const CACHE_NAME = 'pdv-pro-v64';
+const CATALOG_ICON_CACHE = 'pdv-catalog-icons-v1';
 const APP_SHELL = [
   '/', '/login', '/cadastro', '/admin', '/favicon.svg', '/catalogo/', '/catalogo/catalogo.css', '/catalogo/catalogo.js', '/catalogo-admin.js', '/clientes-financeiro.js', '/operator-admin.js', '/manifest.json', '/pwa-install.js', '/pdv-cloud.js', '/auth.js', '/firebase-config.js',
   '/assets/temas/pet-shop.webp', '/assets/temas/adega.webp', '/assets/temas/conveniencia.webp', '/assets/temas/doceria.webp', '/assets/temas/hortifruti.webp',
@@ -23,6 +24,50 @@ const ROTAS_CANONICAS = new Map([
   ['/catalogo', '/catalogo/'], ['/catalogo/', '/catalogo/'], ['/catalogo/index.html', '/catalogo/']
 ]);
 
+function corManifestoCatalogo(valor, padrao) {
+  return /^#[0-9a-f]{6}$/i.test(String(valor || '')) ? String(valor).toLowerCase() : padrao;
+}
+
+function criarManifestoCatalogo(url) {
+  const slug = String(url.searchParams.get('loja') || '');
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length < 3 || slug.length > 50) return null;
+  const nome = String(url.searchParams.get('nome') || 'Catálogo')
+    .replace(/[\u0000-\u001f]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120) || 'Catálogo';
+  const caminhoInicial = `/catalogo/?loja=${encodeURIComponent(slug)}`;
+  const baseIcone = `/catalogo/icones/${slug}`;
+  return {
+    id: caminhoInicial,
+    name: nome,
+    short_name: nome.slice(0, 30),
+    description: `Catálogo online de ${nome}`,
+    lang: 'pt-BR',
+    start_url: caminhoInicial,
+    scope: '/catalogo/',
+    display: 'standalone',
+    orientation: 'portrait-primary',
+    theme_color: corManifestoCatalogo(url.searchParams.get('cor'), '#0f4c81'),
+    background_color: corManifestoCatalogo(url.searchParams.get('fundo'), '#ffffff'),
+    icons: [
+      { src: `${baseIcone}-192.png`, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: `${baseIcone}-512.png`, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+}
+
+function responderManifestoCatalogo(url) {
+  const manifesto = criarManifestoCatalogo(url);
+  if (!manifesto) return new Response('Catálogo inválido.', { status: 400 });
+  return new Response(JSON.stringify(manifesto), {
+    headers: {
+      'Content-Type': 'application/manifest+json; charset=utf-8',
+      'Cache-Control': 'no-store'
+    }
+  });
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then(async (cache) => {
     await cache.addAll(APP_SHELL);
@@ -33,8 +78,9 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+  const cachesPreservados = new Set([CACHE_NAME, CATALOG_ICON_CACHE]);
   event.waitUntil(caches.keys().then((keys) => Promise.all(
-    keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+    keys.filter((key) => !cachesPreservados.has(key)).map((key) => caches.delete(key))
   )));
   self.clients.claim();
 });
@@ -43,6 +89,19 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin && !TRUSTED_REMOTE_ORIGINS.has(url.origin)) return;
+
+  if (url.origin === self.location.origin && url.pathname === '/catalogo/manifest.webmanifest') {
+    event.respondWith(Promise.resolve(responderManifestoCatalogo(url)));
+    return;
+  }
+
+  if (url.origin === self.location.origin && /^\/catalogo\/icones\/[a-z0-9-]+-(?:192|512)\.png$/.test(url.pathname)) {
+    event.respondWith(caches.open(CATALOG_ICON_CACHE).then(async cache => {
+      const icone = await cache.match(url.pathname);
+      return icone || fetch(event.request);
+    }));
+    return;
+  }
 
   if (event.request.mode === 'navigate') {
     event.respondWith((async () => {

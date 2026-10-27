@@ -273,6 +273,12 @@
                     <!-- Pagamento -->
                     <div class="bg-white rounded-lg shadow-md p-4 lg:p-6 order-3">
                         <h2 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4">Pagamento</h2>
+                        <div class="mb-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                            <label for="vendedor-venda" class="block text-xs font-semibold text-slate-600">Vendedor (opcional)</label>
+                            <select id="vendedor-venda" class="mt-1 w-full border-0 bg-transparent p-1 text-sm text-slate-800 focus:ring-2 focus:ring-blue-500" onchange="salvarRascunhoVenda()">
+                                <option value="">Não informar funcionário</option>
+                            </select>
+                        </div>
                         <div id="pagamentos-grid" class="grid grid-cols-1 gap-2 lg:space-y-3 mb-3 lg:mb-4">
                             <button onclick="selecionarPagamento('dinheiro')" 
                                     class="w-full p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm lg:text-base">
@@ -837,7 +843,7 @@
                                     <p class="mt-1 text-xs text-slate-500">Escolha qualquer dia para consultar as vendas e os comprovantes.</p>
                                 </div>
                                 <div>
-                                    <label for="filtro-vendedor-relatorio" class="block text-sm font-semibold text-slate-700">Vendas por operador</label>
+                                    <label for="filtro-vendedor-relatorio" class="block text-sm font-semibold text-slate-700">Vendas por vendedor</label>
                                     <select id="filtro-vendedor-relatorio" class="mt-2 w-full rounded-lg border bg-white p-3" onchange="atualizarRelatorios()"><option value="">Todos os vendedores</option></select>
                                 </div>
                             </div>
@@ -903,15 +909,20 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 16/10/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 27/10/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v59" data-atualizacao="2026-10-16" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v64" data-atualizacao="2026-10-27" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Novidades agora avisam quando há atualização</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Funcionários vendedores e comissão</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
-                            <article class="rounded-xl border border-red-300 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Contador de atualizações no menu</h4><p class="mt-2 text-sm text-slate-700">Quando o PDV receber uma nova versão, o botão <strong>Novidades</strong> mostra uma bolinha vermelha com a quantidade de atualizações ainda não vistas. O número continua aumentando a cada nova versão e só desaparece quando o usuário abre <strong>Novidades</strong>.</p></article>
+                            <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">👤 Cadastre vendedores sem criar senha</h4><p class="mt-2 text-sm text-slate-700">Em <strong>ADM do PDV → Funcionários vendedores</strong>, informe apenas o nome e clique em <strong>Adicionar funcionário</strong>. Na tela de <strong>Vendas</strong>, escolha esse vendedor no campo discreto acima das formas de pagamento ou deixe em branco. Depois, em <strong>Relatórios → Calcular comissão</strong>, selecione o vendedor, o mês e a porcentagem para ver o total vendido e quanto pagar de comissão.</p></article>
+                            <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📲 Instale o catálogo da loja como aplicativo</h4><p class="mt-2 text-sm text-slate-700">No catálogo público, toque em <strong>Instalar catálogo</strong>. O celular cria um aplicativo com o <strong>nome e a logo cadastrados pela loja</strong> e, ao abrir, entra direto naquele catálogo. No iPhone, o botão mostra o caminho <strong>Compartilhar → Adicionar à Tela de Início</strong>.</p></article>
+                            <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">▣ Baixe o QR Code do catálogo em PDF A4</h4><p class="mt-2 text-sm text-slate-700">Depois de publicar o catálogo, abra <strong>Meu Catálogo</strong> e clique em <strong>Baixar cartaz com QR Code</strong>. O PDV gera uma folha A4 com o nome da loja, uma chamada para consultar produtos e preços, o endereço e um QR Code grande, pronta para imprimir, plastificar e colocar na porta ou no balcão.</p></article>
+                            <article class="rounded-xl border border-sky-400 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">🌐 Catálogo público criado normalmente</h4><p class="mt-2 text-sm text-slate-700">A publicação foi ajustada para contas comuns autorizadas. Em <strong>Meu Catálogo</strong>, preencha os dados e clique em <strong>Salvar e publicar catálogo</strong>; o sistema reserva o identificador para a empresa e cria o catálogo público com tema, produtos e horários, sem exigir o e-mail do administrador principal.</p></article>
+                            <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">🕒 Aberto, fechado e intervalo para almoço</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Meu Catálogo → Horário de funcionamento</strong>, ative a exibição, escolha os dias e informe um ou dois períodos por dia. Use o segundo período quando a loja fecha para almoço. No catálogo público, o cliente verá discretamente se a loja está aberta, até que horas funciona e quando abre novamente.</p></article>
+                            <article class="rounded-xl border border-red-300 bg-red-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-red-950">🔔 Novidades agora avisam quando há atualização</h4><p class="mt-2 text-sm text-slate-700"><strong>Contador de atualizações no menu:</strong> quando o PDV receber uma nova versão, o botão <strong>Novidades</strong> mostra uma bolinha vermelha com a quantidade de atualizações ainda não vistas. O número continua aumentando a cada nova versão e só desaparece quando o usuário abre <strong>Novidades</strong>.</p></article>
                             <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📱 PIX pronto no PDF do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao baixar o <strong>PDF A4</strong> de um orçamento, o documento agora inclui o QR Code PIX com o valor total, usando os dados cadastrados em <strong>ADM do PDV → Configuração PIX</strong>. Logo abaixo aparecem o recebedor, o banco e a chave PIX; se o cliente não conseguir escanear o código, pode digitar essa chave no aplicativo do banco.</p></article>
                             <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">✅ Finalize, imprima ou transforme o rascunho em venda</h4><p class="mt-2 text-sm text-slate-700">Os botões de PDF A4 e impressão térmica voltaram a funcionar. No histórico, até o rascunho pode ser impresso, finalizado ou enviado diretamente para <strong>Cliente aprovou / vender</strong>. Depois de finalizado, use <strong>Aprovar e vender</strong> para escolher o pagamento, baixar o estoque e registrar a venda.</p></article>
                             <article class="rounded-xl border border-violet-400 bg-violet-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-violet-950">🖨️ Escolha o tamanho do orçamento</h4><p class="mt-2 text-sm text-slate-700">Ao finalizar ou consultar um orçamento, escolha <strong>Baixar PDF A4</strong> para documentos comuns ou <strong>Imprimir térmica</strong> para gerar uma via compacta em bobina de 80 mm. As duas opções incluem empresa, cliente, itens, valores, validade e observações.</p></article>
@@ -1024,13 +1035,29 @@
                             <textarea id="catalogo-descricao" maxlength="500" rows="3" class="w-full rounded-lg border p-3 text-base" placeholder="Conte brevemente o que sua loja oferece"></textarea>
                         </div>
                     </div>
+                    <section class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 lg:p-5" aria-labelledby="catalogo-horarios-titulo">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div>
+                                <h3 id="catalogo-horarios-titulo" class="text-lg font-bold text-slate-900">Horário de funcionamento</h3>
+                                <p class="mt-1 max-w-2xl text-sm text-slate-600">Informe quando a loja atende. Para quem fecha no almoço, ative o segundo período do dia.</p>
+                            </div>
+                            <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-900">
+                                <input id="catalogo-exibir-horarios" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-emerald-600">
+                                Exibir no catálogo
+                            </label>
+                        </div>
+                        <div id="catalogo-horarios-lista" class="mt-4 grid gap-3" aria-live="polite"></div>
+                        <p class="mt-3 text-xs text-slate-500">O horário é calculado no fuso da loja e atualizado automaticamente para o cliente.</p>
+                    </section>
                     <div class="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4">
                         <label for="catalogo-link" class="mb-2 block text-sm font-semibold text-blue-900">Link do meu catálogo</label>
-                        <div class="flex flex-col gap-2 sm:flex-row">
-                            <input id="catalogo-link" readonly class="min-w-0 flex-1 rounded-lg border border-blue-200 bg-white p-3 text-sm text-blue-900" placeholder="Salve a configuração para gerar seu link">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                            <input id="catalogo-link" readonly class="min-w-0 flex-1 rounded-lg border border-blue-200 bg-white p-3 text-sm text-blue-900 sm:min-w-[280px]" placeholder="Salve a configuração para gerar seu link">
                             <button type="button" data-acao-link-catalogo onclick="copiarLinkCatalogo()" class="rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Copiar link</button>
                             <button type="button" data-acao-link-catalogo onclick="compartilharCatalogo()" class="rounded-lg bg-slate-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">Compartilhar</button>
+                            <button type="button" data-acao-link-catalogo onclick="baixarCartazCatalogo()" class="rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50">Baixar cartaz com QR Code</button>
                         </div>
+                        <p class="mt-2 text-xs text-blue-700">Gera um PDF A4 pronto para imprimir, plastificar e colocar na porta ou no balcão.</p>
                     </div>
                     <button id="btn-salvar-catalogo" type="button" onclick="salvarMeuCatalogo()" class="mt-5 w-full rounded-lg bg-teal-600 px-5 py-3 font-bold text-white hover:bg-teal-700 disabled:cursor-wait disabled:opacity-60 sm:w-auto">Salvar e publicar catálogo</button>
                     <p id="catalogo-status" class="mt-3 text-sm text-slate-600" role="status" aria-live="polite"></p>
@@ -1067,6 +1094,18 @@
                             <button id="btn-salvar-operador" type="button" onclick="salvarOperador()" class="mt-4 w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto">Adicionar acesso</button>
                             <p id="operadores-status" class="mt-3 text-sm text-slate-600" role="status"></p>
                             <div id="lista-operadores" class="mt-4 grid gap-3 lg:grid-cols-2"></div>
+                        </div>
+                        <div class="border rounded-lg p-4">
+                            <div class="mb-4">
+                                <h3 class="text-lg font-semibold text-emerald-700">👤 Funcionários vendedores</h3>
+                                <p class="mt-1 text-sm text-gray-600">Cadastre somente o nome. O funcionário não recebe login nem senha; ele aparece apenas para identificar a venda e calcular comissão.</p>
+                            </div>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <div class="flex-1"><label for="funcionario-nome" class="mb-1 block text-sm font-medium text-gray-700">Nome do funcionário *</label><input id="funcionario-nome" maxlength="80" class="w-full rounded-lg border p-3" placeholder="Ex.: Ana Souza" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); salvarFuncionario(); }"></div>
+                                <button id="btn-salvar-funcionario" type="button" onclick="salvarFuncionario()" class="self-end rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800">Adicionar funcionário</button>
+                            </div>
+                            <p id="funcionarios-status" class="mt-3 text-sm text-slate-600" role="status"></p>
+                            <div id="lista-funcionarios" class="mt-4 grid gap-3 lg:grid-cols-2"></div>
                         </div>
                         <!-- Configurações PIX -->
                         <div class="border rounded-lg p-4">
@@ -1560,7 +1599,7 @@
     <div id="modal-comissao" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="titulo-comissao">
         <div class="w-full max-w-xl rounded-2xl bg-white p-5 text-slate-800 shadow-2xl lg:p-6">
             <div class="flex items-start justify-between gap-4 border-b pb-4"><div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Relatório mensal</p><h2 id="titulo-comissao" class="text-2xl font-bold">Calcular comissão</h2></div><button type="button" onclick="fecharModalComissao()" class="rounded-lg bg-slate-100 px-3 py-2 text-2xl leading-none" aria-label="Fechar comissão">×</button></div>
-            <div class="mt-5 grid gap-4 sm:grid-cols-2"><div class="sm:col-span-2"><label for="comissao-operador" class="block text-sm font-semibold">Operador ou gerente</label><select id="comissao-operador" class="mt-1 w-full rounded-lg border bg-white p-3"></select></div><div><label for="comissao-mes" class="block text-sm font-semibold">Mês das vendas</label><input id="comissao-mes" type="month" class="mt-1 w-full rounded-lg border p-3"></div><div><label for="comissao-percentual" class="block text-sm font-semibold">Comissão (%)</label><input id="comissao-percentual" type="number" min="0" max="100" step="0.01" value="5" class="mt-1 w-full rounded-lg border p-3"></div></div>
+            <div class="mt-5 grid gap-4 sm:grid-cols-2"><div class="sm:col-span-2"><label for="comissao-operador" class="block text-sm font-semibold">Vendedor</label><select id="comissao-operador" class="mt-1 w-full rounded-lg border bg-white p-3"></select></div><div><label for="comissao-mes" class="block text-sm font-semibold">Mês das vendas</label><input id="comissao-mes" type="month" class="mt-1 w-full rounded-lg border p-3"></div><div><label for="comissao-percentual" class="block text-sm font-semibold">Comissão (%)</label><input id="comissao-percentual" type="number" min="0" max="100" step="0.01" value="5" class="mt-1 w-full rounded-lg border p-3"></div></div>
             <button type="button" onclick="calcularComissaoOperador()" class="mt-5 w-full rounded-lg bg-emerald-700 px-4 py-3 font-bold text-white hover:bg-emerald-800">Calcular comissão</button>
             <div id="resultado-comissao" class="mt-4 hidden rounded-xl border border-emerald-200 bg-emerald-50 p-4" role="status"></div>
         </div>
@@ -1668,6 +1707,7 @@ if ('serviceWorker' in navigator) {
         let clientesFiado = JSON.parse(localStorage.getItem('pdv_clientes_fiado') || '[]');
         let pagamentosFiado = JSON.parse(localStorage.getItem('pdv_pagamentos_fiado') || '[]');
         let movimentosSaldoCliente = JSON.parse(localStorage.getItem('pdv_movimentos_saldo_cliente') || '[]');
+        let funcionarios = JSON.parse(localStorage.getItem('pdv_funcionarios') || '[]');
         // O Financeiro só é preenchido depois da autenticação, usando a cópia
         // vinculada ao UID do titular. Nunca carregue dados financeiros globais.
         let lancamentosFinanceiros = [];
@@ -1689,6 +1729,7 @@ if ('serviceWorker' in navigator) {
             clientesFiado: { get: () => clientesFiado, set: v => { clientesFiado = v; } },
             pagamentosFiado: { get: () => pagamentosFiado, set: v => { pagamentosFiado = v; } },
             movimentosSaldoCliente: { get: () => movimentosSaldoCliente, set: v => { movimentosSaldoCliente = v; } },
+            funcionarios: { get: () => funcionarios, set: v => { funcionarios = Array.isArray(v) ? v : []; } },
             lancamentosFinanceiros: { get: () => lancamentosFinanceiros, set: v => { lancamentosFinanceiros = v; } },
             saldosIniciaisFinanceiros: { get: () => saldosIniciaisFinanceiros, set: v => { saldosIniciaisFinanceiros = v; } },
             orcamentos: { get: () => orcamentos, set: v => { orcamentos = v; } },
@@ -1706,6 +1747,91 @@ if ('serviceWorker' in navigator) {
                 email: usuario.email || '',
                 tipo: ehGerenteAtual() ? 'gerente' : ehOperadorAtual() ? 'operador' : 'titular'
             };
+        }
+
+        function vendedorDaVenda() {
+            const funcionarioId = document.getElementById('vendedor-venda')?.value || '';
+            const funcionario = funcionarios.find(item => item.id === funcionarioId);
+            if (!funcionario) return vendedorAtual();
+            return { id: funcionario.id, nome: funcionario.nome, tipo: 'funcionario' };
+        }
+
+        function atualizarFuncionarios() {
+            funcionarios = funcionarios
+                .filter(item => item && item.id && String(item.nome || '').trim())
+                .map(item => ({ ...item, nome: String(item.nome).trim() }))
+                .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+            const seletor = document.getElementById('vendedor-venda');
+            if (seletor) {
+                const selecionado = seletor.value;
+                seletor.replaceChildren(new Option('Não informar funcionário', ''));
+                funcionarios.forEach(funcionario => seletor.add(new Option(funcionario.nome, funcionario.id)));
+                seletor.value = funcionarios.some(funcionario => funcionario.id === selecionado) ? selecionado : '';
+            }
+
+            const lista = document.getElementById('lista-funcionarios');
+            if (!lista) return;
+            if (!funcionarios.length) {
+                lista.innerHTML = '<p class="rounded-lg border border-dashed p-4 text-sm text-slate-500">Nenhum funcionário vendedor cadastrado ainda.</p>';
+                return;
+            }
+            lista.replaceChildren(...funcionarios.map(funcionario => {
+                const card = document.createElement('article');
+                card.className = 'flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4';
+                const info = document.createElement('div');
+                const nome = document.createElement('strong');
+                nome.className = 'block text-slate-900';
+                nome.textContent = funcionario.nome;
+                const detalhe = document.createElement('span');
+                detalhe.className = 'mt-1 block text-xs font-semibold text-emerald-700';
+                detalhe.textContent = 'Vendedor sem acesso ao sistema';
+                info.append(nome, detalhe);
+                const excluir = document.createElement('button');
+                excluir.type = 'button';
+                excluir.className = 'rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-200';
+                excluir.textContent = 'Excluir';
+                excluir.addEventListener('click', () => excluirFuncionario(funcionario.id));
+                card.append(info, excluir);
+                return card;
+            }));
+        }
+
+        function salvarFuncionario() {
+            if (!exigirTitular('O cadastro de funcionários está disponível somente para o titular.')) return;
+            const campo = document.getElementById('funcionario-nome');
+            const nome = String(campo?.value || '').replace(/\s+/g, ' ').trim();
+            const status = document.getElementById('funcionarios-status');
+            if (!nome) {
+                if (status) { status.textContent = 'Informe o nome do funcionário.'; status.className = 'mt-3 text-sm text-red-600'; }
+                campo?.focus();
+                return;
+            }
+            if (funcionarios.some(item => item.nome.localeCompare(nome, 'pt-BR', { sensitivity: 'base' }) === 0)) {
+                if (status) { status.textContent = 'Já existe um funcionário com esse nome.'; status.className = 'mt-3 text-sm text-red-600'; }
+                campo?.focus();
+                return;
+            }
+            funcionarios.push({
+                id: `func_${globalThis.crypto?.randomUUID?.() || `${Date.now()}_${Math.random().toString(36).slice(2)}`}`,
+                nome,
+                criadoEm: new Date().toISOString()
+            });
+            if (campo) campo.value = '';
+            salvarDados();
+            atualizarFuncionarios();
+            if (status) { status.textContent = `${nome} foi adicionado e já pode ser escolhido nas vendas.`; status.className = 'mt-3 text-sm text-green-700'; }
+        }
+
+        function excluirFuncionario(id) {
+            if (!exigirTitular('O cadastro de funcionários está disponível somente para o titular.')) return;
+            const funcionario = funcionarios.find(item => item.id === id);
+            if (!funcionario || !confirm(`Excluir o funcionário ${funcionario.nome}?\n\nAs vendas antigas e as comissões já registradas continuarão no histórico.`)) return;
+            funcionarios = funcionarios.filter(item => item.id !== id);
+            salvarDados();
+            atualizarFuncionarios();
+            const status = document.getElementById('funcionarios-status');
+            if (status) { status.textContent = `${funcionario.nome} foi removido da lista de novas vendas.`; status.className = 'mt-3 text-sm text-green-700'; }
         }
 
         function exigirTitular(mensagem = 'Esta ação está disponível somente para o titular da empresa.') {
@@ -3980,7 +4106,8 @@ function showInstallButton() {
                 clienteId: clienteSelecionado?.id || '',
                 clienteNome: clienteSelecionado?.nome || '',
                 caixaId: caixa.id,
-                vendedor: vendedorAtual()
+                vendedor: vendedorDaVenda(),
+                registradoPor: vendedorAtual()
             };
 
             // Atualizar estoque
@@ -4040,6 +4167,7 @@ function showInstallButton() {
             document.getElementById('tipo-cartao').value = 'credito';
             document.getElementById('parcelas').value = '1';
             document.getElementById('cliente-venda').value = '';
+            document.getElementById('vendedor-venda').value = '';
             document.getElementById('fiado-vencimento').value = '';
             document.getElementById('usar-saldo-cliente').checked = false;
             document.getElementById('valor-saldo-cliente').value = '';
@@ -4890,6 +5018,7 @@ function showInstallButton() {
         function abrirModalComissao() {
             if (!exigirTitular('O cálculo de comissão está disponível somente para o titular.')) return;
             const vendedores = new Map();
+            funcionarios.forEach(funcionario => vendedores.set(funcionario.id, funcionario.nome));
             vendas.forEach(venda => {
                 const chave = chaveVendedorVenda(venda);
                 if (chave !== 'titular' && venda.vendedor?.tipo !== 'titular') vendedores.set(chave, nomeVendedorVenda(venda));
@@ -4920,7 +5049,7 @@ function showInstallButton() {
             const vendedorId = document.getElementById('comissao-operador').value;
             const mes = document.getElementById('comissao-mes').value;
             const percentual = Number(document.getElementById('comissao-percentual').value);
-            if (!vendedorId) return mostrarMensagem('Selecione o operador ou gerente.', 'erro');
+            if (!vendedorId) return mostrarMensagem('Selecione o vendedor.', 'erro');
             if (!/^\d{4}-\d{2}$/.test(mes)) return mostrarMensagem('Escolha o mês das vendas.', 'erro');
             if (!Number.isFinite(percentual) || percentual < 0 || percentual > 100) return mostrarMensagem('Informe uma porcentagem entre 0 e 100.', 'erro');
             const vendasDoMes = vendas.filter(venda => chaveVendedorVenda(venda) === vendedorId && chaveDataRelatorio(venda.data).slice(0, 7) === mes);
@@ -5350,10 +5479,11 @@ function showInstallButton() {
         }
 
         async function exportarBackup() {
-    const backup = {
+        const backup = {
         produtos: produtos,
         vendas: vendas,
         vendasSuspensas: vendasSuspensas,
+        funcionarios: funcionarios,
         movimentos: movimentos,
         caixas: caixas,
         clientesFiado: clientesFiado,
@@ -5639,6 +5769,7 @@ function showInstallButton() {
             clientesFiado = [];
             pagamentosFiado = [];
             movimentosSaldoCliente = [];
+            funcionarios = [];
             lancamentosFinanceiros = [];
             saldosIniciaisFinanceiros = {};
             orcamentos = [];
@@ -5661,6 +5792,7 @@ function showInstallButton() {
             localStorage.removeItem('pdv_clientes_fiado');
             localStorage.removeItem('pdv_pagamentos_fiado');
             localStorage.removeItem('pdv_movimentos_saldo_cliente');
+            localStorage.removeItem('pdv_funcionarios');
             localStorage.removeItem('pdv_lancamentos_financeiros');
             localStorage.removeItem('pdv_saldos_iniciais_financeiros');
             localStorage.removeItem('pdv_config_sistema');
@@ -5708,6 +5840,7 @@ function showInstallButton() {
                     clientesFiado = backup.clientesFiado || [];
                     pagamentosFiado = backup.pagamentosFiado || [];
                     movimentosSaldoCliente = backup.movimentosSaldoCliente || [];
+                    funcionarios = Array.isArray(backup.funcionarios) ? backup.funcionarios : [];
                     lancamentosFinanceiros = backup.lancamentosFinanceiros || [];
                     saldosIniciaisFinanceiros = backup.saldosIniciaisFinanceiros || {};
                     orcamentos = backup.orcamentos || [];
@@ -6350,7 +6483,7 @@ function showInstallButton() {
             const estoquesNegativos = estoquesNegativosAposConsumo(consumoPorEstoque);
             const agora = new Date().toISOString();
             const pagamento = formas.length === 1 ? { ...formas[0], valorCobrado: Number(orcamento.total) } : { tipo: 'misto', dividido: true, formas, valorCobrado: Number(orcamento.total), clienteId: cliente?.id || '', clienteNome: cliente?.nome || '' };
-            const venda = { id: `v_${Date.now()}`, data: agora, itens: itensVenda, subtotal: Number(orcamento.subtotal), desconto: Number(orcamento.descontoPercentual || 0), descontoTipo: orcamento.descontoTipo || 'percentual', descontoInformado: Number(orcamento.descontoInformado ?? orcamento.descontoPercentual ?? 0), valorDesconto: Number(orcamento.valorDesconto || 0), total: Number(orcamento.total), pagamento, clienteId: cliente?.id || '', clienteNome: cliente?.nome || orcamento.cliente?.nome || '', caixaId: caixa.id, vendedor: vendedorAtual(), origem: 'orcamento', orcamentoId: orcamento.id };
+            const venda = { id: `v_${Date.now()}`, data: agora, itens: itensVenda, subtotal: Number(orcamento.subtotal), desconto: Number(orcamento.descontoPercentual || 0), descontoTipo: orcamento.descontoTipo || 'percentual', descontoInformado: Number(orcamento.descontoInformado ?? orcamento.descontoPercentual ?? 0), valorDesconto: Number(orcamento.valorDesconto || 0), total: Number(orcamento.total), pagamento, clienteId: cliente?.id || '', clienteNome: cliente?.nome || orcamento.cliente?.nome || '', caixaId: caixa.id, vendedor: vendedorDaVenda(), registradoPor: vendedorAtual(), origem: 'orcamento', orcamentoId: orcamento.id };
             consumoPorEstoque.forEach((quantidade, estoqueId) => { const raiz = produtos.find(produto => produto.id === estoqueId); raiz.estoque = Number(raiz.estoque || 0) - quantidade; });
             normalizarEstoquesVinculados();
             vendas.push(venda);
@@ -6645,6 +6778,7 @@ function showInstallButton() {
             localStorage.setItem('pdv_clientes_fiado', JSON.stringify(clientesFiado));
             localStorage.setItem('pdv_pagamentos_fiado', JSON.stringify(pagamentosFiado));
             localStorage.setItem('pdv_movimentos_saldo_cliente', JSON.stringify(movimentosSaldoCliente));
+            localStorage.setItem('pdv_funcionarios', JSON.stringify(funcionarios));
             localStorage.setItem('pdv_orcamentos', JSON.stringify(orcamentos));
             atualizarNotificacaoEstoque();
             atualizarVendasSuspensas();
@@ -6661,6 +6795,7 @@ function showInstallButton() {
                 tipoCartao: document.getElementById('tipo-cartao').value,
                 parcelas: document.getElementById('parcelas').value,
                 clienteId: document.getElementById('cliente-venda').value,
+                vendedorId: document.getElementById('vendedor-venda').value,
                 usarSaldoCliente: document.getElementById('usar-saldo-cliente').checked,
                 valorSaldoCliente: document.getElementById('valor-saldo-cliente').value,
                 fiadoVencimento: document.getElementById('fiado-vencimento').value,
@@ -6695,6 +6830,8 @@ function showInstallButton() {
             document.getElementById('parcelas').value = rascunho.parcelas || '1';
             atualizarSelectClientes();
             document.getElementById('cliente-venda').value = rascunho.clienteId || '';
+            atualizarFuncionarios();
+            document.getElementById('vendedor-venda').value = funcionarios.some(funcionario => funcionario.id === rascunho.vendedorId) ? rascunho.vendedorId : '';
             atualizarClienteVendaSelecionado();
             document.getElementById('usar-saldo-cliente').checked = !!rascunho.usarSaldoCliente;
             document.getElementById('valor-saldo-cliente').value = rascunho.valorSaldoCliente || '';
@@ -6872,6 +7009,7 @@ function showInstallButton() {
             atualizarNotificacaoEstoque();
             atualizarNotificacaoNovidades();
             atualizarVendasSuspensas();
+            atualizarFuncionarios();
         }
     </script>
     <script src="/clientes-financeiro.js"></script>

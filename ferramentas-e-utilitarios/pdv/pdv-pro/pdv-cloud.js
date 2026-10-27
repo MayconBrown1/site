@@ -20,6 +20,7 @@ function state() {
     ownerUid: uid,
     produtos: window.produtos || [], vendas: window.vendas || [], vendasSuspensas: window.vendasSuspensas || [], movimentos: window.movimentos || [], caixas: window.caixas || [],
     clientesFiado: window.clientesFiado || [], pagamentosFiado: window.pagamentosFiado || [], movimentosSaldoCliente: window.movimentosSaldoCliente || [],
+    funcionarios: window.funcionarios || [],
     orcamentos: window.orcamentos || [],
     categorias: window.categorias || [], categoriasOcultas: window.categoriasOcultas || [],
     configSistema: configSemSenha, configPix: window.CONFIG_PIX || {}
@@ -88,7 +89,7 @@ function mergeRecords(field, baseState, localState, remoteState) {
 
 function mergeState(baseState, localState, remoteState) {
   const merged = { ...remoteState, ownerUid: uid };
-  ['produtos', 'vendas', 'vendasSuspensas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'movimentosSaldoCliente', 'orcamentos']
+  ['produtos', 'vendas', 'vendasSuspensas', 'movimentos', 'caixas', 'clientesFiado', 'pagamentosFiado', 'movimentosSaldoCliente', 'funcionarios', 'orcamentos']
     .forEach(field => { merged[field] = mergeRecords(field, baseState, localState, remoteState); });
   ['categorias', 'categoriasOcultas', 'configSistema', 'configPix'].forEach(field => {
     merged[field] = same(localState[field], baseState?.[field]) ? (remoteState?.[field] ?? localState[field]) : localState[field];
@@ -145,6 +146,7 @@ function aplicarEstado(valor) {
   writing = true;
   window.produtos = d.produtos || []; window.vendas = d.vendas || []; window.vendasSuspensas = d.vendasSuspensas || []; window.movimentos = d.movimentos || []; window.caixas = d.caixas || [];
   window.clientesFiado = d.clientesFiado || []; window.pagamentosFiado = d.pagamentosFiado || []; window.movimentosSaldoCliente = d.movimentosSaldoCliente || [];
+  window.funcionarios = d.funcionarios || [];
   window.orcamentos = d.orcamentos || [];
   window.categorias = d.categorias || []; window.categoriasOcultas = d.categoriasOcultas || [];
   window.configSistema = d.configSistema || { nomeEmpresa: 'PDV - Pro', cnpj: '' };
@@ -269,7 +271,7 @@ async function salvarFinanceiroNuvem() {
 function iniciarContaVazia() {
   aplicarEstado({
     ownerUid: uid, produtos: [], vendas: [], vendasSuspensas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [],
-    orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao
+    funcionarios: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: { nomeEmpresa: 'PDV - Pro', cnpj: '' }, configPix: pixPadrao
   });
   salvarNuvem();
 }
@@ -406,7 +408,7 @@ protegerPagina(async (user, perfil) => {
 
   const chavesQueAlteramEstado = new Set([
     'pdv_produtos', 'pdv_vendas', 'pdv_vendas_suspensas', 'pdv_movimentos', 'pdv_caixas', 'pdv_categorias', 'pdv_categorias_ocultas',
-    'pdv_config_sistema', 'pdv_clientes_fiado', 'pdv_pagamentos_fiado', 'pdv_movimentos_saldo_cliente', 'pdv_orcamentos', 'pdv_config_pix'
+    'pdv_config_sistema', 'pdv_clientes_fiado', 'pdv_pagamentos_fiado', 'pdv_movimentos_saldo_cliente', 'pdv_funcionarios', 'pdv_orcamentos', 'pdv_config_pix'
   ]);
   const storageSet = Storage.prototype.setItem;
   Storage.prototype.setItem = function(k, v) {

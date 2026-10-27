@@ -44,7 +44,11 @@ for (const marker of [
   'function atualizarNotificacaoEstoque',
   'function produtoRaizEstoque',
   'function restaurarEstoqueDosItens',
-  'vendedor: vendedorAtual()',
+  'vendedor: vendedorDaVenda()',
+  'vendedor-venda',
+  'funcionario-nome',
+  'function salvarFuncionario',
+  "tipo: 'funcionario'",
   'function aplicarPermissoesUsuario',
   'filtro-vendedor-relatorio',
   'filtro-data-relatorio',
@@ -89,6 +93,20 @@ for (const marker of [
 ]) {
   if (!html.includes(marker)) throw new Error(`Recurso ausente em index.html: ${marker}`);
 }
+
+const vendedorDaVendaStart = html.indexOf('function vendedorDaVenda');
+const vendedorDaVendaEnd = html.indexOf('function atualizarFuncionarios', vendedorDaVendaStart);
+if (vendedorDaVendaStart < 0 || vendedorDaVendaEnd < 0) throw new Error('Não foi possível localizar a escolha do funcionário vendedor.');
+const campoVendedorTeste = { value: 'func-1' };
+const criarEscolhaVendedor = new Function('document', 'funcionarios', 'vendedorAtual', `${html.slice(vendedorDaVendaStart, vendedorDaVendaEnd)}; return vendedorDaVenda;`);
+const escolherVendedor = criarEscolhaVendedor(
+  { getElementById: id => id === 'vendedor-venda' ? campoVendedorTeste : null },
+  [{ id: 'func-1', nome: 'Vendedora Teste' }],
+  () => ({ id: 'op-1', nome: 'Operador Teste', tipo: 'operador' })
+);
+if (escolherVendedor().id !== 'func-1' || escolherVendedor().tipo !== 'funcionario') throw new Error('O funcionário escolhido não foi vinculado à venda.');
+campoVendedorTeste.value = '';
+if (escolherVendedor().id !== 'op-1') throw new Error('A venda sem funcionário não preservou o operador atual.');
 
 for (const marker of [
   'Cadastro de clientes',
@@ -247,6 +265,12 @@ const cacheDasNovidades = html.match(/data-novidades-cache="([^"]+)"/)?.[1];
 if (!cacheAtual || !cacheDasNovidades || cacheAtual !== cacheDasNovidades) {
   throw new Error(`ATUALIZE A ÁREA NOVIDADES: o cache do aplicativo (${cacheAtual || 'não encontrado'}) precisa ser igual ao registro mais recente (${cacheDasNovidades || 'não encontrado'}).`);
 }
+const numeroCacheAtual = cacheAtual.match(/-v(\d+)$/)?.[1];
+if (!numeroCacheAtual
+  || !publicCatalogHtml.includes(`href="/catalogo/catalogo.css?v=${numeroCacheAtual}"`)
+  || !publicCatalogHtml.includes(`src="/catalogo/catalogo.js?v=${numeroCacheAtual}"`)) {
+  throw new Error('O catálogo público precisa usar a versão atual do cache nos arquivos CSS e JavaScript.');
+}
 
 for (const [nome, fonte, marcadores] of [
   ['PDV principal', html, ['src="/pdv-cloud.js"', 'href="/login"', 'src="/clientes-financeiro.js"']],
@@ -254,7 +278,7 @@ for (const [nome, fonte, marcadores] of [
   ['cadastro', cadastroSource, ['href="/login"', "from'/firebase-config.js'", 'src="/pwa-install.js"']],
   ['administração', adminSource, ["from'/firebase-config.js'", "from'/auth.js'", "location.replace('/login')"]],
   ['autenticação', authSource, ["from '/firebase-config.js'", "location.replace('/')", "location.replace('/login')"]],
-  ['catálogo público', publicCatalogHtml, ['href="/catalogo/catalogo.css"', 'src="/catalogo/catalogo.js"']],
+  ['catálogo público', publicCatalogHtml, ['href="/catalogo/catalogo.css?v=', 'src="/catalogo/catalogo.js?v=']],
   ['publicação do catálogo', catalogAdminSource, ["from '/firebase-config.js'", "new URL('/catalogo/'"]],
   ['instalação PWA', pwaInstallSource, ["register('/sw.js', { updateViaCache: 'none' })", 'registro.update()']],
   ['service worker', serviceWorkerSource, ["'/login'", "'/cadastro'", 'ROTAS_CANONICAS', "caches.match('/')", 'status: 503']]
@@ -268,6 +292,22 @@ if (manifest.start_url !== '/' || manifest.scope !== '/' || manifest.icons?.[0]?
   throw new Error('O manifesto não está apontando para a raiz da hospedagem Cloudflare.');
 }
 new Function(serviceWorkerSource);
+const manifestoCatalogoStart = serviceWorkerSource.indexOf('function corManifestoCatalogo');
+const manifestoCatalogoEnd = serviceWorkerSource.indexOf("self.addEventListener('install'", manifestoCatalogoStart);
+if (manifestoCatalogoStart < 0 || manifestoCatalogoEnd < 0) throw new Error('Não foi possível localizar o manifesto individual dos catálogos.');
+const criarManifestoCatalogoTeste = new Function(`${serviceWorkerSource.slice(manifestoCatalogoStart, manifestoCatalogoEnd)}; return criarManifestoCatalogo;`)();
+const manifestoCatalogoTeste = criarManifestoCatalogoTeste(new URL('https://exemplo.com/catalogo/manifest.webmanifest?loja=loja-teste&nome=Loja%20Teste&cor=%23123456&fundo=%23abcdef'));
+if (manifestoCatalogoTeste?.name !== 'Loja Teste'
+  || manifestoCatalogoTeste.id !== '/catalogo/?loja=loja-teste'
+  || manifestoCatalogoTeste.start_url !== '/catalogo/?loja=loja-teste'
+  || manifestoCatalogoTeste.icons?.[0]?.sizes !== '192x192'
+  || manifestoCatalogoTeste.icons?.[1]?.sizes !== '512x512'
+  || manifestoCatalogoTeste.theme_color !== '#123456') {
+  throw new Error('O manifesto do catálogo não preservou nome, endereço, cores e ícones da loja.');
+}
+if (criarManifestoCatalogoTeste(new URL('https://exemplo.com/catalogo/manifest.webmanifest?loja=slug%20invalido')) !== null) {
+  throw new Error('O manifesto aceitou um identificador de catálogo inválido.');
+}
 const rotasStart = serviceWorkerSource.indexOf('const ROTAS_CANONICAS');
 const rotasEnd = serviceWorkerSource.indexOf("self.addEventListener('install'", rotasStart);
 if (rotasStart < 0 || rotasEnd < 0) throw new Error('As rotas offline do aplicativo instalado não foram encontradas.');
@@ -366,11 +406,83 @@ for (const [nome, tema] of Object.entries(themeHelpers.TEMAS_PREDEFINIDOS)) {
 for (const marker of ['function temaPublicoAtual', 'tema: temaPublicoAtual()']) {
   if (!catalogAdminSource.includes(marker)) throw new Error(`Sincronização do tema com o catálogo incompleta: ${marker}`);
 }
+for (const marker of ['catalogo-exibir-horarios', 'catalogo-horarios-lista', 'Fecha para almoço e abre novamente', 'horariosFuncionamento: leituraHorarios.horarios']) {
+  if (!html.includes(marker) && !catalogAdminSource.includes(marker)) throw new Error(`Configuração do horário do catálogo incompleta: ${marker}`);
+}
+for (const marker of ['Baixar cartaz com QR Code', 'function criarCanvasQrCatalogo', 'function baixarCartazCatalogo', 'cartaz-catalogo-${slug}.pdf', 'window.baixarCartazCatalogo = baixarCartazCatalogo']) {
+  if (!html.includes(marker) && !catalogAdminSource.includes(marker)) throw new Error(`Cartaz A4 do catálogo incompleto: ${marker}`);
+}
+const cartazCatalogoStart = catalogAdminSource.indexOf('function criarCanvasQrCatalogo');
+const cartazCatalogoEnd = catalogAdminSource.indexOf('function ajustarSlugCatalogo', cartazCatalogoStart);
+if (cartazCatalogoStart < 0 || cartazCatalogoEnd < 0) throw new Error('Não foi possível localizar a geração do cartaz do catálogo.');
+let arquivoCartazTeste = '';
+let payloadQrCartazTeste = '';
+let statusCartazTeste = '';
+class PdfCartazTeste {
+  constructor() { this.internal = { pageSize: { getWidth: () => 210, getHeight: () => 297 } }; }
+  setProperties() {}
+  setFillColor() {}
+  rect() {}
+  setTextColor() {}
+  setFont() {}
+  setFontSize() {}
+  splitTextToSize(valor) { return [String(valor)]; }
+  text() {}
+  setDrawColor() {}
+  setLineWidth() {}
+  roundedRect() {}
+  addImage() {}
+  save(nome) { arquivoCartazTeste = nome; }
+}
+const janelaCartazTeste = {
+  configSistema: { catalogo: { nomeLoja: 'Loja Teste', slug: 'loja-teste', ativo: true } },
+  jspdf: { jsPDF: PdfCartazTeste },
+  qrcode: () => ({
+    addData(payload) { payloadQrCartazTeste = payload; },
+    make() {},
+    getModuleCount: () => 21,
+    isDark: (linha, coluna) => (linha + coluna) % 2 === 0
+  })
+};
+const camposCartazTeste = {
+  'catalogo-link': { value: 'https://pdvpro.mayconbrown.com.br/catalogo/?loja=loja-teste' },
+  'catalogo-nome-loja': { value: 'Loja Teste' },
+  'catalogo-slug': { value: 'loja-teste' }
+};
+const documentoCartazTeste = {
+  getElementById: id => camposCartazTeste[id] || null,
+  createElement: () => ({
+    getContext: () => ({ fillRect() {} }),
+    toDataURL: () => 'data:image/png;base64,teste'
+  })
+};
+const criarCartazCatalogoTeste = new Function('window', 'document', 'normalizarSlugCatalogo', 'definirStatus', `${catalogAdminSource.slice(cartazCatalogoStart, cartazCatalogoEnd)}; return baixarCartazCatalogo;`);
+criarCartazCatalogoTeste(janelaCartazTeste, documentoCartazTeste, valor => String(valor), texto => { statusCartazTeste = texto; })();
+if (payloadQrCartazTeste !== camposCartazTeste['catalogo-link'].value || arquivoCartazTeste !== 'cartaz-catalogo-loja-teste.pdf' || !statusCartazTeste.includes('pronto para imprimir')) {
+  throw new Error('O cartaz A4 não foi gerado com o link, o nome do arquivo e a confirmação esperados.');
+}
 for (const marker of ['function aplicarTemaCatalogo', 'aplicarTemaCatalogo(loja.tema)', '--tema-imagem', '--raio-cartao', '--raio-botao', '--recorte-botao']) {
   if (!publicCatalogSource.includes(marker) && !publicCatalogCss.includes(marker)) throw new Error(`Tema do catálogo público incompleto: ${marker}`);
 }
+for (const marker of ['horario-loja', 'horario-bolinha', 'function calcularStatusFuncionamento', 'renderizarHorarioFuncionamento(loja.horariosFuncionamento)', '@keyframes pulso-aberto']) {
+  if (!publicCatalogHtml.includes(marker) && !publicCatalogSource.includes(marker) && !publicCatalogCss.includes(marker)) throw new Error(`Exibição pública do horário incompleta: ${marker}`);
+}
+for (const marker of ['instalar-catalogo', 'beforeinstallprompt', 'function configurarInstalacaoCatalogo', 'function salvarIconesCatalogo', 'apple-mobile-web-app-title', 'pdv-catalog-icons-v1', '/catalogo/manifest.webmanifest', "purpose: 'any maskable'"]) {
+  if (!publicCatalogHtml.includes(marker) && !publicCatalogSource.includes(marker) && !publicCatalogCss.includes(marker) && !serviceWorkerSource.includes(marker)) {
+    throw new Error(`Instalação individual do catálogo incompleta: ${marker}`);
+  }
+}
+if (!html.includes('Instale o catálogo da loja como aplicativo')) {
+  throw new Error('A instalação do catálogo não foi registrada nas Novidades.');
+}
 if (!firestoreRules.includes("'descricaoCurta', 'tema', 'ativo'")) throw new Error('As regras públicas não permitem a projeção sanitizada do tema.');
-if (!firestoreRules.includes('request.resource.data.tema.formatoBotao')) throw new Error('As regras públicas não permitem salvar o formato dos botões.');
+for (const marker of [
+  'allow create, update: if validCatalogSlug(slug) && (owner() || catalogOwner(slug))',
+  'request.resource.data.horariosFuncionamento is map',
+  'request.resource.data.tema is map'
+]) {
+  if (!firestoreRules.includes(marker)) throw new Error(`Publicação segura do catálogo ausente nas regras do Firebase: ${marker}`);
+}
 if (!catalogAdminSource.includes('formatoBotao:')) throw new Error('A publicação do catálogo não inclui o formato dos botões.');
 const catalogThemeStart = publicCatalogSource.indexOf('const TEMA_CATALOGO_PADRAO');
 const catalogThemeEnd = publicCatalogSource.indexOf('const elementos', catalogThemeStart);
@@ -381,6 +493,30 @@ if (catalogThemeHelpers.caminhoImagemTemaCatalogo('./assets/temas/pet-shop.webp'
 if (catalogThemeHelpers.caminhoImagemTemaCatalogo('javascript:alert(1)') !== '') throw new Error('O catálogo aceitou um protocolo de imagem inseguro.');
 const temaCatalogoTeste = catalogThemeHelpers.normalizarTemaCatalogo({ fundo: '#16090d', botao: '#c18a2d', imagem: '/assets/temas/adega.webp' });
 if (temaCatalogoTeste.fundo !== '#16090d' || temaCatalogoTeste.botao !== '#c18a2d' || temaCatalogoTeste.imagem !== '/assets/temas/adega.webp') throw new Error('A aparência do tema não chegou corretamente ao catálogo.');
+
+const catalogHoursAdminStart = catalogAdminSource.indexOf('const DIAS_HORARIO_CATALOGO');
+const catalogHoursAdminEnd = catalogAdminSource.indexOf('function criarLinhaHorarioCatalogo', catalogHoursAdminStart);
+if (catalogHoursAdminStart < 0 || catalogHoursAdminEnd < 0) throw new Error('Não foi possível localizar a configuração do horário do catálogo.');
+const catalogHoursAdminHelpers = new Function(`${catalogAdminSource.slice(catalogHoursAdminStart, catalogHoursAdminEnd).replace(/export\s+/g, '')}; return { normalizarHorariosFuncionamento };`)();
+const horariosNormalizadosTeste = catalogHoursAdminHelpers.normalizarHorariosFuncionamento({ exibir: true, fusoHorario: 'UTC', dias: [{ aberto: true, inicio1: '09:00', fim1: '18:00' }] });
+if (!horariosNormalizadosTeste.exibir || horariosNormalizadosTeste.dias.length !== 7 || horariosNormalizadosTeste.dias[0].inicio1 !== '09:00') {
+  throw new Error('A configuração semanal do catálogo não foi normalizada corretamente.');
+}
+
+const catalogHoursPublicStart = publicCatalogSource.indexOf('const NOMES_DIAS_CATALOGO');
+const catalogHoursPublicEnd = publicCatalogSource.indexOf('const elementos', catalogHoursPublicStart);
+if (catalogHoursPublicStart < 0 || catalogHoursPublicEnd < 0) throw new Error('Não foi possível localizar o cálculo público do horário.');
+const catalogHoursPublicHelpers = new Function(`${publicCatalogSource.slice(catalogHoursPublicStart, catalogHoursPublicEnd).replace(/export\s+/g, '')}; return { calcularStatusFuncionamento };`)();
+const diasHorarioTeste = Array.from({ length: 7 }, () => ({ aberto: false, inicio1: '08:00', fim1: '12:00', intervalo: false, inicio2: '14:00', fim2: '18:00' }));
+diasHorarioTeste[1] = { aberto: true, inicio1: '08:00', fim1: '12:00', intervalo: true, inicio2: '14:00', fim2: '18:00' };
+diasHorarioTeste[2] = { aberto: true, inicio1: '08:00', fim1: '18:00', intervalo: false, inicio2: '14:00', fim2: '18:00' };
+const horariosPublicosTeste = { exibir: true, fusoHorario: 'UTC', dias: diasHorarioTeste };
+const statusAntesDoAlmoco = catalogHoursPublicHelpers.calcularStatusFuncionamento(horariosPublicosTeste, new Date('2026-10-19T11:00:00Z'));
+const statusNoAlmoco = catalogHoursPublicHelpers.calcularStatusFuncionamento(horariosPublicosTeste, new Date('2026-10-19T13:00:00Z'));
+const statusDepoisDoExpediente = catalogHoursPublicHelpers.calcularStatusFuncionamento(horariosPublicosTeste, new Date('2026-10-19T19:00:00Z'));
+if (!statusAntesDoAlmoco?.aberto || !statusAntesDoAlmoco.detalhe.includes('volta às 14:00')) throw new Error('O catálogo não informa o retorno após o almoço.');
+if (statusNoAlmoco?.aberto || statusNoAlmoco?.detalhe !== 'Abre novamente às 14:00') throw new Error('O catálogo não reconhece o intervalo de almoço.');
+if (statusDepoisDoExpediente?.aberto || statusDepoisDoExpediente?.detalhe !== 'Abre amanhã às 08:00') throw new Error('O catálogo não informa a próxima abertura.');
 
 const featureContext = {
   console,
@@ -526,12 +662,14 @@ const vendaContext = {
   }).filter(item => item.saldo < 0),
   mensagemEstoqueNegativo: itens => `Venda finalizada. Produto(s) sem estoque: ${itens.map(item => `${item.nome} saldo ${item.saldo}`).join(', ')}`,
   normalizarEstoquesVinculados: () => {},
+  vendedorDaVenda: () => ({ id: 'func-1', nome: 'Vendedora Teste', tipo: 'funcionario' }),
   vendedorAtual: () => ({ id: 'titular', nome: 'Titular' }),
   salvarDados: () => {}, atualizarFinanceiro: () => {}, mostrarComprovante: () => {}, limparVenda: () => {}
 };
 vm.runInNewContext(html.slice(finalizarStart, finalizarEnd), vendaContext);
 vendaContext.finalizarVenda();
 if (vendaContext.vendas.length !== 1 || vendaContext.vendas[0].pagamento.saldoUtilizado !== 5 || vendaContext.vendas[0].pagamento.valorCobrado !== 5) throw new Error('A venda não registrou corretamente a divisão entre saldo e pagamento atual.');
+if (vendaContext.vendas[0].vendedor?.id !== 'func-1' || vendaContext.vendas[0].registradoPor?.id !== 'titular') throw new Error('A venda não separou o vendedor escolhido do usuário que registrou o pagamento.');
 if (vendaContext.movimentos.length !== 1 || vendaContext.movimentos[0].valor !== 5) throw new Error('O caixa recebeu novamente o valor usado do saldo do cliente.');
 if (vendaContext.movimentosSaldoCliente.length !== 1 || vendaContext.movimentosSaldoCliente[0].tipo !== 'debito' || vendaContext.movimentosSaldoCliente[0].valor !== 5) throw new Error('O saldo usado na venda não foi debitado do cliente.');
 if (vendaContext.produtos[0].estoque !== -1) throw new Error('A venda sem estoque não deixou o saldo negativo corretamente.');
@@ -679,7 +817,7 @@ if (negativosDepoisDaVenda[0]?.saldo !== -1 || negativosDepoisDaVenda[0]?.nome !
 }
 
 const cloudSource = fs.readFileSync(new URL('../pdv-cloud.js', import.meta.url), 'utf8');
-for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática', 'movimentosSaldoCliente', 'vendasSuspensas', "['operator', 'manager'].includes"]) {
+for (const marker of ["chaveLocal('pending')", "chaveLocal('finance_pending')", "window.addEventListener('online'", 'sincronizarPrincipal', 'snap.metadata.fromCache', 'nova tentativa automática', 'movimentosSaldoCliente', 'vendasSuspensas', 'funcionarios', "['operator', 'manager'].includes"]) {
   if (!cloudSource.includes(marker)) throw new Error(`Fila de sincronização offline incompleta: ${marker}`);
 }
 for (const fonte of [html, cloudSource]) {
@@ -703,13 +841,14 @@ const financeiroDaConta = normalizarFinanceiroDoTitular({ ownerUid: 'empresa-1',
 if (financeiroDaConta.lancamentosFinanceiros[0]?.id !== 'proprio' || financeiroDaConta.saldosIniciaisFinanceiros['2026-09'] !== 50) {
   throw new Error('A cópia financeira do próprio titular não foi preservada.');
 }
-const emptyCollections = { vendasSuspensas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
+const emptyCollections = { vendasSuspensas: [], movimentos: [], caixas: [], clientesFiado: [], pagamentosFiado: [], movimentosSaldoCliente: [], funcionarios: [], orcamentos: [], categorias: [], categoriasOcultas: [], configSistema: {}, configPix: {} };
 const base = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2200 }], vendas: [] };
-const local = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2100 }], vendas: [{ id: 'v-local', total: 10 }] };
+const local = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2100 }], vendas: [{ id: 'v-local', total: 10 }], funcionarios: [{ id: 'func-1', nome: 'Vendedora Teste' }] };
 const remote = { ...emptyCollections, produtos: [{ id: 'papel', estoque: 2125 }], vendas: [{ id: 'v-remota', total: 20 }] };
 const merged = mergeState(base, local, remote);
 if (merged.produtos[0].estoque !== 2025) throw new Error('A mesclagem simultânea calculou o estoque incorretamente.');
 if (merged.vendas.length !== 2) throw new Error('A mesclagem simultânea perdeu uma venda.');
+if (merged.funcionarios[0]?.id !== 'func-1') throw new Error('A sincronização perdeu o cadastro do funcionário vendedor.');
 
 // Reproduz a venda feita logo após carregar os dados da nuvem. A base não pode
 // mudar junto com os objetos da tela, ou a venda e a baixa parecem não existir.

@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0f4c81">
   <meta name="description" content="Catálogo público de produtos e serviços">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Catálogo">
+  <meta name="application-name" content="Catálogo">
   <title>Catálogo</title>
-  <link rel="stylesheet" href="/catalogo/catalogo.css">
+  <link rel="stylesheet" href="/catalogo/catalogo.css?v=64">
 </head>
 <body>
   <header class="cabecalho">
@@ -14,10 +19,30 @@
       <div id="logo-wrap" class="logo-wrap" hidden>
         <img id="logo-loja" alt="">
       </div>
-      <div>
+      <div class="identidade-loja">
         <p class="rotulo">Catálogo</p>
         <h1 id="nome-loja">Carregando...</h1>
         <p id="descricao-loja" class="descricao-loja"></p>
+      </div>
+      <div class="acoes-cabecalho-catalogo">
+        <details id="horario-loja" class="horario-loja" hidden>
+          <summary>
+            <span id="horario-bolinha" class="horario-bolinha" aria-hidden="true"></span>
+            <span class="horario-resumo">
+              <strong id="horario-status">Horário da loja</strong>
+              <span id="horario-proxima-alteracao"></span>
+            </span>
+            <span class="horario-seta" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="horario-detalhes">
+            <p>Horários de funcionamento</p>
+            <ul id="horarios-semana"></ul>
+          </div>
+        </details>
+        <button id="instalar-catalogo" class="instalar-catalogo" type="button" hidden>
+          <span aria-hidden="true">↓</span>
+          Instalar catálogo
+        </button>
       </div>
     </div>
   </header>
@@ -39,6 +64,6 @@
   <footer>
     <p>Disponibilidade atualizada pelo estoque da loja.</p>
   </footer>
-  <script type="module" src="/catalogo/catalogo.js"></script>
+  <script type="module" src="/catalogo/catalogo.js?v=64"></script>
 </body>
 </html>
