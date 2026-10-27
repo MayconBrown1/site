@@ -1,21 +1,680 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PDV Pro — Venda, estoque e gestão em um só lugar</title>
-  <meta name="description" content="PDV online para pequenos negócios: vendas, estoque, caixa, clientes e relatórios em celular ou computador.">
-  <style>
-    :root{--gold:#d8ad4b;--gold2:#f4d67d;--ink:#0b0b0d;--card:#17171b;--muted:#b8b6bb;--line:#323238;--ok:#47c58a}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--ink);color:#f8f7f3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.55}a{text-decoration:none;color:inherit}.wrap{width:min(1140px,calc(100% - 40px));margin:auto}.nav{position:sticky;top:0;z-index:5;background:#0b0b0df2;backdrop-filter:blur(12px);border-bottom:1px solid #27272c}.nav .wrap{display:flex;justify-content:space-between;align-items:center;height:72px}.logo{font-weight:900;letter-spacing:.06em}.logo b{color:var(--gold)}.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#16120a;font-weight:800;padding:14px 22px;border-radius:10px;box-shadow:0 10px 26px #c8942524;transition:.2s}.btn:hover{transform:translateY(-2px);filter:brightness(1.07)}.btn.dark{background:#25252a;color:#fff;box-shadow:none;border:1px solid #45454c}.hero{padding:90px 0 70px;background:radial-gradient(circle at 78% 20%,#bc842220,transparent 30%),linear-gradient(180deg,#111115,#0b0b0d)}.eyebrow{color:var(--gold2);font-weight:800;letter-spacing:.11em;text-transform:uppercase;font-size:.8rem}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center}.hero h1{font-size:clamp(2.55rem,6vw,5.3rem);line-height:1.02;letter-spacing:-.05em;margin:12px 0 20px}.gold{color:var(--gold2)}.hero p{font-size:1.15rem;color:var(--muted);max-width:620px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}.chip{border:1px solid var(--line);background:#17171b;border-radius:100px;padding:7px 12px;color:#d8d6d8;font-size:.88rem}.screen{background:linear-gradient(145deg,#2b2a26,#141419 20%);padding:13px;border:1px solid #55503e;border-radius:20px;box-shadow:0 35px 80px #0008;transform:rotate(2deg)}.screen-in{background:#f2f0e8;color:#1d1d1c;border-radius:11px;padding:17px}.screen-head{display:flex;justify-content:space-between;background:#151518;color:#fff;padding:13px;border-radius:8px;font-weight:800}.screen-head span{color:var(--gold2)}.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:13px}.tile{background:#fff;border-radius:8px;padding:13px;box-shadow:0 2px 8px #0001}.tile small{color:#666}.tile strong{display:block;font-size:1.15rem}.bar{height:8px;background:#dfdcd2;border-radius:8px;margin-top:10px;overflow:hidden}.bar i{display:block;background:#0e766c;width:78%;height:100%;border-radius:8px}section{padding:78px 0}.intro{text-align:center;max-width:750px;margin:auto}.intro h2{font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;margin:10px 0}.intro p{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}.card .ico{font-size:1.65rem}.card h3{margin:12px 0 7px;font-size:1.12rem}.card p{margin:0;color:var(--muted);font-size:.94rem}.band{background:linear-gradient(100deg,#17130a,#30230c,#16140e);border-block:1px solid #70541d}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:34px}.step{position:relative;padding:22px;background:#121215;border:1px solid #4a402b;border-radius:13px}.num{color:var(--gold2);font-weight:900;font-size:1.7rem}.notice{border:1px solid #8e6f2d;background:#2a210f;border-radius:15px;padding:25px;max-width:900px;margin:35px auto 0}.notice h3{color:var(--gold2);margin:0 0 9px}.notice p{color:#e5d8b8;margin:0}.checks{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.checks li:before{content:'✓';color:var(--ok);font-weight:900;margin-right:9px}.cta{background:radial-gradient(circle at center,#3b2b0b,#111114 65%);text-align:center}.cta h2{font-size:clamp(2.1rem,4vw,3.4rem);margin:10px 0}.cta p{color:var(--muted);max-width:650px;margin:0 auto 25px}.footer{padding:30px 0;color:#97949a;text-align:center;font-size:.9rem;border-top:1px solid #27272c}@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:800px){.hero{padding-top:58px}.hero-grid{grid-template-columns:1fr;gap:38px}.screen{max-width:440px;margin:auto}.grid{grid-template-columns:1fr}.steps{grid-template-columns:1fr}.checks{grid-template-columns:1fr}.nav .btn{padding:10px 14px;font-size:.85rem}.wrap{width:min(100% - 28px,1140px)}}
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="PDV Pro: vendas, estoque, caixa, financeiro, clientes, orçamentos, catálogo digital, equipe e relatórios por R$ 19,99 por mês.">
+    <meta name="theme-color" content="#071a25">
+    <title>PDV Pro — Seu negócio organizado por R$ 19,99/mês</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "PDV Pro",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "description": "Sistema de ponto de venda com estoque, caixa, financeiro, clientes, orçamentos, catálogo digital, equipe e relatórios.",
+        "offers": { "@type": "Offer", "price": "19.99", "priceCurrency": "BRL" }
+    }
+    </script>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #10232b;
+            --muted: #5c6d73;
+            --paper: #f8f5ed;
+            --surface: #ffffff;
+            --navy: #071a25;
+            --navy-soft: #102c39;
+            --gold: #f6c84f;
+            --gold-dark: #d89c17;
+            --teal: #0f9f8f;
+            --teal-dark: #08786d;
+            --line: #dce5e5;
+            --shadow: 0 22px 60px rgba(7, 26, 37, .12);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+        button, a { font: inherit; }
+        a { color: inherit; }
+        button { cursor: pointer; }
+        .container { width: min(1160px, calc(100% - 32px)); margin-inline: auto; }
+        .skip-link { position: fixed; left: 16px; top: -80px; z-index: 100; background: #fff; padding: 10px 14px; border-radius: 10px; }
+        .skip-link:focus { top: 16px; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            background: rgba(7, 26, 37, .92);
+            color: #fff;
+            backdrop-filter: blur(16px);
+        }
+        .topbar-inner { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+        .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; font-weight: 900; letter-spacing: -.03em; }
+        .brand-mark { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 12px; background: var(--gold); color: var(--navy); box-shadow: 0 7px 20px rgba(246,200,79,.24); }
+        .brand small { display: block; color: #9fc1c8; font-size: 10px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+        .top-nav { display: flex; align-items: center; gap: 22px; }
+        .top-nav > a:not(.button) { color: #d9e7e9; font-size: 14px; font-weight: 700; text-decoration: none; }
+        .top-nav > a:not(.button):hover { color: var(--gold); }
+
+        .button {
+            display: inline-flex;
+            min-height: 48px;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            border: 0;
+            border-radius: 14px;
+            padding: 11px 18px;
+            background: var(--gold);
+            color: var(--navy);
+            font-weight: 900;
+            text-decoration: none;
+            box-shadow: 0 10px 28px rgba(216,156,23,.24);
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+        }
+        .button:hover { transform: translateY(-2px); background: #ffda6f; box-shadow: 0 14px 34px rgba(216,156,23,.3); }
+        .button:focus-visible, .feature-card:focus-visible, .modal-close:focus-visible { outline: 3px solid #5ed6c8; outline-offset: 3px; }
+        .button.secondary { border: 1px solid rgba(255,255,255,.24); background: rgba(255,255,255,.08); color: #fff; box-shadow: none; }
+        .button.secondary:hover { background: rgba(255,255,255,.14); }
+        .button.large { min-height: 56px; padding-inline: 24px; }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 12% 20%, rgba(15,159,143,.24), transparent 33%),
+                radial-gradient(circle at 88% 10%, rgba(246,200,79,.2), transparent 30%),
+                linear-gradient(145deg, #071a25 0%, #0a2430 58%, #103c45 100%);
+            color: #fff;
+        }
+        .hero::after { content: ""; position: absolute; inset: 0; opacity: .14; background-image: linear-gradient(rgba(255,255,255,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.14) 1px, transparent 1px); background-size: 56px 56px; mask-image: linear-gradient(to bottom, #000, transparent); }
+        .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr .95fr; gap: 52px; align-items: center; min-height: 700px; padding-block: 76px 90px; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 20px; color: var(--gold); font-size: 13px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
+        .eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; }
+        h1, h2, h3, p { margin-top: 0; }
+        h1 { max-width: 760px; margin-bottom: 22px; font-size: clamp(42px, 6vw, 76px); line-height: .99; letter-spacing: -.055em; }
+        .hero-lead { max-width: 660px; margin-bottom: 28px; color: #d1e1e4; font-size: clamp(18px, 2.1vw, 22px); }
+        .hero-lead strong { color: #fff; }
+        .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+        .purchase-note { max-width: 650px; margin: 15px 0 0; color: #9fc1c8; font-size: 13px; }
+        .price-inline { display: flex; align-items: baseline; gap: 8px; margin: 26px 0 24px; }
+        .price-inline strong { color: var(--gold); font-size: clamp(36px, 5vw, 58px); line-height: 1; letter-spacing: -.05em; }
+        .price-inline span { color: #c2d8dc; font-weight: 700; }
+
+        .product-window { position: relative; border: 1px solid rgba(255,255,255,.18); border-radius: 26px; padding: 14px; background: rgba(255,255,255,.09); box-shadow: 0 35px 80px rgba(0,0,0,.34); backdrop-filter: blur(14px); transform: rotate(1.5deg); }
+        .window-bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 12px; color: #c7dadd; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+        .dots { display: flex; gap: 6px; }
+        .dots i { width: 8px; height: 8px; border-radius: 99px; background: #52717b; }
+        .dots i:first-child { background: #ef7b6c; }
+        .dots i:nth-child(2) { background: #f6c84f; }
+        .dots i:last-child { background: #4bc2a9; }
+        .dashboard { border-radius: 18px; padding: 18px; background: #f7faf9; color: var(--ink); }
+        .dash-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .dash-head strong { font-size: 16px; }
+        .status { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 5px 9px; background: #dbf5ed; color: #08786d; font-size: 10px; font-weight: 900; }
+        .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #0f9f8f; }
+        .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+        .dash-stat { min-height: 88px; border: 1px solid #e0e8e8; border-radius: 13px; padding: 11px; background: #fff; }
+        .dash-stat span { display: block; color: #73858a; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .dash-stat strong { display: block; margin-top: 7px; font-size: 19px; }
+        .sale-panel { display: grid; grid-template-columns: 1.1fr .9fr; gap: 10px; margin-top: 10px; }
+        .mini-card { border-radius: 14px; padding: 13px; background: #0d303b; color: #fff; }
+        .mini-card.light { border: 1px solid #e0e8e8; background: #fff; color: var(--ink); }
+        .mini-title { margin-bottom: 10px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .08em; }
+        .sale-row { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid rgba(255,255,255,.12); padding: 8px 0 0; font-size: 11px; }
+        .chart { display: flex; height: 86px; align-items: end; gap: 7px; padding-top: 8px; }
+        .chart i { flex: 1; min-width: 8px; border-radius: 5px 5px 2px 2px; background: linear-gradient(#20b9a7, #0f8075); }
+        .float-note { position: absolute; right: -22px; bottom: 34px; display: flex; gap: 10px; align-items: center; max-width: 210px; border-radius: 14px; padding: 11px 13px; background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 900; box-shadow: 0 18px 40px rgba(0,0,0,.26); transform: rotate(-3deg); }
+
+        .proof-strip { position: relative; z-index: 2; margin-top: -34px; }
+        .proof-grid { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: #fff; box-shadow: var(--shadow); }
+        .proof-item { min-height: 104px; padding: 22px; }
+        .proof-item + .proof-item { border-left: 1px solid var(--line); }
+        .proof-item b { display: block; margin-bottom: 4px; font-size: 16px; }
+        .proof-item span { color: var(--muted); font-size: 13px; }
+
+        section { padding-block: 92px; }
+        .section-head { display: grid; grid-template-columns: .82fr 1.18fr; gap: 52px; align-items: end; margin-bottom: 38px; }
+        .section-head h2 { margin-bottom: 0; font-size: clamp(34px, 4.3vw, 54px); line-height: 1.05; letter-spacing: -.045em; }
+        .section-head p { margin-bottom: 2px; color: var(--muted); font-size: 18px; }
+        .kicker { margin-bottom: 12px; color: var(--teal-dark); font-size: 12px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+
+        .features { background: #fff; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .feature-card { position: relative; min-height: 250px; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; padding: 24px; background: #fbfdfc; color: var(--ink); text-align: left; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+        .feature-card:hover { transform: translateY(-4px); border-color: #91cfc6; box-shadow: 0 18px 40px rgba(7,26,37,.1); }
+        .feature-card::after { content: "↗"; position: absolute; right: 20px; top: 18px; color: var(--teal-dark); font-size: 18px; font-weight: 900; }
+        .feature-icon { display: grid; width: 48px; height: 48px; place-items: center; margin-bottom: 25px; border-radius: 14px; background: #e0f4f0; font-size: 23px; }
+        .feature-card h3 { margin-bottom: 8px; font-size: 21px; line-height: 1.15; letter-spacing: -.025em; }
+        .feature-card p { margin-bottom: 17px; color: var(--muted); font-size: 14px; }
+        .feature-card span { color: var(--teal-dark); font-size: 13px; font-weight: 900; }
+
+        .journey { background: var(--paper); }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; counter-reset: journey; }
+        .step { position: relative; border-radius: 20px; padding: 25px; background: #fff; box-shadow: 0 12px 34px rgba(7,26,37,.07); counter-increment: journey; }
+        .step::before { content: "0" counter(journey); display: block; margin-bottom: 42px; color: var(--gold-dark); font-size: 13px; font-weight: 900; letter-spacing: .1em; }
+        .step h3 { margin-bottom: 8px; font-size: 19px; }
+        .step p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+
+        .price-section { padding-top: 40px; background: linear-gradient(180deg, var(--paper), #e8f4f1); }
+        .price-card { display: grid; grid-template-columns: 1fr .86fr; overflow: hidden; border-radius: 28px; background: var(--navy); color: #fff; box-shadow: 0 28px 80px rgba(7,26,37,.2); }
+        .price-copy { padding: 48px; }
+        .price-copy h2 { max-width: 680px; margin-bottom: 17px; font-size: clamp(36px, 5vw, 58px); line-height: 1; letter-spacing: -.05em; }
+        .price-copy > p { max-width: 650px; color: #bdd2d6; font-size: 17px; }
+        .included { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin: 26px 0 0; padding: 0; list-style: none; }
+        .included li { position: relative; padding-left: 25px; color: #e6eff0; font-size: 14px; }
+        .included li::before { content: "✓"; position: absolute; left: 0; color: var(--gold); font-weight: 900; }
+        .checkout-box { display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 44px; background: #0f3843; }
+        .checkout-box small { color: #9fc1c8; font-weight: 800; text-transform: uppercase; letter-spacing: .11em; }
+        .checkout-price { display: flex; align-items: baseline; gap: 8px; margin: 7px 0 22px; }
+        .checkout-price strong { color: var(--gold); font-size: 60px; line-height: 1; letter-spacing: -.06em; }
+        .checkout-price span { color: #c4d8dc; font-weight: 800; }
+        .checkout-box .button { width: 100%; }
+        .checkout-box p { margin: 13px 0 0; color: #a9c4c9; font-size: 12px; text-align: center; }
+
+        .faq { background: #fff; }
+        .faq-wrap { display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; }
+        .faq h2 { font-size: clamp(34px, 4vw, 50px); line-height: 1.04; letter-spacing: -.04em; }
+        details { border-top: 1px solid var(--line); padding: 18px 0; }
+        details:last-child { border-bottom: 1px solid var(--line); }
+        summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-weight: 900; cursor: pointer; list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: "+"; color: var(--teal-dark); font-size: 24px; }
+        details[open] summary::after { content: "−"; }
+        details p { margin: 12px 34px 0 0; color: var(--muted); font-size: 14px; }
+
+        .final-cta { padding-block: 70px; background: var(--gold); }
+        .final-inner { display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+        .final-inner h2 { max-width: 760px; margin-bottom: 8px; font-size: clamp(32px, 4vw, 52px); line-height: 1; letter-spacing: -.045em; }
+        .final-inner p { margin-bottom: 0; color: #654b0f; font-weight: 700; }
+        .final-inner .button { flex: 0 0 auto; background: var(--navy); color: #fff; box-shadow: 0 12px 30px rgba(7,26,37,.22); }
+        footer { padding-block: 30px; background: var(--navy); color: #9fb9bf; font-size: 13px; }
+        .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+
+        dialog { width: min(720px, calc(100% - 28px)); max-height: min(82vh, 760px); overflow: hidden; border: 0; border-radius: 24px; padding: 0; background: #fff; color: var(--ink); box-shadow: 0 30px 100px rgba(0,0,0,.42); }
+        dialog::backdrop { background: rgba(2,15,21,.76); backdrop-filter: blur(5px); }
+        .modal-shell { display: grid; grid-template-rows: auto 1fr; max-height: min(82vh, 760px); }
+        .modal-head { position: sticky; top: 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); padding: 24px 26px 20px; background: #fff; }
+        .modal-head small { display: block; margin-bottom: 5px; color: var(--teal-dark); font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+        .modal-head h2 { margin: 0; font-size: clamp(25px, 4vw, 34px); line-height: 1.08; letter-spacing: -.035em; }
+        .modal-close { flex: 0 0 auto; width: 42px; height: 42px; border: 0; border-radius: 12px; background: #edf3f2; color: var(--navy); font-size: 25px; line-height: 1; }
+        .modal-body { overflow-y: auto; padding: 24px 26px 28px; }
+        .modal-body > p { color: var(--muted); font-size: 17px; }
+        .modal-body h3 { margin: 25px 0 10px; font-size: 16px; }
+        .modal-body ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+        .modal-body li { position: relative; border-radius: 12px; padding: 11px 13px 11px 39px; background: #f4f8f7; font-size: 14px; }
+        .modal-body li::before { content: "✓"; position: absolute; left: 14px; color: var(--teal-dark); font-weight: 900; }
+        .modal-outcome { margin-top: 24px; border-left: 4px solid var(--gold); border-radius: 0 13px 13px 0; padding: 14px 16px; background: #fff8dd; color: #5f4913; font-size: 14px; font-weight: 800; }
+
+        @media (max-width: 900px) {
+            .top-nav > a:not(.button) { display: none; }
+            .hero-grid, .price-card, .faq-wrap { grid-template-columns: 1fr; }
+            .hero-grid { min-height: auto; padding-top: 66px; }
+            .product-window { max-width: 660px; margin-inline: auto; }
+            .proof-grid { grid-template-columns: 1fr 1fr; }
+            .proof-item:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+            .proof-item:nth-child(4) { border-top: 1px solid var(--line); }
+            .section-head { grid-template-columns: 1fr; gap: 18px; }
+            .feature-grid { grid-template-columns: 1fr 1fr; }
+            .steps { grid-template-columns: 1fr 1fr; }
+            .float-note { right: -8px; }
+        }
+        @media (max-width: 620px) {
+            .container { width: min(100% - 22px, 1160px); }
+            .topbar-inner { min-height: 62px; }
+            .brand small { display: none; }
+            .topbar .button { min-height: 40px; padding: 8px 12px; font-size: 12px; }
+            .hero-grid { gap: 38px; padding-block: 56px 72px; }
+            h1 { font-size: 44px; }
+            .hero-actions .button { width: 100%; }
+            .product-window { transform: none; padding: 9px; }
+            .dashboard { padding: 11px; }
+            .dash-stats { grid-template-columns: 1fr 1fr; }
+            .dash-stat:last-child { grid-column: 1 / -1; }
+            .sale-panel { grid-template-columns: 1fr; }
+            .float-note { position: static; max-width: none; margin-top: 10px; transform: none; }
+            .proof-grid, .feature-grid, .steps { grid-template-columns: 1fr; }
+            .proof-item + .proof-item { border-top: 1px solid var(--line); border-left: 0; }
+            section { padding-block: 66px; }
+            .feature-card { min-height: 220px; }
+            .price-copy, .checkout-box { padding: 30px 22px; }
+            .included { grid-template-columns: 1fr; }
+            .checkout-price strong { font-size: 50px; }
+            .final-inner, .footer-inner { align-items: flex-start; flex-direction: column; }
+            .final-inner .button { width: 100%; }
+            .modal-head, .modal-body { padding-inline: 19px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+    </style>
 </head>
 <body>
-<header class="nav"><div class="wrap"><a class="logo" href="#inicio">PDV <b>PRO</b></a><a class="btn" href="/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Quero conhecer</a></div></header>
-<main>
-<section class="hero" id="inicio"><div class="wrap hero-grid"><div><div class="eyebrow">Gestão simples para pequenos negócios</div><h1>Seu negócio na palma da mão.<br><span class="gold">Venda. Controle. Cresça.</span></h1><p>Um PDV profissional para organizar vendas, estoque, caixa, clientes e resultados — usando no celular ou no computador, onde o seu negócio estiver.</p><div class="actions"><a class="btn" href="/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Quero o meu PDV Pro →</a><a class="btn dark" href="#recursos">Ver recursos</a></div><div class="chips"><span class="chip">📱 Celular e tablet</span><span class="chip">💻 Computador</span><span class="chip">☁️ Acesso online</span><span class="chip">⚡ Rápido e intuitivo</span></div></div><div class="screen"><div class="screen-in"><div class="screen-head">PDV PRO <span>● Online</span></div><div class="tiles"><div class="tile"><small>Faturamento</small><strong>R$ 5.250,00</strong><div class="bar"><i></i></div></div><div class="tile"><small>Vendas hoje</small><strong>48 vendas</strong><div class="bar"><i style="width:62%"></i></div></div><div class="tile"><small>Estoque baixo</small><strong>3 produtos</strong></div><div class="tile"><small>Em caixa</small><strong>R$ 850,00</strong></div></div></div></div></div></section>
-<section id="recursos"><div class="wrap"><div class="intro"><div class="eyebrow">Tudo isso incluído</div><h2>Veja tudo que você desbloqueia na versão Pro</h2><p>Um sistema completo, pensado para a rotina real da sua loja — do balcão à gestão.</p></div><div class="grid"><article class="card"><div class="ico">🛍️</div><h3>Catálogo online vinculado ao estoque</h3><p>Seu catálogo online fica conectado ao estoque automaticamente. Se um produto acabar, ele some do catálogo na hora, sem precisar remover manualmente — evitando que o cliente veja ou peça algo que não tem mais disponível.</p></article><article class="card"><div class="ico">🔗</div><h3>Estoque compartilhado</h3><p>Produtos diferentes podem consumir o mesmo saldo. No cadastro, escolha outro produto em Estoque compartilhado; vendas de qualquer item vinculado baixam o mesmo estoque.</p></article><article class="card"><div class="ico">👤</div><h3>Acesso de operadores</h3><p>O titular pode criar acessos individuais no ADM. Cada venda registra o vendedor; operadores acessam vendas, orçamentos, clientes e abertura/fechamento do caixa, sem relatórios, cadastros administrativos ou sangrias.</p></article><article class="card"><div class="ico">🧾</div><h3>Dados da empresa no cupom</h3><p>Cadastre o CNPJ em ADM → Configurações do Sistema. Ele aparece no comprovante e no PDF térmico, com validação automática.</p></article><article class="card"><div class="ico">🛠️</div><h3>Produtos e serviços</h3><p>No cadastro, escolha Produto ou Serviço. Serviços não controlam estoque e o valor unitário pode ser alterado no carrinho antes de concluir a venda.</p></article><article class="card"><div class="ico">🏷️</div><h3>Categorias reutilizáveis</h3><p>Há categorias padrão e você pode criar outras no cadastro usando + Nova. Em Gerenciar, use o botão × para excluir uma categoria que não deseja mais.</p></article><article class="card"><div class="ico">🔎</div><h3>Venda mais rápida com leitor</h3><p>Ao abrir ou voltar a Vendas, o cursor fica automaticamente no campo de busca. Basta ler o código de barras ou digitar o código/nome do item.</p></article><article class="card"><div class="ico">📷</div><h3>Leitura pela câmera do celular</h3><p>No celular, toque no ícone de câmera ao lado da busca e aponte para o código de barras. O produto cadastrado é localizado e adicionado ao carrinho automaticamente. Ao confirmar a leitura, o PDV emite um bipe. Use o PDV em HTTPS e no Chrome atualizado.</p></article><article class="card"><div class="ico">➕</div><h3>Código de barras no cadastro</h3><p>Ao cadastrar ou editar um produto pelo celular, toque no ícone de câmera ao lado de Código de Barras. A leitura preenche o campo automaticamente, sem precisar digitar.</p></article><article class="card"><div class="ico">📦</div><h3>Backup e funcionamento offline</h3><p>O backup ficou compatível com mais navegadores e o PDV passou a usar cache para os recursos essenciais. Faça backups periódicos na área ADM.</p></article><article class="card"><div class="ico">✨</div><h3>Interface renovada</h3><p>A tela recebeu visual mais moderno, melhor contraste, adaptação para celular e ajustes de segurança no acesso administrativo.</p></article><article class="card"><div class="ico">☁️</div><h3>Acesso individual e dados na nuvem</h3><p>Cada conta usa acesso próprio e mantém produtos, vendas, configurações e clientes separados na nuvem. O sistema também verifica se o acesso está ativo antes de abrir o PDV.</p></article><article class="card"><div class="ico">🧾</div><h3>Clientes e vendas fiado</h3><p>Cadastre clientes com limite, dia de pagamento ou compra sem limite. Na venda, escolha Fiado, selecione o cliente e acompanhe o saldo, pagamentos parciais e vencimento.</p></article><article class="card"><div class="ico">📄</div><h3>Fechamento de fiado com extrato</h3><p>Em Clientes, use Receber / Fechamento para registrar pagamentos e Extrato PDF para gerar o histórico de compras, itens, datas, pagamentos e saldo pendente.</p></article><article class="card"><div class="ico">✏️</div><h3>Gestão de clientes fiado</h3><p>Clientes podem ser editados a qualquer momento. A exclusão é permitida apenas quando o saldo está zerado, protegendo o histórico financeiro.</p></article><article class="card"><div class="ico">📲</div><h3>PDV instalável e menu móvel</h3><p>Use Instalar PDV para adicionar o sistema ao computador ou celular. Em telas pequenas, os atalhos ficam organizados no menu ☰.</p></article></div></div></section>
-<section class="band"><div class="wrap"><div class="intro"><div class="eyebrow">Use como você trabalha</div><h2>Celular e computador, com acesso online</h2><p>Atenda no balcão pelo computador, consulte informações no celular e mantenha a operação organizada em qualquer tela.</p></div><ul class="checks"><li>Interface responsiva para celular, tablet e desktop</li><li>Atalhos para agilizar o atendimento</li><li>Produtos, serviços e categorias em um só lugar</li><li>Dashboard administrativo protegido por senha</li></ul></div></section>
-<section><div class="wrap"><div class="intro"><div class="eyebrow">Venda sem complicação</div><h2>O essencial para atender rápido e controlar melhor</h2></div><div class="steps"><article class="step"><div class="num">01</div><h3>Registre a venda</h3><p>Adicione produtos, ajuste quantidades, aplique desconto quando necessário e escolha a forma de pagamento.</p></article><article class="step"><div class="num">02</div><h3>Controle automático</h3><p>O PDV registra a venda, reduz estoque, atualiza o caixa e alimenta seus relatórios e indicadores.</p></article><article class="step"><div class="num">03</div><h3>Decida com clareza</h3><p>Saiba o que vende mais, o que está acabando e como seu negócio está performando.</p></article></div><div class="notice"><h3>⚠️ Transparência importante sobre PIX e cartão</h3><p>Este é um sistema de gestão e PDV básico, sem integração bancária ou de maquininha. O PDV <strong>gera o QR Code PIX</strong>, mas não confirma automaticamente se o dinheiro entrou. Confira o pagamento na sua conta antes de finalizar a venda. Da mesma forma, pagamentos em cartão devem ser confirmados na maquininha antes da conclusão. Nada é finalizado sozinho sem a conferência do atendente.</p></div></div></section>
-<section class="cta"><div class="wrap"><div class="eyebrow">Profissional, simples e direto</div><h2>Organize sua loja hoje.</h2><p>Tenha vendas, caixa, estoque e informações importantes em um único sistema pensado para o pequeno empreendedor.</p><p style="margin:18px auto 25px;color:#f4d67d;font-size:1.35rem;font-weight:800">R$ 19,99 por mês · Cancele quando quiser</p><div class="actions" style="justify-content:center"><a class="btn" href="/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Assinar o PDV Pro →</a><a class="btn dark" href="/ferramentas-e-utilitarios/pdv/central-afiliado-pdv-pro.html" target="_blank" rel="noopener">Seja um afiliado</a></div></div></section>
-</main><footer class="footer"><div class="wrap">PDV Pro · Gestão prática para o seu negócio</div></footer>
-</body></html>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <a class="brand" href="#inicio" aria-label="PDV Pro — início">
+                <span class="brand-mark">P</span>
+                <span>PDV Pro<small>Venda, organize, cresça</small></span>
+            </a>
+            <nav class="top-nav" aria-label="Navegação principal">
+                <a href="#recursos">Recursos</a>
+                <a href="#como-funciona">Como funciona</a>
+                <a href="#preco">Preço</a>
+                <a class="button" href="https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Começar agora</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="conteudo">
+        <section class="hero" id="inicio">
+            <div class="container hero-grid">
+                <div>
+                    <p class="eyebrow">Um sistema para a rotina inteira</p>
+                    <h1>Menos improviso. Mais controle para vender.</h1>
+                    <p class="hero-lead">O <strong>PDV Pro</strong> reúne vendas, estoque, caixa, financeiro, clientes, orçamentos, catálogo digital, equipe e relatórios em um só lugar — no computador ou no celular.</p>
+                    <div class="price-inline"><strong>R$ 19,99</strong><span>por mês</span></div>
+                    <div class="hero-actions">
+                        <a class="button large" href="https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Criar cadastro e assinar <span aria-hidden="true">→</span></a>
+                        <a class="button secondary large" href="#recursos">Ver o que está incluído</a>
+                    </div>
+                    <p class="purchase-note">O botão abre a tela de acesso do PDV Pro. Se ainda não tiver conta, escolha “Solicitar acesso / Assinar agora”, crie seu cadastro e siga para o pagamento.</p>
+                </div>
+
+                <div class="product-window" aria-label="Ilustração do painel do PDV Pro">
+                    <div class="window-bar"><span class="dots"><i></i><i></i><i></i></span><span>Painel do negócio</span></div>
+                    <div class="dashboard">
+                        <div class="dash-head"><strong>Visão rápida de hoje</strong><span class="status">Sincronizado</span></div>
+                        <div class="dash-stats">
+                            <div class="dash-stat"><span>Vendas</span><strong>24</strong></div>
+                            <div class="dash-stat"><span>Faturamento</span><strong>R$ 1.284</strong></div>
+                            <div class="dash-stat"><span>Estoque baixo</span><strong>3 itens</strong></div>
+                        </div>
+                        <div class="sale-panel">
+                            <div class="mini-card">
+                                <div class="mini-title">Venda em andamento</div>
+                                <div class="sale-row"><span>Itens no carrinho</span><b>4</b></div>
+                                <div class="sale-row"><span>Vendedor</span><b>Ana</b></div>
+                                <div class="sale-row"><span>Total</span><b>R$ 89,90</b></div>
+                            </div>
+                            <div class="mini-card light">
+                                <div class="mini-title">Movimento da semana</div>
+                                <div class="chart" aria-hidden="true"><i style="height:34%"></i><i style="height:52%"></i><i style="height:43%"></i><i style="height:78%"></i><i style="height:64%"></i><i style="height:92%"></i><i style="height:71%"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="float-note"><span aria-hidden="true">✓</span><span>Uma venda atualiza caixa, estoque e relatório.</span></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="container proof-strip" aria-label="Resumo das principais vantagens">
+            <div class="proof-grid">
+                <div class="proof-item"><b>Venda no balcão</b><span>Dinheiro, PIX, cartão, fiado ou pagamento dividido.</span></div>
+                <div class="proof-item"><b>Catálogo da loja</b><span>Link público, WhatsApp, horários e instalação no celular.</span></div>
+                <div class="proof-item"><b>Equipe organizada</b><span>Operador, gerente, vendedor e comissão por período.</span></div>
+                <div class="proof-item"><b>Mesmo sem internet</b><span>Continue trabalhando e sincronize quando a conexão voltar.</span></div>
+            </div>
+        </div>
+
+        <section class="features" id="recursos">
+            <div class="container">
+                <div class="section-head">
+                    <div><p class="kicker">Explore pela sua necessidade</p><h2>Qual problema você quer resolver primeiro?</h2></div>
+                    <p>A tela continua simples. Clique apenas no assunto que importa para você e veja, em um pop-up, tudo o que o PDV Pro oferece naquela área.</p>
+                </div>
+                <div class="feature-grid">
+                    <button class="feature-card" type="button" data-feature="vendas"><span class="feature-icon">🛒</span><h3>Vender com mais agilidade</h3><p>Encontre itens, receba de várias formas e entregue um comprovante claro.</p><span>Ver tudo sobre vendas</span></button>
+                    <button class="feature-card" type="button" data-feature="estoque"><span class="feature-icon">📦</span><h3>Parar de perder o controle do estoque</h3><p>Cadastre produtos e serviços, receba alertas e acompanhe o saldo real.</p><span>Ver produtos e estoque</span></button>
+                    <button class="feature-card" type="button" data-feature="caixa"><span class="feature-icon">💰</span><h3>Entender para onde o dinheiro foi</h3><p>Separe caixa e financeiro sem deixar a rotina confusa.</p><span>Ver caixa e financeiro</span></button>
+                    <button class="feature-card" type="button" data-feature="clientes"><span class="feature-icon">👥</span><h3>Conhecer e cobrar melhor seus clientes</h3><p>Histórico de compras, fiado, saldo e cadastro completo em um só lugar.</p><span>Ver gestão de clientes</span></button>
+                    <button class="feature-card" type="button" data-feature="orcamentos"><span class="feature-icon">🧾</span><h3>Enviar orçamentos profissionais</h3><p>Crie propostas, gere PDF ou impressão térmica e transforme a aprovação em venda.</p><span>Ver orçamentos</span></button>
+                    <button class="feature-card" type="button" data-feature="catalogo"><span class="feature-icon">🏪</span><h3>Mostrar seus produtos sem montar outro site</h3><p>Publique um catálogo com a identidade da loja e atendimento pelo WhatsApp.</p><span>Ver catálogo digital</span></button>
+                    <button class="feature-card" type="button" data-feature="equipe"><span class="feature-icon">🧑‍💼</span><h3>Delegar sem entregar acesso a tudo</h3><p>Crie perfis, registre vendedores e calcule comissão com clareza.</p><span>Ver equipe e permissões</span></button>
+                    <button class="feature-card" type="button" data-feature="relatorios"><span class="feature-icon">📊</span><h3>Decidir com números, não com memória</h3><p>Filtre vendas, confira faturamento e encontre comprovantes por data e vendedor.</p><span>Ver relatórios</span></button>
+                    <button class="feature-card" type="button" data-feature="mobilidade"><span class="feature-icon">📱</span><h3>Trabalhar no celular ou computador</h3><p>Instale o PDV, use atalhos e continue vendendo durante oscilações de internet.</p><span>Ver mobilidade e offline</span></button>
+                    <button class="feature-card" type="button" data-feature="personalizacao"><span class="feature-icon">🎨</span><h3>Ter um sistema com a cara do negócio</h3><p>Escolha temas prontos ou personalize cores, fontes, cartões e botões.</p><span>Ver personalização</span></button>
+                    <button class="feature-card" type="button" data-feature="seguranca"><span class="feature-icon">🔐</span><h3>Proteger acessos e informações sensíveis</h3><p>Dados separados por empresa, áreas restritas e ações importantes protegidas.</p><span>Ver segurança e backup</span></button>
+                    <button class="feature-card" type="button" data-feature="pix"><span class="feature-icon">◈</span><h3>Facilitar cobrança e pagamento</h3><p>Configure seu PIX, gere QR Code e registre cada forma recebida.</p><span>Ver PIX e recebimentos</span></button>
+                </div>
+            </div>
+        </section>
+
+        <section class="journey" id="como-funciona">
+            <div class="container">
+                <div class="section-head">
+                    <div><p class="kicker">Da configuração à gestão</p><h2>Um fluxo simples para a rotina real.</h2></div>
+                    <p>O sistema conecta as áreas que normalmente ficam espalhadas em cadernos, planilhas, mensagens e aplicativos diferentes.</p>
+                </div>
+                <div class="steps">
+                    <article class="step"><h3>Cadastre</h3><p>Produtos, serviços, clientes, dados da empresa, PIX, equipe e vendedor.</p></article>
+                    <article class="step"><h3>Venda</h3><p>Busque o item, escolha cliente, vendedor, desconto e forma de pagamento.</p></article>
+                    <article class="step"><h3>Atualize automaticamente</h3><p>A venda alimenta estoque, caixa, histórico do cliente e relatórios.</p></article>
+                    <article class="step"><h3>Acompanhe</h3><p>Consulte resultados, financeiro, fechamentos, comissões e itens em falta.</p></article>
+                </div>
+            </div>
+        </section>
+
+        <section class="price-section" id="preco">
+            <div class="container">
+                <div class="price-card">
+                    <div class="price-copy">
+                        <p class="eyebrow">Preço direto e transparente</p>
+                        <h2>Organize a operação inteira por menos de um real por dia.</h2>
+                        <p>Uma mensalidade para usar os recursos do PDV Pro e concentrar a rotina do negócio em um único sistema.</p>
+                        <ul class="included">
+                            <li>Vendas e comprovantes</li>
+                            <li>Produtos, serviços e estoque</li>
+                            <li>Caixa e financeiro</li>
+                            <li>Clientes, saldo e fiado</li>
+                            <li>Orçamentos profissionais</li>
+                            <li>Catálogo digital público</li>
+                            <li>Equipe e comissão</li>
+                            <li>Relatórios e exportações</li>
+                            <li>Uso instalável e offline</li>
+                            <li>Temas e personalização</li>
+                        </ul>
+                    </div>
+                    <div class="checkout-box">
+                        <small>Assinatura mensal</small>
+                        <div class="checkout-price"><strong>R$ 19,99</strong><span>/ mês</span></div>
+                        <a class="button large" href="https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Quero usar o PDV Pro</a>
+                        <p>Você será direcionado à tela de login. Para assinar, crie seu cadastro e continue para o pagamento.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="faq" id="duvidas">
+            <div class="container faq-wrap">
+                <div><p class="kicker">Informação antes da decisão</p><h2>Dúvidas comuns, respostas claras.</h2></div>
+                <div>
+                    <details><summary>Preciso instalar um programa?</summary><p>Não é necessário instalar um programa tradicional. O PDV Pro funciona pelo navegador e também pode ser adicionado como aplicativo ao computador ou celular pelo recurso “Instalar PDV”.</p></details>
+                    <details><summary>O sistema funciona sem internet?</summary><p>Depois de abrir o PDV online pelo menos uma vez no aparelho, os recursos essenciais ficam disponíveis para uso offline. As alterações permanecem protegidas localmente e são sincronizadas automaticamente quando a internet volta.</p></details>
+                    <details><summary>Minha equipe verá o financeiro?</summary><p>Não. O Financeiro e o ADM são exclusivos do titular. Operadores e gerentes recebem acessos e permissões compatíveis com suas funções, e o vendedor sem login serve apenas para identificar vendas e calcular comissão.</p></details>
+                    <details><summary>O catálogo mostra informações internas?</summary><p>O catálogo público recebe apenas os dados preparados para divulgação, como nome da loja, logo, WhatsApp, horários, tema e itens marcados como visíveis. Custos, vendas, clientes e informações internas não são publicados.</p></details>
+                    <details><summary>Posso usar produtos e serviços?</summary><p>Sim. Produtos controlam estoque; serviços não baixam saldo e podem ter o valor unitário ajustado no carrinho. Os dois tipos também podem ser usados em orçamentos.</p></details>
+                    <details><summary>Como faço a assinatura?</summary><p>Clique em qualquer botão de compra desta página. Na tela de acesso, use “Solicitar acesso / Assinar agora”, crie seu login e siga para o pagamento da mensalidade de R$ 19,99.</p></details>
+                </div>
+            </div>
+        </section>
+
+        <section class="final-cta">
+            <div class="container final-inner">
+                <div><h2>Seu negócio já tem trabalho demais. O controle pode ser simples.</h2><p>Comece seu cadastro no PDV Pro e leve a rotina para um único lugar.</p></div>
+                <a class="button large" href="https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html">Criar cadastro e assinar →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-inner"><strong>PDV Pro</strong><span>Vendas, organização e gestão por R$ 19,99 por mês.</span></div>
+    </footer>
+
+    <dialog id="detalhes-recurso" aria-labelledby="modal-titulo">
+        <div class="modal-shell">
+            <header class="modal-head">
+                <div><small id="modal-etiqueta">Recurso do PDV Pro</small><h2 id="modal-titulo"></h2></div>
+                <button class="modal-close" type="button" aria-label="Fechar informações">×</button>
+            </header>
+            <div class="modal-body">
+                <p id="modal-resumo"></p>
+                <h3>O que você encontra nessa área</h3>
+                <ul id="modal-lista"></ul>
+                <div class="modal-outcome" id="modal-resultado"></div>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        const LINK_COMPRA = 'https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html';
+        const RECURSOS = {
+            vendas: {
+                etiqueta: 'Venda no balcão',
+                titulo: 'Atenda rápido sem perder os detalhes da venda',
+                resumo: 'O fluxo foi pensado para localizar o item, montar o carrinho, receber e emitir o comprovante sem depender de contas paralelas.',
+                itens: [
+                    'Busca por nome ou código de barras, com os produtos mais vendidos aparecendo primeiro.',
+                    'Leitura de código pela câmera do celular e suporte a produtos vendidos por peso.',
+                    'Carrinho para produtos e serviços; em serviços, o preço pode ser ajustado durante a venda.',
+                    'Desconto em porcentagem ou em reais, com limites e autorizações conforme o perfil do usuário.',
+                    'Pagamento em dinheiro, PIX, cartão ou fiado, incluindo divisão da mesma venda em duas formas.',
+                    'Seleção opcional de cliente e vendedor, uso de saldo do cliente e cálculo de troco.',
+                    'Venda suspensa para guardar carrinho, cliente, desconto, pagamento e vendedor e retomar depois.',
+                    'Comprovante na tela, PDF e impressão térmica de 80 mm, com dados da empresa e do vendedor.'
+                ],
+                resultado: 'Resultado prático: o atendimento termina com estoque, caixa, cliente, vendedor e relatório atualizados pela mesma venda.'
+            },
+            estoque: {
+                etiqueta: 'Produtos e estoque',
+                titulo: 'Saiba o que vende, o que falta e o que precisa repor',
+                resumo: 'O cadastro serve tanto para mercadorias quanto para serviços e mantém a operação organizada do balcão ao relatório.',
+                itens: [
+                    'Cadastro de produto ou serviço com nome, código, preço de venda, custo, unidade, categoria, descrição e imagem.',
+                    'Validação para impedir nome ou código de barras repetido.',
+                    'Pesquisa rápida na tela de cadastro e organização automática dos mais vendidos no painel de vendas.',
+                    'Categorias padrão e categorias personalizadas reutilizáveis.',
+                    'Estoque mínimo configurável por item e contador de alertas quando o saldo chega ao limite.',
+                    'Estoque compartilhado: produtos diferentes podem consumir o mesmo saldo de origem.',
+                    'Venda com estoque zerado ou negativo acompanhada de aviso claro, sem travar o atendimento.',
+                    'Relatório de produtos em PDF e exportação para conferência fora do sistema.'
+                ],
+                resultado: 'Resultado prático: menos surpresa na reposição e menos cadastros duplicados, sem impedir uma venda urgente.'
+            },
+            caixa: {
+                etiqueta: 'Caixa e financeiro',
+                titulo: 'Separe o movimento do caixa da gestão financeira',
+                resumo: 'O PDV mostra o dinheiro da operação diária e, em uma área privada do titular, a visão financeira mais ampla do negócio.',
+                itens: [
+                    'Abertura e fechamento de caixa com identificação de quem abriu e quem fechou.',
+                    'Saldo, entradas, retiradas, formas de pagamento, histórico de movimentos e PDF de fechamento.',
+                    'Retiradas classificadas como sangria, transferência ou despesa para não distorcer o resultado.',
+                    'Financeiro exclusivo do titular, sem acesso de operadores e gerentes.',
+                    'Vendas e recebimentos de fiado entram automaticamente na consolidação financeira.',
+                    'Lançamentos manuais de receitas, despesas e transferências, inclusive com valores em centavos.',
+                    'Saldo contínuo entre meses, resultado do período, percentual de economia e resumo por categoria.',
+                    'Sugestões baseadas em lançamentos anteriores para repetir descrição, categoria e último valor com rapidez.'
+                ],
+                resultado: 'Resultado prático: você entende o caixa do dia sem misturá-lo com receitas, despesas e transferências da empresa.'
+            },
+            clientes: {
+                etiqueta: 'Relacionamento e cobrança',
+                titulo: 'Pare de depender da memória para saber quem comprou e quem deve',
+                resumo: 'Cada cliente pode reunir cadastro, compras, comprovantes, crédito disponível e compromissos de fiado.',
+                itens: [
+                    'Cadastro com nome, CPF ou CNPJ, WhatsApp, e-mail, nascimento, endereço, cidade e observações.',
+                    'Histórico de compras com itens, data, valor, forma de pagamento e acesso ao comprovante.',
+                    'Busca e filtros para mostrar todos, clientes com dívida ou clientes com saldo disponível.',
+                    'Ordenação que destaca primeiro as pendências financeiras.',
+                    'Saldo de cliente para guardar troco, registrar motivo, usar em uma compra ou devolver depois.',
+                    'Venda fiado com limite definido ou sem limite, dia de pagamento e vencimento.',
+                    'Pagamentos parciais, recebimento/fechamento e extrato em PDF com histórico e saldo pendente.',
+                    'Proteção contra exclusão de cliente fiado enquanto ainda existe saldo em aberto.'
+                ],
+                resultado: 'Resultado prático: atendimento, pós-venda e cobrança ficam apoiados por um histórico consultável.'
+            },
+            orcamentos: {
+                etiqueta: 'Propostas comerciais',
+                titulo: 'Envie uma proposta clara e transforme a aprovação em venda',
+                resumo: 'O orçamento fica separado do caixa e do estoque até o cliente aprovar, evitando movimentações antes da hora.',
+                itens: [
+                    'Numeração, validade, dados da empresa, dados do cliente, itens, quantidades, preços, desconto e observações.',
+                    'Busca de cliente já cadastrado ou criação automática do novo cliente ao finalizar a proposta.',
+                    'Inclusão de produtos e serviços, com desconto em percentual ou valor em reais.',
+                    'Rascunho, edição, duplicação, finalização e histórico de decisões.',
+                    'PDF A4 e impressão térmica de 80 mm com apresentação profissional.',
+                    'QR Code PIX no PDF com valor total, recebedor, banco e chave configurada.',
+                    'Marcação de proposta não aprovada ou ação “Aprovar e vender”.',
+                    'Na aprovação, escolha uma ou duas formas de pagamento; só então o estoque e o caixa são movimentados.'
+                ],
+                resultado: 'Resultado prático: você negocia com organização e evita baixar estoque ou lançar receita antes da confirmação.'
+            },
+            catalogo: {
+                etiqueta: 'Vitrine digital',
+                titulo: 'Coloque sua loja no celular do cliente com um link simples',
+                resumo: 'O catálogo usa os produtos escolhidos no PDV e apresenta uma vitrine pública sem expor os dados internos da empresa.',
+                itens: [
+                    'Endereço público exclusivo da loja, com nome, logo, descrição e WhatsApp.',
+                    'Publicação seletiva: apenas produtos e serviços marcados como visíveis aparecem.',
+                    'Categorias, busca, detalhes do item, imagem, preço e botão de contato pelo WhatsApp.',
+                    'Produtos sem saldo deixam de ser oferecidos; serviços publicados continuam disponíveis.',
+                    'Horário de funcionamento por dia, com dois períodos para quem fecha no almoço.',
+                    'Indicação automática de aberto, fechado, horário de encerramento e próxima abertura.',
+                    'Instalação do catálogo no celular com nome e logo da loja.',
+                    'Cartaz em PDF A4 com QR Code, além de botões para copiar ou compartilhar o link.',
+                    'As cores, a fonte, os cantos e a imagem do tema do PDV também podem aparecer no catálogo.'
+                ],
+                resultado: 'Resultado prático: o cliente consulta produtos e chama no WhatsApp, enquanto custos, vendas e cadastros internos permanecem privados.'
+            },
+            equipe: {
+                etiqueta: 'Acessos e comissão',
+                titulo: 'Dê autonomia para vender sem abrir áreas sensíveis',
+                resumo: 'Cada função recebe um nível de acesso coerente e cada venda pode identificar quem registrou e quem realizou o atendimento.',
+                itens: [
+                    'Conta individual de operador com acesso à rotina de vendas, orçamentos, clientes e caixa.',
+                    'Conta de gerente com recursos adicionais de produtos, estoque e relatórios.',
+                    'Financeiro, ADM, catálogo administrativo, temas e backups permanecem exclusivos do titular.',
+                    'Cadastro de funcionário vendedor apenas pelo nome, sem login e sem senha.',
+                    'Seleção opcional do vendedor na venda, mantendo separado quem vendeu de quem operou o caixa.',
+                    'Pausa, reativação, troca de senha por e-mail e exclusão de acessos de operador ou gerente.',
+                    'Operador concede até 5% de desconto; acima disso precisa do titular.',
+                    'Gerente confirma com a própria senha descontos de até 20%; acima disso precisa do titular.',
+                    'Comissão por vendedor, mês e porcentagem, mostrando quantidade de vendas, total vendido e valor a pagar.'
+                ],
+                resultado: 'Resultado prático: a equipe trabalha com responsabilidade individual sem visualizar toda a gestão da empresa.'
+            },
+            relatorios: {
+                etiqueta: 'Indicadores e conferência',
+                titulo: 'Encontre a resposta sem procurar venda por venda',
+                resumo: 'Os relatórios transformam o histórico da operação em filtros e resumos que ajudam na conferência diária e mensal.',
+                itens: [
+                    'Consulta de vendas por qualquer data, não apenas pelo dia atual.',
+                    'Indicadores de quantidade de vendas, faturamento da data, produtos cadastrados e estoque baixo.',
+                    'Filtro por vendedor e resumo de quantidade e valor vendido por pessoa.',
+                    'Lista detalhada das vendas com horário, itens, total, pagamento e comprovante.',
+                    'Cálculo mensal de comissão com vendedor, período e porcentagem escolhida pelo titular.',
+                    'Exportação de vendas e produtos, além do relatório de produtos em PDF.',
+                    'Histórico de fechamentos e movimentos do caixa para conferência operacional.',
+                    'Dados conectados ao histórico real de vendas, clientes e estoque.'
+                ],
+                resultado: 'Resultado prático: você acompanha desempenho, confere diferenças e calcula comissão com dados registrados na origem.'
+            },
+            mobilidade: {
+                etiqueta: 'Instalação e continuidade',
+                titulo: 'Use no balcão, no celular e mesmo quando a internet oscilar',
+                resumo: 'O PDV funciona como aplicação web responsiva e pode manter a operação local até a conexão voltar.',
+                itens: [
+                    'Interface adaptada para computador e celular, com menu compacto e busca focada no atendimento.',
+                    'Instalação pelo navegador para abrir o PDV por um ícone como aplicativo.',
+                    'Cache dos recursos essenciais após a primeira abertura online no aparelho.',
+                    'Vendas, estoque, clientes, caixa, orçamentos e lançamentos protegidos localmente durante o uso offline.',
+                    'Fila automática de sincronização quando a internet volta.',
+                    'Indicador visual informando se o sistema está offline, sincronizando ou atualizado.',
+                    'Leitor de código de barras pela câmera do celular.',
+                    'Atalhos de teclado para navegar entre áreas e selecionar formas de pagamento.'
+                ],
+                resultado: 'Resultado prático: uma oscilação de conexão não precisa interromper o atendimento que já foi preparado no aparelho.'
+            },
+            personalizacao: {
+                etiqueta: 'Identidade visual',
+                titulo: 'Adapte o sistema ao estilo do seu segmento',
+                resumo: 'O titular escolhe um tema pronto ou cria uma combinação própria, com prévia antes de salvar.',
+                itens: [
+                    'Temas para pet shop, adega, conveniência, doceria, hortifruti, gráfica, informática e estilos futurista ou neon.',
+                    'Opções para borracharia, oficina de motos, oficina de carros, autopeças, mercado, moda, beleza, construção, papelaria e farmácia.',
+                    'Personalização de cores, textos, cartões, barra superior, fonte, cantos e formato dos botões.',
+                    'Imagem de fundo local do tema ou imagem personalizada por endereço HTTPS.',
+                    'Prévia antes de salvar e opção para restaurar o visual padrão.',
+                    'Correção automática de contraste para manter textos importantes legíveis.',
+                    'Tema sincronizado para a equipe e aplicado também ao catálogo público.'
+                ],
+                resultado: 'Resultado prático: o sistema deixa de parecer genérico e acompanha a identidade visual do negócio.'
+            },
+            seguranca: {
+                etiqueta: 'Proteção e recuperação',
+                titulo: 'Mantenha pessoas, dados e ações sensíveis no lugar certo',
+                resumo: 'O sistema combina autenticação, regras de acesso, separação de dados e cópias para reduzir exposição indevida e perdas operacionais.',
+                itens: [
+                    'Login individual e verificação de que a conta está ativa antes de abrir o PDV.',
+                    'Dados operacionais separados por empresa e sincronizados na conta correspondente.',
+                    'Financeiro armazenado separadamente e entregue somente ao titular.',
+                    'Senha administrativa confirmada pela própria autenticação, sem senha paralela salva no navegador.',
+                    'Ações importantes, como descontos acima do limite e exclusões, exigem autorização compatível.',
+                    'Perfis de operador e gerente podem ser pausados, reativados ou excluídos.',
+                    'Catálogo público recebe apenas uma projeção dos dados liberados para divulgação.',
+                    'Backup completo em arquivo e restauração dos dados pelo próprio PDV.',
+                    'Cópia local e sincronização automática para proteger alterações feitas durante falhas de conexão.'
+                ],
+                resultado: 'Resultado prático: cada pessoa vê o que precisa e o titular preserva áreas administrativas e financeiras.'
+            },
+            pix: {
+                etiqueta: 'Cobranças e recebimentos',
+                titulo: 'Receba de formas diferentes sem perder a conferência',
+                resumo: 'O pagamento fica ligado à venda, ao caixa e ao comprovante, inclusive quando o cliente divide o valor.',
+                itens: [
+                    'Configuração de recebedor, chave PIX, cidade e banco na área administrativa.',
+                    'QR Code PIX manual com valor da venda e código para copiar.',
+                    'PIX incorporado ao PDF do orçamento, junto com recebedor, banco e chave.',
+                    'Dinheiro com cálculo de troco, cartão de crédito ou débito e seleção de parcelas.',
+                    'Fiado vinculado ao cliente, com vencimento, limite e acompanhamento de pagamentos.',
+                    'Divisão em duas formas, combinando dinheiro, PIX, cartão ou fiado.',
+                    'Cada parte do pagamento aparece separadamente no comprovante e nos movimentos do caixa.',
+                    'Uso de saldo do cliente para abater a compra sem registrar a mesma entrada duas vezes.'
+                ],
+                resultado: 'Resultado prático: mais opções para o cliente e mais clareza para quem confere o caixa.'
+            }
+        };
+
+        const modal = document.getElementById('detalhes-recurso');
+        const modalTitulo = document.getElementById('modal-titulo');
+        const modalEtiqueta = document.getElementById('modal-etiqueta');
+        const modalResumo = document.getElementById('modal-resumo');
+        const modalLista = document.getElementById('modal-lista');
+        const modalResultado = document.getElementById('modal-resultado');
+        let botaoOrigem = null;
+
+        function abrirRecurso(chave, origem) {
+            const recurso = RECURSOS[chave];
+            if (!recurso) return;
+            botaoOrigem = origem;
+            modalEtiqueta.textContent = recurso.etiqueta;
+            modalTitulo.textContent = recurso.titulo;
+            modalResumo.textContent = recurso.resumo;
+            modalLista.replaceChildren(...recurso.itens.map(texto => {
+                const item = document.createElement('li');
+                item.textContent = texto;
+                return item;
+            }));
+            modalResultado.textContent = recurso.resultado;
+            modal.showModal();
+            modal.querySelector('.modal-close').focus();
+        }
+
+        document.querySelectorAll('[data-feature]').forEach(botao => {
+            botao.setAttribute('aria-haspopup', 'dialog');
+            botao.addEventListener('click', () => abrirRecurso(botao.dataset.feature, botao));
+        });
+
+        modal.querySelector('.modal-close').addEventListener('click', () => modal.close());
+        modal.addEventListener('click', evento => { if (evento.target === modal) modal.close(); });
+        modal.addEventListener('close', () => botaoOrigem?.focus());
+
+        document.querySelectorAll('a[href="' + LINK_COMPRA + '"]').forEach(link => {
+            link.setAttribute('data-checkout', 'login');
+        });
+    </script>
+</body>
+</html>
