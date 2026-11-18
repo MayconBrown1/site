@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pdv-pro-v64';
+const CACHE_NAME = 'pdv-pro-v66';
 const CATALOG_ICON_CACHE = 'pdv-catalog-icons-v1';
 const APP_SHELL = [
   '/', '/login', '/cadastro', '/admin', '/favicon.svg', '/catalogo/', '/catalogo/catalogo.css', '/catalogo/catalogo.js', '/catalogo-admin.js', '/clientes-financeiro.js', '/operator-admin.js', '/manifest.json', '/pwa-install.js', '/pdv-cloud.js', '/auth.js', '/firebase-config.js',

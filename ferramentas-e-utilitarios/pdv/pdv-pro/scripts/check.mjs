@@ -17,6 +17,10 @@ const cadastroSource = fs.readFileSync(new URL('../cadastro.html', import.meta.u
 const adminSource = fs.readFileSync(new URL('../admin.html', import.meta.url), 'utf8');
 const manifestSource = fs.readFileSync(new URL('../manifest.json', import.meta.url), 'utf8');
 const publicCatalogHtml = fs.readFileSync(new URL('../catalogo/index.html', import.meta.url), 'utf8');
+const salesPageSource = fs.readFileSync(new URL('../vendas.html', import.meta.url), 'utf8');
+const wranglerSource = fs.readFileSync(new URL('../wrangler.jsonc', import.meta.url), 'utf8');
+const assetsIgnoreSource = fs.readFileSync(new URL('../.assetsignore', import.meta.url), 'utf8');
+const cloudflareBuildSource = fs.readFileSync(new URL('./build-cloudflare.mjs', import.meta.url), 'utf8');
 const inlineScripts = html
   .split('<script')
   .slice(1)
@@ -25,6 +29,33 @@ const inlineScripts = html
 
 inlineScripts.forEach(script => new Function(script));
 new Function(customerFinanceSource);
+const salesInlineScripts = salesPageSource
+  .split('<script')
+  .slice(1)
+  .map(part => part.slice(part.indexOf('>') + 1, part.indexOf('</script>')))
+  .filter(script => script && !script.trimStart().startsWith('{'));
+salesInlineScripts.forEach(script => new Function(script));
+
+const wranglerConfig = JSON.parse(wranglerSource);
+if (wranglerConfig.name !== 'pdv-pro' || wranglerConfig.assets?.directory !== '.') {
+  throw new Error('A implantação Cloudflare precisa publicar os arquivos estáticos do Worker pdv-pro.');
+}
+for (const itemInterno of ['functions', 'scripts', 'tmp', 'output', 'firestore.rules', 'wrangler.jsonc']) {
+  if (!assetsIgnoreSource.split(/\r?\n/).includes(itemInterno)) throw new Error(`A Cloudflare precisa excluir o item interno ${itemInterno} dos arquivos públicos.`);
+}
+for (const marker of ["'functions'", "'tmp'", "'output'"]) {
+  if (cloudflareBuildSource.includes(marker)) throw new Error(`A build pública da Cloudflare não pode copiar o diretório privado ${marker}.`);
+}
+for (const marker of ["'index.html'", "'vendas.html'", "'assets'", "'catalogo'"]) {
+  if (!cloudflareBuildSource.includes(marker)) throw new Error(`Arquivo público ausente da build Cloudflare: ${marker}`);
+}
+
+const checkoutUrl = 'https://mayconbrown.com.br/ferramentas-e-utilitarios/pdv/pdv-pro-5435135849648/login.html';
+for (const marker of ['R$ 19,99', 'data-feature="vendas"', 'data-feature="catalogo"', 'data-feature="equipe"', 'id="detalhes-recurso"', 'const RECURSOS = {']) {
+  if (!salesPageSource.includes(marker)) throw new Error(`Página de vendas incompleta: ${marker}`);
+}
+const salesCheckoutLinks = salesPageSource.match(new RegExp(`href="${checkoutUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'g')) || [];
+if (salesCheckoutLinks.length < 4) throw new Error('A página de vendas precisa manter todos os principais botões no link oficial de login/cadastro.');
 
 const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map(match => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
@@ -83,8 +114,19 @@ for (const marker of [
   'function autorizacaoNecessariaDesconto',
   'function montarCobrancaPix',
   'function criarCanvasQrCode',
-  "pdf.addImage(imagemQrCodePix, 'PNG'",
+  "pdf.addImage(etapa.imagem, 'PNG'",
   'Chave PIX:',
+  'orcamento-pagamento-em-etapas',
+  'function planoPagamentoOrcamento',
+  "receberEtapaOrcamento(id, etapa)",
+  "orcamento.status = recebendoEntrada ? 'pagamento_parcial' : 'aprovado'",
+  'Cobrança desta etapa:',
+  'etapasPix.forEach(etapa =>',
+  'PAGO${etapa.pagoEm',
+  'Metro quadrado (medir largura × altura em cm)',
+  'function calcularAreaMetrosQuadrados',
+  'function mostrarModalArea',
+  "produto.unidade === 'm2'",
   'btn-novidades',
   'contador-novidades',
   'function atualizarNotificacaoNovidades',
@@ -158,6 +200,26 @@ for (const marker of ['Escolha o tamanho do orçamento', "finalizarOrcamento('pd
 }
 for (const marker of ['Novidades agora avisam quando há atualização', 'Contador de atualizações no menu', 'PIX pronto no PDF do orçamento', 'Finalize, imprima ou transforme o rascunho em venda', 'function finalizarOrcamentoSalvo', 'function aprovarRascunhoOrcamento', 'Finalizar orçamento', 'Cliente aprovou / vender', 'calcularTotaisOrcamento().descontoPercentual']) {
   if (!html.includes(marker)) throw new Error(`Fluxo de finalização do orçamento incompleto: ${marker}`);
+}
+for (const marker of ['Entrada e entrega com cobranças separadas', 'Venda por m² usando medidas em centímetros']) {
+  if (!html.includes(marker)) throw new Error(`Novidade desta versão ausente: ${marker}`);
+}
+
+const calcularAreaStart = html.indexOf('function calcularAreaMetrosQuadrados');
+const calcularAreaEnd = html.indexOf('function mostrarModalArea', calcularAreaStart);
+if (calcularAreaStart < 0 || calcularAreaEnd < 0) throw new Error('Não foi possível localizar o cálculo de área em m².');
+const calcularAreaTeste = new Function(`${html.slice(calcularAreaStart, calcularAreaEnd)}; return calcularAreaMetrosQuadrados;`)();
+if (calcularAreaTeste(20, 25, 1) !== 0.05 || calcularAreaTeste(20, 25, 3) !== 0.15) {
+  throw new Error('A conversão de largura e altura em centímetros para m² está incorreta.');
+}
+
+const planoPagamentoStart = html.indexOf('function planoPagamentoOrcamento');
+const planoPagamentoEnd = html.indexOf('function planoPagamentoFormulario', planoPagamentoStart);
+if (planoPagamentoStart < 0 || planoPagamentoEnd < 0) throw new Error('Não foi possível localizar o plano de pagamento do orçamento.');
+const normalizarPlanoPagamentoTeste = new Function('arredondarCentavos', `${html.slice(planoPagamentoStart, planoPagamentoEnd)}; return planoPagamentoOrcamento;`)(valor => Math.round(Number(valor) * 100) / 100);
+const planoPagamentoTeste = normalizarPlanoPagamentoTeste({ planoPagamento: { ativo: true, etapas: [{ nome: 'Entrada', valor: 50, status: 'pago' }, { nome: 'Entrega', valor: 50, status: 'pendente' }] } });
+if (planoPagamentoTeste?.etapas[0]?.status !== 'pago' || planoPagamentoTeste?.etapas[1]?.status !== 'pendente' || planoPagamentoTeste.etapas.reduce((soma, etapa) => soma + etapa.valor, 0) !== 100) {
+  throw new Error('O plano de pagamento não preservou corretamente a entrada paga e o saldo pendente.');
 }
 if (html.includes('totaisOrcamento()')) throw new Error('A finalização do orçamento ainda chama a função inexistente totaisOrcamento.');
 if (html.includes("finalizando && !orcamento.empresa.cnpj")) throw new Error('O orçamento não pode exigir CNPJ do emitente quando esse dado não foi informado.');

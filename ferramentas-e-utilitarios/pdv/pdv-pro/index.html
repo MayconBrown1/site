@@ -421,13 +421,15 @@
                             </div>
                             <div id="campo-produto-unidade">
                                 <label for="produto-unidade" class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
-                                <select id="produto-unidade" class="w-full p-3 border rounded-lg text-base">
+                                <select id="produto-unidade" class="w-full p-3 border rounded-lg text-base" onchange="atualizarRotuloPrecoUnidade()">
                                     <option value="un">Unidade</option>
                                     <option value="kg">Quilograma</option>
                                     <option value="g">Grama</option>
                                     <option value="l">Litro</option>
                                     <option value="ml">Mililitro</option>
+                                    <option value="m2">Metro quadrado (medir largura × altura em cm)</option>
                                 </select>
+                                <p class="mt-1 text-xs text-gray-500">Para adesivo, acrílico e chapas, escolha metro quadrado e cadastre o preço de 1 m². A largura e a altura serão pedidas em centímetros na venda.</p>
                             </div>
                             <div id="campo-produto-estoque">
                                 <label for="produto-estoque" class="block text-sm font-medium text-gray-700 mb-1">Estoque Inicial</label>
@@ -610,6 +612,19 @@
                                     <label for="orcamento-condicoes" class="mb-1 block text-sm font-medium text-gray-700">Condições de pagamento</label>
                                     <input id="orcamento-condicoes" class="w-full rounded-lg border p-3" placeholder="Ex.: 50% na aprovação e 50% na entrega">
                                 </div>
+                                <div class="rounded-xl border border-purple-200 bg-purple-50 p-4">
+                                    <label class="flex cursor-pointer items-start gap-3">
+                                        <input id="orcamento-pagamento-em-etapas" type="checkbox" class="mt-1 h-5 w-5 rounded border-purple-300 text-purple-600" onchange="atualizarPlanoPagamentoOrcamento()">
+                                        <span><strong class="block text-purple-950">Cobrar em duas etapas com PIX separado</strong><span class="text-sm text-purple-800">Use para entrada + entrega. O PDF terá um QR Code para cada etapa ainda pendente.</span></span>
+                                    </label>
+                                    <div id="orcamento-plano-pagamento" class="mt-4 hidden grid gap-3 sm:grid-cols-2">
+                                        <div><label for="orcamento-etapa-1-nome" class="block text-sm font-semibold text-purple-950">Nome da 1ª etapa</label><input id="orcamento-etapa-1-nome" class="mt-1 w-full rounded-lg border p-3" value="Entrada" oninput="atualizarPlanoPagamentoOrcamento()"></div>
+                                        <div><label for="orcamento-etapa-1-valor" class="block text-sm font-semibold text-purple-950">Valor da entrada</label><input id="orcamento-etapa-1-valor" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-3" oninput="atualizarPlanoPagamentoOrcamento(true)"></div>
+                                        <div><label for="orcamento-etapa-2-nome" class="block text-sm font-semibold text-purple-950">Nome da 2ª etapa</label><input id="orcamento-etapa-2-nome" class="mt-1 w-full rounded-lg border p-3" value="Entrega" oninput="atualizarPlanoPagamentoOrcamento()"></div>
+                                        <div><label for="orcamento-etapa-2-valor" class="block text-sm font-semibold text-purple-950">Saldo na entrega</label><input id="orcamento-etapa-2-valor" type="text" class="mt-1 w-full rounded-lg border bg-white p-3" readonly></div>
+                                        <p id="orcamento-plano-resumo" class="rounded-lg bg-white p-3 text-sm font-semibold text-purple-900 sm:col-span-2"></p>
+                                    </div>
+                                </div>
                                 <div>
                                     <label for="orcamento-prazo-entrega" class="mb-1 block text-sm font-medium text-gray-700">Prazo de entrega / execução</label>
                                     <input id="orcamento-prazo-entrega" class="w-full rounded-lg border p-3" placeholder="Ex.: até 10 dias úteis após a aprovação">
@@ -632,6 +647,7 @@
 
                         <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-end">
                             <button type="button" onclick="salvarOrcamento('rascunho')" class="rounded-lg bg-slate-600 px-5 py-3 font-semibold text-white hover:bg-slate-700">Salvar rascunho</button>
+                            <button id="btn-orcamento-receber-entrada" type="button" onclick="finalizarOrcamento('entrada')" class="hidden rounded-lg bg-purple-700 px-5 py-3 font-semibold text-white hover:bg-purple-800">Receber entrada e baixar PDF do saldo</button>
                             <button type="button" onclick="finalizarOrcamento('pdf')" class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700">Finalizar e baixar PDF A4</button>
                             <button type="button" onclick="finalizarOrcamento('termica')" class="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Finalizar e imprimir térmica</button>
                         </div>
@@ -909,14 +925,17 @@
                             <h2 class="text-2xl lg:text-3xl font-bold text-slate-800">Novidades do PDV</h2>
                             <p class="mt-2 text-slate-600">Veja o que mudou e como aproveitar cada recurso.</p>
                         </div>
-                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 27/10/2026</span>
+                        <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-700">Atualizado em 17/11/2026</span>
                     </div>
-                    <section data-novidades-cache="pdv-pro-v64" data-atualizacao="2026-10-27" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
+                    <section data-novidades-cache="pdv-pro-v66" data-atualizacao="2026-11-17" class="mb-7 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-sky-50 p-4 lg:p-6">
                         <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Funcionários vendedores e comissão</h3></div>
+                            <div><p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Última atualização</p><h3 class="text-xl font-bold text-slate-900">Orçamento parcelado e venda calculada por área</h3></div>
                             <span class="self-start rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">Novo</span>
                         </div>
                         <div class="grid gap-3 lg:grid-cols-2">
+                            <article class="rounded-xl border border-purple-500 bg-purple-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-purple-950">💳 Entrada e entrega com cobranças separadas</h4><p class="mt-2 text-sm text-slate-700">Em <strong>Orçamentos</strong>, ative <strong>Cobrar em duas etapas com PIX separado</strong>, informe o valor e os nomes das etapas. Antes do pagamento, o PDF mostra dois QR Codes, um para cada valor. Se a entrada já foi paga, use <strong>Receber entrada e baixar PDF do saldo</strong>: o PDV registra uma única venda, baixa o estoque uma única vez e gera o documento discriminando a entrada paga e cobrando somente o saldo da entrega. Depois, no histórico, clique em <strong>Receber entrega</strong> para concluir o pagamento.</p></article>
+                            <article class="rounded-xl border border-cyan-500 bg-cyan-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-cyan-950">📐 Venda por m² usando medidas em centímetros</h4><p class="mt-2 text-sm text-slate-700">Ao cadastrar adesivo, acrílico, chapa ou outro material, escolha a unidade <strong>Metro quadrado (medir largura × altura em cm)</strong> e informe o preço por m². Na venda, selecione o produto, digite largura, altura e quantidade de peças — por exemplo, <strong>20 × 25 cm</strong>. O PDV converte automaticamente para m², calcula o valor e permite somar outras medidas do mesmo produto.</p></article>
+                            <article class="rounded-xl border border-sky-500 bg-sky-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-sky-950">🚀 Página de vendas clara, completa e interativa</h4><p class="mt-2 text-sm text-slate-700">A nova página <strong>vendas.html</strong> apresenta o PDV Pro por dores do negócio, sem encher a tela de texto. O visitante clica no assunto que deseja resolver para abrir os detalhes em um pop-up, confere tudo que está incluído por <strong>R$ 19,99 por mês</strong> e usa os botões de compra para seguir à tela oficial de login e cadastro.</p></article>
                             <article class="rounded-xl border border-emerald-500 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">👤 Cadastre vendedores sem criar senha</h4><p class="mt-2 text-sm text-slate-700">Em <strong>ADM do PDV → Funcionários vendedores</strong>, informe apenas o nome e clique em <strong>Adicionar funcionário</strong>. Na tela de <strong>Vendas</strong>, escolha esse vendedor no campo discreto acima das formas de pagamento ou deixe em branco. Depois, em <strong>Relatórios → Calcular comissão</strong>, selecione o vendedor, o mês e a porcentagem para ver o total vendido e quanto pagar de comissão.</p></article>
                             <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">📲 Instale o catálogo da loja como aplicativo</h4><p class="mt-2 text-sm text-slate-700">No catálogo público, toque em <strong>Instalar catálogo</strong>. O celular cria um aplicativo com o <strong>nome e a logo cadastrados pela loja</strong> e, ao abrir, entra direto naquele catálogo. No iPhone, o botão mostra o caminho <strong>Compartilhar → Adicionar à Tela de Início</strong>.</p></article>
                             <article class="rounded-xl border border-emerald-400 bg-emerald-50 p-4 shadow-sm lg:col-span-2"><h4 class="font-bold text-emerald-950">▣ Baixe o QR Code do catálogo em PDF A4</h4><p class="mt-2 text-sm text-slate-700">Depois de publicar o catálogo, abra <strong>Meu Catálogo</strong> e clique em <strong>Baixar cartaz com QR Code</strong>. O PDV gera uma folha A4 com o nome da loja, uma chamada para consultar produtos e preços, o endereço e um QR Code grande, pronta para imprimir, plastificar e colocar na porta ou no balcão.</p></article>
@@ -1511,6 +1530,21 @@
         </div>
     </div>
 
+    <!-- Medição por área: largura e altura são informadas em centímetros e convertidas para m² -->
+    <div id="modal-area" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-area">
+        <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl lg:p-6">
+            <h3 id="titulo-modal-area" class="text-lg font-bold text-slate-900">📐 Calcular produto por metro quadrado</h3>
+            <div class="mt-3 rounded-lg bg-purple-50 p-3"><strong id="area-produto-nome" class="block text-purple-950"></strong><span class="text-sm text-purple-800">Preço por m²: <span id="area-preco-m2"></span></span></div>
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <div><label for="area-largura-cm" class="block text-sm font-semibold">Largura (cm)</label><input id="area-largura-cm" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-3" placeholder="20" oninput="calcularPrecoArea()"></div>
+                <div><label for="area-altura-cm" class="block text-sm font-semibold">Altura (cm)</label><input id="area-altura-cm" type="number" min="0.01" step="0.01" class="mt-1 w-full rounded-lg border p-3" placeholder="25" oninput="calcularPrecoArea()"></div>
+                <div class="col-span-2"><label for="area-quantidade-pecas" class="block text-sm font-semibold">Quantidade de peças</label><input id="area-quantidade-pecas" type="number" min="1" step="1" value="1" class="mt-1 w-full rounded-lg border p-3" oninput="calcularPrecoArea()"></div>
+            </div>
+            <div class="mt-4 rounded-lg bg-slate-50 p-3 text-sm"><div class="flex justify-between"><span>Medida:</span><strong id="area-medida-display">0 × 0 cm</strong></div><div class="mt-2 flex justify-between"><span>Área total:</span><strong id="area-total-display">0,0000 m²</strong></div><div class="mt-2 flex justify-between text-base"><span>Valor:</span><strong id="area-valor-display" class="text-emerald-700">R$ 0,00</strong></div></div>
+            <div class="mt-5 flex gap-3"><button type="button" onclick="confirmarAreaProduto()" class="flex-1 rounded-lg bg-purple-700 p-3 font-semibold text-white hover:bg-purple-800">Adicionar ao carrinho</button><button type="button" onclick="cancelarAreaProduto()" class="rounded-lg bg-gray-200 px-5 py-3 font-semibold">Cancelar</button></div>
+        </div>
+    </div>
+
     <!-- Leitor móvel de código de barras -->
     <div id="modal-leitor-codigo" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 md:hidden" role="dialog" aria-modal="true" aria-labelledby="titulo-leitor-codigo">
         <div class="w-full max-w-md overflow-hidden rounded-2xl bg-slate-950 shadow-2xl">
@@ -1573,7 +1607,7 @@
             <div id="orcamento-aprovacao-dinheiro" class="mt-3 hidden rounded-lg border border-green-200 bg-green-50 p-3"><label for="orcamento-aprovacao-recebido" class="block text-sm font-semibold">Valor em dinheiro recebido</label><input id="orcamento-aprovacao-recebido" type="number" min="0" step="0.01" class="mt-1 w-full rounded-lg border p-3"></div>
             <div id="orcamento-aprovacao-cartao" class="mt-3 hidden grid gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:grid-cols-2"><div><label for="orcamento-aprovacao-tipo-cartao" class="block text-sm font-semibold">Tipo do cartão</label><select id="orcamento-aprovacao-tipo-cartao" class="mt-1 w-full rounded-lg border p-3"><option value="credito">Crédito</option><option value="debito">Débito</option></select></div><div><label for="orcamento-aprovacao-parcelas" class="block text-sm font-semibold">Parcelas</label><select id="orcamento-aprovacao-parcelas" class="mt-1 w-full rounded-lg border p-3"><option value="1">1x</option><option value="2">2x</option><option value="3">3x</option><option value="6">6x</option><option value="12">12x</option></select></div></div>
             <p id="orcamento-aprovacao-pix" class="mt-3 hidden rounded-lg border border-purple-200 bg-purple-50 p-3 text-sm text-purple-900">Confirme o recebimento da parte em PIX no banco antes de concluir.</p>
-            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end"><button type="button" onclick="fecharAprovacaoOrcamento()" class="rounded-lg bg-gray-200 px-5 py-3 font-semibold">Cancelar</button><button type="button" onclick="confirmarAprovacaoOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700">Aprovar, baixar estoque e emitir comprovante</button></div>
+            <div class="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end"><button type="button" onclick="fecharAprovacaoOrcamento()" class="rounded-lg bg-gray-200 px-5 py-3 font-semibold">Cancelar</button><button id="btn-confirmar-etapa-orcamento" type="button" onclick="confirmarAprovacaoOrcamento()" class="rounded-lg bg-emerald-600 px-5 py-3 font-bold text-white hover:bg-emerald-700">Aprovar, baixar estoque e emitir comprovante</button></div>
         </div>
     </div>
 
@@ -1716,6 +1750,8 @@ if ('serviceWorker' in navigator) {
         let itensOrcamento = [];
         let orcamentoEditando = null;
         let orcamentoEmAprovacao = null;
+        let etapaOrcamentoEmAprovacao = 'total';
+        let gerarPdfAposRecebimentoOrcamento = false;
         let clienteFiadoEditando = null;
         Object.defineProperties(window, {
             produtos: { get: () => produtos, set: v => { produtos = v; } },
@@ -2730,7 +2766,16 @@ if ('serviceWorker' in navigator) {
             document.getElementById('produto-imagem').value = '';
             document.getElementById('produto-visivel-catalogo').checked = true;
             atualizarCamposTipoItem();
+            atualizarRotuloPrecoUnidade();
             validarDuplicidadeProduto();
+        }
+
+        function atualizarRotuloPrecoUnidade() {
+            const ehServico = document.getElementById('produto-tipo')?.value === 'servico';
+            const unidade = document.getElementById('produto-unidade')?.value;
+            const rotulo = document.getElementById('label-produto-preco');
+            if (!rotulo) return;
+            rotulo.textContent = ehServico ? 'Valor-base do serviço' : unidade === 'm2' ? 'Preço de venda por m² *' : unidade === 'kg' ? 'Preço de venda por kg *' : 'Preço de Venda *';
         }
 
         function atualizarCamposTipoItem() {
@@ -2746,7 +2791,7 @@ if ('serviceWorker' in navigator) {
             const visivelCatalogo = document.getElementById('produto-visivel-catalogo');
             campoCatalogo.classList.remove('opacity-50');
             visivelCatalogo.disabled = false;
-            document.getElementById('label-produto-preco').textContent = ehServico ? 'Valor-base do serviço' : 'Preço de Venda *';
+            atualizarRotuloPrecoUnidade();
             document.getElementById('produto-preco').required = !ehServico;
             atualizarVinculoEstoqueForm();
             validarDuplicidadeProduto();
@@ -3436,6 +3481,73 @@ function showInstallButton() {
             calcularPrecoPesagem();
         }
 
+        let produtoParaArea = null;
+
+        function calcularAreaMetrosQuadrados(larguraCm, alturaCm, quantidadePecas = 1) {
+            const largura = Math.max(0, Number(larguraCm) || 0);
+            const altura = Math.max(0, Number(alturaCm) || 0);
+            const pecas = Math.max(0, Number(quantidadePecas) || 0);
+            return Number(((largura / 100) * (altura / 100) * pecas).toFixed(6));
+        }
+
+        function mostrarModalArea(produto) {
+            produtoParaArea = produto;
+            document.getElementById('area-produto-nome').textContent = produto.nome;
+            document.getElementById('area-preco-m2').textContent = moedaOrcamento(produto.preco);
+            document.getElementById('area-largura-cm').value = '';
+            document.getElementById('area-altura-cm').value = '';
+            document.getElementById('area-quantidade-pecas').value = '1';
+            calcularPrecoArea();
+            const modal = document.getElementById('modal-area');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            document.getElementById('area-largura-cm').focus();
+        }
+
+        function calcularPrecoArea() {
+            if (!produtoParaArea) return;
+            const largura = Number(document.getElementById('area-largura-cm').value || 0);
+            const altura = Number(document.getElementById('area-altura-cm').value || 0);
+            const pecas = Number(document.getElementById('area-quantidade-pecas').value || 0);
+            const area = calcularAreaMetrosQuadrados(largura, altura, pecas);
+            document.getElementById('area-medida-display').textContent = `${largura.toLocaleString('pt-BR')} × ${altura.toLocaleString('pt-BR')} cm · ${pecas || 0} peça(s)`;
+            document.getElementById('area-total-display').textContent = `${area.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} m²`;
+            document.getElementById('area-valor-display').textContent = moedaOrcamento(area * Number(produtoParaArea.preco || 0));
+        }
+
+        function confirmarAreaProduto() {
+            if (!exigirCaixaAberto('Abra o caixa antes de adicionar itens à venda.') || !produtoParaArea) return;
+            const larguraCm = Number(document.getElementById('area-largura-cm').value || 0);
+            const alturaCm = Number(document.getElementById('area-altura-cm').value || 0);
+            const pecas = Number(document.getElementById('area-quantidade-pecas').value || 0);
+            if (larguraCm <= 0 || alturaCm <= 0 || !Number.isInteger(pecas) || pecas <= 0) return mostrarMensagem('Informe largura, altura e quantidade de peças válidas.', 'erro');
+            const areaM2 = calcularAreaMetrosQuadrados(larguraCm, alturaCm, pecas);
+            const medida = { larguraCm, alturaCm, pecas, areaM2 };
+            const itemExistente = carrinho.find(item => item.produtoId === produtoParaArea.id);
+            if (itemExistente) {
+                itemExistente.quantidade = Number((Number(itemExistente.quantidade || 0) + areaM2).toFixed(6));
+                itemExistente.dimensoesArea = [...(itemExistente.dimensoesArea || []), medida];
+            } else {
+                carrinho.push({
+                    produtoId: produtoParaArea.id, nome: produtoParaArea.nome, preco: Number(produtoParaArea.preco),
+                    quantidade: areaM2, unidade: 'm2', tipo: produtoParaArea.tipo || 'produto', dimensoesArea: [medida],
+                    estoqueOrigemId: chaveEstoque(produtoParaArea)
+                });
+            }
+            avisarEstoqueInsuficienteNoCarrinho(produtoParaArea, totalReservadoNoEstoque(produtoParaArea));
+            const nome = produtoParaArea.nome;
+            cancelarAreaProduto();
+            atualizarCarrinho();
+            document.getElementById('busca-produto').value = '';
+            document.getElementById('busca-produto').focus();
+            mostrarMensagem(`${larguraCm} × ${alturaCm} cm (${areaM2.toLocaleString('pt-BR', { maximumFractionDigits: 6 })} m²) de ${nome} adicionado.`, 'sucesso');
+        }
+
+        function cancelarAreaProduto() {
+            produtoParaArea = null;
+            const modal = document.getElementById('modal-area');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+        }
+
         // Gerenciamento do carrinho
         function adicionarAoCarrinho(produtoId) {
             if (!exigirCaixaAberto('Abra o caixa antes de iniciar uma venda.')) return false;
@@ -3447,6 +3559,10 @@ function showInstallButton() {
             // Se for produto por kg, mostrar modal para inserir peso
             if (!ehServico && produto.unidade === 'kg') {
                 mostrarModalPesagem(produto);
+                return false;
+            }
+            if (!ehServico && produto.unidade === 'm2') {
+                mostrarModalArea(produto);
                 return false;
             }
 
@@ -3531,6 +3647,11 @@ function showInstallButton() {
                     const gramas = Math.round(item.quantidade * 1000);
                     quantidadeDisplay = `${gramas}g (${item.quantidade.toFixed(3)}kg)`;
                     unidadeDisplay = '';
+                } else if (item.unidade === 'm2') {
+                    quantidadeDisplay = `${Number(item.quantidade).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} m²`;
+                    const medidas = (item.dimensoesArea || []).map(medida => `${medida.pecas}× ${medida.larguraCm} × ${medida.alturaCm} cm`).join(' + ');
+                    if (medidas) quantidadeDisplay += ` (${medidas})`;
+                    unidadeDisplay = '';
                 } else {
                     quantidadeDisplay = `${item.quantidade} ${item.unidade}`;
                     unidadeDisplay = '';
@@ -3552,6 +3673,7 @@ function showInstallButton() {
                                     </label>` : item.unidade === 'kg' ? 
                                     `<button onclick="editarPesagem('${item.produtoId}')" 
                                             class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors">⚖️ Editar</button>` :
+                                    item.unidade === 'm2' ? `<button onclick="mostrarModalArea(produtos.find(produto => produto.id === '${item.produtoId}'))" class="rounded bg-purple-700 px-2 py-1 text-xs text-white hover:bg-purple-800">📐 Somar medida</button>` :
                                     `<button onclick="alterarQuantidade('${item.produtoId}', ${item.quantidade - 1})" 
                                             class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 lg:w-6 lg:h-6 rounded text-sm transition-colors">-</button>
                                     <input type="number" value="${item.quantidade}" min="1" step="0.01" 
@@ -4220,6 +4342,9 @@ function showInstallButton() {
                 if (item.unidade === 'kg') {
                     const gramas = Math.round(item.quantidade * 1000);
                     quantidadeTexto = `${gramas}g (${item.quantidade.toFixed(3)}kg)`;
+                } else if (item.unidade === 'm2') {
+                    const medidas = (item.dimensoesArea || []).map(medida => `${medida.pecas}× ${medida.larguraCm} × ${medida.alturaCm} cm`).join(' + ');
+                    quantidadeTexto = `${Number(item.quantidade).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} m²${medidas ? ` · ${medidas}` : ''}`;
                 } else {
                     quantidadeTexto = `${item.quantidade} ${item.unidade}`;
                 }
@@ -4481,6 +4606,8 @@ function showInstallButton() {
             if (item.unidade === 'kg') {
                 const gramas = Math.round(item.quantidade * 1000);
                 quantidadeTexto = `${gramas}g`;
+            } else if (item.unidade === 'm2') {
+                quantidadeTexto = `${Number(item.quantidade).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 6 })} m²`;
             } else {
                 quantidadeTexto = `${item.quantidade} ${item.unidade}`;
             }
@@ -5274,6 +5401,7 @@ function showInstallButton() {
             case 'finalizar_venda_desconto': finalizarVenda(); break;
             case 'finalizar_orcamento_pdf_desconto': finalizarOrcamento('pdf'); break;
             case 'finalizar_orcamento_termica_desconto': finalizarOrcamento('termica'); break;
+            case 'finalizar_orcamento_entrada_desconto': finalizarOrcamento('entrada'); break;
             case 'finalizar_orcamento_salvo_desconto': concluirFinalizacaoOrcamentoSalvo(orcamentoRascunhoPendenteId); orcamentoRascunhoPendenteId = null; break;
             case 'aprovar_orcamento_desconto': confirmarAprovacaoOrcamento(); break;
         }
@@ -5308,7 +5436,7 @@ function showInstallButton() {
             movimentos = movimentos.filter(m => m.vendaId !== vendaParaExcluir.id);
             movimentosSaldoCliente = movimentosSaldoCliente.filter(m => m.vendaId !== vendaParaExcluir.id);
             const orcamentoVinculado = orcamentos.find(orcamento => orcamento.vendaId === vendaParaExcluir.id);
-            if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
+            if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; if (orcamentoVinculado.planoPagamento?.etapas) orcamentoVinculado.planoPagamento.etapas = orcamentoVinculado.planoPagamento.etapas.map(etapa => ({ ...etapa, status: 'pendente', pagoEm: '', formas: [] })); orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
             
             // Remover venda
             vendas = vendas.filter(v => v.id !== vendaParaExcluir.id);
@@ -5338,7 +5466,7 @@ function showInstallButton() {
                 if (venda) {
                     restaurarEstoqueDosItens(venda.itens);
                     const orcamentoVinculado = orcamentos.find(orcamento => orcamento.vendaId === venda.id);
-                    if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
+                    if (orcamentoVinculado) { orcamentoVinculado.status = 'finalizado'; delete orcamentoVinculado.vendaId; delete orcamentoVinculado.aprovadoEm; delete orcamentoVinculado.pagamento; if (orcamentoVinculado.planoPagamento?.etapas) orcamentoVinculado.planoPagamento.etapas = orcamentoVinculado.planoPagamento.etapas.map(etapa => ({ ...etapa, status: 'pendente', pagoEm: '', formas: [] })); orcamentoVinculado.atualizadoEm = new Date().toISOString(); }
                     
                     // Remover a venda também
                     vendas = vendas.filter(v => v.id !== movimentoParaExcluir.vendaId);
@@ -6093,6 +6221,53 @@ function showInstallButton() {
             emitente.innerHTML = `<div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><strong class="block text-blue-900">Emitente: ${escaparHTMLOrcamento(configSistema.nomeEmpresa || 'PDV - Pro')}</strong><span>${cnpj ? `CNPJ ${escaparHTMLOrcamento(cnpj)}` : 'CNPJ ainda não cadastrado'}${configSistema.telefone ? ` · ${escaparHTMLOrcamento(configSistema.telefone)}` : ''}${configSistema.email ? ` · ${escaparHTMLOrcamento(configSistema.email)}` : ''}</span></div>${cnpj ? '' : '<button type="button" onclick="acessarAdm()" class="rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white">Cadastrar no ADM</button>'}</div>`;
         }
 
+        function planoPagamentoOrcamento(orcamento) {
+            const plano = orcamento?.planoPagamento;
+            if (!plano?.ativo || !Array.isArray(plano.etapas) || plano.etapas.length !== 2) return null;
+            return {
+                ativo: true,
+                etapas: plano.etapas.map((etapa, indice) => ({
+                    numero: indice + 1,
+                    nome: String(etapa.nome || (indice ? 'Entrega' : 'Entrada')),
+                    valor: arredondarCentavos(etapa.valor || 0),
+                    status: etapa.status === 'pago' ? 'pago' : 'pendente',
+                    pagoEm: etapa.pagoEm || '',
+                    formas: Array.isArray(etapa.formas) ? etapa.formas : []
+                }))
+            };
+        }
+
+        function planoPagamentoFormulario(total = calcularTotaisOrcamento().total) {
+            if (!document.getElementById('orcamento-pagamento-em-etapas')?.checked) return null;
+            const valorEntrada = arredondarCentavos(document.getElementById('orcamento-etapa-1-valor').value || 0);
+            const anterior = planoPagamentoOrcamento(orcamentoEditando);
+            return {
+                ativo: true,
+                etapas: [
+                    { ...(anterior?.etapas[0] || {}), numero: 1, nome: document.getElementById('orcamento-etapa-1-nome').value.trim() || 'Entrada', valor: valorEntrada },
+                    { ...(anterior?.etapas[1] || {}), numero: 2, nome: document.getElementById('orcamento-etapa-2-nome').value.trim() || 'Entrega', valor: arredondarCentavos(total - valorEntrada) }
+                ]
+            };
+        }
+
+        function atualizarPlanoPagamentoOrcamento(valorDigitado = false) {
+            const ativo = !!document.getElementById('orcamento-pagamento-em-etapas')?.checked;
+            const painel = document.getElementById('orcamento-plano-pagamento');
+            const botaoEntrada = document.getElementById('btn-orcamento-receber-entrada');
+            painel?.classList.toggle('hidden', !ativo);
+            botaoEntrada?.classList.toggle('hidden', !ativo || planoPagamentoOrcamento(orcamentoEditando)?.etapas[0]?.status === 'pago');
+            if (!ativo) return;
+            const total = calcularTotaisOrcamento().total;
+            const campoEntrada = document.getElementById('orcamento-etapa-1-valor');
+            let entrada = Number(campoEntrada.value || 0);
+            if (!valorDigitado && (!entrada || entrada >= total)) entrada = arredondarCentavos(total / 2);
+            campoEntrada.value = Number(Math.max(0, entrada)).toFixed(2);
+            const saldo = arredondarCentavos(total - entrada);
+            document.getElementById('orcamento-etapa-2-valor').value = moedaOrcamento(Math.max(0, saldo));
+            const percentual = total > 0 ? entrada * 100 / total : 0;
+            document.getElementById('orcamento-plano-resumo').textContent = `${percentual.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% na ${document.getElementById('orcamento-etapa-1-nome').value || 'entrada'} e ${(100 - percentual).toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% na ${document.getElementById('orcamento-etapa-2-nome').value || 'entrega'}.`;
+        }
+
         function novoOrcamento() {
             orcamentoEditando = null;
             itensOrcamento = [];
@@ -6111,6 +6286,11 @@ function showInstallButton() {
             document.getElementById('orcamento-desconto').value = '0';
             document.getElementById('orcamento-desconto-tipo').value = 'percentual';
             document.getElementById('orcamento-acrescimo').value = '0';
+            document.getElementById('orcamento-pagamento-em-etapas').checked = false;
+            document.getElementById('orcamento-etapa-1-nome').value = 'Entrada';
+            document.getElementById('orcamento-etapa-1-valor').value = '';
+            document.getElementById('orcamento-etapa-2-nome').value = 'Entrega';
+            atualizarPlanoPagamentoOrcamento();
             document.getElementById('orcamento-numero').textContent = proximoNumeroOrcamento();
             document.getElementById('editor-orcamento').classList.remove('hidden');
             atualizarDadosEmitenteOrcamento();
@@ -6203,6 +6383,7 @@ function showInstallButton() {
             document.getElementById('orcamento-subtotal').textContent = moedaOrcamento(totais.subtotal);
             document.getElementById('orcamento-total').textContent = moedaOrcamento(totais.total);
             document.getElementById('orcamento-desconto-resumo').textContent = totais.valorDesconto > 0 ? `- ${moedaOrcamento(totais.valorDesconto)} (${totais.descontoPercentual.toLocaleString('pt-BR')}%)` : '';
+            atualizarPlanoPagamentoOrcamento();
         }
 
         function dadosFormularioOrcamento(status) {
@@ -6239,6 +6420,7 @@ function showInstallButton() {
                 condicoes: document.getElementById('orcamento-condicoes').value.trim(),
                 prazoEntrega: document.getElementById('orcamento-prazo-entrega').value.trim(),
                 observacoes: document.getElementById('orcamento-observacoes').value.trim()
+                ,planoPagamento: planoPagamentoFormulario(totais.total)
             };
         }
 
@@ -6252,6 +6434,10 @@ function showInstallButton() {
             if (orcamento.cliente.documento && ![11, 14].includes(orcamento.cliente.documento.length)) { mostrarMensagem('Informe um CPF ou CNPJ completo.', 'erro'); return false; }
             if (finalizando && orcamento.empresa.cnpj && !validarCNPJ(orcamento.empresa.cnpj)) { mostrarMensagem('O CNPJ da empresa salvo no ADM é inválido.', 'erro'); return false; }
             if (finalizando && orcamento.total <= 0) { mostrarMensagem('O total do orçamento precisa ser maior que zero.', 'erro'); return false; }
+            const plano = typeof planoPagamentoOrcamento === 'function' ? planoPagamentoOrcamento(orcamento) : null;
+            if (plano && (plano.etapas.some(etapa => etapa.valor <= 0) || Math.abs(plano.etapas.reduce((soma, etapa) => soma + etapa.valor, 0) - Number(orcamento.total)) > 0.01)) {
+                mostrarMensagem('Confira os valores da entrada e da entrega. As duas etapas precisam somar o total do orçamento.', 'erro'); return false;
+            }
             return true;
         }
 
@@ -6273,16 +6459,23 @@ function showInstallButton() {
         }
 
         function finalizarOrcamento(formato = 'pdf') {
+            if (formato === 'entrada' && !exigirCaixaAberto('Abra o caixa antes de receber a entrada do orçamento.')) return;
             const desconto = calcularTotaisOrcamento().descontoPercentual;
-            const acaoAutorizada = formato === 'termica' ? 'finalizar_orcamento_termica_desconto' : 'finalizar_orcamento_pdf_desconto';
+            const acaoAutorizada = formato === 'termica' ? 'finalizar_orcamento_termica_desconto' : formato === 'entrada' ? 'finalizar_orcamento_entrada_desconto' : 'finalizar_orcamento_pdf_desconto';
             if (solicitarAutorizacaoDesconto(desconto, acaoAutorizada)) return;
             const orcamento = salvarOrcamento('finalizado', true);
             if (!orcamento) return;
-            if (formato === 'termica') imprimirOrcamentoTermico(orcamento.id);
+            if (formato === 'entrada') {
+                if (!planoPagamentoOrcamento(orcamento)) { mostrarMensagem('Ative a cobrança em duas etapas e informe o valor da entrada.', 'erro'); return; }
+                gerarPdfAposRecebimentoOrcamento = true;
+                aprovarOrcamento(orcamento.id, 'entrada');
+            } else if (formato === 'termica') imprimirOrcamentoTermico(orcamento.id);
             else gerarPDFOrcamento(orcamento.id);
             document.getElementById('editor-orcamento').classList.add('hidden');
-            const destino = formato === 'termica' ? 'enviado para impressão térmica' : 'gerado em PDF A4';
-            mostrarMensagem(`Orçamento finalizado e ${destino}. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
+            if (formato !== 'entrada') {
+                const destino = formato === 'termica' ? 'enviado para impressão térmica' : 'gerado em PDF A4';
+                mostrarMensagem(`Orçamento finalizado e ${destino}. ${orcamento.clienteNovoCadastrado ? 'O novo cliente foi cadastrado automaticamente.' : 'O cliente cadastrado foi vinculado ao orçamento.'}`, 'sucesso');
+            }
         }
 
         let orcamentoRascunhoPendenteId = null;
@@ -6343,6 +6536,11 @@ function showInstallButton() {
             statusCliente.textContent = clienteVinculado ? `Cliente cadastrado selecionado: ${clienteVinculado.nome}` : 'Este cliente será cadastrado ao finalizar o orçamento.';
             statusCliente.className = `mt-1 text-xs ${clienteVinculado ? 'font-semibold text-emerald-700' : 'text-gray-500'}`;
             document.getElementById('orcamento-desconto-tipo').value = orcamento.descontoTipo || 'percentual';
+            const plano = planoPagamentoOrcamento(orcamento);
+            document.getElementById('orcamento-pagamento-em-etapas').checked = !!plano;
+            document.getElementById('orcamento-etapa-1-nome').value = plano?.etapas[0]?.nome || 'Entrada';
+            document.getElementById('orcamento-etapa-1-valor').value = plano ? Number(plano.etapas[0].valor).toFixed(2) : '';
+            document.getElementById('orcamento-etapa-2-nome').value = plano?.etapas[1]?.nome || 'Entrega';
             const campoDocumento = document.getElementById('orcamento-cliente-documento');
             formatarDocumentoOrcamento(campoDocumento);
             document.getElementById('orcamento-numero').textContent = orcamento.numero;
@@ -6350,6 +6548,7 @@ function showInstallButton() {
             atualizarDadosEmitenteOrcamento();
             atualizarBuscaItensOrcamento();
             atualizarItensOrcamento();
+            atualizarPlanoPagamentoOrcamento();
             document.getElementById('editor-orcamento').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -6366,7 +6565,7 @@ function showInstallButton() {
 
         function excluirOrcamento(id) {
             const orcamento = orcamentos.find(item => item.id === id);
-            if (orcamento?.status === 'aprovado') { mostrarMensagem('Orçamentos aprovados ficam no histórico e não podem ser excluídos.', 'erro'); return; }
+            if (['pagamento_parcial', 'aprovado'].includes(orcamento?.status)) { mostrarMensagem('Orçamentos com venda ou recebimento ficam no histórico e não podem ser excluídos.', 'erro'); return; }
             if (!orcamento || !confirm(`Excluir o orçamento ${orcamento.numero}?`)) return;
             orcamentos = orcamentos.filter(item => item.id !== id);
             if (orcamentoEditando?.id === id) cancelarEdicaoOrcamento();
@@ -6375,17 +6574,25 @@ function showInstallButton() {
             mostrarMensagem('Orçamento excluído.', 'sucesso');
         }
 
-        function aprovarOrcamento(id) {
+        function aprovarOrcamento(id, etapa = 'total') {
             const caixa = exigirCaixaAberto('Abra o caixa antes de aprovar o orçamento.');
             const orcamento = orcamentos.find(item => item.id === id);
-            if (!caixa || !orcamento || orcamento.status !== 'finalizado') return;
+            const statusPermitido = etapa === 'saldo' ? orcamento?.status === 'pagamento_parcial' : orcamento?.status === 'finalizado';
+            if (!caixa || !orcamento || !statusPermitido) { gerarPdfAposRecebimentoOrcamento = false; return; }
+            const plano = planoPagamentoOrcamento(orcamento);
+            if (etapa !== 'total' && !plano) { gerarPdfAposRecebimentoOrcamento = false; return mostrarMensagem('Este orçamento não possui cobrança em duas etapas.', 'erro'); }
             orcamentoEmAprovacao = orcamento;
-            document.getElementById('aprovar-orcamento-resumo').textContent = `${orcamento.numero} · ${orcamento.cliente?.nome || 'Cliente'} · ${moedaOrcamento(orcamento.total)}`;
+            etapaOrcamentoEmAprovacao = etapa;
+            const valorEtapa = etapa === 'entrada' ? plano.etapas[0].valor : etapa === 'saldo' ? plano.etapas[1].valor : Number(orcamento.total || 0);
+            const nomeEtapa = etapa === 'entrada' ? plano.etapas[0].nome : etapa === 'saldo' ? plano.etapas[1].nome : 'Pagamento integral';
+            document.getElementById('titulo-aprovar-orcamento').textContent = etapa === 'entrada' ? `Receber ${nomeEtapa}` : etapa === 'saldo' ? `Receber ${nomeEtapa}` : 'Orçamento aprovado';
+            document.getElementById('btn-confirmar-etapa-orcamento').textContent = etapa === 'saldo' ? 'Receber saldo e emitir comprovante' : etapa === 'entrada' ? 'Receber entrada, vender e baixar estoque' : 'Aprovar, baixar estoque e emitir comprovante';
+            document.getElementById('aprovar-orcamento-resumo').textContent = `${orcamento.numero} · ${orcamento.cliente?.nome || 'Cliente'} · ${nomeEtapa}: ${moedaOrcamento(valorEtapa)}`;
             document.getElementById('orcamento-pagamento-forma-1').value = 'dinheiro';
             document.getElementById('orcamento-pagamento-forma-2').value = '';
-            document.getElementById('orcamento-pagamento-valor-1').value = Number(orcamento.total || 0).toFixed(2);
+            document.getElementById('orcamento-pagamento-valor-1').value = Number(valorEtapa).toFixed(2);
             document.getElementById('orcamento-pagamento-valor-2').value = '0.00';
-            document.getElementById('orcamento-aprovacao-recebido').value = Number(orcamento.total || 0).toFixed(2);
+            document.getElementById('orcamento-aprovacao-recebido').value = Number(valorEtapa).toFixed(2);
             const clienteSelect = document.getElementById('orcamento-aprovacao-cliente-id');
             clienteSelect.innerHTML = '<option value="">Selecione o cliente</option>' + clientesFiado.map(cliente => `<option value="${escaparHTMLOrcamento(cliente.id)}">${escaparHTMLOrcamento(cliente.nome)} · saldo ${moedaOrcamento(saldoClienteFiado(cliente.id))}</option>`).join('');
             const documentoOrcamento = String(orcamento.cliente?.documento || '').replace(/\D/g, '');
@@ -6404,11 +6611,21 @@ function showInstallButton() {
             const modal = document.getElementById('modal-aprovar-orcamento');
             modal.classList.add('hidden'); modal.classList.remove('flex');
             orcamentoEmAprovacao = null;
+            etapaOrcamentoEmAprovacao = 'total';
+            gerarPdfAposRecebimentoOrcamento = false;
+        }
+
+        function valorEtapaOrcamentoEmAprovacao() {
+            if (!orcamentoEmAprovacao) return 0;
+            const plano = planoPagamentoOrcamento(orcamentoEmAprovacao);
+            if (etapaOrcamentoEmAprovacao === 'entrada') return Number(plano?.etapas[0]?.valor || 0);
+            if (etapaOrcamentoEmAprovacao === 'saldo') return Number(plano?.etapas[1]?.valor || 0);
+            return Number(orcamentoEmAprovacao.total || 0);
         }
 
         function ajustarPagamentoAprovacaoOrcamento(campoAlterado) {
             if (!orcamentoEmAprovacao) return;
-            const total = Number(orcamentoEmAprovacao.total || 0);
+            const total = valorEtapaOrcamentoEmAprovacao();
             const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
             if (!tipo2) {
                 document.getElementById('orcamento-pagamento-valor-1').value = total.toFixed(2);
@@ -6427,14 +6644,14 @@ function showInstallButton() {
             const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
             const campo2 = document.getElementById('orcamento-pagamento-valor-2');
             campo2.disabled = !tipo2;
-            if (!tipo2) { campo2.value = '0.00'; document.getElementById('orcamento-pagamento-valor-1').value = Number(orcamentoEmAprovacao.total || 0).toFixed(2); }
+            if (!tipo2) { campo2.value = '0.00'; document.getElementById('orcamento-pagamento-valor-1').value = valorEtapaOrcamentoEmAprovacao().toFixed(2); }
             const tipos = [tipo1, tipo2].filter(Boolean);
             document.getElementById('orcamento-aprovacao-cliente').classList.toggle('hidden', !tipos.includes('fiado'));
             document.getElementById('orcamento-aprovacao-dinheiro').classList.toggle('hidden', !tipos.includes('dinheiro'));
             document.getElementById('orcamento-aprovacao-cartao').classList.toggle('hidden', !tipos.includes('cartao'));
             document.getElementById('orcamento-aprovacao-pix').classList.toggle('hidden', !tipos.includes('pix'));
             const soma = arredondarCentavos(Number(document.getElementById('orcamento-pagamento-valor-1').value || 0) + Number(campo2.value || 0));
-            const diferenca = arredondarCentavos(Number(orcamentoEmAprovacao.total || 0) - soma);
+            const diferenca = arredondarCentavos(valorEtapaOrcamentoEmAprovacao() - soma);
             const conferencia = document.getElementById('orcamento-pagamento-conferencia');
             conferencia.textContent = Math.abs(diferenca) <= 0.01 ? `Pagamento conferido: ${moedaOrcamento(soma)}` : `${diferenca > 0 ? 'Falta distribuir' : 'Valor excedente'}: ${moedaOrcamento(Math.abs(diferenca))}`;
             conferencia.className = `mt-3 rounded-lg p-3 text-sm font-semibold ${Math.abs(diferenca) <= 0.01 ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-700'}`;
@@ -6443,14 +6660,16 @@ function showInstallButton() {
         function confirmarAprovacaoOrcamento() {
             const orcamento = orcamentoEmAprovacao;
             const caixa = exigirCaixaAberto('Abra o caixa antes de aprovar o orçamento.');
-            if (!orcamento || !caixa || orcamento.status !== 'finalizado') return;
+            const statusPermitido = etapaOrcamentoEmAprovacao === 'saldo' ? orcamento?.status === 'pagamento_parcial' : orcamento?.status === 'finalizado';
+            if (!orcamento || !caixa || !statusPermitido) return;
             if (solicitarAutorizacaoDesconto(Number(orcamento.descontoPercentual || 0), 'aprovar_orcamento_desconto')) return;
             const tipo1 = document.getElementById('orcamento-pagamento-forma-1').value;
             const tipo2 = document.getElementById('orcamento-pagamento-forma-2').value;
             if (tipo2 && tipo1 === tipo2) return mostrarMensagem('Escolha formas de pagamento diferentes.', 'erro');
             const formas = [{ tipo: tipo1, valor: arredondarCentavos(document.getElementById('orcamento-pagamento-valor-1').value) }];
             if (tipo2) formas.push({ tipo: tipo2, valor: arredondarCentavos(document.getElementById('orcamento-pagamento-valor-2').value) });
-            if (formas.some(forma => forma.valor <= 0) || Math.abs(formas.reduce((soma, forma) => soma + forma.valor, 0) - Number(orcamento.total || 0)) > 0.01) return mostrarMensagem('Confira os valores: o pagamento precisa somar o total do orçamento.', 'erro');
+            const valorEtapa = valorEtapaOrcamentoEmAprovacao();
+            if (formas.some(forma => forma.valor <= 0) || Math.abs(formas.reduce((soma, forma) => soma + forma.valor, 0) - valorEtapa) > 0.01) return mostrarMensagem('Confira os valores: o pagamento precisa somar o valor desta etapa.', 'erro');
 
             const formaDinheiro = formas.find(forma => forma.tipo === 'dinheiro');
             if (formaDinheiro) {
@@ -6468,6 +6687,33 @@ function showInstallButton() {
                 if (!cliente.semLimite && saldoClienteFiado(cliente.id) + formaFiado.valor > Number(cliente.limite || 0)) return mostrarMensagem('O valor fiado ultrapassa o limite disponível do cliente.', 'erro');
             }
 
+            if (etapaOrcamentoEmAprovacao === 'saldo') {
+                const venda = vendas.find(item => item.id === orcamento.vendaId);
+                if (!venda) return mostrarMensagem('A venda vinculada à entrada não foi encontrada.', 'erro');
+                const agora = new Date().toISOString();
+                const plano = planoPagamentoOrcamento(orcamento);
+                plano.etapas[1] = { ...plano.etapas[1], status: 'pago', pagoEm: agora, formas: formas.map(forma => ({ ...forma })) };
+                orcamento.planoPagamento = plano;
+                const formasAnteriores = formasPagamentoRegistradas(venda.pagamento, venda.pagamento?.valorCobrado || 0).map(forma => ({ ...forma }));
+                const todasFormas = [...formasAnteriores, ...formas.map(forma => ({ ...forma }))];
+                const pagamento = {
+                    tipo: todasFormas.length === 1 ? todasFormas[0].tipo : 'misto', dividido: todasFormas.length > 1,
+                    formas: todasFormas, valorCobrado: Number(orcamento.total), saldoPendente: 0,
+                    etapas: plano.etapas, clienteId: cliente?.id || venda.pagamento?.clienteId || '', clienteNome: cliente?.nome || venda.pagamento?.clienteNome || ''
+                };
+                venda.pagamento = pagamento;
+                venda.pagamentoConcluidoEm = agora;
+                formas.forEach((forma, indice) => movimentos.push({ id: `m_${Date.now()}_orc_saldo_${indice}`, data: agora, tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada', formaPagamento: forma.tipo, valor: forma.valor, descricao: `Orçamento ${orcamento.numero} - ${plano.etapas[1].nome} - ${forma.tipo}`, vendaId: venda.id, orcamentoId: orcamento.id, caixaId: caixa.id, vendedor: venda.vendedor }));
+                orcamento.status = 'aprovado'; orcamento.pagamento = pagamento; orcamento.atualizadoEm = agora; orcamento.saldoRecebidoEm = agora;
+                salvarDados(); atualizarFinanceiro(); atualizarListaOrcamentos(); calcularSaldoCaixa(); atualizarHistoricoMovimentos();
+                const baixarPdf = gerarPdfAposRecebimentoOrcamento;
+                fecharAprovacaoOrcamento();
+                if (baixarPdf) gerarPDFOrcamento(orcamento.id);
+                mostrarComprovante(venda);
+                mostrarMensagem(`${plano.etapas[1].nome} recebida. O orçamento está totalmente pago.`, 'sucesso');
+                return;
+            }
+
             const consumoPorEstoque = new Map();
             const itemAusente = (orcamento.itens || []).find(item => !produtos.some(produto => produto.id === item.produtoId));
             if (itemAusente) return mostrarMensagem(`O item ${itemAusente.nome} não está mais cadastrado. Edite o orçamento antes de aprovar.`, 'erro');
@@ -6482,15 +6728,39 @@ function showInstallButton() {
             });
             const estoquesNegativos = estoquesNegativosAposConsumo(consumoPorEstoque);
             const agora = new Date().toISOString();
-            const pagamento = formas.length === 1 ? { ...formas[0], valorCobrado: Number(orcamento.total) } : { tipo: 'misto', dividido: true, formas, valorCobrado: Number(orcamento.total), clienteId: cliente?.id || '', clienteNome: cliente?.nome || '' };
+            const recebendoEntrada = etapaOrcamentoEmAprovacao === 'entrada';
+            const plano = planoPagamentoOrcamento(orcamento);
+            if (recebendoEntrada) {
+                plano.etapas[0] = { ...plano.etapas[0], status: 'pago', pagoEm: agora, formas: formas.map(forma => ({ ...forma })) };
+                orcamento.planoPagamento = plano;
+            } else if (plano) {
+                plano.etapas = plano.etapas.map(etapa => ({ ...etapa, status: 'pago', pagoEm: agora, formas: formas.map(forma => ({ ...forma })) }));
+                orcamento.planoPagamento = plano;
+            }
+            const pagamento = formas.length === 1
+                ? { ...formas[0], formas: formas.map(forma => ({ ...forma })), valorCobrado: valorEtapa }
+                : { tipo: 'misto', dividido: true, formas, valorCobrado: valorEtapa, clienteId: cliente?.id || '', clienteNome: cliente?.nome || '' };
+            if (recebendoEntrada) {
+                pagamento.parcial = true;
+                pagamento.saldoPendente = arredondarCentavos(Number(orcamento.total) - valorEtapa);
+                pagamento.etapas = plano.etapas;
+            } else if (plano) {
+                pagamento.saldoPendente = 0;
+                pagamento.etapas = plano.etapas;
+            }
             const venda = { id: `v_${Date.now()}`, data: agora, itens: itensVenda, subtotal: Number(orcamento.subtotal), desconto: Number(orcamento.descontoPercentual || 0), descontoTipo: orcamento.descontoTipo || 'percentual', descontoInformado: Number(orcamento.descontoInformado ?? orcamento.descontoPercentual ?? 0), valorDesconto: Number(orcamento.valorDesconto || 0), total: Number(orcamento.total), pagamento, clienteId: cliente?.id || '', clienteNome: cliente?.nome || orcamento.cliente?.nome || '', caixaId: caixa.id, vendedor: vendedorDaVenda(), registradoPor: vendedorAtual(), origem: 'orcamento', orcamentoId: orcamento.id };
             consumoPorEstoque.forEach((quantidade, estoqueId) => { const raiz = produtos.find(produto => produto.id === estoqueId); raiz.estoque = Number(raiz.estoque || 0) - quantidade; });
             normalizarEstoquesVinculados();
             vendas.push(venda);
-            formas.forEach((forma, indice) => movimentos.push({ id: `m_${Date.now()}_orc_${indice}`, data: agora, tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada', formaPagamento: forma.tipo, valor: forma.valor, descricao: `Orçamento ${orcamento.numero} aprovado - ${forma.tipo}`, vendaId: venda.id, orcamentoId: orcamento.id, caixaId: caixa.id, vendedor: venda.vendedor }));
-            orcamento.status = 'aprovado'; orcamento.aprovadoEm = agora; orcamento.vendaId = venda.id; orcamento.pagamento = pagamento; orcamento.atualizadoEm = agora;
+            formas.forEach((forma, indice) => movimentos.push({ id: `m_${Date.now()}_orc_${indice}`, data: agora, tipo: forma.tipo === 'fiado' ? 'fiado' : 'entrada', formaPagamento: forma.tipo, valor: forma.valor, descricao: recebendoEntrada ? `Orçamento ${orcamento.numero} - ${plano.etapas[0].nome} - ${forma.tipo}` : `Orçamento ${orcamento.numero} aprovado - ${forma.tipo}`, vendaId: venda.id, orcamentoId: orcamento.id, caixaId: caixa.id, vendedor: venda.vendedor }));
+            orcamento.status = recebendoEntrada ? 'pagamento_parcial' : 'aprovado'; orcamento.aprovadoEm = agora; orcamento.vendaId = venda.id; orcamento.pagamento = pagamento; orcamento.atualizadoEm = agora;
             salvarDados(); atualizarFinanceiro(); atualizarListaOrcamentos(); atualizarListaProdutos(); calcularSaldoCaixa(); atualizarHistoricoMovimentos();
-            fecharAprovacaoOrcamento(); mostrarComprovante(venda); mostrarMensagem(estoquesNegativos.length ? mensagemEstoqueNegativo(estoquesNegativos) : 'Orçamento aprovado, venda registrada e estoque atualizado.', estoquesNegativos.length ? 'aviso' : 'sucesso');
+            const baixarPdf = gerarPdfAposRecebimentoOrcamento;
+            fecharAprovacaoOrcamento();
+            if (baixarPdf) gerarPDFOrcamento(orcamento.id);
+            mostrarComprovante(venda);
+            const mensagem = recebendoEntrada ? `${plano.etapas[0].nome} recebida. A venda foi registrada e o PDF cobra somente ${plano.etapas[1].nome.toLocaleLowerCase('pt-BR')}.` : 'Orçamento aprovado, venda registrada e estoque atualizado.';
+            mostrarMensagem(estoquesNegativos.length ? mensagemEstoqueNegativo(estoquesNegativos) : mensagem, estoquesNegativos.length ? 'aviso' : 'sucesso');
         }
 
         function rejeitarOrcamento(id) {
@@ -6500,8 +6770,14 @@ function showInstallButton() {
             salvarDados(); atualizarListaOrcamentos(); mostrarMensagem('Orçamento marcado como não aprovado.', 'sucesso');
         }
 
+        function receberEtapaOrcamento(id, etapa) {
+            gerarPdfAposRecebimentoOrcamento = true;
+            aprovarOrcamento(id, etapa);
+        }
+
         function statusOrcamento(orcamento) {
             if (orcamento.status === 'rascunho') return { texto: 'Rascunho', classe: 'bg-slate-100 text-slate-700' };
+            if (orcamento.status === 'pagamento_parcial') return { texto: 'Entrada paga / saldo pendente', classe: 'bg-purple-600 text-white' };
             if (orcamento.status === 'aprovado') return { texto: 'Aprovado / vendido', classe: 'bg-emerald-600 text-white' };
             if (orcamento.status === 'nao_aprovado') return { texto: 'Não aprovado', classe: 'bg-red-100 text-red-700' };
             const hoje = new Date().toISOString().slice(0, 10);
@@ -6517,15 +6793,18 @@ function showInstallButton() {
                 .join(' ').toLocaleLowerCase('pt-BR').includes(termo)).sort((a, b) => new Date(b.atualizadoEm || b.criadoEm) - new Date(a.atualizadoEm || a.criadoEm));
             lista.innerHTML = filtrados.map(orcamento => {
                 const status = statusOrcamento(orcamento);
+                const plano = planoPagamentoOrcamento(orcamento);
                 const botoesImpressao = `<button onclick="gerarPDFOrcamento('${orcamento.id}')" class="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Baixar PDF A4</button><button onclick="imprimirOrcamentoTermico('${orcamento.id}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Imprimir térmica</button>`;
                 const botoesRascunho = orcamento.status === 'rascunho' ? `<button onclick="finalizarOrcamentoSalvo('${orcamento.id}')" class="rounded bg-cyan-700 px-3 py-2 text-sm font-bold text-white">Finalizar orçamento</button><button onclick="aprovarRascunhoOrcamento('${orcamento.id}')" class="rounded bg-emerald-800 px-3 py-2 text-sm font-bold text-white">Cliente aprovou / vender</button>` : '';
-                const botoesDecisao = orcamento.status === 'finalizado' ? `<button onclick="aprovarOrcamento('${orcamento.id}')" class="rounded bg-emerald-700 px-3 py-2 text-sm font-bold text-white">Aprovar e vender</button><button onclick="rejeitarOrcamento('${orcamento.id}')" class="rounded bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">Não aprovado</button>` : '';
-                const botaoComprovante = orcamento.status === 'aprovado' && orcamento.vendaId ? `<button onclick="mostrarComprovanteVenda('${orcamento.vendaId}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Comprovante</button>` : '';
-                const botaoEditar = ['aprovado', 'nao_aprovado'].includes(orcamento.status) ? '' : `<button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button>`;
-                const botaoExcluir = orcamento.status === 'aprovado' ? '' : `<button onclick="excluirOrcamento('${orcamento.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button>`;
+                const botaoEntrada = orcamento.status === 'finalizado' && plano ? `<button onclick="receberEtapaOrcamento('${orcamento.id}', 'entrada')" class="rounded bg-purple-700 px-3 py-2 text-sm font-bold text-white">Receber ${escaparHTMLOrcamento(plano.etapas[0].nome)}</button>` : '';
+                const botoesDecisao = orcamento.status === 'finalizado' ? `${botaoEntrada}<button onclick="aprovarOrcamento('${orcamento.id}')" class="rounded bg-emerald-700 px-3 py-2 text-sm font-bold text-white">Receber tudo / vender</button><button onclick="rejeitarOrcamento('${orcamento.id}')" class="rounded bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-800">Não aprovado</button>` : orcamento.status === 'pagamento_parcial' ? `<button onclick="receberEtapaOrcamento('${orcamento.id}', 'saldo')" class="rounded bg-purple-700 px-3 py-2 text-sm font-bold text-white">Receber ${escaparHTMLOrcamento(plano?.etapas[1]?.nome || 'saldo')}</button>` : '';
+                const botaoComprovante = ['pagamento_parcial', 'aprovado'].includes(orcamento.status) && orcamento.vendaId ? `<button onclick="mostrarComprovanteVenda('${orcamento.vendaId}')" class="rounded bg-blue-600 px-3 py-2 text-sm font-semibold text-white">Comprovante</button>` : '';
+                const botaoEditar = ['pagamento_parcial', 'aprovado', 'nao_aprovado'].includes(orcamento.status) ? '' : `<button onclick="editarOrcamento('${orcamento.id}')" class="rounded bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-700">Editar</button>`;
+                const botaoExcluir = ['pagamento_parcial', 'aprovado'].includes(orcamento.status) ? '' : `<button onclick="excluirOrcamento('${orcamento.id}')" class="rounded bg-red-100 px-3 py-2 text-sm font-semibold text-red-700">Excluir</button>`;
+                const resumoEtapas = plano ? `<p class="mt-1 text-sm ${orcamento.status === 'pagamento_parcial' ? 'font-semibold text-purple-700' : 'text-gray-600'}">${escaparHTMLOrcamento(plano.etapas[0].nome)}: ${moedaOrcamento(plano.etapas[0].valor)} · ${escaparHTMLOrcamento(plano.etapas[1].nome)}: ${moedaOrcamento(plano.etapas[1].valor)}${orcamento.status === 'pagamento_parcial' ? ` · Falta ${moedaOrcamento(plano.etapas[1].valor)}` : ''}</p>` : '';
                 return `<article class="rounded-xl border border-gray-200 p-4">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                        <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p></div>
+                        <div class="min-w-0"><div class="flex flex-wrap items-center gap-2"><strong class="text-lg text-emerald-800">${escaparHTMLOrcamento(orcamento.numero)}</strong><span class="rounded-full px-2 py-1 text-xs font-bold ${status.classe}">${status.texto}</span></div><p class="mt-1 font-semibold">${escaparHTMLOrcamento(orcamento.cliente?.nome || 'Cliente não informado')}</p><p class="text-sm text-gray-500">Emitido em ${dataOrcamentoBR(orcamento.emitidoEm)} · válido até ${dataOrcamentoBR(orcamento.validade)} · ${(orcamento.itens || []).length} item(ns)</p>${resumoEtapas}</div>
                         <div class="lg:text-right"><strong class="text-xl text-emerald-700">${moedaOrcamento(orcamento.total)}</strong><div class="mt-2 flex flex-wrap gap-2 lg:justify-end">${botoesRascunho}${botoesDecisao}${botaoComprovante}${botaoEditar}<button onclick="duplicarOrcamento('${orcamento.id}')" class="rounded bg-violet-100 px-3 py-2 text-sm font-semibold text-violet-700">Duplicar</button>${botoesImpressao}${botaoExcluir}</div></div>
                     </div>
                 </article>`;
@@ -6541,8 +6820,12 @@ function showInstallButton() {
                 const empresa = orcamento.empresa || configSistema;
                 const cliente = orcamento.cliente || {};
                 const identificadorPix = `ORC${String(orcamento.numero || orcamento.id || Date.now()).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-22)}`;
-                const cobrancaPix = montarCobrancaPix(orcamento.total, identificadorPix);
-                const imagemQrCodePix = criarCanvasQrCode(cobrancaPix.payload, 720).toDataURL('image/png');
+                const plano = planoPagamentoOrcamento(orcamento);
+                const etapasPix = (plano?.etapas || [{ numero: 1, nome: 'Pagamento integral', valor: Number(orcamento.total), status: 'pendente', formas: [] }]).map((etapa, indice) => {
+                    if (etapa.status === 'pago') return { ...etapa };
+                    const cobranca = montarCobrancaPix(etapa.valor, `${identificadorPix.slice(0, 23)}E${indice + 1}`);
+                    return { ...etapa, cobranca, imagem: criarCanvasQrCode(cobranca.payload, 720).toDataURL('image/png') };
+                });
                 const margem = 15, larguraPagina = 210, larguraUtil = 180;
                 let y = 16;
 
@@ -6629,6 +6912,18 @@ function showInstallButton() {
                 if (Number(orcamento.acrescimo) > 0) { pdf.text('Frete / acréscimo', 145, y, { align: 'right' }); pdf.text(moedaOrcamento(orcamento.acrescimo), larguraPagina - margem, y, { align: 'right' }); y += 6; }
                 pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(5, 150, 105); pdf.text('TOTAL', 145, y, { align: 'right' }); pdf.text(moedaOrcamento(orcamento.total), larguraPagina - margem, y, { align: 'right' }); y += 11;
 
+                if (plano) {
+                    verificarPagina(22);
+                    pdf.setTextColor(15, 23, 42); pdf.setFontSize(9); pdf.setFont('helvetica', 'bold');
+                    pdf.text('PLANO DE PAGAMENTO', margem, y); y += 5;
+                    plano.etapas.forEach(etapa => {
+                        pdf.setFont('helvetica', etapa.status === 'pago' ? 'bold' : 'normal');
+                        const situacao = etapa.status === 'pago' ? `PAGO${etapa.pagoEm ? ` em ${new Date(etapa.pagoEm).toLocaleDateString('pt-BR')}` : ''}` : 'PENDENTE';
+                        pdf.text(`${etapa.numero}ª etapa · ${textoSeguro(etapa.nome)}: ${moedaOrcamento(etapa.valor)} · ${situacao}`, margem, y); y += 5;
+                    });
+                    y += 3;
+                }
+
                 pdf.setTextColor(15, 23, 42); pdf.setFontSize(10);
                 const secoes = [['CONDIÇÕES DE PAGAMENTO', orcamento.condicoes], ['PRAZO DE ENTREGA / EXECUÇÃO', orcamento.prazoEntrega], ['OBSERVAÇÕES', orcamento.observacoes]];
                 secoes.forEach(([titulo, conteudo]) => {
@@ -6638,29 +6933,42 @@ function showInstallButton() {
                     pdf.setFont('helvetica', 'normal'); textoQuebrado(conteudo, margem, larguraUtil, 9, 4.5); y += 4;
                 });
 
-                const nomeRecebedorPix = textoSeguro(CONFIG_PIX.nomeRecebedor || cobrancaPix.nomeRecebedor);
-                const bancoPix = textoSeguro(CONFIG_PIX.nomeBanco || '');
-                const linhasRecebedorPix = pdf.splitTextToSize(`Recebedor: ${nomeRecebedorPix}${bancoPix ? ` · Banco: ${bancoPix}` : ''}`, larguraUtil - 12);
-                const linhasInstrucaoPix = pdf.splitTextToSize('Se não conseguir escanear o QR Code, use a chave PIX abaixo no aplicativo do seu banco.', larguraUtil - 12);
-                const linhasChavePix = pdf.splitTextToSize(`Chave PIX: ${formatarChavePix(cobrancaPix.chavePix)}`, larguraUtil - 12);
-                const alturaBlocoPix = 72 + (linhasRecebedorPix.length + linhasInstrucaoPix.length + linhasChavePix.length) * 4;
-                verificarPagina(alturaBlocoPix + 8);
-                const inicioBlocoPix = y;
-                pdf.setFillColor(240, 253, 250); pdf.setDrawColor(110, 231, 183);
-                pdf.roundedRect(margem, inicioBlocoPix, larguraUtil, alturaBlocoPix, 2, 2, 'FD');
-                y += 7;
-                pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(5, 150, 105);
-                pdf.text('PAGAMENTO VIA PIX', larguraPagina / 2, y, { align: 'center' });
-                y += 4;
-                pdf.addImage(imagemQrCodePix, 'PNG', (larguraPagina - 44) / 2, y, 44, 44);
-                y += 50;
-                pdf.setFontSize(11); pdf.text(`Valor: ${moedaOrcamento(orcamento.total)}`, larguraPagina / 2, y, { align: 'center' });
-                y += 6;
-                pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(15, 23, 42);
-                pdf.text(linhasRecebedorPix, margem + 6, y); y += linhasRecebedorPix.length * 4;
-                pdf.text(linhasInstrucaoPix, margem + 6, y); y += linhasInstrucaoPix.length * 4 + 1;
-                pdf.setFont('helvetica', 'bold'); pdf.text(linhasChavePix, margem + 6, y);
-                y = inicioBlocoPix + alturaBlocoPix + 8;
+                etapasPix.forEach(etapa => {
+                    if (etapa.status === 'pago') {
+                        verificarPagina(24);
+                        pdf.setFillColor(236, 253, 245); pdf.setDrawColor(52, 211, 153);
+                        pdf.roundedRect(margem, y, larguraUtil, 18, 2, 2, 'FD');
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(4, 120, 87);
+                        pdf.text(`${textoSeguro(etapa.nome).toUpperCase()} · ${moedaOrcamento(etapa.valor)} · PAGO`, larguraPagina / 2, y + 8, { align: 'center' });
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8);
+                        if (etapa.pagoEm) pdf.text(`Recebido em ${new Date(etapa.pagoEm).toLocaleString('pt-BR')}`, larguraPagina / 2, y + 13, { align: 'center' });
+                        y += 26;
+                        return;
+                    }
+                    const nomeRecebedorPix = textoSeguro(CONFIG_PIX.nomeRecebedor || etapa.cobranca.nomeRecebedor);
+                    const bancoPix = textoSeguro(CONFIG_PIX.nomeBanco || '');
+                    const linhasRecebedorPix = pdf.splitTextToSize(`Recebedor: ${nomeRecebedorPix}${bancoPix ? ` · Banco: ${bancoPix}` : ''}`, larguraUtil - 12);
+                    const linhasInstrucaoPix = pdf.splitTextToSize('Escaneie somente este QR Code para pagar esta etapa. Se preferir, use a chave PIX abaixo.', larguraUtil - 12);
+                    const linhasChavePix = pdf.splitTextToSize(`Chave PIX: ${formatarChavePix(etapa.cobranca.chavePix)}`, larguraUtil - 12);
+                    const alturaBlocoPix = 76 + (linhasRecebedorPix.length + linhasInstrucaoPix.length + linhasChavePix.length) * 4;
+                    verificarPagina(alturaBlocoPix + 8);
+                    const inicioBlocoPix = y;
+                    pdf.setFillColor(250, 245, 255); pdf.setDrawColor(192, 132, 252);
+                    pdf.roundedRect(margem, inicioBlocoPix, larguraUtil, alturaBlocoPix, 2, 2, 'FD');
+                    y += 7;
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(126, 34, 206);
+                    pdf.text(`${etapa.numero}ª ETAPA · ${textoSeguro(etapa.nome).toUpperCase()}`, larguraPagina / 2, y, { align: 'center' });
+                    y += 4;
+                    pdf.addImage(etapa.imagem, 'PNG', (larguraPagina - 44) / 2, y, 44, 44);
+                    y += 50;
+                    pdf.setFontSize(11); pdf.text(`Cobrança desta etapa: ${moedaOrcamento(etapa.valor)}`, larguraPagina / 2, y, { align: 'center' });
+                    y += 6;
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(15, 23, 42);
+                    pdf.text(linhasRecebedorPix, margem + 6, y); y += linhasRecebedorPix.length * 4;
+                    pdf.text(linhasInstrucaoPix, margem + 6, y); y += linhasInstrucaoPix.length * 4 + 1;
+                    pdf.setFont('helvetica', 'bold'); pdf.text(linhasChavePix, margem + 6, y);
+                    y = inicioBlocoPix + alturaBlocoPix + 8;
+                });
 
                 verificarPagina(35);
                 y += 8; pdf.setDrawColor(148, 163, 184); pdf.line(margem, y, 88, y); pdf.line(122, y, larguraPagina - margem, y); y += 5;
