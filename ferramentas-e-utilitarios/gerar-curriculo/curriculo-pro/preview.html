@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2b2b2b">
+  <meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+  <title>Pré-visualização do currículo</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body class="public-preview-body">
+  <main class="public-preview-shell">
+    <section class="public-preview-notice" aria-labelledby="notice-title">
+      <h1 id="notice-title">Pré-visualização do currículo</h1>
+      <p>Confira se as informações estão corretas e avise a Brown caso precise de alguma alteração.</p>
+      <p id="expiryNotice"></p>
+      <p>Este link é temporário. A impressão e o download não estão disponíveis nesta tela.</p>
+    </section>
+
+    <section id="loadingPanel" class="preview-loading" role="status">Carregando pré-visualização...</section>
+    <section id="errorPanel" class="preview-loading" hidden role="alert">
+      <h2>Visualização indisponível</h2>
+      <p>O link pode estar incorreto, vencido ou ter sido revogado. Solicite um novo link à Brown.</p>
+    </section>
+
+    <div id="previewPanel" class="preview-wrap protected-preview" hidden>
+      <article class="resume-preview" aria-label="Conteúdo do currículo">
+        <header class="preview-header">
+          <div>
+            <h1 id="previewName">NOME COMPLETO</h1>
+            <p id="previewObjective">Objetivo profissional</p>
+          </div>
+          <img id="previewPhoto" class="preview-photo" alt="" hidden>
+        </header>
+        <p id="previewContact" class="preview-contact"></p>
+        <section class="preview-section"><h2>Resumo profissional</h2><p id="previewSummary"></p></section>
+        <section class="preview-section"><h2>Experiência profissional</h2><div id="previewExperiences"></div></section>
+        <section class="preview-section"><h2>Formação acadêmica</h2><div id="previewEducation"></div></section>
+        <section class="preview-section"><h2>Cursos</h2><div id="previewCourses"></div></section>
+        <section class="preview-section"><h2>Habilidades</h2><p id="previewSkills"></p></section>
+        <section class="preview-section"><h2>Idiomas</h2><p id="previewLanguages"></p></section>
+        <section class="preview-section"><h2>Informações adicionais</h2><p id="previewExtra"></p></section>
+      </article>
+    </div>
+  </main>
+
+  <script src="assets/forms.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js";
+    import { doc, getDoc, getFirestore } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoGHZXcw0rCgcOwz384CtGZCmIOQx4Qq4",
+      authDomain: "curriculo-8b75d.firebaseapp.com",
+      projectId: "curriculo-8b75d",
+      storageBucket: "curriculo-8b75d.firebasestorage.app",
+      messagingSenderId: "517299277608",
+      appId: "1:517299277608:web:442c58ec0abd2c34458a1d"
+    };
+
+    const APP_CHECK_SITE_KEY = "";
+
+    const loadingPanel = document.getElementById("loadingPanel");
+    const errorPanel = document.getElementById("errorPanel");
+    const previewPanel = document.getElementById("previewPanel");
+    const token = new URLSearchParams(window.location.search).get("id") || "";
+
+    function showError() {
+      loadingPanel.hidden = true;
+      previewPanel.hidden = true;
+      errorPanel.hidden = false;
+    }
+
+    async function loadPreview() {
+      if (!/^[A-Za-z0-9_-]{32,64}$/.test(token)) {
+        showError();
+        return;
+      }
+      try {
+        const app = initializeApp(firebaseConfig);
+        if (APP_CHECK_SITE_KEY) {
+          initializeAppCheck(app, {
+            provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+            isTokenAutoRefreshEnabled: true
+          });
+        }
+        const db = getFirestore(app);
+        const snapshot = await getDoc(doc(db, "previews", token));
+        if (!snapshot.exists()) {
+          showError();
+          return;
+        }
+        const data = snapshot.data();
+        const expires = data.expiresAt?.toDate?.();
+        if (!expires || expires.getTime() <= Date.now()) {
+          showError();
+          return;
+        }
+        ResumeForms.renderPreview(data.resume, "");
+        document.getElementById("expiryNotice").textContent = `Disponível até ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(expires)}.`;
+        loadingPanel.hidden = true;
+        previewPanel.hidden = false;
+      } catch (error) {
+        showError();
+      }
+    }
+
+    document.addEventListener("contextmenu", (event) => event.preventDefault());
+    document.addEventListener("dragstart", (event) => event.preventDefault());
+    document.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        document.getElementById("expiryNotice").textContent = "A impressão desta pré-visualização está desativada.";
+      }
+    });
+
+    loadPreview();
+  </script>
+</body>
+</html>

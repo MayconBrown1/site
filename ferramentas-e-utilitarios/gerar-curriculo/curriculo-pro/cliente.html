@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#171717">
+  <meta name="description" content="Formulário simples para enviar informações do currículo.">
+  <title>Enviar dados do currículo | Brown</title>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#resumeForm">Ir para o formulário</a>
+  <header class="page-header">
+    <h1>Dados para o seu currículo</h1>
+    <p>Preencha com calma. Se uma informação não se aplicar a você, pode deixar em branco.</p>
+  </header>
+
+  <main class="client-shell">
+    <section class="card intro-card" aria-labelledby="before-title">
+      <h2 id="before-title">Antes de começar</h2>
+      <p>Tenha em mãos suas informações de contato, estudos, cursos e empregos anteriores.</p>
+      <p class="required-note">Os campos marcados com * são obrigatórios.</p>
+      <div class="photo-note">
+        <strong>A foto não é enviada por esta página.</strong>
+        Envie sua foto separadamente pelo mesmo WhatsApp usado no atendimento.
+        <a id="whatsAppLink" class="button secondary compact" href="#" target="_blank" rel="noopener" hidden>Enviar foto pelo WhatsApp</a>
+      </div>
+    </section>
+
+    <form id="resumeForm" novalidate>
+      <section class="card form-section" aria-labelledby="personal-title">
+        <span class="step-label">Parte 1 de 7</span>
+        <h2 id="personal-title">Seus dados</h2>
+
+        <div class="field">
+          <label for="name">Nome completo *</label>
+          <input id="name" name="name" autocomplete="name" maxlength="120" required placeholder="Ex.: Maria da Silva">
+        </div>
+        <div class="field-row two">
+          <div class="field">
+            <label for="phone">Telefone com DDD *</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="Ex.: (84) 99999-9999">
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" autocomplete="email" maxlength="160" placeholder="Ex.: seuemail@email.com">
+          </div>
+        </div>
+        <div class="field-row two">
+          <div class="field">
+            <label for="birthDate">Data de nascimento</label>
+            <input id="birthDate" name="birthDate" type="date" autocomplete="bday">
+          </div>
+          <div class="field">
+            <label for="maritalStatus">Estado civil</label>
+            <select id="maritalStatus" name="maritalStatus">
+              <option value="">Selecione</option>
+              <option>Solteiro(a)</option>
+              <option>Casado(a)</option>
+              <option>União estável</option>
+              <option>Divorciado(a)</option>
+              <option>Viúvo(a)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="card form-section" aria-labelledby="address-title">
+        <span class="step-label">Parte 2 de 7</span>
+        <h2 id="address-title">Onde você mora</h2>
+        <p class="hint">Não é necessário informar CEP.</p>
+        <div class="field">
+          <label for="street">Rua</label>
+          <input id="street" name="street" autocomplete="address-line1" maxlength="160" placeholder="Ex.: Rua das Flores">
+        </div>
+        <div class="field-row three">
+          <div class="field">
+            <label for="number">Número</label>
+            <input id="number" name="number" autocomplete="address-line2" maxlength="20" inputmode="numeric" placeholder="Ex.: 120">
+          </div>
+          <div class="field">
+            <label for="neighborhood">Bairro</label>
+            <input id="neighborhood" name="neighborhood" maxlength="100" placeholder="Ex.: Centro">
+          </div>
+          <div class="field">
+            <label for="state">Estado</label>
+            <input id="state" name="state" maxlength="2" autocapitalize="characters" placeholder="Ex.: RN">
+          </div>
+        </div>
+        <div class="field">
+          <label for="city">Cidade</label>
+          <input id="city" name="city" autocomplete="address-level2" maxlength="100" placeholder="Ex.: Parnamirim">
+        </div>
+      </section>
+
+      <section class="card form-section" aria-labelledby="goal-title">
+        <span class="step-label">Parte 3 de 7</span>
+        <h2 id="goal-title">Objetivo profissional</h2>
+        <div class="field">
+          <label for="objective">Qual cargo ou área você procura? *</label>
+          <input id="objective" name="objective" maxlength="160" required placeholder="Ex.: Vendedor, serviços gerais, auxiliar administrativo">
+        </div>
+        <div class="field">
+          <label for="summary">Conte um pouco sobre seu perfil profissional</label>
+          <textarea id="summary" name="summary" maxlength="1500" placeholder="Ex.: Sou uma pessoa organizada, pontual e tenho facilidade para atender clientes e trabalhar em equipe."></textarea>
+          <p class="hint">De 3 a 5 linhas já é suficiente.</p>
+        </div>
+      </section>
+
+      <section class="card form-section" aria-labelledby="experience-title">
+        <span class="step-label">Parte 4 de 7</span>
+        <h2 id="experience-title">Experiência profissional</h2>
+        <div class="check-row">
+          <input id="firstJob" name="firstJob" type="checkbox">
+          <label for="firstJob">Estou procurando meu primeiro emprego</label>
+        </div>
+        <div id="experiencesBlock">
+          <div class="repeat-list" data-repeat="experiences"></div>
+          <button class="button secondary add-button" type="button" data-add-repeat="experiences">Adicionar outra experiência</button>
+        </div>
+      </section>
+
+      <section class="card form-section" aria-labelledby="education-title">
+        <span class="step-label">Parte 5 de 7</span>
+        <h2 id="education-title">Estudos</h2>
+        <div class="repeat-list" data-repeat="education"></div>
+        <button class="button secondary add-button" type="button" data-add-repeat="education">Adicionar outra formação</button>
+      </section>
+
+      <section class="card form-section" aria-labelledby="courses-title">
+        <span class="step-label">Parte 6 de 7</span>
+        <h2 id="courses-title">Cursos</h2>
+        <p class="hint">Se não fez cursos, pode deixar esta parte em branco.</p>
+        <div class="repeat-list" data-repeat="courses"></div>
+        <button class="button secondary add-button" type="button" data-add-repeat="courses">Adicionar outro curso</button>
+      </section>
+
+      <section class="card form-section" aria-labelledby="extra-title">
+        <span class="step-label">Parte 7 de 7</span>
+        <h2 id="extra-title">Outras informações</h2>
+        <div class="field">
+          <label for="skills">Habilidades</label>
+          <textarea id="skills" name="skills" maxlength="1000" placeholder="Ex.: Atendimento ao cliente, informática básica, organização, trabalho em equipe"></textarea>
+        </div>
+        <div class="field">
+          <label for="languages">Idiomas</label>
+          <textarea id="languages" name="languages" maxlength="500" placeholder="Ex.: Português fluente; Inglês básico"></textarea>
+        </div>
+        <div class="field-row two">
+          <div class="field">
+            <label for="cnh">Carteira de motorista (CNH)</label>
+            <input id="cnh" name="cnh" maxlength="40" placeholder="Ex.: Categoria B ou Não possuo">
+          </div>
+          <div class="field">
+            <label for="availability">Disponibilidade</label>
+            <input id="availability" name="availability" maxlength="300" placeholder="Ex.: Horário comercial e fins de semana">
+          </div>
+        </div>
+
+        <div class="check-row">
+          <input id="consent" name="consent" type="checkbox" required>
+          <label for="consent">Autorizo o envio destas informações para a Brown preparar meu currículo. *</label>
+        </div>
+        <div class="honeypot" aria-hidden="true">
+          <label for="website">Não preencha este campo</label>
+          <input id="website" name="website" tabindex="-1" autocomplete="off">
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button id="submitButton" class="button" type="submit">Enviar informações</button>
+        <p id="formStatus" class="status-message" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+
+    <section id="successPanel" class="card success-panel" hidden tabindex="-1">
+      <h2>Informações enviadas</h2>
+      <p>Pronto! A Brown recebeu seus dados. Agora envie a foto separadamente pelo WhatsApp usado no atendimento.</p>
+      <button id="sendAnother" class="button secondary" type="button">Enviar outro formulário</button>
+    </section>
+  </main>
+
+  <script src="assets/forms.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js";
+    import { addDoc, collection, getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoGHZXcw0rCgcOwz384CtGZCmIOQx4Qq4",
+      authDomain: "curriculo-8b75d.firebaseapp.com",
+      projectId: "curriculo-8b75d",
+      storageBucket: "curriculo-8b75d.firebasestorage.app",
+      messagingSenderId: "517299277608",
+      appId: "1:517299277608:web:442c58ec0abd2c34458a1d"
+    };
+
+    // Preencha apenas se ativar o App Check conforme explicado no README.
+    const APP_CHECK_SITE_KEY = "";
+    // Exemplo: 5584999999999. Deixe vazio para mostrar somente a instrução.
+    const WHATSAPP_NUMBER = "";
+    const COOLDOWN_SECONDS = 60;
+    const COOLDOWN_KEY = "brownResumeLastSubmission";
+
+    const app = initializeApp(firebaseConfig);
+    if (APP_CHECK_SITE_KEY) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+        isTokenAutoRefreshEnabled: true
+      });
+    }
+    const db = getFirestore(app);
+
+    const form = document.getElementById("resumeForm");
+    const submitButton = document.getElementById("submitButton");
+    const formStatus = document.getElementById("formStatus");
+    const successPanel = document.getElementById("successPanel");
+    const sendAnother = document.getElementById("sendAnother");
+    let countdownTimer = null;
+
+    ResumeForms.setupRepeaters();
+    ResumeForms.setupFirstJob();
+
+    if (WHATSAPP_NUMBER) {
+      const link = document.getElementById("whatsAppLink");
+      const message = encodeURIComponent("Olá! Preenchi o formulário do currículo e estou enviando minha foto.");
+      link.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`;
+      link.hidden = false;
+    }
+
+    function setStatus(message, type = "") {
+      formStatus.textContent = message;
+      formStatus.className = `status-message ${type}`.trim();
+    }
+
+    function cooldownRemaining() {
+      const last = Number(localStorage.getItem(COOLDOWN_KEY) || 0);
+      return Math.max(0, COOLDOWN_SECONDS - Math.floor((Date.now() - last) / 1000));
+    }
+
+    function updateCooldown() {
+      clearTimeout(countdownTimer);
+      const remaining = cooldownRemaining();
+      if (remaining > 0) {
+        submitButton.disabled = true;
+        submitButton.textContent = `Aguarde ${remaining}s para enviar novamente`;
+        countdownTimer = setTimeout(updateCooldown, 1000);
+      } else {
+        submitButton.disabled = false;
+        submitButton.textContent = "Enviar informações";
+      }
+    }
+
+    function showSuccess() {
+      form.hidden = true;
+      successPanel.hidden = false;
+      successPanel.focus();
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setStatus("");
+      if (!form.reportValidity()) {
+        setStatus("Confira os campos obrigatórios antes de enviar.", "error");
+        return;
+      }
+      if (cooldownRemaining() > 0) {
+        updateCooldown();
+        return;
+      }
+      if (document.getElementById("website").value) {
+        localStorage.setItem(COOLDOWN_KEY, String(Date.now()));
+        showSuccess();
+        return;
+      }
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Enviando...";
+      try {
+        const data = ResumeForms.collectData();
+        await addDoc(collection(db, "curriculos"), {
+          ...data,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        localStorage.setItem(COOLDOWN_KEY, String(Date.now()));
+        form.reset();
+        ResumeForms.resetDynamicFields();
+        showSuccess();
+      } catch (error) {
+        setStatus("Não foi possível enviar agora. Verifique sua internet e tente novamente.", "error");
+        submitButton.disabled = false;
+        submitButton.textContent = "Tentar enviar novamente";
+      }
+    });
+
+    sendAnother.addEventListener("click", () => {
+      successPanel.hidden = true;
+      form.hidden = false;
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      updateCooldown();
+    });
+
+    updateCooldown();
+  </script>
+</body>
+</html>

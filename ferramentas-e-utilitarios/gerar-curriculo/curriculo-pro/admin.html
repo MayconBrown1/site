@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Painel de currículos | Brown</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+</head>
+<body class="admin-page">
+  <main>
+    <section id="loginView" class="login-shell" aria-labelledby="login-title">
+      <form id="loginForm" class="card">
+        <h1 id="login-title">Acesso administrativo</h1>
+        <p>Entre com a conta de administrador cadastrada no Firebase.</p>
+        <div class="field">
+          <label for="loginEmail">E-mail</label>
+          <input id="loginEmail" type="email" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="loginPassword">Senha</label>
+          <input id="loginPassword" type="password" autocomplete="current-password" minlength="6" required>
+        </div>
+        <button id="loginButton" class="button" type="submit">Entrar</button>
+        <p id="loginStatus" class="status-message error" role="alert"></p>
+      </form>
+    </section>
+
+    <div id="adminView" hidden>
+      <header class="admin-topbar">
+        <div>
+          <h1>Painel de currículos Brown</h1>
+          <span id="adminEmail"></span>
+        </div>
+        <button id="logoutButton" class="button secondary compact" type="button">Sair</button>
+      </header>
+
+      <div class="admin-shell">
+        <div class="admin-grid">
+          <aside class="admin-panel inbox" aria-labelledby="inbox-title">
+            <h2 id="inbox-title">Formulários recebidos</h2>
+            <div class="inbox-toolbar">
+              <select id="statusFilter" aria-label="Filtrar por situação">
+                <option value="todos">Todos</option>
+                <option value="novo">Novos</option>
+                <option value="em_atendimento">Em atendimento</option>
+                <option value="concluido">Concluídos</option>
+              </select>
+            </div>
+            <p id="inboxStatus" class="hint" role="status" aria-live="polite">Carregando...</p>
+            <div id="submissionList" class="submission-list"></div>
+            <div id="selectedActions" class="selected-actions" hidden>
+              <button id="fillButton" class="button" type="button">Preencher currículo</button>
+              <button id="completeButton" class="button success" type="button">Marcar concluído</button>
+              <button id="deleteButton" class="button danger" type="button">Excluir envio</button>
+            </div>
+            <section id="sharePreview" class="share-preview" hidden aria-labelledby="share-preview-title">
+              <h3 id="share-preview-title">Visualização para o cliente</h3>
+              <p class="hint">O link expira em 7 dias e não inclui a foto.</p>
+              <div class="preview-link-row">
+                <input id="previewLink" type="url" readonly aria-label="Link da visualização" placeholder="Gere um link para o cliente">
+              </div>
+              <div class="preview-buttons">
+                <button id="createPreviewButton" class="button" type="button">Gerar link de visualização</button>
+                <button id="copyPreviewButton" class="button secondary" type="button" disabled>Copiar link</button>
+                <button id="revokePreviewButton" class="button danger" type="button" disabled>Revogar link</button>
+              </div>
+            </section>
+          </aside>
+
+          <section class="admin-panel editor-panel" aria-labelledby="editor-title">
+            <h2 id="editor-title">Editar currículo</h2>
+            <p id="selectedInfo" class="hint">Clique em um formulário recebido para preencher os campos.</p>
+            <form id="resumeForm" class="resume-form">
+              <section class="form-section" aria-labelledby="personal-title">
+                <h2 id="personal-title">Dados pessoais</h2>
+                <div class="field">
+                  <label for="name">Nome completo</label>
+                  <input id="name" maxlength="120" placeholder="Nome completo">
+                </div>
+                <div class="field-row two">
+                  <div class="field">
+                    <label for="phone">Telefone</label>
+                    <input id="phone" type="tel" maxlength="30" placeholder="(84) 99999-9999">
+                  </div>
+                  <div class="field">
+                    <label for="email">E-mail</label>
+                    <input id="email" type="email" maxlength="160" placeholder="email@exemplo.com">
+                  </div>
+                </div>
+                <div class="field-row two">
+                  <div class="field">
+                    <label for="birthDate">Data de nascimento</label>
+                    <input id="birthDate" type="date">
+                  </div>
+                  <div class="field">
+                    <label for="maritalStatus">Estado civil</label>
+                    <select id="maritalStatus">
+                      <option value="">Selecione</option>
+                      <option>Solteiro(a)</option><option>Casado(a)</option><option>União estável</option>
+                      <option>Divorciado(a)</option><option>Viúvo(a)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="photo">Foto local (não é enviada ao Firebase)</label>
+                  <input id="photo" type="file" accept="image/jpeg,image/png,image/webp">
+                  <p class="hint">Escolha a foto recebida pelo WhatsApp. Limite recomendado: 5 MB.</p>
+                </div>
+                <div class="watermark-controls">
+                  <h3>Marca d'água</h3>
+                  <div class="field">
+                    <label for="watermarkMode">Texto da marca d'água</label>
+                    <select id="watermarkMode">
+                      <option value="">Nenhuma</option>
+                      <option value="BROWN">BROWN</option>
+                      <option value="RASCUNHO">RASCUNHO</option>
+                      <option value="CONFIDENCIAL">CONFIDENCIAL</option>
+                      <option value="custom">Texto personalizado</option>
+                    </select>
+                  </div>
+                  <div id="customWatermarkField" class="field" hidden>
+                    <label for="watermarkText">Texto personalizado</label>
+                    <input id="watermarkText" maxlength="40" placeholder="Digite o texto">
+                  </div>
+                  <div class="field">
+                    <label for="watermarkImage">Ou escolha uma imagem</label>
+                    <input id="watermarkImage" type="file" accept="image/jpeg,image/png,image/webp">
+                    <p id="watermarkImageName" class="hint">A imagem escolhida tem prioridade sobre o texto e não é enviada ao Firebase.</p>
+                  </div>
+                  <div class="field">
+                    <label for="watermarkOpacity">Transparência</label>
+                    <div class="range-row">
+                      <input id="watermarkOpacity" type="range" min="4" max="18" value="8">
+                      <output id="watermarkOpacityValue" for="watermarkOpacity">8%</output>
+                    </div>
+                  </div>
+                  <button id="clearWatermarkButton" class="button secondary compact" type="button">Remover marca d'água</button>
+                </div>
+              </section>
+
+              <section class="form-section" aria-labelledby="address-title">
+                <h2 id="address-title">Endereço</h2>
+                <div class="field">
+                  <label for="street">Rua</label>
+                  <input id="street" maxlength="160">
+                </div>
+                <div class="field-row three">
+                  <div class="field"><label for="number">Número</label><input id="number" maxlength="20"></div>
+                  <div class="field"><label for="neighborhood">Bairro</label><input id="neighborhood" maxlength="100"></div>
+                  <div class="field"><label for="state">Estado</label><input id="state" maxlength="2"></div>
+                </div>
+                <div class="field"><label for="city">Cidade</label><input id="city" maxlength="100"></div>
+              </section>
+
+              <section class="form-section" aria-labelledby="goal-title">
+                <h2 id="goal-title">Objetivo e resumo</h2>
+                <div class="field"><label for="objective">Cargo ou área</label><input id="objective" maxlength="160"></div>
+                <div class="field"><label for="summary">Resumo profissional</label><textarea id="summary" maxlength="1500"></textarea></div>
+              </section>
+
+              <section class="form-section" aria-labelledby="experience-title">
+                <h2 id="experience-title">Experiência profissional</h2>
+                <div class="check-row">
+                  <input id="firstJob" type="checkbox">
+                  <label for="firstJob">Primeiro emprego</label>
+                </div>
+                <div id="experiencesBlock">
+                  <div class="repeat-list" data-repeat="experiences"></div>
+                  <button class="button secondary add-button" type="button" data-add-repeat="experiences">Adicionar experiência</button>
+                </div>
+              </section>
+
+              <section class="form-section" aria-labelledby="education-title">
+                <h2 id="education-title">Formação acadêmica</h2>
+                <div class="repeat-list" data-repeat="education"></div>
+                <button class="button secondary add-button" type="button" data-add-repeat="education">Adicionar formação</button>
+              </section>
+
+              <section class="form-section" aria-labelledby="courses-title">
+                <h2 id="courses-title">Cursos</h2>
+                <div class="repeat-list" data-repeat="courses"></div>
+                <button class="button secondary add-button" type="button" data-add-repeat="courses">Adicionar curso</button>
+              </section>
+
+              <section class="form-section" aria-labelledby="extra-title">
+                <h2 id="extra-title">Outras informações</h2>
+                <div class="field"><label for="skills">Habilidades</label><textarea id="skills" maxlength="1000"></textarea></div>
+                <div class="field"><label for="languages">Idiomas</label><textarea id="languages" maxlength="500"></textarea></div>
+                <div class="field-row two">
+                  <div class="field"><label for="cnh">CNH</label><input id="cnh" maxlength="40"></div>
+                  <div class="field"><label for="availability">Disponibilidade</label><input id="availability" maxlength="300"></div>
+                </div>
+              </section>
+
+              <button id="pdfButton" class="button" type="button">Baixar currículo em PDF</button>
+              <p id="editorStatus" class="status-message" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <section class="admin-panel" aria-labelledby="preview-title">
+            <h2 id="preview-title" class="preview-title">Pré-visualização</h2>
+            <div class="preview-wrap">
+              <article id="resumePreview" class="resume-preview">
+                <div id="previewWatermark" class="preview-watermark" hidden aria-hidden="true">
+                  <span id="previewWatermarkText"></span>
+                  <img id="previewWatermarkImage" alt="" hidden>
+                </div>
+                <header class="preview-header">
+                  <div>
+                    <h1 id="previewName">NOME COMPLETO</h1>
+                    <p id="previewObjective">Objetivo profissional</p>
+                  </div>
+                  <img id="previewPhoto" class="preview-photo" alt="Foto do candidato" hidden>
+                </header>
+                <p id="previewContact" class="preview-contact"></p>
+                <section class="preview-section"><h2>Resumo profissional</h2><p id="previewSummary"></p></section>
+                <section class="preview-section"><h2>Experiência profissional</h2><div id="previewExperiences"></div></section>
+                <section class="preview-section"><h2>Formação acadêmica</h2><div id="previewEducation"></div></section>
+                <section class="preview-section"><h2>Cursos</h2><div id="previewCourses"></div></section>
+                <section class="preview-section"><h2>Habilidades</h2><p id="previewSkills"></p></section>
+                <section class="preview-section"><h2>Idiomas</h2><p id="previewLanguages"></p></section>
+                <section class="preview-section"><h2>Informações adicionais</h2><p id="previewExtra"></p></section>
+              </article>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/forms.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js";
+    import {
+      browserSessionPersistence,
+      getAuth,
+      onAuthStateChanged,
+      setPersistence,
+      signInWithEmailAndPassword,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+    import {
+      collection,
+      doc,
+      getFirestore,
+      limit,
+      onSnapshot,
+      orderBy,
+      query,
+      serverTimestamp,
+      Timestamp,
+      writeBatch,
+      updateDoc
+    } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoGHZXcw0rCgcOwz384CtGZCmIOQx4Qq4",
+      authDomain: "curriculo-8b75d.firebaseapp.com",
+      projectId: "curriculo-8b75d",
+      storageBucket: "curriculo-8b75d.firebasestorage.app",
+      messagingSenderId: "517299277608",
+      appId: "1:517299277608:web:442c58ec0abd2c34458a1d"
+    };
+
+    const APP_CHECK_SITE_KEY = "";
+
+    const app = initializeApp(firebaseConfig);
+    if (APP_CHECK_SITE_KEY) {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+        isTokenAutoRefreshEnabled: true
+      });
+    }
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const loginView = document.getElementById("loginView");
+    const adminView = document.getElementById("adminView");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const loginStatus = document.getElementById("loginStatus");
+    const submissionList = document.getElementById("submissionList");
+    const inboxStatus = document.getElementById("inboxStatus");
+    const statusFilter = document.getElementById("statusFilter");
+    const selectedActions = document.getElementById("selectedActions");
+    const selectedInfo = document.getElementById("selectedInfo");
+    const editorStatus = document.getElementById("editorStatus");
+    const photoInput = document.getElementById("photo");
+    const watermarkMode = document.getElementById("watermarkMode");
+    const watermarkText = document.getElementById("watermarkText");
+    const watermarkImageInput = document.getElementById("watermarkImage");
+    const watermarkOpacity = document.getElementById("watermarkOpacity");
+    let unsubscribeInbox = null;
+    let submissions = [];
+    let selectedId = null;
+    let currentPreviewToken = "";
+    let photoDataUrl = "";
+    let watermarkImageDataUrl = "";
+    let renderScheduled = false;
+
+    ResumeForms.setupRepeaters();
+    ResumeForms.setupFirstJob();
+
+    function setEditorStatus(message, type = "") {
+      editorStatus.textContent = message;
+      editorStatus.className = `status-message ${type}`.trim();
+    }
+
+    function currentSubmission() {
+      return submissions.find((item) => item.id === selectedId) || null;
+    }
+
+    function statusLabel(status) {
+      return ({ novo: "Novo", em_atendimento: "Em atendimento", concluido: "Concluído" })[status] || "Novo";
+    }
+
+    function dateLabel(value) {
+      if (!value || typeof value.toDate !== "function") return "Data pendente";
+      return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(value.toDate());
+    }
+
+    function renderInbox() {
+      const filter = statusFilter.value;
+      const visible = submissions.filter((item) => filter === "todos" || item.data.status === filter);
+      submissionList.replaceChildren();
+      inboxStatus.textContent = `${visible.length} formulário(s)`;
+      if (!visible.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty-state";
+        empty.textContent = "Nenhum formulário nesta situação.";
+        submissionList.append(empty);
+      }
+      visible.forEach((item) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "submission-card";
+        card.dataset.id = item.id;
+        card.setAttribute("aria-current", String(item.id === selectedId));
+        const name = document.createElement("span");
+        name.className = "submission-name";
+        name.textContent = item.data.personal?.name || "Sem nome";
+        const meta = document.createElement("span");
+        meta.className = "submission-meta";
+        meta.textContent = `${item.data.objective || "Objetivo não informado"} · ${dateLabel(item.data.createdAt)}`;
+        const chip = document.createElement("span");
+        chip.className = "status-chip";
+        chip.textContent = statusLabel(item.data.status);
+        card.append(name, meta, chip);
+        card.addEventListener("click", () => selectAndFill(item.id));
+        submissionList.append(card);
+      });
+      selectedActions.hidden = !currentSubmission();
+      document.getElementById("sharePreview").hidden = !currentSubmission();
+    }
+
+    async function markInService(item) {
+      if (!item || item.data.status !== "novo") return;
+      try {
+        await updateDoc(doc(db, "curriculos", item.id), {
+          status: "em_atendimento",
+          updatedAt: serverTimestamp()
+        });
+      } catch (error) {
+        setEditorStatus("Os dados foram preenchidos, mas não foi possível atualizar a situação do envio.", "error");
+      }
+    }
+
+    function clearPhoto() {
+      photoDataUrl = "";
+      photoInput.value = "";
+    }
+
+    function watermarkState() {
+      const mode = watermarkMode.value;
+      return {
+        text: mode === "custom" ? watermarkText.value.trim() : mode,
+        image: watermarkImageDataUrl,
+        opacity: Number(watermarkOpacity.value) / 100
+      };
+    }
+
+    function renderWatermark() {
+      const state = watermarkState();
+      const container = document.getElementById("previewWatermark");
+      const text = document.getElementById("previewWatermarkText");
+      const image = document.getElementById("previewWatermarkImage");
+      const active = Boolean(state.image || state.text);
+      container.hidden = !active;
+      container.style.opacity = String(state.opacity);
+      image.hidden = !state.image;
+      text.hidden = Boolean(state.image) || !state.text;
+      if (state.image) image.src = state.image;
+      text.textContent = state.text;
+    }
+
+    function selectAndFill(id) {
+      const item = submissions.find((entry) => entry.id === id);
+      if (!item) return;
+      selectedId = id;
+      currentPreviewToken = item.data.previewId || "";
+      clearPhoto();
+      ResumeForms.fillData(item.data);
+      selectedInfo.textContent = `Dados carregados de ${item.data.personal?.name || "cliente sem nome"}. Você pode editar antes de gerar o PDF.`;
+      setEditorStatus("Formulário preenchido.", "success");
+      renderInbox();
+      updatePreviewControls();
+      schedulePreview();
+      markInService(item);
+      document.getElementById("editor-title").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function startInbox() {
+      if (unsubscribeInbox) unsubscribeInbox();
+      const inboxQuery = query(collection(db, "curriculos"), orderBy("createdAt", "desc"), limit(100));
+      unsubscribeInbox = onSnapshot(inboxQuery, (snapshot) => {
+        submissions = snapshot.docs.map((item) => ({ id: item.id, data: item.data() }));
+        if (selectedId && !submissions.some((item) => item.id === selectedId)) {
+          selectedId = null;
+          currentPreviewToken = "";
+          updatePreviewControls();
+        }
+        renderInbox();
+      }, () => {
+        inboxStatus.textContent = "Não foi possível ler os formulários. Confira o UID nas regras do Firestore.";
+        inboxStatus.className = "admin-error";
+      });
+    }
+
+    function schedulePreview() {
+      if (renderScheduled) return;
+      renderScheduled = true;
+      requestAnimationFrame(() => {
+        renderScheduled = false;
+        ResumeForms.renderPreview(ResumeForms.collectData(), photoDataUrl);
+        renderWatermark();
+      });
+    }
+
+    document.getElementById("resumeForm").addEventListener("input", schedulePreview);
+    document.addEventListener("resume:change", schedulePreview);
+    statusFilter.addEventListener("change", renderInbox);
+    document.getElementById("fillButton").addEventListener("click", () => {
+      if (selectedId) selectAndFill(selectedId);
+    });
+
+    function randomToken() {
+      const bytes = crypto.getRandomValues(new Uint8Array(24));
+      return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function previewUrl(token) {
+      if (!token) return "";
+      const url = new URL("preview.html", window.location.href);
+      url.searchParams.set("id", token);
+      return url.href;
+    }
+
+    function updatePreviewControls() {
+      const link = document.getElementById("previewLink");
+      const url = previewUrl(currentPreviewToken);
+      link.value = url;
+      document.getElementById("copyPreviewButton").disabled = !url;
+      document.getElementById("revokePreviewButton").disabled = !url;
+      document.getElementById("createPreviewButton").textContent = url ? "Atualizar visualização" : "Gerar link de visualização";
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.append(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+
+    document.getElementById("createPreviewButton").addEventListener("click", async () => {
+      const item = currentSubmission();
+      const data = ResumeForms.collectData();
+      if (!item || !data.personal.name) {
+        setEditorStatus("Selecione um envio e informe o nome antes de gerar a visualização.", "error");
+        return;
+      }
+      const token = currentPreviewToken || randomToken();
+      const expiresAt = Timestamp.fromDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+      const resume = {
+        personal: data.personal,
+        address: data.address,
+        objective: data.objective,
+        summary: data.summary,
+        firstJob: data.firstJob,
+        experiences: data.experiences,
+        education: data.education,
+        courses: data.courses,
+        skills: data.skills,
+        languages: data.languages,
+        cnh: data.cnh,
+        availability: data.availability
+      };
+      try {
+        const batch = writeBatch(db);
+        batch.set(doc(db, "previews", token), {
+          schemaVersion: 1,
+          resume,
+          submissionId: item.id,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          expiresAt
+        });
+        batch.update(doc(db, "curriculos", item.id), {
+          previewId: token,
+          updatedAt: serverTimestamp()
+        });
+        await batch.commit();
+        currentPreviewToken = token;
+        updatePreviewControls();
+        await copyText(previewUrl(token));
+        setEditorStatus("Visualização criada e link copiado. Ela expira em 7 dias.", "success");
+      } catch (error) {
+        setEditorStatus("Não foi possível criar a visualização. Confira se as novas regras foram publicadas.", "error");
+      }
+    });
+
+    document.getElementById("copyPreviewButton").addEventListener("click", async () => {
+      if (!currentPreviewToken) return;
+      try {
+        await copyText(previewUrl(currentPreviewToken));
+        setEditorStatus("Link copiado.", "success");
+      } catch (error) {
+        setEditorStatus("Não foi possível copiar automaticamente. Selecione o link acima e copie.", "error");
+      }
+    });
+
+    document.getElementById("revokePreviewButton").addEventListener("click", async () => {
+      const item = currentSubmission();
+      if (!item || !currentPreviewToken) return;
+      if (!window.confirm("Revogar este link de visualização?")) return;
+      try {
+        const batch = writeBatch(db);
+        batch.delete(doc(db, "previews", currentPreviewToken));
+        batch.update(doc(db, "curriculos", item.id), {
+          previewId: "",
+          updatedAt: serverTimestamp()
+        });
+        await batch.commit();
+        currentPreviewToken = "";
+        updatePreviewControls();
+        setEditorStatus("Link revogado.", "success");
+      } catch (error) {
+        setEditorStatus("Não foi possível revogar o link.", "error");
+      }
+    });
+
+    photoInput.addEventListener("change", () => {
+      const file = photoInput.files?.[0];
+      if (!file) { clearPhoto(); schedulePreview(); return; }
+      if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+        photoInput.value = "";
+        setEditorStatus("Escolha uma imagem JPG, PNG ou WebP de até 5 MB.", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          const scale = Math.min(1, 1200 / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+          photoDataUrl = canvas.toDataURL("image/jpeg", .9);
+          schedulePreview();
+        };
+        image.onerror = () => setEditorStatus("Não foi possível abrir a foto.", "error");
+        image.src = String(reader.result);
+      };
+      reader.onerror = () => setEditorStatus("Não foi possível abrir a foto.", "error");
+      reader.readAsDataURL(file);
+    });
+
+    watermarkMode.addEventListener("change", () => {
+      document.getElementById("customWatermarkField").hidden = watermarkMode.value !== "custom";
+      schedulePreview();
+    });
+    watermarkText.addEventListener("input", schedulePreview);
+    watermarkOpacity.addEventListener("input", () => {
+      document.getElementById("watermarkOpacityValue").value = `${watermarkOpacity.value}%`;
+      schedulePreview();
+    });
+    watermarkImageInput.addEventListener("change", () => {
+      const file = watermarkImageInput.files?.[0];
+      if (!file) {
+        watermarkImageDataUrl = "";
+        document.getElementById("watermarkImageName").textContent = "A imagem escolhida tem prioridade sobre o texto e não é enviada ao Firebase.";
+        schedulePreview();
+        return;
+      }
+      if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) {
+        watermarkImageInput.value = "";
+        setEditorStatus("Escolha uma imagem de marca d'água de até 5 MB.", "error");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        watermarkImageDataUrl = String(reader.result);
+        document.getElementById("watermarkImageName").textContent = `Imagem escolhida: ${file.name}`;
+        schedulePreview();
+      };
+      reader.onerror = () => setEditorStatus("Não foi possível abrir a imagem da marca d'água.", "error");
+      reader.readAsDataURL(file);
+    });
+    document.getElementById("clearWatermarkButton").addEventListener("click", () => {
+      watermarkMode.value = "";
+      watermarkText.value = "";
+      watermarkImageInput.value = "";
+      watermarkImageDataUrl = "";
+      document.getElementById("customWatermarkField").hidden = true;
+      document.getElementById("watermarkImageName").textContent = "A imagem escolhida tem prioridade sobre o texto e não é enviada ao Firebase.";
+      schedulePreview();
+    });
+
+    document.getElementById("completeButton").addEventListener("click", async () => {
+      const item = currentSubmission();
+      if (!item) return;
+      try {
+        await updateDoc(doc(db, "curriculos", item.id), {
+          status: "concluido",
+          updatedAt: serverTimestamp()
+        });
+        setEditorStatus("Envio marcado como concluído.", "success");
+      } catch (error) {
+        setEditorStatus("Não foi possível alterar a situação.", "error");
+      }
+    });
+
+    document.getElementById("deleteButton").addEventListener("click", async () => {
+      const item = currentSubmission();
+      if (!item) return;
+      const name = item.data.personal?.name || "este cliente";
+      if (!window.confirm(`Excluir definitivamente o envio de ${name}?`)) return;
+      try {
+        const batch = writeBatch(db);
+        batch.delete(doc(db, "curriculos", item.id));
+        if (currentPreviewToken) batch.delete(doc(db, "previews", currentPreviewToken));
+        await batch.commit();
+        selectedId = null;
+        currentPreviewToken = "";
+        selectedInfo.textContent = "Clique em um formulário recebido para preencher os campos.";
+        selectedActions.hidden = true;
+        updatePreviewControls();
+        setEditorStatus("Envio excluído.", "success");
+      } catch (error) {
+        setEditorStatus("Não foi possível excluir o envio.", "error");
+      }
+    });
+
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      loginStatus.textContent = "";
+      loginButton.disabled = true;
+      loginButton.textContent = "Entrando...";
+      try {
+        await setPersistence(auth, browserSessionPersistence);
+        await signInWithEmailAndPassword(auth, document.getElementById("loginEmail").value.trim(), document.getElementById("loginPassword").value);
+        loginForm.reset();
+      } catch (error) {
+        loginStatus.textContent = "Não foi possível entrar. Confira o e-mail e a senha.";
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Entrar";
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", () => signOut(auth));
+
+    onAuthStateChanged(auth, (user) => {
+      loginView.hidden = Boolean(user);
+      adminView.hidden = !user;
+      if (user) {
+        document.getElementById("adminEmail").textContent = user.email || "Administrador";
+        startInbox();
+        schedulePreview();
+      } else if (unsubscribeInbox) {
+        unsubscribeInbox();
+        unsubscribeInbox = null;
+        submissions = [];
+        selectedId = null;
+      }
+    });
+
+    function safeFileName(value) {
+      return (value || "curriculo").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase() || "curriculo";
+    }
+
+    function fadedImage(dataUrl, opacity) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => {
+          const maxSide = 1200;
+          const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext("2d");
+          context.globalAlpha = opacity;
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve({ dataUrl: canvas.toDataURL("image/png"), ratio: canvas.width / canvas.height });
+        };
+        image.onerror = reject;
+        image.src = dataUrl;
+      });
+    }
+
+    async function addWatermarkToPdf(pdf) {
+      const state = watermarkState();
+      if (!state.image && !state.text) return;
+      let faded = null;
+      if (state.image) faded = await fadedImage(state.image, state.opacity);
+      const pages = pdf.getNumberOfPages();
+      for (let page = 1; page <= pages; page += 1) {
+        pdf.setPage(page);
+        if (faded) {
+          const maxWidth = 125;
+          const maxHeight = 135;
+          let width = maxWidth;
+          let height = width / faded.ratio;
+          if (height > maxHeight) { height = maxHeight; width = height * faded.ratio; }
+          pdf.addImage(faded.dataUrl, "PNG", (210 - width) / 2, (297 - height) / 2, width, height, undefined, "FAST");
+        } else {
+          const gray = Math.round(255 - (255 - 80) * state.opacity);
+          pdf.setTextColor(gray, gray, gray);
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(Math.min(54, Math.max(32, 320 / Math.max(5, state.text.length))));
+          pdf.text(state.text.toUpperCase(), 105, 153, { align: "center", angle: 32 });
+          pdf.setTextColor(0, 0, 0);
+        }
+      }
+    }
+
+    async function generatePdf() {
+      const jsPDF = window.jspdf?.jsPDF;
+      if (!jsPDF) {
+        setEditorStatus("O gerador de PDF ainda não carregou. Verifique sua internet e tente novamente.", "error");
+        return;
+      }
+      const data = ResumeForms.collectData();
+      if (!data.personal.name) {
+        setEditorStatus("Informe o nome antes de gerar o PDF.", "error");
+        document.getElementById("name").focus();
+        return;
+      }
+
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 16;
+      const contentWidth = pageWidth - margin * 2;
+      let y = 18;
+
+      function ensureSpace(height) {
+        if (y + height <= pageHeight - 16) return;
+        pdf.addPage();
+        y = 18;
+      }
+
+      function addWrapped(text, options = {}) {
+        if (!text) return;
+        const size = options.size || 10;
+        const style = options.style || "normal";
+        const width = options.width || contentWidth;
+        const lineHeight = options.lineHeight || size * 0.46;
+        pdf.setFont("helvetica", style);
+        pdf.setFontSize(size);
+        const lines = pdf.splitTextToSize(String(text), width);
+        lines.forEach((line) => {
+          ensureSpace(lineHeight + 1);
+          pdf.text(line, margin, y);
+          y += lineHeight;
+        });
+      }
+
+      function addSection(title, body) {
+        if (!body) return;
+        ensureSpace(16);
+        y += 4;
+        pdf.setDrawColor(80);
+        pdf.setLineWidth(.3);
+        pdf.line(margin, y, pageWidth - margin, y);
+        y += 6;
+        addWrapped(title.toUpperCase(), { size: 11, style: "bold", lineHeight: 5 });
+        y += 1;
+        if (typeof body === "function") body();
+        else addWrapped(body, { size: 10, lineHeight: 4.7 });
+      }
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(19);
+      const nameWidth = photoDataUrl ? contentWidth - 42 : contentWidth;
+      const nameLines = pdf.splitTextToSize(data.personal.name.toUpperCase(), nameWidth);
+      pdf.text(nameLines, margin, y);
+      y += nameLines.length * 8;
+      if (data.objective) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(11);
+        const objectiveLines = pdf.splitTextToSize(data.objective, nameWidth);
+        pdf.text(objectiveLines, margin, y);
+        y += objectiveLines.length * 5;
+      }
+      if (photoDataUrl) {
+        try { pdf.addImage(photoDataUrl, "JPEG", pageWidth - margin - 32, 16, 32, 42, undefined, "FAST"); } catch (error) { /* PDF continua sem foto. */ }
+        y = Math.max(y, 61);
+      }
+
+      const contact = ResumeForms.nonEmptyParts([data.personal.phone, data.personal.email, ResumeForms.formatAddress(data)], " | ");
+      addWrapped(contact, { size: 9, lineHeight: 4.3 });
+      const personalDetails = ResumeForms.nonEmptyParts([
+        data.personal.birthDate ? `Nascimento: ${data.personal.birthDate.split("-").reverse().join("/")}` : "",
+        data.personal.maritalStatus
+      ], " | ");
+      addWrapped(personalDetails, { size: 9, lineHeight: 4.3 });
+
+      addSection("Resumo profissional", data.summary);
+      if (data.firstJob || data.experiences.length) addSection("Experiência profissional", () => {
+        if (data.firstJob) {
+          addWrapped("Em busca da primeira oportunidade profissional.", { size: 10, lineHeight: 4.7 });
+          return;
+        }
+        data.experiences.forEach((item) => {
+          ensureSpace(14);
+          addWrapped(ResumeForms.nonEmptyParts([item.role, item.company], " — "), { size: 10, style: "bold", lineHeight: 4.7 });
+          addWrapped(item.period, { size: 9, lineHeight: 4.2 });
+          addWrapped(item.activities, { size: 10, lineHeight: 4.7 });
+          y += 2;
+        });
+      });
+      if (data.education.length) addSection("Formação acadêmica", () => data.education.forEach((item) => {
+        ensureSpace(11);
+        addWrapped(ResumeForms.nonEmptyParts([item.level, item.institution], " — "), { size: 10, style: "bold", lineHeight: 4.7 });
+        addWrapped(ResumeForms.nonEmptyParts([item.status, item.period], " | "), { size: 9, lineHeight: 4.2 });
+        y += 2;
+      }));
+      if (data.courses.length) addSection("Cursos", () => data.courses.forEach((item) => {
+        ensureSpace(11);
+        addWrapped(ResumeForms.nonEmptyParts([item.name, item.institution], " — "), { size: 10, style: "bold", lineHeight: 4.7 });
+        addWrapped(ResumeForms.nonEmptyParts([item.workload, item.year], " | "), { size: 9, lineHeight: 4.2 });
+        y += 2;
+      }));
+      addSection("Habilidades", data.skills);
+      addSection("Idiomas", data.languages);
+      addSection("Informações adicionais", ResumeForms.nonEmptyParts([
+        data.cnh ? `CNH: ${data.cnh}` : "",
+        data.availability ? `Disponibilidade: ${data.availability}` : ""
+      ], "\n"));
+
+      try {
+        await addWatermarkToPdf(pdf);
+      } catch (error) {
+        setEditorStatus("O PDF foi preparado, mas a imagem da marca d'água não pôde ser aplicada.", "error");
+      }
+      pdf.save(`${safeFileName(data.personal.name)}_curriculo.pdf`);
+      setEditorStatus("PDF gerado.", "success");
+    }
+
+    document.getElementById("pdfButton").addEventListener("click", generatePdf);
+    schedulePreview();
+  </script>
+</body>
+</html>
