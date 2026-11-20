@@ -200,6 +200,7 @@ input:focus, textarea:focus, select:focus, button:focus-visible, [tabindex]:focu
 
 .admin-topbar h1 { margin: 0; font-size: 1.25rem; }
 .admin-topbar .button { width: auto; }
+.admin-topbar-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 .login-shell { width: min(100% - 24px, 420px); margin: 9vh auto; }
 .login-shell .card { padding: 24px; }

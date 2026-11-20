@@ -10,6 +10,8 @@ A foto não passa pelo Firebase. O cliente recebe a instrução de enviá-la por
 
 O campo de escolaridade inclui opções de completo/incompleto e **Sem escolaridade formal** para quem nunca frequentou a escola.
 
+No topo do painel administrativo há os botões **Copiar link do formulário** e **Abrir formulário**. O endereço de `cliente.html` é calculado automaticamente a partir da pasta onde `admin.html` foi publicado. Portanto, mantenha os dois arquivos na mesma pasta ao enviar o projeto para sua hospedagem.
+
 ## 1. Ativar os serviços
 
 No [Firebase Console](https://console.firebase.google.com/), abra o projeto `curriculo-8b75d`.

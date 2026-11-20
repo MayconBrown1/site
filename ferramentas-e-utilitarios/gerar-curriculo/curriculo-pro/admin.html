@@ -34,7 +34,11 @@
           <h1>Painel de currículos Brown</h1>
           <span id="adminEmail"></span>
         </div>
-        <button id="logoutButton" class="button secondary compact" type="button">Sair</button>
+        <div class="admin-topbar-actions">
+          <button id="copyClientLinkButton" class="button compact" type="button">Copiar link do formulário</button>
+          <a id="openClientFormLink" class="button secondary compact" href="cliente.html" target="_blank" rel="noopener">Abrir formulário</a>
+          <button id="logoutButton" class="button secondary compact" type="button">Sair</button>
+        </div>
       </header>
 
       <div class="admin-shell">
@@ -301,6 +305,11 @@
     let watermarkImageDataUrl = "";
     let renderScheduled = false;
 
+    // Mantém o formulário do cliente na mesma pasta do painel, mesmo quando
+    // o projeto for publicado dentro de uma subpasta do site.
+    const clientFormUrl = new URL("cliente.html", window.location.href).href;
+    document.getElementById("openClientFormLink").href = clientFormUrl;
+
     ResumeForms.setupRepeaters();
     ResumeForms.setupFirstJob();
 
@@ -481,6 +490,17 @@
       document.execCommand("copy");
       area.remove();
     }
+
+    document.getElementById("copyClientLinkButton").addEventListener("click", async () => {
+      const button = document.getElementById("copyClientLinkButton");
+      try {
+        await copyText(clientFormUrl);
+        button.textContent = "Link copiado!";
+      } catch (error) {
+        button.textContent = "Não foi possível copiar";
+      }
+      setTimeout(() => { button.textContent = "Copiar link do formulário"; }, 2200);
+    });
 
     document.getElementById("createPreviewButton").addEventListener("click", async () => {
       const item = currentSubmission();
