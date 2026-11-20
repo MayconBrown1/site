@@ -87,13 +87,16 @@ No painel, selecione um envio e use **Gerar link de visualização**. O link:
 - expira para leitura em 7 dias;
 - pode ser atualizado ou revogado pelo painel;
 - não inclui a foto, mantendo o acordo de não armazená-la online;
-- tem marca d’água e bloqueios de impressão/download.
+- inclui temporariamente a foto escolhida no painel e a marca d’água configurada;
+- tem bloqueios de impressão/download.
+
+Para permitir que o cliente veja a foto e a marca d’água, o painel comprime essas imagens e as grava dentro do documento temporário da pré-visualização no Firestore. Elas não usam Firebase Storage, não vêm do formulário público e ficam acessíveis somente pelo link aleatório enquanto a prévia estiver válida. Revogar o link exclui o documento imediatamente; a política TTL remove documentos vencidos posteriormente.
 
 Nenhuma página web oferece DRM real. Uma pessoa com conhecimento técnico pode desativar CSS/JavaScript, copiar o conteúdo ou fazer uma captura de alta resolução. Os bloqueios deste projeto são impedimentos de uso comum, não uma garantia absoluta.
 
 ### Exclusão automática das visualizações
 
-As regras impedem a leitura pública imediatamente após `expiresAt`, mesmo que o documento ainda exista. Para remover fisicamente documentos vencidos, configure uma política TTL no Firestore para o grupo de coleções `previews`, usando o campo `expiresAt`. A remoção por TTL não é instantânea; por isso a regra de leitura também verifica a validade.
+As regras impedem a leitura pública imediatamente após `expiresAt`, mesmo que o documento ainda exista. Para manter o projeto sempre no plano gratuito Spark, não ative TTL. Revogue a prévia pelo painel ou exclua o formulário quando terminar; essas ações também apagam o documento temporário associado.
 
 ## 5. Proteção contra abuso
 

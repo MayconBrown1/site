@@ -25,6 +25,10 @@
 
     <div id="previewPanel" class="preview-wrap protected-preview" hidden>
       <article class="resume-preview" aria-label="Conteúdo do currículo">
+        <div id="previewWatermark" class="preview-watermark" hidden aria-hidden="true">
+          <span id="previewWatermarkText"></span>
+          <img id="previewWatermarkImage" alt="" hidden>
+        </div>
         <header class="preview-header">
           <div>
             <h1 id="previewName">NOME COMPLETO</h1>
@@ -72,6 +76,23 @@
       errorPanel.hidden = false;
     }
 
+    function renderSharedWatermark(watermark = {}) {
+      const container = document.getElementById("previewWatermark");
+      const text = document.getElementById("previewWatermarkText");
+      const image = document.getElementById("previewWatermarkImage");
+      const watermarkText = typeof watermark.text === "string" ? watermark.text : "";
+      const imageDataUrl = typeof watermark.imageDataUrl === "string" ? watermark.imageDataUrl : "";
+      const opacity = typeof watermark.opacity === "number" ? Math.min(.18, Math.max(.04, watermark.opacity)) : .08;
+      const active = Boolean(watermarkText || imageDataUrl);
+      container.hidden = !active;
+      container.style.opacity = String(opacity);
+      text.hidden = Boolean(imageDataUrl) || !watermarkText;
+      text.textContent = watermarkText;
+      image.hidden = !imageDataUrl;
+      if (imageDataUrl) image.src = imageDataUrl;
+      previewPanel.classList.toggle("has-custom-watermark", active);
+    }
+
     async function loadPreview() {
       if (!/^[A-Za-z0-9_-]{32,64}$/.test(token)) {
         showError();
@@ -97,7 +118,8 @@
           showError();
           return;
         }
-        ResumeForms.renderPreview(data.resume, "");
+        ResumeForms.renderPreview(data.resume, data.photoDataUrl || "");
+        renderSharedWatermark(data.watermark);
         document.getElementById("expiryNotice").textContent = `Disponível até ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(expires)}.`;
         loadingPanel.hidden = true;
         previewPanel.hidden = false;
