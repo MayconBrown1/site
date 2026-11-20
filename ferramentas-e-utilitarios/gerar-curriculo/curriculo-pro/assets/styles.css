@@ -281,7 +281,13 @@ input:focus, textarea:focus, select:focus, button:focus-visible, [tabindex]:focu
 .public-preview-notice h1 { font-size: 1.15rem; margin: 0 0 6px; }
 .public-preview-notice p { margin: 4px 0; color: #ddd; }
 .protected-preview { position: relative; user-select: none; -webkit-user-select: none; }
-.public-preview-body .resume-preview { width: 100%; min-height: 0; padding: clamp(18px, 4vw, 17mm); }
+.public-preview-body .resume-preview {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 210 / 297;
+  padding: clamp(18px, 4vw, 17mm);
+}
 .protected-preview::after {
   content: "PRÉ-VISUALIZAÇÃO • NÃO É O ARQUIVO FINAL";
   position: fixed;
